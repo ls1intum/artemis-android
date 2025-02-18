@@ -20,6 +20,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.PlayStoreScreenshots
 import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotFrame
 import de.tum.informatics.www1.artemis.native_app.core.websocket.test.LiveParticipationServiceStub
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.service.LectureService
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 
 @PlayStoreScreenshots
 @Composable
@@ -79,11 +81,8 @@ fun `Lecture - Overview`() {
         savedStateHandle = SavedStateHandle(),
         serverTimeService = ServerTimeServiceStub(),
         courseExerciseService = object : CourseExerciseService {
-            override suspend fun startExercise(
-                exerciseId: Long,
-                serverUrl: String,
-                authToken: String
-            ): NetworkResponse<Participation> =
+            override val onReloadRequired: Flow<Unit> = emptyFlow()
+            override suspend fun startExercise(exerciseId: Long): NetworkResponse<Participation> =
                 NetworkResponse.Response(StudentParticipation.StudentParticipationImpl())
         }
     )

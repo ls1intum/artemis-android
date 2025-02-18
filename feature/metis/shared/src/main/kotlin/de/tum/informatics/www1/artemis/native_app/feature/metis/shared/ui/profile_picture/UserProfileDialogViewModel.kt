@@ -5,8 +5,6 @@ import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CommunicationDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
@@ -22,15 +20,11 @@ import kotlin.coroutines.EmptyCoroutineContext
 class UserProfileDialogViewModel(
     private val courseId: Long,
     private val userId: Long,
-    serverConfigurationService: ServerConfigurationService,
-    accountService: AccountService,
     accountDataService: AccountDataService,
     networkStatusProvider: NetworkStatusProvider,
     websocketProvider: WebsocketProvider,
     coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : MetisViewModel(
-    serverConfigurationService,
-    accountService,
     accountDataService,
     networkStatusProvider,
     websocketProvider,

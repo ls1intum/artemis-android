@@ -133,8 +133,6 @@ internal open class ConversationViewModel(
     metisService: MetisService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : MetisViewModel(
-    serverConfigurationService,
-    accountService,
     accountDataService,
     networkStatusProvider,
     websocketProvider,
@@ -202,15 +200,12 @@ internal open class ConversationViewModel(
     )
 
     private val course: StateFlow<DataState<Course>> = flatMapLatest(
-        serverConfigurationService.serverUrl,
-        accountService.authToken,
+        courseService.onReloadRequired,
         onRequestReload.onStart { emit(Unit) }
-    ) { serverUrl, authToken, _ ->
+    ) { _, _ ->
         retryOnInternet(networkStatusProvider.currentNetworkStatus) {
             courseService.getCourse(
                 metisContext.courseId,
-                serverUrl,
-                authToken
             ).bind { it.course }
         }
     }
@@ -223,16 +218,12 @@ internal open class ConversationViewModel(
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
     private val isAtLeastTutorInCourse: StateFlow<Boolean> = flatMapLatest(
-        serverConfigurationService.serverUrl,
-        accountService.authToken,
         course,
-        onRequestReload.onStart { emit(Unit) }
-    ) { serverUrl, authToken, course, _ ->
+        onRequestReload.onStart { emit(Unit) },
+        accountDataService.onReloadRequired,
+    ) { course, _, _ ->
         retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-            accountDataService.getAccountData(
-                serverUrl = serverUrl,
-                bearerToken = authToken
-            )
+            accountDataService.getAccountData()
                 .bind { it.isAtLeastTutorInCourse(course = course.orThrow()) }
         }
             .map { it.orElse(false) }

@@ -59,7 +59,7 @@ class TextExerciseParticipationE2eTest : BaseExerciseTest() {
             val courseExerciseService: CourseExerciseService = get()
             participation =
                 courseExerciseService
-                    .startExercise(exercise.id!!, testServerUrl, accessToken)
+                    .startExercise(exercise.id!!)
                     .orThrow("Start text exercise participation")
     
             val submissions = participation.submissions
