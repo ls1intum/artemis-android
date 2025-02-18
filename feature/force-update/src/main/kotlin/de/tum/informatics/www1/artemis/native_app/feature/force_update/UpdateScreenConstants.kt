@@ -4,7 +4,7 @@ import androidx.compose.ui.unit.dp
 
 object UpdateScreenConstants {
     val ScreenPadding = 24.dp
-    val ImageSize = 150.dp
+    val ImageSize = 300.dp
     val SpacingLarge = 24.dp
     val SpacingMedium = 16.dp
     val ButtonCornerRadius = 8.dp

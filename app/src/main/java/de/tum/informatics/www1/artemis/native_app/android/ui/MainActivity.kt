@@ -225,7 +225,7 @@ class MainActivity : AppCompatActivity(),
                 val updateFlow: Flow<UpdateRepository.UpdateResult> = updateRepository.checkForUpdate()
                 updateFlow.collect { updateResult ->
                     if (updateResult.updateAvailable) {
-                        navController.navigateToUpdateScreen()
+                        navController.navigateToUpdateScreen(updateResult.currentVersion, updateResult.minVersion)
                     }
                 }
             }

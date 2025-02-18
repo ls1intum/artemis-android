@@ -69,12 +69,22 @@ class UpdateRepository(
 
             // If the stored version is greater than our current version, then an update is required.
             if (isVersionGreater(storedServerVersion, currentVersionNormalized)) {
-                return@mapLatest UpdateResult(updateAvailable = true, forceUpdate = true)
+                return@mapLatest UpdateResult(
+                    updateAvailable = true,
+                    forceUpdate = true,
+                    currentVersion = currentVersionNormalized,
+                    minVersion = storedServerVersion
+                )
             }
 
             // If it's not yet time to re-check (less than 2 days since last check), then assume no update.
             if (!isTimeToCheckUpdate()) {
-                return@mapLatest UpdateResult(updateAvailable = false, forceUpdate = false)
+                return@mapLatest UpdateResult(
+                    updateAvailable = false,
+                    forceUpdate = false,
+                    currentVersion = currentVersionNormalized,
+                    minVersion = storedServerVersion
+                )
             }
 
             val token = accountService.authToken.first()
@@ -85,7 +95,8 @@ class UpdateRepository(
                     // Use the server response—if it's null or blank, treat it as "0.0.0".
                     val serverMinVersion = normalizeVersion(response.data ?: "0.0.0")
 
-                    val updateRequired = isVersionGreater(serverMinVersion, currentVersionNormalized)
+                    val updateRequired =
+                        isVersionGreater(serverMinVersion, currentVersionNormalized)
                     if (updateRequired) {
                         saveLastKnownVersion(serverMinVersion)
                         saveLastUpdateCheck(System.currentTimeMillis())
@@ -93,11 +104,18 @@ class UpdateRepository(
 
                     UpdateResult(
                         updateAvailable = updateRequired,
-                        forceUpdate = updateRequired
+                        forceUpdate = updateRequired,
+                        currentVersion = currentVersionNormalized,
+                        minVersion = storedServerVersion
                     )
                 }
                 // If the network call fails, assume no update.
-                else -> UpdateResult(updateAvailable = false, forceUpdate = false)
+                else -> UpdateResult(
+                    updateAvailable = false,
+                    forceUpdate = false,
+                    currentVersion = currentVersionNormalized,
+                    minVersion = storedServerVersion
+                )
             }
         }
 
@@ -119,6 +137,8 @@ class UpdateRepository(
 
     data class UpdateResult(
         val updateAvailable: Boolean,
-        val forceUpdate: Boolean
+        val forceUpdate: Boolean,
+        val currentVersion: String,
+        val minVersion: String
     )
 }
