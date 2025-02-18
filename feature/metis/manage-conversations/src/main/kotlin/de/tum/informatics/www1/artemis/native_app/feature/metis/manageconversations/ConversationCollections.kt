@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations
 
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.ConversationOverviewUtils
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
@@ -54,6 +55,34 @@ data class ConversationCollections(
             recentChannels = recentChannels.filter { (it.unreadMessagesCount ?: 0) > 0 }
         )
     }
+
+    fun filterRecent() : ConversationCollections {
+        return ConversationCollections(
+            channels = channels.filter { ConversationOverviewUtils.isRecent(it, null) },
+            groupChats = groupChats.filter { ConversationOverviewUtils.isRecent(it, null) },
+            directChats = directChats.filter { ConversationOverviewUtils.isRecent(it, null) },
+            favorites = favorites.filter { ConversationOverviewUtils.isRecent(it, null) },
+            hidden = hidden.filter { ConversationOverviewUtils.isRecent(it, null) },
+            exerciseChannels = exerciseChannels.filter { ConversationOverviewUtils.isRecent(it, null) },
+            lectureChannels = lectureChannels.filter { ConversationOverviewUtils.isRecent(it, null) },
+            examChannels = examChannels.filter { ConversationOverviewUtils.isRecent(it, null) },
+            recentChannels = recentChannels.filter { ConversationOverviewUtils.isRecent(it, null) }
+        )
+    }
+
+//    fun filterUnresolved() : ConversationCollections {
+//        return ConversationCollections(
+//            channels = channels.filter {  },
+//            groupChats = groupChats.filter { ConversationOverviewUtils.isRecent(it, null) },
+//            directChats = directChats.filter { ConversationOverviewUtils.isRecent(it, null) },
+//            favorites = favorites.filter { ConversationOverviewUtils.isRecent(it, null) },
+//            hidden = hidden.filter { ConversationOverviewUtils.isRecent(it, null) },
+//            exerciseChannels = exerciseChannels.filter { ConversationOverviewUtils.isRecent(it, null) },
+//            lectureChannels = lectureChannels.filter { ConversationOverviewUtils.isRecent(it, null) },
+//            examChannels = examChannels.filter { ConversationOverviewUtils.isRecent(it, null) },
+//            recentChannels = recentChannels.filter { ConversationOverviewUtils.isRecent(it, null) }
+//        )
+//    }
 
     data class ConversationCollection<T : Conversation>(
         val conversations: List<T>,

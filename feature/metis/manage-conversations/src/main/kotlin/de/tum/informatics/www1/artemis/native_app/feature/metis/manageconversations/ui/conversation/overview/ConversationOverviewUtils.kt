@@ -1,12 +1,16 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.AccessTimeFilled
 import androidx.compose.material.icons.filled.AllInbox
 import androidx.compose.material.icons.filled.MarkChatUnread
 import androidx.compose.material.icons.filled.QuestionMark
+import androidx.compose.material.icons.outlined.MarkChatUnread
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ComponentColors
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
@@ -49,12 +53,13 @@ object ConversationOverviewUtils {
     sealed class ConversationFilter(
         val titleId: Int,
         val icon: ImageVector,
-        val isInitiallySelected: Boolean = false,
+        val selectedColor: Color,
+        val selectedIcon: ImageVector = icon,
         val onClick : () -> Unit = {}
     ) {
-        data object All : ConversationFilter(R.string.conversation_overview_filter_all, Icons.Default.AllInbox, true)
-        data object Unread : ConversationFilter(R.string.conversation_overview_filter_unread, Icons.Default.MarkChatUnread)
-        data object Recent : ConversationFilter(R.string.conversation_overview_filter_recent, Icons.Default.AccessTimeFilled)
-        data object Unresolved : ConversationFilter(R.string.conversation_overview_filter_unresolved, Icons.Default.QuestionMark)
+        data object All : ConversationFilter(R.string.conversation_overview_filter_all, Icons.Default.AllInbox, ComponentColors.ChannelFilter.all)
+        data object Unread : ConversationFilter(R.string.conversation_overview_filter_unread, Icons.Outlined.MarkChatUnread, ComponentColors.ChannelFilter.unread, Icons.Default.MarkChatUnread)
+        data object Recent : ConversationFilter(R.string.conversation_overview_filter_recent, Icons.Default.AccessTime, ComponentColors.ChannelFilter.recent, Icons.Default.AccessTimeFilled)
+        data object Unresolved : ConversationFilter(R.string.conversation_overview_filter_unresolved, Icons.Default.QuestionMark, ComponentColors.ChannelFilter.unresolved)
     }
 }

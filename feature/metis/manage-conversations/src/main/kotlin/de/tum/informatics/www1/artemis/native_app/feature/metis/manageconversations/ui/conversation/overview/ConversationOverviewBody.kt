@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +46,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -328,29 +330,41 @@ private fun FilterRow(
         ConversationOverviewUtils.ConversationFilter.Unresolved
     )
 ) {
+    val filterChipColorAlpha = 0.8f
     Row(
         modifier = modifier.horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         availableFilters.forEach { filter ->
+            val selected = filter == currentFilter
             FilterChip(
-                selected = filter == currentFilter,
+                selected = selected,
                 onClick = {
                     onUpdateFilter(filter)
                 },
                 label = {
                     Text(
                         text = stringResource(id = filter.titleId),
+                        color = if (selected) Color.White else MaterialTheme.colorScheme.onSurface
                     )
                 },
                 leadingIcon = {
                     Icon(
-                        imageVector = filter.icon,
-                        tint = MaterialTheme.colorScheme.primary,
+                        imageVector = if (selected) filter.selectedIcon else filter.icon,
+                        tint = if (selected) Color.White else MaterialTheme.colorScheme.primary,
                         contentDescription = null
                     )
-                }
+                },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = filter.selectedColor.copy(alpha = filterChipColorAlpha)
+                ),
+                border = FilterChipDefaults.filterChipBorder(
+                    borderColor = MaterialTheme.colorScheme.surfaceVariant,
+                    selectedBorderColor = filter.selectedColor.copy(alpha = filterChipColorAlpha),
+                    enabled = true,
+                    selected = selected,
+                )
             )
         }
     }
