@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +27,7 @@ import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -146,6 +148,10 @@ fun ConversationOverviewBody(
                     hint = stringResource(id = R.string.conversation_overview_search_hint),
                     query = query,
                     updateQuery = viewModel::onUpdateQuery
+                )
+
+                FilterRow(
+                    modifier = Modifier.fillMaxWidth()
                 )
 
                 ConversationList(
@@ -303,6 +309,47 @@ fun ConversationFabWithDropdownMenu(
                     }
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun FilterRow(
+    modifier: Modifier,
+    availableFilters: List<ConversationOverviewUtils.ConversationFilter> = listOf(
+        ConversationOverviewUtils.ConversationFilter.All,
+        ConversationOverviewUtils.ConversationFilter.Unread,
+        ConversationOverviewUtils.ConversationFilter.Recent,
+        ConversationOverviewUtils.ConversationFilter.Unresolved
+    )
+) {
+    var selectedFilter by remember { mutableStateOf(availableFilters.first { it.isInitiallySelected }) }
+
+    Row(
+        modifier = modifier.horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        availableFilters.forEach { filter ->
+            FilterChip(
+                selected = filter == selectedFilter,
+                onClick = {
+                    selectedFilter = filter
+                    filter.onClick()
+                },
+                label = {
+                    Text(
+                        text = stringResource(id = filter.titleId),
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = filter.icon,
+                        tint = MaterialTheme.colorScheme.primary,
+                        contentDescription = null
+                    )
+                }
+            )
         }
     }
 }
