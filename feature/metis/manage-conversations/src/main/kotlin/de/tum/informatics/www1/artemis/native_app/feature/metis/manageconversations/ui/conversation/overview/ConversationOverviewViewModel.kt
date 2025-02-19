@@ -56,7 +56,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onCompletion
@@ -384,9 +383,8 @@ class ConversationOverviewViewModel(
     val availableFilters: StateFlow<List<ConversationOverviewUtils.ConversationFilter>> = combine(
         latestConversations,
         recentConversations,
-        isAtLeastTutorInCourse,
-        _currentFilter
-    ) { conversationsDataState, recentConversations, isAtLeastTutorInCourse, currentFilter ->
+        isAtLeastTutorInCourse
+    ) { conversationsDataState, recentConversations, isAtLeastTutorInCourse ->
         val filters = mutableListOf<ConversationOverviewUtils.ConversationFilter>()
 
         conversationsDataState.bind { conversations ->
@@ -400,16 +398,14 @@ class ConversationOverviewViewModel(
 
             filters.toList().reversed()
         }.orNull() ?: emptyList()
-    }
-        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, emptyList())
-
-    // if the current filter is not available anymore, we reset it to all
-    val checkFilterState = availableFilters.debounce(300)
+    }.debounce(200)
         .onEach { filters ->
+            // if the current filter is not available anymore, we reset it to all
             if (filters.none { it.id == _currentFilter.value.id }) {
                 onUpdateFilter(ConversationOverviewUtils.ConversationFilter.All)
             }
-        }.launchIn(viewModelScope)
+        }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, emptyList())
 
     private fun getUpdateConversationsFlow(loadedConversations: List<Conversation>): Flow<Success<List<Conversation>>> =
         flow {
