@@ -25,6 +25,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections.ConversationCollection
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.network.ChannelService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.storage.ConversationPreferenceService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisCrudAction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisPostDTO
@@ -75,6 +76,7 @@ class ConversationOverviewViewModel(
     currentActivityListener: CurrentActivityListener?,
     val courseId: Long,
     private val conversationService: ConversationService,
+    private val channelService: ChannelService,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
     private val conversationPreferenceService: ConversationPreferenceService,
@@ -96,6 +98,7 @@ class ConversationOverviewViewModel(
         application: Application,
         courseId: Long,
         conversationService: ConversationService,
+        channelService: ChannelService,
         serverConfigurationService: ServerConfigurationService,
         accountService: AccountService,
         conversationPreferenceService: ConversationPreferenceService,
@@ -108,6 +111,7 @@ class ConversationOverviewViewModel(
         application as? CurrentActivityListener,
         courseId,
         conversationService,
+        channelService,
         serverConfigurationService,
         accountService,
         conversationPreferenceService,
@@ -194,6 +198,36 @@ class ConversationOverviewViewModel(
             }
             .stateIn(viewModelScope + coroutineContext, SharingStarted.WhileSubscribed())
 
+    private val unresolvedChannels: StateFlow<DataState<List<Conversation>>> =
+        loadedConversations.flatMapLatest { conversations ->
+            when (conversations) {
+                is Success -> {
+                    val channelIds = conversations.data.filterIsInstance<ChannelChat>()
+                        .filter { channel -> !channel.isAnnouncementChannel && channel.isCourseWide }
+                        .map { it.id }
+
+                    retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+                        channelService.getUnresolvedChannels(
+                            courseId,
+                            channelIds,
+                            serverConfigurationService.serverUrl.first(),
+                            accountService.authToken.first()
+                        )
+                    }
+                }
+                is DataState.Loading -> flowOf(DataState.Loading())
+                is DataState.Failure -> flowOf(DataState.Failure(conversations.throwable))
+            }
+        }
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
+
+    private val recentConversations: StateFlow<DataState<List<Conversation>>> =
+        updatedConversations.map { conversationsDataState ->
+            conversationsDataState.bind { conversations ->
+                conversations.filter { ConversationOverviewUtils.isRecent(it, course.value.orNull()) }
+            }
+        }.stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
+
     val isConnected: StateFlow<Boolean> =
         websocketProvider
             .isConnected
@@ -266,16 +300,7 @@ class ConversationOverviewViewModel(
                     examChannels = conversations.filter {
                         it is ChannelChat && !it.isHidden && it.filterPredicate("exam")
                     }.map { it as ChannelChat }
-                        .asCollection(filterActive || preferences.examsExpanded, showPrefix = false),
-
-                    recentChannels = conversations.filter { ConversationOverviewUtils.isRecent(
-                        it,
-                        course.value.orNull()
-                    ) }
-                        .asCollection(
-                            filterActive || preferences.recentExpanded,
-                            showPrefix = true
-                        )
+                        .asCollection(filterActive || preferences.examsExpanded, showPrefix = false)
                 )
             }
         }
@@ -309,13 +334,20 @@ class ConversationOverviewViewModel(
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     val conversations: StateFlow<DataState<ConversationCollections>> =
-        combine(latestConversations, query, currentFilter) { latestConversationsDataState, query, filter ->
+        combine(latestConversations, unresolvedChannels, recentConversations, query, currentFilter) { latestConversationsDataState, unresolvedChannels, recentConversations, query, filter ->
             latestConversationsDataState.bind { latestConversations ->
                 var filteredConversations = latestConversations
 
                 filteredConversations = when (filter) {
                     ConversationOverviewUtils.ConversationFilter.Unread -> filteredConversations.filterUnread()
-                    //ConversationOverviewUtils.ConversationFilter.Unresolved -> filteredConversations.filterUnresolved()
+                    ConversationOverviewUtils.ConversationFilter.Recent -> {
+                        recentConversations.orNull()?.let {
+                            filteredConversations.filterRecent(it)
+                        } ?: filteredConversations
+                    }
+                    ConversationOverviewUtils.ConversationFilter.Unresolved -> {
+                        filteredConversations.filterUnresolved(unresolvedChannels.orNull() ?: emptyList())
+                    }
                     else -> filteredConversations
                 }
 
@@ -523,10 +555,6 @@ class ConversationOverviewViewModel(
 
     fun toggleSavedPostsExpanded() {
         expandOrCollapseSection { copy(savedPostsExpanded = !savedPostsExpanded) }
-    }
-
-    fun toggleRecentExpanded() {
-        expandOrCollapseSection { copy(recentExpanded = !recentExpanded) }
     }
 
     private fun expandOrCollapseSection(update: ConversationPreferenceService.Preferences.() -> ConversationPreferenceService.Preferences) {

@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations
 
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.ConversationOverviewUtils
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
@@ -14,8 +13,7 @@ data class ConversationCollections(
     val hidden: ConversationCollection<Conversation>,
     val exerciseChannels: ConversationCollection<ChannelChat>,
     val lectureChannels: ConversationCollection<ChannelChat>,
-    val examChannels: ConversationCollection<ChannelChat>,
-    val recentChannels: ConversationCollection<Conversation>
+    val examChannels: ConversationCollection<ChannelChat>
 ) {
     val conversations: List<Conversation>
         get() = favorites.conversations +
@@ -25,64 +23,34 @@ data class ConversationCollections(
                 hidden.conversations +
                 exerciseChannels.conversations +
                 lectureChannels.conversations +
-                examChannels.conversations +
-                recentChannels.conversations
+                examChannels.conversations
 
-    fun filtered(query: String): ConversationCollections {
-        return ConversationCollections(
-            channels = channels.filter { it.filterPredicate(query) },
-            groupChats = groupChats.filter { it.filterPredicate(query) },
-            directChats = directChats.filter { it.filterPredicate(query) },
-            favorites = favorites.filter { it.filterPredicate(query) },
-            hidden = hidden.filter { it.filterPredicate(query) },
-            exerciseChannels = exerciseChannels.filter { it.filterPredicate(query) },
-            lectureChannels = lectureChannels.filter { it.filterPredicate(query) },
-            examChannels = examChannels.filter { it.filterPredicate(query) },
-            recentChannels = recentChannels.filter { it.filterPredicate(query) }
-        )
+    fun filtered(query: String): ConversationCollections = filterBy { it.filterPredicate(query) }
+
+    fun filterUnread(): ConversationCollections = filterBy { (it.unreadMessagesCount ?: 0) > 0 }
+
+    fun filterRecent(recentChannels: List<Conversation>): ConversationCollections {
+        val recentConversations = recentChannels.toSet()
+        return filterBy { it in recentConversations }
     }
 
-    fun filterUnread() : ConversationCollections {
-        return ConversationCollections(
-            channels = channels.filter { (it.unreadMessagesCount ?: 0) > 0 },
-            groupChats = groupChats.filter { (it.unreadMessagesCount ?: 0) > 0 },
-            directChats = directChats.filter { (it.unreadMessagesCount ?: 0) > 0 },
-            favorites = favorites.filter { (it.unreadMessagesCount ?: 0) > 0 },
-            hidden = hidden.filter { (it.unreadMessagesCount ?: 0) > 0 },
-            exerciseChannels = exerciseChannels.filter { (it.unreadMessagesCount ?: 0) > 0 },
-            lectureChannels = lectureChannels.filter { (it.unreadMessagesCount ?: 0) > 0 },
-            examChannels = examChannels.filter { (it.unreadMessagesCount ?: 0) > 0 },
-            recentChannels = recentChannels.filter { (it.unreadMessagesCount ?: 0) > 0 }
-        )
+    fun filterUnresolved(unresolvedChannels: List<Conversation>): ConversationCollections {
+        val unresolved = unresolvedChannels.toSet()
+        return filterBy { unresolved.any { unresolved -> unresolved.id == it.id }  }
     }
 
-    fun filterRecent() : ConversationCollections {
+    private fun filterBy(predicate: (Conversation) -> Boolean): ConversationCollections {
         return ConversationCollections(
-            channels = channels.filter { ConversationOverviewUtils.isRecent(it, null) },
-            groupChats = groupChats.filter { ConversationOverviewUtils.isRecent(it, null) },
-            directChats = directChats.filter { ConversationOverviewUtils.isRecent(it, null) },
-            favorites = favorites.filter { ConversationOverviewUtils.isRecent(it, null) },
-            hidden = hidden.filter { ConversationOverviewUtils.isRecent(it, null) },
-            exerciseChannels = exerciseChannels.filter { ConversationOverviewUtils.isRecent(it, null) },
-            lectureChannels = lectureChannels.filter { ConversationOverviewUtils.isRecent(it, null) },
-            examChannels = examChannels.filter { ConversationOverviewUtils.isRecent(it, null) },
-            recentChannels = recentChannels.filter { ConversationOverviewUtils.isRecent(it, null) }
+            channels = channels.filter(predicate),
+            groupChats = groupChats.filter(predicate),
+            directChats = directChats.filter(predicate),
+            favorites = favorites.filter(predicate),
+            hidden = hidden.filter(predicate),
+            exerciseChannels = exerciseChannels.filter(predicate),
+            lectureChannels = lectureChannels.filter(predicate),
+            examChannels = examChannels.filter(predicate)
         )
     }
-
-//    fun filterUnresolved() : ConversationCollections {
-//        return ConversationCollections(
-//            channels = channels.filter {  },
-//            groupChats = groupChats.filter { ConversationOverviewUtils.isRecent(it, null) },
-//            directChats = directChats.filter { ConversationOverviewUtils.isRecent(it, null) },
-//            favorites = favorites.filter { ConversationOverviewUtils.isRecent(it, null) },
-//            hidden = hidden.filter { ConversationOverviewUtils.isRecent(it, null) },
-//            exerciseChannels = exerciseChannels.filter { ConversationOverviewUtils.isRecent(it, null) },
-//            lectureChannels = lectureChannels.filter { ConversationOverviewUtils.isRecent(it, null) },
-//            examChannels = examChannels.filter { ConversationOverviewUtils.isRecent(it, null) },
-//            recentChannels = recentChannels.filter { ConversationOverviewUtils.isRecent(it, null) }
-//        )
-//    }
 
     data class ConversationCollection<T : Conversation>(
         val conversations: List<T>,
