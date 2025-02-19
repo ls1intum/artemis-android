@@ -178,7 +178,8 @@ internal fun ConversationList(
         }
 
     LazyColumn (
-        modifier = modifier.testTag(TEST_TAG_CONVERSATION_LIST)
+        modifier = modifier
+            .testTag(TEST_TAG_CONVERSATION_LIST)
     ) {
         if (conversationCollections.favorites.conversations.isNotEmpty()) {
             listWithHeader(
@@ -191,13 +192,15 @@ internal fun ConversationList(
             )
         }
 
-        listWithHeader(
-            ConversationSectionState.Conversations(conversationCollections.channels),
-            SECTION_CHANNELS_KEY,
-            KEY_SUFFIX_CHANNELS,
-            R.string.conversation_overview_section_general_channels,
-            toggleGeneralsExpanded
-        ) { Icon(imageVector = Icons.Default.ChatBubble, contentDescription = null) }
+        if (conversationCollections.channels.conversations.isNotEmpty()) {
+            listWithHeader(
+                ConversationSectionState.Conversations(conversationCollections.channels),
+                SECTION_CHANNELS_KEY,
+                KEY_SUFFIX_CHANNELS,
+                R.string.conversation_overview_section_general_channels,
+                toggleGeneralsExpanded
+            ) { Icon(imageVector = Icons.Default.ChatBubble, contentDescription = null) }
+        }
 
         if (conversationCollections.exerciseChannels.conversations.isNotEmpty()) {
             listWithHeader(
@@ -282,6 +285,7 @@ private fun LazyListScope.conversationSectionHeader(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .animateItem()
                 .testTag(key)
                 .clickable { onClick() }
                 .padding(vertical = 8.dp),
@@ -336,7 +340,9 @@ private fun LazyListScope.conversationList(
                 SavedPostStatus.entries
             ) {
                 SavedPostsListItem(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .animateItem(),
                     status = it,
                     onClick = {
                         onNavigateToSavedPosts(it)
@@ -355,6 +361,7 @@ private fun LazyListScope.conversationList(
                 ConversationListItem(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .animateItem()
                         .testTag(itemTag),
                     itemBaseTag = itemTag,
                     conversation = conversation,

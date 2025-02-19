@@ -1,6 +1,11 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -128,7 +133,7 @@ fun ConversationOverviewBody(
         ) { conversationCollection ->
             Column(
                 modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 AnimatedVisibility(modifier = Modifier.fillMaxWidth(), visible = !isConnected) {
                     Box(modifier = Modifier.fillMaxWidth()) {
@@ -328,41 +333,49 @@ private fun FilterRow(
     availableFilters: List<ConversationOverviewUtils.ConversationFilter>
 ) {
     val filterChipColorAlpha = 0.8f
-    Row(
-        modifier = modifier.horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
+    AnimatedVisibility(
+        visible = availableFilters.isNotEmpty(),
+        enter = fadeIn() + expandHorizontally(),
+        exit = fadeOut() + shrinkHorizontally()
     ) {
-        availableFilters.forEach { filter ->
-            val selected = filter == currentFilter
-            FilterChip(
-                selected = selected,
-                onClick = {
-                    onUpdateFilter(filter)
-                },
-                label = {
-                    Text(
-                        text = stringResource(id = filter.titleId),
-                        color = if (selected) Color.White else MaterialTheme.colorScheme.onSurface
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        imageVector = if (selected) filter.selectedIcon else filter.icon,
-                        tint = if (selected) Color.White else MaterialTheme.colorScheme.primary,
-                        contentDescription = null
-                    )
-                },
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = filter.selectedColor.copy(alpha = filterChipColorAlpha)
-                ),
-                border = FilterChipDefaults.filterChipBorder(
-                    borderColor = MaterialTheme.colorScheme.surfaceVariant,
-                    selectedBorderColor = filter.selectedColor.copy(alpha = filterChipColorAlpha),
-                    enabled = true,
+        Row(
+            modifier = modifier
+                .horizontalScroll(rememberScrollState())
+                .animateContentSize(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            availableFilters.forEach { filter ->
+                val selected = filter == currentFilter
+                FilterChip(
                     selected = selected,
+                    onClick = {
+                        onUpdateFilter(filter)
+                    },
+                    label = {
+                        Text(
+                            text = stringResource(id = filter.titleId),
+                            color = if (selected) Color.White else MaterialTheme.colorScheme.onSurface
+                        )
+                    },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = if (selected) filter.selectedIcon else filter.icon,
+                            tint = if (selected) Color.White else MaterialTheme.colorScheme.primary,
+                            contentDescription = null
+                        )
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = filter.selectedColor.copy(alpha = filterChipColorAlpha)
+                    ),
+                    border = FilterChipDefaults.filterChipBorder(
+                        borderColor = MaterialTheme.colorScheme.surfaceVariant,
+                        selectedBorderColor = filter.selectedColor.copy(alpha = filterChipColorAlpha),
+                        enabled = true,
+                        selected = selected,
+                    )
                 )
-            )
+            }
         }
     }
 }

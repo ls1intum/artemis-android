@@ -48,6 +48,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
@@ -55,9 +56,11 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
@@ -379,10 +382,11 @@ class ConversationOverviewViewModel(
     val isDisplayingErrorDialog: StateFlow<Boolean> = _isDisplayingErrorDialog
 
     val availableFilters: StateFlow<List<ConversationOverviewUtils.ConversationFilter>> = combine(
-        conversations,
+        latestConversations,
         recentConversations,
-        isAtLeastTutorInCourse
-    ) { conversationsDataState, recentConversations, isAtLeastTutorInCourse ->
+        isAtLeastTutorInCourse,
+        _currentFilter
+    ) { conversationsDataState, recentConversations, isAtLeastTutorInCourse, currentFilter ->
         val filters = mutableListOf<ConversationOverviewUtils.ConversationFilter>()
 
         conversationsDataState.bind { conversations ->
@@ -394,14 +398,18 @@ class ConversationOverviewViewModel(
             if (conversations.hasUnreadMessages()) filters.add(ConversationOverviewUtils.ConversationFilter.Unread)
             if (filters.isNotEmpty()) filters.add(ConversationOverviewUtils.ConversationFilter.All)
 
-            // if the current filter is not available anymore, we reset it to all
+            filters.toList().reversed()
+        }.orNull() ?: emptyList()
+    }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, emptyList())
+
+    // if the current filter is not available anymore, we reset it to all
+    val checkFilterState = availableFilters.debounce(300)
+        .onEach { filters ->
             if (filters.none { it.id == _currentFilter.value.id }) {
                 onUpdateFilter(ConversationOverviewUtils.ConversationFilter.All)
             }
-
-            filters.toList().reversed()
-        }.orNull() ?: emptyList()
-    }.stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, emptyList())
+        }.launchIn(viewModelScope)
 
     private fun getUpdateConversationsFlow(loadedConversations: List<Conversation>): Flow<Success<List<Conversation>>> =
         flow {
