@@ -65,6 +65,13 @@ object Spacings {
         start = ScreenHorizontalSpacing,
         end = ScreenHorizontalSpacing
     )
+
+    object  UpdateScreen {
+        val imageSize = 300.dp
+        val large = 24.dp
+        val medium = 16.dp
+        val buttonRadius = 8.dp
+    }
 }
 
 fun Modifier.endOfPagePadding() = padding(bottom = Spacings.EndOfScrollablePageSpacing).navigationBarsPadding()

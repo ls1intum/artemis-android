@@ -4,7 +4,7 @@
     <string name="update_screen_download_message">Please update Artemis to the latest version to ensure you have a smooth experience. You can download the latest version from the Play Store.</string>
     <string name="update_screen_downlaod_button">Download</string>
     <string name="update_screen_version_info">
-    You are currently using version %1$s while the oldest version currently supported is %2$s.
+    You are using version %1$s while the oldest version currently supported is %2$s.
     </string>
 
 </resources>

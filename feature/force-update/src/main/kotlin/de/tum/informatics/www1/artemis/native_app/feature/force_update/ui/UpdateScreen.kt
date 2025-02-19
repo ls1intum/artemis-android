@@ -23,7 +23,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import de.tum.informatics.www1.artemis.native_app.feature.force_update.UpdateScreenConstants
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.feature.forceupdate.R
 
 @Composable
@@ -37,21 +37,21 @@ fun UpdateScreen(
             .fillMaxSize()
             .background(color = MaterialTheme.colorScheme.background)
             .imePadding()
-            .padding(bottom = UpdateScreenConstants.SpacingMedium),
+            .padding(bottom = Spacings.UpdateScreen.medium),
         contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(UpdateScreenConstants.SpacingLarge),
+            verticalArrangement = Arrangement.spacedBy(Spacings.UpdateScreen.large),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(UpdateScreenConstants.ScreenPadding)
+                .padding(Spacings.UpdateScreen.large)
         ) {
             Image(
                 painter = painterResource(R.drawable.ic_launcher_foreground),
                 contentDescription = "Update Icon",
                 modifier = Modifier
-                    .size(UpdateScreenConstants.ImageSize)
+                    .size(Spacings.UpdateScreen.imageSize)
                     .align(Alignment.CenterHorizontally),
             )
 
@@ -61,17 +61,19 @@ fun UpdateScreen(
                     fontWeight = FontWeight.Bold
                 ),
                 textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onBackground
             )
 
-            Spacer(modifier = Modifier.height(UpdateScreenConstants.SpacingMedium))
+            Spacer(modifier = Modifier.height(Spacings.UpdateScreen.medium))
 
             Text(
                 text = stringResource(R.string.update_screen_download_message),
                 style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onBackground
             )
 
-            Spacer(modifier = Modifier.height(UpdateScreenConstants.SpacingMedium))
+            Spacer(modifier = Modifier.height(Spacings.UpdateScreen.medium))
 
             Text(
                 text = stringResource(
@@ -89,7 +91,7 @@ fun UpdateScreen(
             Button(
                 onClick = onDownloadClick,
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(UpdateScreenConstants.ButtonCornerRadius)
+                shape = RoundedCornerShape(Spacings.UpdateScreen.buttonRadius)
             ) {
                 Text(
                     text = stringResource(R.string.update_screen_downlaod_button)
