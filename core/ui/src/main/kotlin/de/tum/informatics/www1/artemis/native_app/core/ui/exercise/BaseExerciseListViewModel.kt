@@ -4,14 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseExerciseService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 
@@ -19,8 +15,6 @@ import kotlinx.coroutines.launch
  * Shares common exercise starting logic.
  */
 abstract class BaseExerciseListViewModel(
-    private val serverConfigurationService: ServerConfigurationService,
-    private val accountService: AccountService,
     private val courseExerciseService: CourseExerciseService
 ) : ViewModel() {
 
@@ -42,11 +36,7 @@ abstract class BaseExerciseListViewModel(
 
     fun startExercise(exerciseId: Long, onStartedSuccessfully: (participationId: Long) -> Unit) {
         viewModelScope.launch {
-            val serverUrl = serverConfigurationService.serverUrl.first()
-            val authToken = accountService.authToken.first()
-
-            when (val response =
-                courseExerciseService.startExercise(exerciseId, serverUrl, authToken)) {
+            when (val response = courseExerciseService.startExercise(exerciseId)) {
                 is NetworkResponse.Response -> {
                     startedExerciseFlow.emit(NewParticipationData(exerciseId, response.data))
 

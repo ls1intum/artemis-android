@@ -36,12 +36,11 @@ internal class NavigateToUserConversationViewModel(
     private val requestReload = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     private val accountData: StateFlow<DataState<Account>> = flatMapLatest(
-        serverConfigurationService.serverUrl,
-        accountService.authToken,
+        accountDataService.onReloadRequired,
         requestReload.onStart { emit(Unit) }
-    ) { serverUrl, authToken, _ ->
+    ) { _, _ ->
         retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-            accountDataService.getAccountData(serverUrl, authToken)
+            accountDataService.getAccountData()
         }
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly)
