@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
@@ -24,6 +25,7 @@ class UserProfileDialogViewModel(
     private val userId: Long,
     serverConfigurationService: ServerConfigurationService,
     accountService: AccountService,
+    courseService: CourseService,
     accountDataService: AccountDataService,
     networkStatusProvider: NetworkStatusProvider,
     websocketProvider: WebsocketProvider,
@@ -31,10 +33,12 @@ class UserProfileDialogViewModel(
 ) : MetisViewModel(
     serverConfigurationService,
     accountService,
+    courseService,
     accountDataService,
     networkStatusProvider,
     websocketProvider,
-    coroutineContext
+    coroutineContext,
+    courseId
 ) {
 
     val isSendMessageAvailable: StateFlow<Boolean>  = clientId

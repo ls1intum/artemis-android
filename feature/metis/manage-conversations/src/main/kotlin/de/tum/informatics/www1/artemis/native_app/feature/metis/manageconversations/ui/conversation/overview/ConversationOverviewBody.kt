@@ -103,6 +103,7 @@ fun ConversationOverviewBody(
     val conversationCollectionsDataState: DataState<ConversationCollections> by viewModel.conversations.collectAsState()
     val isDisplayingErrorDialog by viewModel.isDisplayingErrorDialog.collectAsState()
     val currentFilter by viewModel.currentFilter.collectAsState()
+    val availableFilters by viewModel.availableFilters.collectAsState()
 
     val isConnected by viewModel.isConnected.collectAsState()
 
@@ -156,6 +157,7 @@ fun ConversationOverviewBody(
                 FilterRow(
                     modifier = Modifier.fillMaxWidth(),
                     currentFilter = currentFilter,
+                    availableFilters = availableFilters,
                     onUpdateFilter = viewModel::onUpdateFilter
                 )
 
@@ -323,12 +325,7 @@ private fun FilterRow(
     modifier: Modifier,
     currentFilter: ConversationOverviewUtils.ConversationFilter,
     onUpdateFilter: (ConversationOverviewUtils.ConversationFilter) -> Unit,
-    availableFilters: List<ConversationOverviewUtils.ConversationFilter> = listOf(
-        ConversationOverviewUtils.ConversationFilter.All,
-        ConversationOverviewUtils.ConversationFilter.Unread,
-        ConversationOverviewUtils.ConversationFilter.Recent,
-        ConversationOverviewUtils.ConversationFilter.Unresolved
-    )
+    availableFilters: List<ConversationOverviewUtils.ConversationFilter>
 ) {
     val filterChipColorAlpha = 0.8f
     Row(

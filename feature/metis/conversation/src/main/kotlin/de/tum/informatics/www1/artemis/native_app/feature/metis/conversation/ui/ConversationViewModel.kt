@@ -24,8 +24,6 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
-import de.tum.informatics.www1.artemis.native_app.core.model.Course
-import de.tum.informatics.www1.artemis.native_app.core.model.account.isAtLeastTutorInCourse
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.FileUploadExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ModelingExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
@@ -135,10 +133,12 @@ internal open class ConversationViewModel(
 ) : MetisViewModel(
     serverConfigurationService,
     accountService,
+    courseService,
     accountDataService,
     networkStatusProvider,
     websocketProvider,
-    coroutineContext
+    coroutineContext,
+    courseId
 ), InitialReplyTextProvider, ReplyAutoCompleteHintProvider {
 
     private var currentlySavingPost = false
@@ -201,41 +201,9 @@ internal open class ConversationViewModel(
         metisStorageService = metisStorageService
     )
 
-    private val course: StateFlow<DataState<Course>> = flatMapLatest(
-        serverConfigurationService.serverUrl,
-        accountService.authToken,
-        onRequestReload.onStart { emit(Unit) }
-    ) { serverUrl, authToken, _ ->
-        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-            courseService.getCourse(
-                metisContext.courseId,
-                serverUrl,
-                authToken
-            ).bind { it.course }
-        }
-    }
-        .stateIn(viewModelScope + coroutineContext, SharingStarted.Lazily)
-
     private val hasModerationRights: StateFlow<Boolean> = conversation.map {
         it.bind { conversation -> conversation.hasModerationRights }
             .orElse(false)
-    }
-        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
-
-    private val isAtLeastTutorInCourse: StateFlow<Boolean> = flatMapLatest(
-        serverConfigurationService.serverUrl,
-        accountService.authToken,
-        course,
-        onRequestReload.onStart { emit(Unit) }
-    ) { serverUrl, authToken, course, _ ->
-        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-            accountDataService.getAccountData(
-                serverUrl = serverUrl,
-                bearerToken = authToken
-            )
-                .bind { it.isAtLeastTutorInCourse(course = course.orThrow()) }
-        }
-            .map { it.orElse(false) }
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 

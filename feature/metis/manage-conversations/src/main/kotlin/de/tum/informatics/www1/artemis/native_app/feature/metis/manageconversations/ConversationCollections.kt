@@ -39,6 +39,8 @@ data class ConversationCollections(
         return filterBy { unresolved.any { unresolved -> unresolved.id == it.id }  }
     }
 
+    fun hasUnreadMessages(): Boolean = conversations.any { (it.unreadMessagesCount ?: 0) > 0 }
+
     private fun filterBy(predicate: (Conversation) -> Boolean): ConversationCollections {
         return ConversationCollections(
             channels = channels.filter(predicate),

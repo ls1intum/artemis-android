@@ -53,13 +53,14 @@ object ConversationOverviewUtils {
     sealed class ConversationFilter(
         val titleId: Int,
         val icon: ImageVector,
+        val id: Int,
         val selectedColor: Color,
         val selectedIcon: ImageVector = icon,
         val onClick : () -> Unit = {}
     ) {
-        data object All : ConversationFilter(R.string.conversation_overview_filter_all, Icons.Default.AllInbox, ComponentColors.ChannelFilter.all)
-        data object Unread : ConversationFilter(R.string.conversation_overview_filter_unread, Icons.Outlined.MarkChatUnread, ComponentColors.ChannelFilter.unread, Icons.Default.MarkChatUnread)
-        data object Recent : ConversationFilter(R.string.conversation_overview_filter_recent, Icons.Default.AccessTime, ComponentColors.ChannelFilter.recent, Icons.Default.AccessTimeFilled)
-        data object Unresolved : ConversationFilter(R.string.conversation_overview_filter_unresolved, Icons.Default.QuestionMark, ComponentColors.ChannelFilter.unresolved)
+        data object All : ConversationFilter(R.string.conversation_overview_filter_all, Icons.Default.AllInbox, 1,  ComponentColors.ChannelFilter.all)
+        data object Unread : ConversationFilter(R.string.conversation_overview_filter_unread, Icons.Outlined.MarkChatUnread, 2, ComponentColors.ChannelFilter.unread, Icons.Default.MarkChatUnread)
+        data object Recent : ConversationFilter(R.string.conversation_overview_filter_recent, Icons.Default.AccessTime, 3, ComponentColors.ChannelFilter.recent, Icons.Default.AccessTimeFilled)
+        data object Unresolved : ConversationFilter(R.string.conversation_overview_filter_unresolved, Icons.Default.QuestionMark, 4, ComponentColors.ChannelFilter.unresolved)
     }
 }

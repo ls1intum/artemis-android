@@ -21,7 +21,6 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
-import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections.ConversationCollection
@@ -88,10 +87,12 @@ class ConversationOverviewViewModel(
 ) : MetisViewModel(
     serverConfigurationService,
     accountService,
+    courseService,
     accountDataService,
     networkStatusProvider,
     websocketProvider,
-    coroutineContext
+    coroutineContext,
+    courseId
 ) {
 
     constructor(
@@ -139,7 +140,8 @@ class ConversationOverviewViewModel(
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query
 
-    private val _currentFilter = MutableStateFlow<ConversationOverviewUtils.ConversationFilter>(ConversationOverviewUtils.ConversationFilter.All)
+    private val _currentFilter =
+        MutableStateFlow<ConversationOverviewUtils.ConversationFilter>(ConversationOverviewUtils.ConversationFilter.All)
     val currentFilter: StateFlow<ConversationOverviewUtils.ConversationFilter> = _currentFilter
 
     private val conversationUpdates: Flow<ConversationWebsocketDto> = clientId
@@ -222,11 +224,23 @@ class ConversationOverviewViewModel(
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
 
     private val recentConversations: StateFlow<DataState<List<Conversation>>> =
-        updatedConversations.map { conversationsDataState ->
-            conversationsDataState.bind { conversations ->
-                conversations.filter { ConversationOverviewUtils.isRecent(it, course.value.orNull()) }
+        combine(updatedConversations, course) { conversationsDataState, courseDataState ->
+            when {
+                conversationsDataState is Success && courseDataState is Success -> {
+                    Success(conversationsDataState.data.filter { conversation ->
+                        ConversationOverviewUtils.isRecent(conversation, courseDataState.data)
+                    })
+                }
+                conversationsDataState is DataState.Loading || courseDataState is DataState.Loading -> {
+                    DataState.Loading()
+                }
+                else -> {
+                    DataState.Failure(
+                        IllegalStateException("Failed to load recent conversations: $conversationsDataState")
+                    )
+                }
             }
-        }.stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
+        }.stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
 
     val isConnected: StateFlow<Boolean> =
         websocketProvider
@@ -243,24 +257,8 @@ class ConversationOverviewViewModel(
             .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 
     private val isFiltering: StateFlow<Boolean> = query
-            .map { it.isNotBlank() }
-            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
-
-    private val course: StateFlow<DataState<Course>> = flatMapLatest(
-        serverConfigurationService.serverUrl,
-        accountService.authToken,
-        onRequestReload.onStart { emit(Unit) }
-    ) { serverUrl, authToken, _ ->
-        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-            courseService.getCourse(
-                courseId,
-                serverUrl,
-                authToken
-            ).bind { it.course }
-        }
-    }
-        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
-
+        .map { it.isNotBlank() }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
     private val conversationsAsCollections: StateFlow<DataState<ConversationCollections>> =
         combine(
@@ -272,7 +270,11 @@ class ConversationOverviewViewModel(
 
                 ConversationCollections(
                     channels = conversations.filterNotHidden<ChannelChat>()
-                        .filter { !it.filterPredicate("exercise") && !it.filterPredicate("lecture") && !it.filterPredicate("exam") }
+                        .filter {
+                            !it.filterPredicate("exercise") && !it.filterPredicate("lecture") && !it.filterPredicate(
+                                "exam"
+                            )
+                        }
                         .asCollection(filterActive || preferences.generalsExpanded),
 
                     groupChats = conversations.filterNotHidden<GroupChat>()
@@ -290,12 +292,18 @@ class ConversationOverviewViewModel(
                     exerciseChannels = conversations.filter {
                         it is ChannelChat && !it.isHidden && it.filterPredicate("exercise")
                     }.map { it as ChannelChat }
-                        .asCollection(filterActive || preferences.exercisesExpanded, showPrefix = false),
+                        .asCollection(
+                            filterActive || preferences.exercisesExpanded,
+                            showPrefix = false
+                        ),
 
                     lectureChannels = conversations.filter {
                         it is ChannelChat && !it.isHidden && it.filterPredicate("lecture")
                     }.map { it as ChannelChat }
-                        .asCollection(filterActive || preferences.lecturesExpanded, showPrefix = false),
+                        .asCollection(
+                            filterActive || preferences.lecturesExpanded,
+                            showPrefix = false
+                        ),
 
                     examChannels = conversations.filter {
                         it is ChannelChat && !it.isHidden && it.filterPredicate("exam")
@@ -334,7 +342,13 @@ class ConversationOverviewViewModel(
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     val conversations: StateFlow<DataState<ConversationCollections>> =
-        combine(latestConversations, unresolvedChannels, recentConversations, query, currentFilter) { latestConversationsDataState, unresolvedChannels, recentConversations, query, filter ->
+        combine(
+            latestConversations,
+            unresolvedChannels,
+            recentConversations,
+            query,
+            currentFilter
+        ) { latestConversationsDataState, unresolvedChannels, recentConversations, query, filter ->
             latestConversationsDataState.bind { latestConversations ->
                 var filteredConversations = latestConversations
 
@@ -346,7 +360,9 @@ class ConversationOverviewViewModel(
                         } ?: filteredConversations
                     }
                     ConversationOverviewUtils.ConversationFilter.Unresolved -> {
-                        filteredConversations.filterUnresolved(unresolvedChannels.orNull() ?: emptyList())
+                        filteredConversations.filterUnresolved(
+                            unresolvedChannels.orNull() ?: emptyList()
+                        )
                     }
                     else -> filteredConversations
                 }
@@ -361,6 +377,31 @@ class ConversationOverviewViewModel(
 
     private val _isDisplayingErrorDialog = MutableStateFlow(false)
     val isDisplayingErrorDialog: StateFlow<Boolean> = _isDisplayingErrorDialog
+
+    val availableFilters: StateFlow<List<ConversationOverviewUtils.ConversationFilter>> = combine(
+        conversations,
+        recentConversations,
+        isAtLeastTutorInCourse
+    ) { conversationsDataState, recentConversations, isAtLeastTutorInCourse ->
+        val filters = mutableListOf<ConversationOverviewUtils.ConversationFilter>()
+
+        conversationsDataState.bind { conversations ->
+            // only tutors should see the unresolved filter
+            if (isAtLeastTutorInCourse) filters.add(ConversationOverviewUtils.ConversationFilter.Unresolved)
+            if (recentConversations.orNull()?.isNotEmpty() == true) filters.add(
+                ConversationOverviewUtils.ConversationFilter.Recent
+            )
+            if (conversations.hasUnreadMessages()) filters.add(ConversationOverviewUtils.ConversationFilter.Unread)
+            if (filters.isNotEmpty()) filters.add(ConversationOverviewUtils.ConversationFilter.All)
+
+            // if the current filter is not available anymore, we reset it to all
+            if (filters.none { it.id == _currentFilter.value.id }) {
+                onUpdateFilter(ConversationOverviewUtils.ConversationFilter.All)
+            }
+
+            filters.toList().reversed()
+        }.orNull() ?: emptyList()
+    }.stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, emptyList())
 
     private fun getUpdateConversationsFlow(loadedConversations: List<Conversation>): Flow<Success<List<Conversation>>> =
         flow {
@@ -377,8 +418,10 @@ class ConversationOverviewViewModel(
                 .collect { update ->
                     when (update) {
                         is MarkMessagesRead -> {
-                            val affectedConversation = currentConversations[update.conversationId] ?: return@collect
-                            currentConversations[update.conversationId] = affectedConversation.withUnreadMessagesCount(0L)
+                            val affectedConversation =
+                                currentConversations[update.conversationId] ?: return@collect
+                            currentConversations[update.conversationId] =
+                                affectedConversation.withUnreadMessagesCount(0L)
                         }
 
                         is ServerSentConversationUpdate -> {
@@ -403,10 +446,14 @@ class ConversationOverviewViewModel(
                             Log.d(TAG, "Received post creation update: $postUpdate")
 
                             val conversationId = postUpdate.post.conversation?.id ?: return@collect
-                            val isConversationVisible = visibleMetisContexts.value.any { it.isInConversation(conversationId) }
+                            val isConversationVisible =
+                                visibleMetisContexts.value.any { it.isInConversation(conversationId) }
                             // The user is currently looking at the conversation in the UI
                             if (isConversationVisible) {
-                                Log.d(TAG, "Conversation is visible, not increasing unread messages count")
+                                Log.d(
+                                    TAG,
+                                    "Conversation is visible, not increasing unread messages count"
+                                )
                                 conversationService.markConversationAsRead(
                                     courseId,
                                     conversationId,
@@ -416,11 +463,13 @@ class ConversationOverviewViewModel(
                                 return@collect
                             }
 
-                            val existingConversation = currentConversations[conversationId] ?: return@collect
+                            val existingConversation =
+                                currentConversations[conversationId] ?: return@collect
 
-                            currentConversations[conversationId] = existingConversation.withUnreadMessagesCount(
-                                (existingConversation.unreadMessagesCount ?: 0) + 1
-                            )
+                            currentConversations[conversationId] =
+                                existingConversation.withUnreadMessagesCount(
+                                    (existingConversation.unreadMessagesCount ?: 0) + 1
+                                )
                         }
                     }
 
