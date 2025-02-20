@@ -35,7 +35,7 @@ class UpdateServiceImpl(
                 cookieAuth(authToken)
             }.body()
 
-            dto.compatibleVersions?.android?.min
+            dto.compatibleVersions?.android?.minRequired
         }
     }
 

@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.model.server_config
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -41,6 +42,7 @@ data class CompatibleVersions(
 
 @Serializable
 data class AndroidCompatibleVersions(
-    val min: String? = null,
+    @SerialName("min")
+    val minRequired: String? = null,
     val recommended: String? = null
 )
