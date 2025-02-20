@@ -31,6 +31,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.ui.Scaling
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
@@ -45,8 +46,6 @@ internal const val TEST_TAG_CREATE_CHANNEL_BUTTON = "create channel button"
 internal const val TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH = "TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH"
 internal const val TEST_TAG_SET_ANNOUNCEMENT_UNRESTRICTED_SWITCH = "TEST_TAG_SET_ANNOUNCEMENT_UNRESTRICTED_SWITCH"
 internal const val TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH = "TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH"
-
-internal const val BINARY_SELECTION_SCALE = 0.9f
 
 @Composable
 fun CreateChannelScreen(
@@ -143,7 +142,7 @@ internal fun CreateChannelScreen(
             )
 
             BinarySelection(
-                modifier = Modifier.scale(BINARY_SELECTION_SCALE).fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 title = stringResource(id = R.string.create_channel_channel_accessibility_type),
                 description = stringResource(id = R.string.create_channel_channel_accessibility_type_hint),
                 isChecked = isPrivate,
@@ -152,7 +151,7 @@ internal fun CreateChannelScreen(
             )
 
             BinarySelection(
-                modifier = Modifier.scale(BINARY_SELECTION_SCALE).fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 title = stringResource(id = R.string.create_channel_channel_announcement_type),
                 description = stringResource(id = R.string.create_channel_channel_announcement_type_hint),
                 isChecked = isAnnouncement,
@@ -161,7 +160,7 @@ internal fun CreateChannelScreen(
             )
 
             BinarySelection(
-                modifier = Modifier.scale(BINARY_SELECTION_SCALE).fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 title = stringResource(id = R.string.create_channel_channel_course_wide_type),
                 description = stringResource(id = R.string.create_channel_channel_course_wide_type_hint),
                 isChecked = isCourseWide,
@@ -225,7 +224,7 @@ private fun BinarySelection(
                 style = MaterialTheme.typography.titleMedium
             )
             Switch(
-                modifier = Modifier.testTag(switchTestTag),
+                modifier = Modifier.scale(Scaling.SWITCH).testTag(switchTestTag),
                 checked = isChecked,
                 onCheckedChange = onCheckedChange
             )
