@@ -35,7 +35,7 @@ import androidx.navigation.toRoute
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisTopAppBar
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.LectureDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
