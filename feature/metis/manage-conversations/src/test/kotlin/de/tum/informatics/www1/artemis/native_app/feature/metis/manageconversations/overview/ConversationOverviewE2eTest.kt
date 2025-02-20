@@ -20,6 +20,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.onFailure
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Username
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
@@ -411,6 +412,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
             ConversationOverviewBody(
                 modifier = Modifier.fillMaxSize(),
                 viewModel = viewModel,
+                collapsingContentState = CollapsingContentState(),
                 onNavigateToConversation = {},
                 onNavigateToSavedPosts = {},
                 onRequestCreatePersonalConversation = { },

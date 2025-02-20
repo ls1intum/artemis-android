@@ -30,6 +30,8 @@ import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseSearchConfiguration
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CommunicationDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CourseDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ExerciseDeeplinks
@@ -78,7 +80,6 @@ internal sealed class CourseTab {
     @Serializable
     data object Faq : CourseTab()
 }
-
 
 fun NavController.navigateToCourse(courseId: Long, builder: NavOptionsBuilder.() -> Unit) {
     navigate(CourseUiScreen(courseId), builder)
@@ -159,12 +160,34 @@ fun CourseUiScreen(
     val weeklyExercisesDataState by viewModel.exercisesGroupedByWeek.collectAsState()
     val weeklyLecturesDataState by viewModel.lecturesGroupedByWeek.collectAsState()
 
+    val collapsingContentState = remember { CollapsingContentState() }
+
+    val exerciseQuery by viewModel.exerciseQuery.collectAsState()
+    val lectureQuery by viewModel.lectureQuery.collectAsState()
+
+    val lectureSearchConfiguration = CourseSearchConfiguration.Search(
+        query = lectureQuery,
+        hint = stringResource(id = R.string.course_ui_lectures_search_hint),
+        onUpdateQuery = viewModel::onUpdateLectureQuery
+    )
+
+    val exerciseSearchConfiguration = CourseSearchConfiguration.Search(
+        query = exerciseQuery,
+        hint = stringResource(id = R.string.course_ui_exercises_search_hint),
+        onUpdateQuery = viewModel::onUpdateExerciseQuery
+    )
+
+
+
     CourseUiScreen(
         modifier = modifier,
         conversationId = conversationId,
         courseDataState = courseDataState,
         username = username,
         userId = userId,
+        lectureSearchConfiguration = lectureSearchConfiguration,
+        exerciseSearchConfiguration = exerciseSearchConfiguration,
+        collapsingContentState = collapsingContentState,
         onNavigateBack = onNavigateBack,
         weeklyExercisesDataState = weeklyExercisesDataState,
         onNavigateToExercise = onNavigateToExercise,
@@ -197,6 +220,9 @@ internal fun CourseUiScreen(
     postId: Long? = null,
     username: String? = null,
     userId: Long? = null,
+    lectureSearchConfiguration: CourseSearchConfiguration,
+    collapsingContentState: CollapsingContentState,
+    exerciseSearchConfiguration: CourseSearchConfiguration,
     courseDataState: DataState<Course>,
     weeklyExercisesDataState: DataState<List<GroupedByWeek<Exercise>>>,
     weeklyLecturesDataState: DataState<List<GroupedByWeek<Lecture>>>,
@@ -209,18 +235,19 @@ internal fun CourseUiScreen(
     onClickStartTextExercise: (exerciseId: Long) -> Unit,
     onNavigateToFaq: (faqId: Long) -> Unit,
     onNavigateBack: () -> Unit,
-    onReloadCourse: () -> Unit
+    onReloadCourse: () -> Unit,
 ) {
     ReportVisibleMetisContext(VisibleCourse(MetisContext.Course(courseId)))
 
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
+
     // This scaffold function is needed because of the way the navigation in the communication tab
     // is handled and the fact that the communicationTab supports the tablet layout. In the tablet
     // layout we want to display the scaffold always, while for the normal (phone) layout the
     // scaffold is only shown in the ConversationOverviewScreen.
-    val scaffold = @Composable { content: @Composable () -> Unit ->
+    val scaffold = @Composable { searchConfiguration: CourseSearchConfiguration, content: @Composable () -> Unit ->
         CourseScaffold(
             modifier = modifier,
             courseDataState = courseDataState,
@@ -229,6 +256,8 @@ internal fun CourseUiScreen(
                 currentDestination?.hierarchy?.any { it.hasRoute(tab::class) } == true
             },
             updateSelectedCourseTab = {
+                // Reset the collapsing content state when switching tabs to show the search bar again
+                collapsingContentState.resetCollapsingContent()
                 navController.navigate(it) {
                     popUpTo(navController.graph.findStartDestination().id) {
                         saveState = true
@@ -239,6 +268,8 @@ internal fun CourseUiScreen(
             },
             onNavigateBack = onNavigateBack,
             onReloadCourse = onReloadCourse,
+            searchConfiguration = searchConfiguration,
+            collapsingContentState = collapsingContentState,
             content = content
         )
     }
@@ -254,11 +285,13 @@ internal fun CourseUiScreen(
         startDestination = initialTab::class,
     ) {
         composable<CourseTab.Exercises> {
-            scaffold {
+            scaffold(exerciseSearchConfiguration) {
                 EmptyDataStateUi(dataState = weeklyExercisesDataState) { weeklyExercises ->
                     ExerciseListUi(
                         modifier = Modifier.fillMaxSize(),
                         weeklyExercises = weeklyExercises,
+                        query = if (exerciseSearchConfiguration is CourseSearchConfiguration.Search) exerciseSearchConfiguration.query else "",
+                        collapsingContentState = collapsingContentState,
                         onClickExercise = onNavigateToExercise,
                         actions = BoundExerciseActions(
                             onClickStartTextExercise = onClickStartTextExercise,
@@ -286,11 +319,13 @@ internal fun CourseUiScreen(
         }
 
         composable<CourseTab.Lectures> {
-            scaffold {
+            scaffold(lectureSearchConfiguration) {
                 EmptyDataStateUi(dataState = weeklyLecturesDataState) { weeklyLectures ->
                     LectureListUi(
                         modifier = Modifier.fillMaxSize(),
                         lectures = weeklyLectures,
+                        collapsingContentState = collapsingContentState,
+                        query = if (lectureSearchConfiguration is CourseSearchConfiguration.Search) lectureSearchConfiguration.query else "",
                         onClickLecture = { onNavigateToLecture(it.id ?: 0L) }
                     )
                 }
@@ -301,13 +336,13 @@ internal fun CourseUiScreen(
             EmptyDataStateUi(
                 dataState = courseDataState,
                 otherwise = {
-                    scaffold {}
+                    scaffold(CourseSearchConfiguration.DisabledSearch) {}
                 }
             ) { course ->
                 val isCommunicationEnabled = course.courseInformationSharingConfiguration.supportsMessaging
 
                 if (!isCommunicationEnabled) {
-                    scaffold {
+                    scaffold(CourseSearchConfiguration.DisabledSearch) {
                         CommunicationDisabledInfo()
                     }
                     return@EmptyDataStateUi
@@ -326,19 +361,20 @@ internal fun CourseUiScreen(
                     modifier = Modifier.fillMaxSize(),
                     courseId = courseId,
                     scaffold = scaffold,
+                    collapsingContentState = collapsingContentState,
                     initialConfiguration = initialConfiguration
                 )
             }
         }
 
         composable<CourseTab.Faq> {
-            scaffold {
-                FaqOverviewUi(
-                    modifier = Modifier.fillMaxSize(),
-                    courseId = courseId,
-                    onNavigateToFaq = onNavigateToFaq
-                )
-            }
+            FaqOverviewUi(
+                modifier = Modifier.fillMaxSize(),
+                courseId = courseId,
+                scaffold = scaffold,
+                collapsingContentState = collapsingContentState,
+                onNavigateToFaq = onNavigateToFaq
+            )
         }
     }
 }

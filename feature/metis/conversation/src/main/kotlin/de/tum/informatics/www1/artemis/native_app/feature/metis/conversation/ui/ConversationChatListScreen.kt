@@ -54,10 +54,12 @@ import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.ui.BuildConfig
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicSearchTextField
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.innerShadow
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ComponentColors
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
@@ -193,15 +195,18 @@ fun ConversationChatListScreen(
                         BasicSearchTextField(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(end = 8.dp),
+                                .padding(end = 8.dp)
+                                .innerShadow(
+                                    offset = 2.dp,
+                                    color = ComponentColors.ArtemisTopAppBar.searchBarShadow
+                                ),
                             query = query,
                             updateQuery = onUpdateQuery,
                             hint = stringResource(id = R.string.metis_post_search_hint),
                             backgroundColor = MaterialTheme.colorScheme.background,
-                                textStyle = MaterialTheme.typography.bodyMedium,
-                                focusRequester = searchBarFocusRequester
-                            )
-
+                            textStyle = MaterialTheme.typography.bodyMedium,
+                            focusRequester = searchBarFocusRequester
+                        )
                     } else {
                         EmptyDataStateUi(
                             dataState = conversationDataState,
