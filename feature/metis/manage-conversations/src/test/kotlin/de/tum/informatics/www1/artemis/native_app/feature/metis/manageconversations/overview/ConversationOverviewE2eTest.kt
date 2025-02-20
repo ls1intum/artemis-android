@@ -91,6 +91,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
                 description = "some description",
                 isPublic = true,
                 isAnnouncement = false,
+                isCourseWide = true,
                 authToken = accessToken,
                 serverUrl = testServerUrl
             )
@@ -259,6 +260,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
                 description = "some description",
                 isPublic = true,
                 isAnnouncement = false,
+                isCourseWide = false,
                 authToken = accessToken,
                 serverUrl = testServerUrl
             )
