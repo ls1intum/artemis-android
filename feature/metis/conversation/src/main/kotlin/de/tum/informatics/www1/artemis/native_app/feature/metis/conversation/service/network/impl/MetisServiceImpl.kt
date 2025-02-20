@@ -4,6 +4,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.RESOURCE_PATH_SEGMENTS
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
@@ -141,6 +142,22 @@ internal class MetisServiceImpl(
 
                 return NetworkResponse.Response(posts.data.first())
             }
+        }
+    }
+
+    override suspend fun fetchLinkPreview(
+        url: String,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<LinkPreview> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.get(serverUrl) {
+                url{
+                    appendPathSegments("api", "link-preview")
+                }
+                parameter("url", url)
+                cookieAuth(authToken)
+            }.body()
         }
     }
 }
