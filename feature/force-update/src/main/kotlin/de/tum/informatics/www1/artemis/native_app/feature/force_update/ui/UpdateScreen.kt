@@ -9,10 +9,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -36,8 +35,7 @@ fun UpdateScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(color = MaterialTheme.colorScheme.background)
-            .imePadding()
-            .padding(bottom = Spacings.UpdateScreen.medium),
+            .systemBarsPadding(),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -86,12 +84,11 @@ fun UpdateScreen(
                 textAlign = TextAlign.Center,
             )
 
-            Spacer(modifier = Modifier.weight(0.1f))
+            Spacer(modifier = Modifier.weight(1f))
 
             Button(
                 onClick = onDownloadClick,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(Spacings.UpdateScreen.buttonRadius)
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
                     text = stringResource(R.string.update_screen_downlaod_button)
