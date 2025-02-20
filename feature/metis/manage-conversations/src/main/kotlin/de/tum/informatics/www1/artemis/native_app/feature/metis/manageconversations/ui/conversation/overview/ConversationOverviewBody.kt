@@ -58,7 +58,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicSearchTextField
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.core.ui.endOfPagePadding
 import de.tum.informatics.www1.artemis.native_app.core.ui.pagePadding
 import de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.ui.CodeOfConductUi
@@ -74,6 +74,7 @@ private const val KEY_BUTTON_SHOW_COC = "KEY_BUTTON_SHOW_COC"
 fun ConversationOverviewBody(
     modifier: Modifier,
     courseId: Long,
+    collapsingContentState: CollapsingContentState,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onNavigateToSavedPosts: (SavedPostStatus) -> Unit,
     onRequestCreatePersonalConversation: () -> Unit,
@@ -84,6 +85,7 @@ fun ConversationOverviewBody(
     ConversationOverviewBody(
         modifier = modifier,
         viewModel = koinViewModel { parametersOf(courseId) },
+        collapsingContentState = collapsingContentState,
         onNavigateToConversation = onNavigateToConversation,
         onNavigateToSavedPosts = onNavigateToSavedPosts,
         onRequestCreatePersonalConversation = onRequestCreatePersonalConversation,
@@ -97,6 +99,7 @@ fun ConversationOverviewBody(
 fun ConversationOverviewBody(
     modifier: Modifier,
     viewModel: ConversationOverviewViewModel,
+    collapsingContentState: CollapsingContentState,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onNavigateToSavedPosts: (SavedPostStatus) -> Unit,
     onRequestCreatePersonalConversation: () -> Unit,
@@ -112,8 +115,6 @@ fun ConversationOverviewBody(
 
     val isConnected by viewModel.isConnected.collectAsState()
 
-    val query by viewModel.query.collectAsState()
-
     LaunchedEffect(Unit) {
         viewModel.requestReload()
     }
@@ -121,6 +122,7 @@ fun ConversationOverviewBody(
     Box(modifier = Modifier
         .fillMaxSize()
         .padding(horizontal = Spacings.ScreenHorizontalSpacing)
+        .padding(top = Spacings.ScreenTopBarSpacing)
     ) {
         BasicDataStateUi(
             modifier = modifier,
@@ -135,7 +137,12 @@ fun ConversationOverviewBody(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                AnimatedVisibility(modifier = Modifier.fillMaxWidth(), visible = !isConnected) {
+                AnimatedVisibility(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    visible = !isConnected
+                ) {
                     Box(modifier = Modifier.fillMaxWidth()) {
                         Row(
                             modifier = Modifier.align(Alignment.Center),
@@ -152,13 +159,6 @@ fun ConversationOverviewBody(
                     }
                 }
 
-                BasicSearchTextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    hint = stringResource(id = R.string.conversation_overview_search_hint),
-                    query = query,
-                    updateQuery = viewModel::onUpdateQuery
-                )
-
                 FilterRow(
                     modifier = Modifier.fillMaxWidth(),
                     currentFilter = currentFilter,
@@ -169,6 +169,7 @@ fun ConversationOverviewBody(
                 ConversationList(
                     modifier = Modifier.fillMaxSize(),
                     viewModel = viewModel,
+                    collapsingContentState = collapsingContentState,
                     conversationCollections = conversationCollection,
                     onNavigateToConversation = { conversationId ->
                         viewModel.setConversationMessagesRead(conversationId)

@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.ui.Scaling
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.push.R
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.PushNotificationSetting
@@ -171,7 +172,7 @@ private fun PushNotificationSettingEntry(
         if (setting.push != null) {
             Switch(
                 modifier = Modifier
-                    .scale(SWITCH_SCALE)
+                    .scale(Scaling.SWITCH)
                     .testTag(testTagForSwitch(setting.settingId)),
                 checked = setting.push,
                 onCheckedChange = { onUpdate(setting.webapp, setting.email, it) }

@@ -39,6 +39,7 @@ internal class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
                 description = "",
                 isPublic = true,
                 isAnnouncement = true,
+                isCourseWide = false,
                 authToken = getAdminAccessToken(),
                 serverUrl = testServerUrl
             )
@@ -66,6 +67,7 @@ internal class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
                 description = "",
                 isPublic = true,
                 isAnnouncement = true,
+                isCourseWide = false,
                 authToken = accessToken,
                 serverUrl = testServerUrl
             )
@@ -86,6 +88,7 @@ internal class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
                 description = "",
                 isPublic = true,
                 isAnnouncement = true,
+                isCourseWide = false,
                 authToken = accessToken,
                 serverUrl = testServerUrl
             )
@@ -152,6 +155,7 @@ internal class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
                 description = "some description",
                 isPublic = true,
                 isAnnouncement = true,
+                isCourseWide = false,
                 authToken = accessToken,
                 serverUrl = testServerUrl
             )

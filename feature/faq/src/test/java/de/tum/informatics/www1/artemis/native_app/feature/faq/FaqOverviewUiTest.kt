@@ -2,16 +2,14 @@ package de.tum.informatics.www1.artemis.native_app.feature.faq
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performTextClearance
-import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.Faq
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.FaqState
 import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.overview.FaqOverviewUi
 import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.overview.FaqOverviewViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.overview.TEST_TAG_FAQ_OVERVIEW_SEARCH
 import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.overview.testTagForFaq
 import de.tum.informatics.www1.artemis.native_app.feature.faq_test.FaqRepositoryMock
 import org.junit.Test
@@ -49,17 +47,17 @@ class FaqOverviewUiTest : BaseComposeTest() {
 
     @Test
     fun `test GIVEN faqs WHEN searching THEN only faqs matching the search should be visible`() {
-        setupUiAndViewModel(listOf(faq1, faq2))
+        val viewModel = setupUiAndViewModel(listOf(faq1, faq2))
 
         faq1.assertIsVisible()
         faq2.assertIsVisible()
 
-        searchFor(faq1.questionTitle)
+        viewModel.updateQuery(faq1.questionTitle)
 
         faq1.assertIsVisible()
         faq2.assertIsHidden()
 
-        searchFor(faq2.questionAnswer)
+        viewModel.updateQuery(faq2.questionAnswer)
 
         faq1.assertIsHidden()
         faq2.assertIsVisible()
@@ -69,7 +67,7 @@ class FaqOverviewUiTest : BaseComposeTest() {
 
     private fun setupUiAndViewModel(
         faqs: List<Faq>
-    ) {
+    ): FaqOverviewViewModel {
         val viewModel = FaqOverviewViewModel(
             courseId = courseId,
             faqRepository = FaqRepositoryMock(faqs = faqs),
@@ -79,9 +77,11 @@ class FaqOverviewUiTest : BaseComposeTest() {
         composeTestRule.setContent {
             FaqOverviewUi(
                 viewModel = viewModel,
+                collapsingContentState = CollapsingContentState(),
                 onNavigateToFaq = {}
             )
         }
+        return viewModel
     }
 
     private fun Faq.assertIsVisible() {
@@ -90,12 +90,5 @@ class FaqOverviewUiTest : BaseComposeTest() {
 
     private fun Faq.assertIsHidden() {
         composeTestRule.onNodeWithTag(testTagForFaq(this)).assertDoesNotExist()
-    }
-
-    private fun searchFor(query: String) {
-        val searchInput = composeTestRule.onNodeWithTag(TEST_TAG_FAQ_OVERVIEW_SEARCH)
-        searchInput.performTextClearance()
-        searchInput.performTextInput(query)
-        composeTestRule.waitForIdle()       // Wait until LazyColumn animateItem() animation is done
     }
 }

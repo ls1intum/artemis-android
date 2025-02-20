@@ -27,11 +27,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.ui.Scaling
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisTopAppBar
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.pagePadding
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
@@ -43,6 +45,7 @@ internal const val TEST_TAG_CREATE_CHANNEL_BUTTON = "create channel button"
 
 internal const val TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH = "TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH"
 internal const val TEST_TAG_SET_ANNOUNCEMENT_UNRESTRICTED_SWITCH = "TEST_TAG_SET_ANNOUNCEMENT_UNRESTRICTED_SWITCH"
+internal const val TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH = "TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH"
 
 @Composable
 fun CreateChannelScreen(
@@ -76,6 +79,7 @@ internal fun CreateChannelScreen(
 
     val isPrivate by viewModel.isPrivate.collectAsState()
     val isAnnouncement by viewModel.isAnnouncement.collectAsState()
+    val isCourseWide by viewModel.isCourseWide.collectAsState()
 
     val canCreate by viewModel.canCreate.collectAsState()
 
@@ -155,6 +159,15 @@ internal fun CreateChannelScreen(
                 switchTestTag = TEST_TAG_SET_ANNOUNCEMENT_UNRESTRICTED_SWITCH,
             )
 
+            BinarySelection(
+                modifier = Modifier.fillMaxWidth(),
+                title = stringResource(id = R.string.create_channel_channel_course_wide_type),
+                description = stringResource(id = R.string.create_channel_channel_course_wide_type_hint),
+                isChecked = isCourseWide,
+                onCheckedChange = { viewModel.updateCourseWide(it) },
+                switchTestTag = TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH,
+            )
+
             Button(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -211,7 +224,7 @@ private fun BinarySelection(
                 style = MaterialTheme.typography.titleMedium
             )
             Switch(
-                modifier = Modifier.testTag(switchTestTag),
+                modifier = Modifier.scale(Scaling.SWITCH).testTag(switchTestTag),
                 checked = isChecked,
                 onCheckedChange = onCheckedChange
             )

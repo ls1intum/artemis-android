@@ -48,11 +48,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
@@ -102,6 +104,7 @@ private sealed class ConversationSectionState(val isExpanded: Boolean) {
 internal fun ConversationList(
     modifier: Modifier,
     viewModel: ConversationOverviewViewModel,
+    collapsingContentState: CollapsingContentState,
     conversationCollections: ConversationCollections,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onNavigateToSavedPosts: (status: SavedPostStatus) -> Unit,
@@ -125,6 +128,7 @@ internal fun ConversationList(
         toggleHiddenExpanded = viewModel::toggleHiddenExpanded,
         toggleSavedPostsExpanded = viewModel::toggleSavedPostsExpanded,
         conversationCollections = conversationCollections,
+        collapsingContentState = collapsingContentState,
         onNavigateToConversation = onNavigateToConversation,
         onNavigateToSavedPosts = onNavigateToSavedPosts,
         onToggleMarkAsFavourite = onToggleMarkAsFavourite,
@@ -147,6 +151,7 @@ internal fun ConversationList(
     togglePersonalConversationsExpanded: () -> Unit,
     toggleHiddenExpanded: () -> Unit,
     toggleSavedPostsExpanded: () -> Unit,
+    collapsingContentState: CollapsingContentState,
     conversationCollections: ConversationCollections,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onNavigateToSavedPosts: (status: SavedPostStatus) -> Unit,
@@ -179,6 +184,7 @@ internal fun ConversationList(
 
     LazyColumn (
         modifier = modifier
+            .nestedScroll(collapsingContentState.nestedScrollConnection)
             .testTag(TEST_TAG_CONVERSATION_LIST)
     ) {
         if (conversationCollections.favorites.conversations.isNotEmpty()) {

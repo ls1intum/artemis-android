@@ -17,6 +17,7 @@ import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTi
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1DisplayName
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2DisplayName
@@ -59,6 +60,7 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
                 description = "",
                 isPublic = true,
                 isAnnouncement = true,
+                isCourseWide = false,
                 authToken = accessToken,
                 serverUrl = testServerUrl
             )
@@ -201,7 +203,8 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
                 modifier = Modifier.fillMaxSize(),
                 courseId = course.id!!,
                 conversationId = channel.id,
-                viewModel = viewModel
+                viewModel = viewModel,
+                collapsingContentState = CollapsingContentState()
             )
         }
 
