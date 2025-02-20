@@ -64,7 +64,7 @@ class BaseMarkdownLinkResolver(
     private val setBottomSheetState: (LinkBottomSheetState) -> Unit
 ) : LinkResolver {
     override fun resolve(view: View, link: String) {
-        // This is a workaround ensures other click functions are not triggered and prevents
+        // This workaround ensures other click functions are not triggered and prevents
         // the thread view from being opened when clicking on a link in the chat
         view.cancelPendingInputEvents()
         view.isPressed = false
