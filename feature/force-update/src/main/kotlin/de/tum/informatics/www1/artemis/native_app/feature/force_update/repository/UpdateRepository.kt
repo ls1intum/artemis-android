@@ -40,7 +40,7 @@ class UpdateRepository(
     /**
      * Returns true if the serverVersion (normalized) is greater than currentVersion.
      */
-    private fun isVersionGreater(serverVersion: String, currentVersion: String): Boolean {
+    fun isVersionGreater(serverVersion: String, currentVersion: String): Boolean {
         val parts1 = serverVersion.split(".")
         val parts2 = currentVersion.split(".")
         val maxLen = maxOf(parts1.size, parts2.size)

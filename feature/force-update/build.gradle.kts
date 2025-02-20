@@ -13,4 +13,6 @@ dependencies {
     implementation(libs.androidx.dataStore.core)
     implementation(libs.androidx.dataStore.preferences)
 
+    testImplementation(libs.mockk.android)
+    testImplementation(libs.mockk.agent)
 }
