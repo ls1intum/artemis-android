@@ -93,7 +93,7 @@ internal fun FaqCategoryChip(
         enabled = filterConfig != null,
         selected = filterConfig?.isSelected ?: false,
         onClick = filterConfig?.onClick ?: {},
-        colors = FilterChipDefaults.filterChipColors().copy(
+        colors = FilterChipDefaults.filterChipColors(
             // To not make it too colorful, we only apply the color to the disabled state (we use
             // the default Material3 colors for the selectable category chips)
             disabledContainerColor = chipColor,
