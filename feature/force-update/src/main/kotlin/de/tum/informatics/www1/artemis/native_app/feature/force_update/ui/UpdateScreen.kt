@@ -1,20 +1,8 @@
 package de.tum.informatics.www1.artemis.native_app.feature.force_update.ui
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,19 +19,14 @@ fun UpdateScreen(
     currentVersion: String,
     minVersion: String
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = MaterialTheme.colorScheme.background)
-            .systemBarsPadding(),
-        contentAlignment = Alignment.Center
-    ) {
+    Scaffold { paddingValues ->
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(Spacings.UpdateScreen.large),
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(Spacings.UpdateScreen.large)
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(Spacings.UpdateScreen.large),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(Spacings.UpdateScreen.large)
         ) {
             Image(
                 painter = painterResource(R.drawable.ic_launcher_foreground),
@@ -55,11 +38,8 @@ fun UpdateScreen(
 
             Text(
                 text = stringResource(id = R.string.update_screen_new_update_available),
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.Bold
-                ),
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onBackground
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                textAlign = TextAlign.Center
             )
 
             Spacer(modifier = Modifier.height(Spacings.UpdateScreen.medium))
@@ -67,8 +47,7 @@ fun UpdateScreen(
             Text(
                 text = stringResource(R.string.update_screen_download_message),
                 style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onBackground
+                textAlign = TextAlign.Center
             )
 
             Spacer(modifier = Modifier.height(Spacings.UpdateScreen.medium))
@@ -80,8 +59,8 @@ fun UpdateScreen(
                     minVersion
                 ),
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.secondary,
                 textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.secondary
             )
 
             Spacer(modifier = Modifier.weight(1f))
@@ -90,9 +69,7 @@ fun UpdateScreen(
                 onClick = onDownloadClick,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    text = stringResource(R.string.update_screen_downlaod_button)
-                )
+                Text(text = stringResource(R.string.update_screen_downlaod_button))
             }
         }
     }
