@@ -39,6 +39,10 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwo
 import de.tum.informatics.www1.artemis.native_app.feature.faq.R
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.Faq
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.FaqState
+import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.ConfiguredFaqCategoryChip
+import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.ConfiguredFaqCategoryChipRow
+import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.FaqCategoryChipConfig
+import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.FaqCategoryChipFlowRow
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -80,10 +84,23 @@ fun FaqOverviewUi(
 ) {
     val faqs by viewModel.displayedFaqs.collectAsState()
     val query by viewModel.searchQuery.collectAsState()
+    val selectedCategory by viewModel.selectedCategory.collectAsState()
+    val allCategories by viewModel.allCategories.collectAsState()
+
+    val filterChips = allCategories.map {
+        ConfiguredFaqCategoryChip(
+            category = it,
+            config = FaqCategoryChipConfig.Filter(
+                isSelected = selectedCategory == it,
+                onClick = { viewModel.onToggleSelectableFaqCategory(it) }
+            )
+        )
+    }
 
     FaqOverviewUi(
         modifier = modifier,
         faqsDataState = faqs,
+        filterChips = filterChips,
         query = query,
         collapsingContentState = collapsingContentState,
         onReloadRequest = viewModel::requestReload,
@@ -96,6 +113,7 @@ fun FaqOverviewUi(
 fun FaqOverviewUi(
     modifier: Modifier = Modifier,
     faqsDataState: DataState<List<Faq>>,
+    filterChips: List<ConfiguredFaqCategoryChip>,
     query: String,
     collapsingContentState: CollapsingContentState,
     onReloadRequest: () -> Unit,
@@ -117,6 +135,7 @@ fun FaqOverviewUi(
                     .fillMaxSize()
                     .imePadding(),
                 faqs = faqs,
+                filterChips = filterChips,
                 collapsingContentState = collapsingContentState,
                 query = query,
                 onNavigateToFaq = onNavigateToFaq
@@ -125,10 +144,12 @@ fun FaqOverviewUi(
     }
 }
 
+
 @Composable
 private fun FaqOverviewBody(
     modifier: Modifier = Modifier,
     faqs: List<Faq>,
+    filterChips: List<ConfiguredFaqCategoryChip>,
     collapsingContentState: CollapsingContentState,
     query: String,
     onNavigateToFaq: (Long) -> Unit
@@ -138,6 +159,16 @@ private fun FaqOverviewBody(
     Column(
         modifier = modifier,
     ) {
+        if (filterChips.size > 1) {
+            ConfiguredFaqCategoryChipRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+                ,
+                configuredFaqCategories = filterChips
+            )
+        }
+
         if (faqs.isEmpty()) {
             if (isSearching) {
                 NoSearchResults(
@@ -145,13 +176,14 @@ private fun FaqOverviewBody(
                     title = stringResource(R.string.faq_overview_no_faqs),
                     details = stringResource(R.string.faq_overview_no_faqs_search, query)
                 )
-            } else {
-                EmptyListHint(
-                    modifier = Modifier.fillMaxSize(),
-                    hint = stringResource(R.string.faq_overview_no_faqs),
-                    icon = Icons.Default.QuestionMark
-                )
+                return
             }
+
+            EmptyListHint(
+                modifier = Modifier.fillMaxSize(),
+                hint = stringResource(R.string.faq_overview_no_faqs),
+                icon = Icons.Default.QuestionMark
+            )
             return
         }
 
@@ -177,7 +209,10 @@ private fun FaqList(
         contentPadding = Spacings.calculateContentPaddingValues(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(faqs) { faq ->
+        items(
+            items = faqs,
+            key = { faq -> faq.id }
+        ) { faq ->
             FaqPreviewItem(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -204,7 +239,6 @@ private fun FaqPreviewItem(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
                 text = faq.questionTitle,
@@ -214,7 +248,10 @@ private fun FaqPreviewItem(
                 overflow = TextOverflow.Ellipsis
             )
 
+            FaqCategoryChipFlowRow(categories = faq.categories)
+
             MarkdownText(
+                modifier = Modifier.padding(vertical = 8.dp),
                 markdown = faq.questionAnswer,
                 style = MaterialTheme.typography.bodyLarge,
                 maxLines = 8,
@@ -222,8 +259,8 @@ private fun FaqPreviewItem(
             )
 
             TextButton(
+                modifier = Modifier.align(Alignment.End),
                 onClick = onClick,
-                modifier = Modifier.align(Alignment.End)
             ) {
                 Text(stringResource(R.string.faq_overview_read_more))
             }
