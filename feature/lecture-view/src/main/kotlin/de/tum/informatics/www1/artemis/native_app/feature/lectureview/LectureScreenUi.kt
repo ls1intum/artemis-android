@@ -277,7 +277,7 @@ private fun buildOpenAttachmentLink(
 
 // Necessary to encode the file name for the attachment URL, see
 // https://github.com/ls1intum/Artemis/blob/develop/src/main/webapp/app/shared/http/file.service.ts
-fun createAttachmentFileUrl(downloadUrl: String, downloadName: String, encodeName: Boolean): String {
+private fun createAttachmentFileUrl(downloadUrl: String, downloadName: String, encodeName: Boolean): String {
     val downloadUrlComponents = downloadUrl.split("/")
     val extension = downloadUrlComponents.lastOrNull()?.substringAfterLast('.', "") ?: ""
     val restOfUrl = downloadUrlComponents.dropLast(1).joinToString("/")
