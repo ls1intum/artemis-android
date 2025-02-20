@@ -9,6 +9,7 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -24,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.BackgroundColorBasedTextColor
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.FaqCategory
 
@@ -33,31 +35,31 @@ internal fun testTagForCategoryColorfulChip(category: FaqCategory) = "TEST_TAG_F
 
 
 @Composable
-internal fun FaqCategoryChipRow(
+internal fun FaqCategoryChipFlowRow(
     modifier: Modifier = Modifier,
     categories: Iterable<FaqCategory>
 ) {
-    SelectableFaqCategoryChipRow(
+    FlowRow(
         modifier = modifier,
-        configuredFaqCategories = categories.map {
-            ConfiguredFaqCategoryChip(
-                category = it,
-                config = FaqCategoryChipConfig.Colorful
-            )
+        horizontalArrangement = Arrangement.spacedBy(Spacings.Faq.categoryChipSpacing),
+        verticalArrangement = Arrangement.spacedBy(Spacings.Faq.categoryChipSpacing)
+    ) {
+        categories.forEach {
+            FaqCategoryChip(faqCategory = it)
         }
-    )
+    }
 }
 
 
 @Composable
-internal fun SelectableFaqCategoryChipRow(
+internal fun ConfiguredFaqCategoryChipRow(
     modifier: Modifier = Modifier,
     configuredFaqCategories: Iterable<ConfiguredFaqCategoryChip>
 ) {
     Row(
         modifier = modifier
             .horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(Spacings.Faq.categoryChipSpacing),
     ) {
         configuredFaqCategories.forEach {
             FaqCategoryChip(

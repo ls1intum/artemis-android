@@ -3,7 +3,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.faq.ui.overview
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
@@ -38,9 +37,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.faq.R
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.Faq
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.FaqState
 import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.ConfiguredFaqCategoryChip
+import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.ConfiguredFaqCategoryChipRow
 import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.FaqCategoryChipConfig
-import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.FaqCategoryChipRow
-import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.SelectableFaqCategoryChipRow
+import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.FaqCategoryChipFlowRow
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -158,7 +157,7 @@ private fun FaqOverviewBody(
         )
 
         if (filterChips.size > 1) {
-            SelectableFaqCategoryChipRow(
+            ConfiguredFaqCategoryChipRow(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp)
@@ -230,7 +229,6 @@ private fun FaqPreviewItem(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
                 text = faq.questionTitle,
@@ -240,26 +238,21 @@ private fun FaqPreviewItem(
                 overflow = TextOverflow.Ellipsis
             )
 
+            FaqCategoryChipFlowRow(categories = faq.categories)
+
             MarkdownText(
+                modifier = Modifier.padding(vertical = 8.dp),
                 markdown = faq.questionAnswer,
                 style = MaterialTheme.typography.bodyLarge,
                 maxLines = 8,
                 onClick = onClick
             )
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically
+            TextButton(
+                modifier = Modifier.align(Alignment.End),
+                onClick = onClick,
             ) {
-                FaqCategoryChipRow(
-                    modifier = Modifier.weight(1f),
-                    categories = faq.categories
-                )
-
-                TextButton(
-                    onClick = onClick,
-                ) {
-                    Text(stringResource(R.string.faq_overview_read_more))
-                }
+                Text(stringResource(R.string.faq_overview_read_more))
             }
         }
     }

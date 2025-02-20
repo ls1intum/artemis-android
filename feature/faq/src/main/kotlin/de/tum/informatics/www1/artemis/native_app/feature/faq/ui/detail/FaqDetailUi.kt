@@ -40,7 +40,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedCom
 import de.tum.informatics.www1.artemis.native_app.feature.faq.R
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.Faq
 import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.rememberFaqArtemisMarkdownTransformer
-import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.FaqCategoryChipRow
+import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.FaqCategoryChipFlowRow
 import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -136,20 +136,15 @@ private fun FaqDetail(
     Column(
         modifier = modifier,
     ) {
-
         Text(
             text = faq.questionTitle,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold
         )
 
-        FaqCategoryChipRow(
-            modifier = Modifier.padding(
-                top = 8.dp,
-                bottom = 16.dp
-            ),
-            categories = faq.categories
-        )
+        FaqCategoryChipFlowRow(categories = faq.categories)
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         MarkdownText(
             markdown = faq.questionAnswer,
