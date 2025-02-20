@@ -56,12 +56,13 @@ internal fun LectureUnitHeader(
         is LectureUnitAttachment -> Icons.Default.Description to R.string.lecture_view_lecture_unit_type_attachment
         is LectureUnitExercise -> {
             val exercise = lectureUnit.exercise ?: return
+            val exerciseId = exercise.id ?: return
             ExerciseListItem(
                 modifier = modifier,
                 exercise = exercise,
-                onClickExercise = { onClickExercise(exercise.id ?: 0L) },
+                onClickExercise = { onClickExercise(exerciseId) },
                 exerciseActions = remember(exerciseActions, exercise) {
-                    exerciseActions.getUnbound(exerciseId = exercise.id ?: 0L)
+                    exerciseActions.getUnbound(exerciseId = exerciseId)
                 }
             )
             return

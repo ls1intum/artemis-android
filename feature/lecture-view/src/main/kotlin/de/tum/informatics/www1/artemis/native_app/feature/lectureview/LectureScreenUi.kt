@@ -25,7 +25,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.toRoute
-import de.tum.informatics.www1.artemis.native_app.core.common.markdown.MarkdownUrlUtil
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
@@ -43,6 +42,7 @@ import io.ktor.http.appendPathSegments
 import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
+import java.net.URLEncoder
 
 const val METIS_RATIO = 0.3f
 
@@ -220,14 +220,16 @@ internal fun LectureScreen(
 
             val currentPendingOpenFileAttachment = pendingOpenFileAttachment
             if (currentPendingOpenFileAttachment != null) {
+                val fileName = currentPendingOpenFileAttachment.name.orEmpty()
                 val url = buildOpenAttachmentLink(serverUrl, currentPendingOpenFileAttachment.link.orEmpty())
-                val fileName = MarkdownUrlUtil.decodeUrl(url.substringAfterLast("/"))
+                val formattedUrl = createAttachmentFileUrl(url, fileName, true)
+
                 LinkBottomSheet(
                     modifier = Modifier.fillMaxSize(),
                     serverUrl = serverUrl,
                     authToken = authToken,
-                    link = url,
-                    fileName = fileName,
+                    link = formattedUrl,
+                    fileName = currentPendingOpenFileAttachment.name.orEmpty(),
                     state = LinkBottomSheetState.PDFVIEWSTATE,
                     onDismissRequest = { pendingOpenFileAttachment = null }
                 )
@@ -272,3 +274,18 @@ private fun buildOpenAttachmentLink(
         appendPathSegments(attachmentLink)
     }.buildString()
 }
+
+// Necessary to encode the file name for the attachment URL, see
+// https://github.com/ls1intum/Artemis/blob/develop/src/main/webapp/app/shared/http/file.service.ts
+fun createAttachmentFileUrl(downloadUrl: String, downloadName: String, encodeName: Boolean): String {
+    val downloadUrlComponents = downloadUrl.split("/")
+    val extension = downloadUrlComponents.lastOrNull()?.substringAfterLast('.', "") ?: ""
+    val restOfUrl = downloadUrlComponents.dropLast(1).joinToString("/")
+    val encodedDownloadName = if (encodeName) {
+        URLEncoder.encode("$downloadName.$extension", "UTF-8").replace("+", "%20")
+    } else {
+        "$downloadName.$extension"
+    }
+    return "$restOfUrl/$encodedDownloadName"
+}
+
