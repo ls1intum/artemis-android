@@ -163,7 +163,7 @@ private fun FaqOverviewBody(
             ConfiguredFaqCategoryChipRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 8.dp)
+                    .padding(vertical = 8.dp)
                 ,
                 configuredFaqCategories = filterChips
             )
@@ -176,13 +176,14 @@ private fun FaqOverviewBody(
                     title = stringResource(R.string.faq_overview_no_faqs),
                     details = stringResource(R.string.faq_overview_no_faqs_search, query)
                 )
-            } else {
-                EmptyListHint(
-                    modifier = Modifier.fillMaxSize(),
-                    hint = stringResource(R.string.faq_overview_no_faqs),
-                    icon = Icons.Default.QuestionMark
-                )
+                return
             }
+
+            EmptyListHint(
+                modifier = Modifier.fillMaxSize(),
+                hint = stringResource(R.string.faq_overview_no_faqs),
+                icon = Icons.Default.QuestionMark
+            )
             return
         }
 
