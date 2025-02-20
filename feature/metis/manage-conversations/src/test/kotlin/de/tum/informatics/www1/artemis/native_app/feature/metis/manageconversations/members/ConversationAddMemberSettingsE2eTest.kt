@@ -51,6 +51,7 @@ class ConversationAddMemberSettingsE2eTest : ConversationBaseTest() {
                 description = "",
                 isPublic = true,
                 isAnnouncement = true,
+                isCourseWide = true,
                 authToken = accessToken,
                 serverUrl = testServerUrl
             ).orThrow("Could not create channel")
