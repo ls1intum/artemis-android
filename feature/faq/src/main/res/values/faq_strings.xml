@@ -11,8 +11,8 @@
     <string name="faq_overview_read_more">Read more</string>
 
     <string name="faq_overview_no_faqs">No FAQs found</string>
-    <string name="faq_overview_no_faqs_search">No FAQs matching your query found</string>
-    <string name="faq_search_hint">Search</string>
+    <string name="faq_overview_no_faqs_search">\"%s\" did not match any FAQs.</string>
+    <string name="faq_search_hint">Search for an FAQ</string>
 
 
 </resources>

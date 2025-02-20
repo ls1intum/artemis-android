@@ -29,8 +29,6 @@ val communicationModule = module {
             params[0],
             get(),
             get(),
-            get(),
-            get(),
             get()
         )
     }

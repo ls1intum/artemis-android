@@ -49,7 +49,7 @@ internal fun <T> WeeklyItemsLazyColumn(
     weeklyItemGroups: List<GroupedByWeek<T>>,
     verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(8.dp),
     getItemId: T.() -> Long,
-    itemContent: @Composable (T) -> Unit
+    itemContent: @Composable (Modifier, T) -> Unit
 ) {
     val weeklyItemsSectionExpanded: MutableMap<String, Boolean> = rememberSaveable(
         weeklyItemGroups,
@@ -82,11 +82,12 @@ internal fun <T> WeeklyItemsLazyColumn(
                 WeeklyItemsSectionHeader(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .animateItem()
                         .clickable(onClick = {
                             weeklyItemsSectionExpanded[weeklyItems.key] =
                                 weeklyItemsSectionExpanded[weeklyItems.key] != true
                         })
-                        .padding(horizontal = 16.dp),
+                        .padding(horizontal = Spacings.ScreenHorizontalSpacing),
                     weeklyItems = weeklyItems,
                     expanded = weeklyItemsSectionExpanded[weeklyItems.key] == true,
                 )
@@ -94,7 +95,10 @@ internal fun <T> WeeklyItemsLazyColumn(
 
             if (weeklyItemsSectionExpanded[weeklyItems.key] == true) {
                 items(weeklyItems.items, key = getItemId) { item ->
-                    itemContent(item)
+                    itemContent(
+                        Modifier.animateItem(),
+                        item
+                    )
                 }
             }
 

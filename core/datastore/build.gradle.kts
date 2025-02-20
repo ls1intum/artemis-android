@@ -37,4 +37,5 @@ dependencies {
     implementation(libs.kotlinx.datetime)
 
     implementation(libs.auth0.java.jwt)
+    implementation(project(":core:common"))
 }

@@ -1,44 +1,33 @@
 package de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl
 
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
-import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
-import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
-import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ExerciseService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
-import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
+import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.ArtemisContextBasedServiceImpl
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ExerciseService
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
-import io.ktor.client.request.get
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.ContentType
 import io.ktor.http.appendPathSegments
-import io.ktor.http.contentType
-import kotlinx.serialization.json.decodeFromJsonElement
-import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.Serializable
 
 internal class ExerciseServiceImpl(
-    private val ktorProvider: KtorProvider,
-    private val jsonProvider: JsonProvider
-) : ExerciseService {
+    ktorProvider: KtorProvider,
+    artemisContextProvider: ArtemisContextProvider,
+) : ArtemisContextBasedServiceImpl(ktorProvider, artemisContextProvider), ExerciseService {
+
+    // For some reason the API endpoint does not return an exercise directly, but this wrapper.
+    @Serializable
+    private data class ExerciseWrapper(
+        val exercise: Exercise
+    )
+
+
     override suspend fun getExerciseDetails(
         exerciseId: Long,
-        serverUrl: String,
-        authToken: String
     ): NetworkResponse<Exercise> {
-        return performNetworkCall {
-                val response = ktorProvider.ktorClient.get(serverUrl) {
-                    url {
-                        appendPathSegments("api", "exercises", exerciseId.toString(), "details")
-                    }
-
-                    contentType(ContentType.Application.Json)
-                    cookieAuth(authToken)
-                }
-
-                val jsonElement = jsonProvider.applicationJsonConfiguration.parseToJsonElement(response.bodyAsText())
-                val exercise = jsonProvider.applicationJsonConfiguration
-                    .decodeFromJsonElement<Exercise>(jsonElement.jsonObject["exercise"]!!)
-
-                exercise
-        }
+        return getRequest<ExerciseWrapper> {
+            url {
+                appendPathSegments("api", "exercises", exerciseId.toString(), "details")
+            }
+        }.bind { it.exercise }
     }
 }
