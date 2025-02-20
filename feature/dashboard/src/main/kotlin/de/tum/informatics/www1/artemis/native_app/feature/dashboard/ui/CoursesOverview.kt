@@ -10,15 +10,12 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -50,6 +47,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.Dashboard
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicSearchTextField
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.NoSearchResults
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.BuildConfig
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.R
@@ -206,33 +204,41 @@ internal fun CoursesOverview(
                 retryButtonText = stringResource(id = R.string.courses_loading_try_again),
                 onClickRetry = viewModel::requestReloadDashboard
             ) { dashboard: Dashboard ->
-                if (dashboard.courses.isEmpty() && dashboard.recentCourses.isEmpty() && query.isNotBlank()) {
-                    NoSearchResults(
-                        modifier = Modifier.fillMaxSize(),
-                        query = query
-                    )
-                } else if (dashboard.courses.isEmpty() && dashboard.recentCourses.isEmpty()) {
+                if (dashboard.courses.isEmpty() && dashboard.recentCourses.isEmpty()) {
+                    if (query.isNotBlank()) {
+                        NoSearchResults(
+                            modifier = Modifier.fillMaxSize(),
+                            title = stringResource(id = R.string.course_overview_no_search_results),
+                            details = stringResource(
+                                id = R.string.course_overview_no_search_results_details,
+                                query
+                            )
+                        )
+                        return@BasicDataStateUi
+                    }
+
                     DashboardEmpty(
                         modifier = Modifier.fillMaxSize(),
                         onClickSignup = onClickRegisterForCourse
                     )
-                } else {
-                    CourseList(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = Spacings.ScreenHorizontalSpacing)
-                            .testTag(TEST_TAG_COURSE_LIST),
-                        courseListState = courseListState,
-                        courses = dashboard.courses,
-                        recentCourses = dashboard.recentCourses,
-                        onClickOnCourse = { course ->
-                            scope.launch{
-                                viewModel.onCourseAccessed(course.id ?: 0L)
-                            }
-                            onViewCourse(course.id ?: 0L)
-                        }
-                    )
+                    return@BasicDataStateUi
                 }
+
+                CourseList(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = Spacings.ScreenHorizontalSpacing)
+                        .testTag(TEST_TAG_COURSE_LIST),
+                    courseListState = courseListState,
+                    courses = dashboard.courses,
+                    recentCourses = dashboard.recentCourses,
+                    onClickOnCourse = { course ->
+                        scope.launch{
+                            viewModel.onCourseAccessed(course.id ?: 0L)
+                        }
+                        onViewCourse(course.id ?: 0L)
+                    }
+                )
             }
         }
     }
@@ -297,43 +303,6 @@ private fun SearchAndOrderRow(
                 painter = if (sorting == CourseSorting.ALPHABETICAL_ASCENDING) painterResource(id = R.drawable.alphabetical_sorting_descending) else painterResource(id = R.drawable.alphabetical_sorting_ascending),
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
-            )
-        }
-    }
-}
-
-@Composable
-private fun NoSearchResults(
-    modifier: Modifier,
-    query: String
-) {
-    Box(modifier = modifier.imePadding()) {
-        Column(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .fillMaxWidth()
-                .padding(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.SearchOff,
-                contentDescription = null,
-                modifier = Modifier.size(84.dp)
-            )
-
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(id = R.string.course_overview_no_search_results),
-                style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Center
-            )
-
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(id = R.string.course_overview_no_search_results_details, query),
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center
             )
         }
     }

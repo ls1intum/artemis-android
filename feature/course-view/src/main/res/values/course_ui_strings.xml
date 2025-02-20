@@ -10,6 +10,9 @@
     <string name="course_ui_loading_course_suspended">Your Internet connection may be unstable.</string>
     <string name="course_ui_loading_course_loading">Fetching your course from server…</string>
     <string name="course_ui_loading_course_try_again">Try again</string>
+    <string name="course_ui_exercises_search_hint">Search for an exercise</string>
+    <string name="course_ui_exercises_no_search_results_title">No exercises found</string>
+    <string name="course_ui_exercises_no_search_results_body">\"%s\" did not match any exercises.</string>
 
     <!--  Supplied with the from date and to date.   -->
     <string name="course_ui_weekly_list_week_header">%1$s - %2$s</string>
@@ -22,7 +25,9 @@
     <string name="course_ui_lecture_item_start_date_not_set">No due date</string>
 
     <!--  Lecture list  -->
-    <string name="course_ui_lectures_empty">This course does not have any lectures yet.</string>
+    <string name="course_ui_lectures_no_search_results_title">No lectures found</string>
+    <string name="course_ui_lectures_no_search_results_body">\"%s\" did not match any lectures.</string>
+    <string name="course_ui_lectures_search_hint">Search for a lecture</string>
 
     <!--  Communication  -->
     <string name="course_ui_communication_disabled">Course communication is disabled.</string>
