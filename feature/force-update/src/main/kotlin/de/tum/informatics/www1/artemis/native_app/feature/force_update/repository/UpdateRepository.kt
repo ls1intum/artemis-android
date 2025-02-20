@@ -106,7 +106,7 @@ class UpdateRepository(
                         updateAvailable = updateRequired,
                         forceUpdate = updateRequired,
                         currentVersion = currentVersionNormalized,
-                        minVersion = storedServerVersion
+                        minVersion = serverMinVersion
                     )
                 }
                 // If the network call fails, assume no update.
