@@ -1,7 +1,9 @@
 package de.tum.informatics.www1.artemis.native_app.feature.force_update
 
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
+import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.feature.force_update.repository.UpdateUtil
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -51,5 +53,91 @@ class UpdateUtilTest {
         val now = System.currentTimeMillis()
 
         assertFalse(UpdateUtil.isTimeToCheckUpdate(lastCheck, now))
+    }
+
+    @Test
+    fun `createUpdateResultBasedOnServiceResponse should detect update if server version is newer`() = runBlocking {
+        var detectedVersion: String? = null
+        val response: NetworkResponse.Response<String?> = NetworkResponse.Response("1.3.0")
+        val currentVersion = "1.2.3"
+        val storedServerVersion = "1.2.3"
+
+        val result = UpdateUtil.createUpdateResultBasedOnServiceResponse(
+            response = response,
+            currentVersion = currentVersion,
+            storedServerVersion = storedServerVersion,
+            onUpdateDetected = { newVersion ->
+                detectedVersion = newVersion
+            }
+        )
+
+        assertTrue(result.updateAvailable)
+        assertTrue(result.forceUpdate)
+        assertEquals(currentVersion, result.currentVersion)
+        assertEquals("1.3.0", result.minVersion)
+        assertEquals("1.3.0", detectedVersion)
+    }
+
+    @Test
+    fun `createUpdateResultBasedOnServiceResponse should not detect update if server version is same`() = runBlocking {
+        var detectedVersion: String? = null
+        val response: NetworkResponse.Response<String?> = NetworkResponse.Response("1.2.3")
+        val currentVersion = "1.2.3"
+        val storedServerVersion = "1.2.3"
+
+        val result = UpdateUtil.createUpdateResultBasedOnServiceResponse(
+            response = response,
+            currentVersion = currentVersion,
+            storedServerVersion = storedServerVersion,
+            onUpdateDetected = { detectedVersion = it }
+        )
+
+        assertFalse(result.updateAvailable)
+        assertFalse(result.forceUpdate)
+        assertEquals(currentVersion, result.currentVersion)
+        assertEquals("1.2.3", result.minVersion)
+        assertEquals(null, detectedVersion)
+    }
+
+    @Test
+    fun `createUpdateResultBasedOnServiceResponse should not detect update if server version is older`() = runBlocking {
+        var detectedVersion: String? = null
+        val response: NetworkResponse.Response<String?> = NetworkResponse.Response("1.1.9")
+        val currentVersion = "1.2.3"
+        val storedServerVersion = "1.2.3"
+
+        val result = UpdateUtil.createUpdateResultBasedOnServiceResponse(
+            response = response,
+            currentVersion = currentVersion,
+            storedServerVersion = storedServerVersion,
+            onUpdateDetected = { detectedVersion = it }
+        )
+
+        assertFalse(result.updateAvailable)
+        assertFalse(result.forceUpdate)
+        assertEquals(currentVersion, result.currentVersion)
+        assertEquals("1.1.9", result.minVersion)
+        assertEquals(null, detectedVersion)
+    }
+
+    @Test
+    fun `createUpdateResultBasedOnServiceResponse should return no update needed if network failure`() = runBlocking {
+        var detectedVersion: String? = null
+        val response: NetworkResponse.Response<String?> = NetworkResponse.Response(null)
+        val currentVersion = "1.2.3"
+        val fallbackVersion = "0.0.0"
+
+        val result = UpdateUtil.createUpdateResultBasedOnServiceResponse(
+            response = response,
+            currentVersion = currentVersion,
+            storedServerVersion = fallbackVersion,
+            onUpdateDetected = { detectedVersion = it }
+        )
+
+        assertFalse(result.updateAvailable)
+        assertFalse(result.forceUpdate)
+        assertEquals(currentVersion, result.currentVersion)
+        assertEquals(fallbackVersion, result.minVersion)
+        assertEquals(null, detectedVersion)
     }
 }

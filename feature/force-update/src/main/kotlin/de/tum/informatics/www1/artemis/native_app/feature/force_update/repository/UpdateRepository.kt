@@ -5,7 +5,6 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.force_update.service.UpdateService
 import kotlinx.coroutines.flow.Flow
@@ -69,28 +68,15 @@ class UpdateRepository(
 
             val response = updateService.getLatestVersion(latestServerUrl)
 
-            when (response) {
-                is NetworkResponse.Response -> {
-                    // Use the server response—if it's null or blank, treat it as "0.0.0".
-                    val serverMinVersion = UpdateUtil.normalizeVersion(response.data ?: "0.0.0")
-
-                    val updateRequired =
-                        UpdateUtil.isVersionGreater(serverMinVersion, currentVersionNormalized)
-                    if (updateRequired) {
-                        saveLastKnownVersion(serverMinVersion)
-                        saveLastUpdateCheck(System.currentTimeMillis())
-                    }
-
-                    UpdateResult(
-                        updateAvailable = updateRequired,
-                        forceUpdate = updateRequired,
-                        currentVersion = currentVersionNormalized,
-                        minVersion = serverMinVersion
-                    )
+            UpdateUtil.createUpdateResultBasedOnServiceResponse(
+                response = response,
+                currentVersion = currentVersionNormalized,
+                storedServerVersion = storedServerVersion,
+                onUpdateDetected = { newVersion ->
+                    saveLastKnownVersion(newVersion)
+                    saveLastUpdateCheck(System.currentTimeMillis())
                 }
-                // If the network call fails, assume no update.
-                else -> noUpdateNeeded
-            }
+            )
         }
 
     private suspend fun saveLastUpdateCheck(timestamp: Long) {
