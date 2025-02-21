@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.ui
 
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
@@ -42,6 +43,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.S
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.user_conversation.NavigateToUserConversationUi
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
+
+private const val TAG = "SinglePageConversationBody"
 
 @Composable
 internal fun SinglePageConversationBody(
@@ -304,7 +307,9 @@ internal fun SinglePageConversationBody(
                 }
 
                 is IgnoreCustomBackHandling -> {
-                    throw IllegalStateException("IgnoreCustomBackHandling is only a technical configuration and should not be handled in SinglePageConversationBody")
+                    Log.e(TAG, "IgnoreCustomBackHandling is only a technical configuration and should not be handled in SinglePageConversationBody")
+                    // Somehow users managed to navigate to this configuration, so we just navigate back to the overview screen
+                    configuration = NothingOpened
                 }
             }
         }
