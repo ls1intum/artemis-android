@@ -6,7 +6,6 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerProfileIn
 interface UpdateService {
     suspend fun getLatestVersion(
         serverUrl: String,
-        authToken: String
     ): NetworkResponse<String?>
 }
 
@@ -16,12 +15,11 @@ class UpdateServiceImpl(
 
     override suspend fun getLatestVersion(
         serverUrl: String,
-        authToken: String
     ): NetworkResponse<String?> {
-        return when (val response = serverProfileInfoService.getServerProfileInfo(serverUrl)) {
-            is NetworkResponse.Response -> NetworkResponse.Response(response.data.compatibleVersions?.android?.minRequired)
-            is NetworkResponse.Failure -> NetworkResponse.Response(null)
-        }
+        return serverProfileInfoService.getServerProfileInfo(serverUrl)
+            .bind { profileInfo ->
+               profileInfo.compatibleVersions?.android?.minRequired
+            }
     }
 }
 

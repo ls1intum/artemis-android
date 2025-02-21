@@ -50,7 +50,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visibleme
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleStandalonePostDetails
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.unsubscribeFromNotifications
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -222,8 +221,7 @@ class MainActivity : AppCompatActivity(),
             val updateRepository = koinInject<UpdateRepository> { parametersOf(BuildConfig.VERSION_NAME) }
 
             LaunchedEffect(Unit) {
-                val updateFlow: Flow<UpdateRepository.UpdateResult> = updateRepository.checkForUpdate()
-                updateFlow.collect { updateResult ->
+                updateRepository.updateResultFlow.collect { updateResult ->
                     if (updateResult.updateAvailable) {
                         navController.navigateToUpdateScreen(updateResult.currentVersion, updateResult.minVersion)
                     }

@@ -14,7 +14,6 @@ val updateModule = module {
                 context = androidContext(),
                 updateService = get(),
                 version = version,
-                get(),
                 get()
             )
         }
