@@ -18,6 +18,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.exercise
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.navigateToExercise
 import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.detail.faqDetail
 import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.detail.navigateToFaqDetail
+import de.tum.informatics.www1.artemis.native_app.feature.force_update.ui.updateNavGraph
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.navigateToLecture
 import de.tum.informatics.www1.artemis.native_app.feature.login.LoginScreen
@@ -32,7 +33,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.settingsNa
 
 fun NavGraphBuilder.rootNavGraph(
     navController: NavController,
-    onDisplayThirdPartyLicenses: () -> Unit
+    onDisplayThirdPartyLicenses: () -> Unit,
+    onOpenPlayStore : () -> Unit
 ) {
     val onNavigateToTextExerciseParticipation =
         { exerciseId: Long, participationId: Long ->
@@ -182,4 +184,9 @@ fun NavGraphBuilder.rootNavGraph(
         versionName = BuildConfig.VERSION_NAME,
         onDisplayThirdPartyLicenses = onDisplayThirdPartyLicenses
     )
+
+    updateNavGraph(
+        onOpenPlayStore = onOpenPlayStore
+    )
+
 }

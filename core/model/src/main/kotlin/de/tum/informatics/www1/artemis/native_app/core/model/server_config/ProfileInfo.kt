@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.model.server_config
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -31,4 +32,17 @@ data class ProfileInfo(
      * If a login using a username-password combination is not possible.
      */
     val isPasswordLoginDisabled: Boolean = saml2 != null && (saml2.passwordLoginDisabled || !saml2.enablePassword)
+    val compatibleVersions: CompatibleVersions? = null
 }
+
+@Serializable
+data class CompatibleVersions(
+    val android: AndroidCompatibleVersions? = null
+)
+
+@Serializable
+data class AndroidCompatibleVersions(
+    @SerialName("min")
+    val minRequired: String? = null,
+    val recommended: String? = null
+)
