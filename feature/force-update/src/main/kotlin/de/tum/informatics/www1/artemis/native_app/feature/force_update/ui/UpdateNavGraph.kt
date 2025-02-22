@@ -14,7 +14,7 @@ private data class UpdateScreenRoute(
 
 fun NavController.navigateToUpdateScreen(currentVersion: String, minVersion: String) {
     navigate(UpdateScreenRoute(currentVersion, minVersion)) {
-        popUpTo(graph.startDestinationId) { inclusive = false }
+        popUpTo(graph.startDestinationId) { inclusive = true }
     }
 }
 
