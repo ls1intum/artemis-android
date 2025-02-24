@@ -80,7 +80,6 @@ class ConversationListUiTest : BaseComposeTest() {
                 togglePersonalConversationsExpanded = {},
                 toggleHiddenExpanded = {},
                 toggleSavedPostsExpanded = {},
-                toggleRecentExpanded = {},
                 conversationCollections = conversations,
                 collapsingContentState = CollapsingContentState(),
                 onNavigateToConversation = {},
@@ -102,8 +101,7 @@ class ConversationListUiTest : BaseComposeTest() {
             hidden = ConversationCollections.ConversationCollection(emptyList(), isExpanded = true),
             exerciseChannels = ConversationCollections.ConversationCollection(emptyList(), isExpanded = true),
             lectureChannels = ConversationCollections.ConversationCollection(emptyList(), isExpanded = true),
-            examChannels = ConversationCollections.ConversationCollection(emptyList(), isExpanded = true),
-            recentChannels = ConversationCollections.ConversationCollection(emptyList(), isExpanded = true)
+            examChannels = ConversationCollections.ConversationCollection(emptyList(), isExpanded = true)
         )
     }
 }

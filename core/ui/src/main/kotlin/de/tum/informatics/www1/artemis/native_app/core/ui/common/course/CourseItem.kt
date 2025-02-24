@@ -57,6 +57,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.AutoResizeText
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.FontSizeRange
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.util.CourseUtil
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.BackgroundColorBasedTextColor
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ExerciseDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.CoursePointsDecimalFormat
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.CourseColors
@@ -265,7 +266,7 @@ private fun CourseItemHeader(
                 .padding(vertical = 8.dp)
                 .padding(end = 16.dp),
             text = course.title,
-            color = Color.White,
+            color = BackgroundColorBasedTextColor.of(courseColor),
             textAlign = TextAlign.Center,
             fontSizeRange = FontSizeRange(min = 14.sp, max = 20.sp),
             maxLines = 2

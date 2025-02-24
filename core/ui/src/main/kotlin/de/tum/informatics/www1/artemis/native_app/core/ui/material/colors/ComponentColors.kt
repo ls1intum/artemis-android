@@ -33,4 +33,15 @@ object ComponentColors {
         val actionText: Color
             @Composable get() = Color.White
     }
+
+    object ChannelFilter {
+        val all: Color
+            get() = Color(0xFF005388)
+        val unread: Color
+            get() = Color(0xFF7E00D7)
+        val recent: Color
+            get() = Color(0xFFFD7E14)
+        val unresolved: Color
+            get() = Color(0xFF28A745)
+    }
 }

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseService
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CommunicationDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
@@ -20,15 +21,18 @@ import kotlin.coroutines.EmptyCoroutineContext
 class UserProfileDialogViewModel(
     private val courseId: Long,
     private val userId: Long,
+    courseService: CourseService,
     accountDataService: AccountDataService,
     networkStatusProvider: NetworkStatusProvider,
     websocketProvider: WebsocketProvider,
     coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : MetisViewModel(
+    courseService,
     accountDataService,
     networkStatusProvider,
     websocketProvider,
-    coroutineContext
+    coroutineContext,
+    courseId
 ) {
 
     val isSendMessageAvailable: StateFlow<Boolean>  = clientId

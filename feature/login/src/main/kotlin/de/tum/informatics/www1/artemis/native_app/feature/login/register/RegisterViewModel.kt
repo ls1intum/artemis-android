@@ -12,7 +12,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.feature.login.BaseAccountViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.login.R
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.network.RegisterService
-import de.tum.informatics.www1.artemis.native_app.feature.login.service.network.ServerProfileInfoService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerProfileInfoService
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async

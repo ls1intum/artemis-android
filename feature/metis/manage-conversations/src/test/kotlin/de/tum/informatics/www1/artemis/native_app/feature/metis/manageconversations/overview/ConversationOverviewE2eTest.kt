@@ -398,6 +398,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
             application = context.applicationContext as Application,
             courseId = course.id!!,
             conversationService = get(),
+            channelService = get(),
             serverConfigurationService = get(),
             accountService = get(),
             conversationPreferenceService = get(),

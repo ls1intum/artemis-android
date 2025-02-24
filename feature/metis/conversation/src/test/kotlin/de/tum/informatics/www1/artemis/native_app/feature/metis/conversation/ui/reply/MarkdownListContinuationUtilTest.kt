@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.assertCursorAfterSubstring
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.util.MarkdownListContinuationUtil.continueListIfApplicable
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -155,17 +156,6 @@ class MarkdownListContinuationUtilTest {
             text = newString,
             selection = TextRange(cursor, cursor)
         )
-    }
-
-    private fun TextFieldValue.assertCursorAfterSubstring(substring: String) {
-        val firstIndex = text.indexOf(substring)
-        if (firstIndex == -1) {
-            throw IllegalArgumentException("Substring not found in the original string")
-        }
-
-        val expectedCursor = firstIndex + substring.length
-        assertEquals(expectedCursor, selection.start)
-        assertEquals(expectedCursor, selection.end)
     }
 }
 
