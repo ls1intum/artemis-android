@@ -48,8 +48,6 @@ abstract class BaseCourseTest : BaseComposeTest() {
             courseId = course.id!!,
             courseService = get(),
             liveParticipationService = get(),
-            serverConfigurationService = get(),
-            accountService = get(),
             courseExerciseService = get(),
             networkStatusProvider = get(),
             coroutineContext = testDispatcher

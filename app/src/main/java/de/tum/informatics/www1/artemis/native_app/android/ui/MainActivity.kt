@@ -24,6 +24,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
+import de.tum.informatics.www1.artemis.native_app.android.BuildConfig
 import de.tum.informatics.www1.artemis.native_app.android.R
 import de.tum.informatics.www1.artemis.native_app.android.ui.theme.AppTheme
 import de.tum.informatics.www1.artemis.native_app.core.common.withPrevious
@@ -38,6 +39,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.link_resolving.LocalMarkdownLinkResolver
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui.DashboardScreen
+import de.tum.informatics.www1.artemis.native_app.feature.force_update.repository.UpdateRepository
+import de.tum.informatics.www1.artemis.native_app.feature.force_update.ui.navigateToUpdateScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.LoginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.navigateToLogin
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.LocalVisibleMetisContextManager
@@ -54,6 +57,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
 import org.koin.compose.koinInject
+import org.koin.core.parameter.parametersOf
 
 /**
  * Main and only activity used in the android app.
@@ -213,6 +217,17 @@ class MainActivity : AppCompatActivity(),
             LocalArtemisImageProvider provides koinInject(),
             LocalMarkdownLinkResolver provides koinInject()
         ) {
+
+            val updateRepository = koinInject<UpdateRepository> { parametersOf(BuildConfig.VERSION_NAME) }
+
+            LaunchedEffect(Unit) {
+                updateRepository.updateResultFlow.collect { updateResult ->
+                    if (updateResult.updateAvailable) {
+                        navController.navigateToUpdateScreen(updateResult.currentVersion, updateResult.minVersion)
+                    }
+                }
+            }
+
             NavHost(navController = navController, startDestination = startDestination) {
                 rootNavGraph(
                     navController = navController,
@@ -220,7 +235,8 @@ class MainActivity : AppCompatActivity(),
                         val intent =
                             Intent(this@MainActivity, OssLicensesMenuActivity::class.java)
                         startActivity(intent)
-                    }
+                    },
+                    onOpenPlayStore = ::openPlayStore
                 )
             }
         }
@@ -248,4 +264,18 @@ class MainActivity : AppCompatActivity(),
             }
         }
     }
+
+    private fun openPlayStore() {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=${packageName}"))
+            startActivity(intent)
+        } catch (e: Exception) {
+            val webIntent = Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("https://play.google.com/store/apps/details?id=${packageName}")
+            )
+            startActivity(webIntent)
+        }
+    }
 }
+

@@ -1,9 +1,9 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.ui
 
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -11,8 +11,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import de.tum.informatics.www1.artemis.native_app.core.ui.ArtemisAppLayout
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseSearchConfiguration
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.core.ui.getArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.DefaultTransition
 import de.tum.informatics.www1.artemis.native_app.feature.metis.AddChannelConfiguration
@@ -28,22 +30,29 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.OpenedSavedPosts
 import de.tum.informatics.www1.artemis.native_app.feature.metis.OpenedThread
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.SavedPostsScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.browse_channels.BrowseChannelsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_channel.CreateChannelScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_personal_conversation.CreatePersonalConversationScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.ConversationOverviewBody
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.ConversationOverviewViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.add_members.ConversationAddMembersScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.members.ConversationMembersScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.overview.ConversationSettingsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.user_conversation.NavigateToUserConversationUi
+import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
+
+private const val TAG = "SinglePageConversationBody"
 
 @Composable
 internal fun SinglePageConversationBody(
     modifier: Modifier,
     viewModel: SinglePageConversationBodyViewModel,
     courseId: Long,
-    scaffold: @Composable (content: @Composable () -> Unit) -> Unit,
+    scaffold: @Composable (searchConfiguration: CourseSearchConfiguration, content: @Composable () -> Unit) -> Unit,
+    collapsingContentState: CollapsingContentState,
     initialConfiguration: ConversationConfiguration = NothingOpened
 ) {
     var configuration: ConversationConfiguration by rememberSaveable(initialConfiguration) {
@@ -79,8 +88,9 @@ internal fun SinglePageConversationBody(
 
     val conversationOverview: @Composable (Modifier) -> Unit = { m ->
         ConversationOverviewBody(
-            modifier = m.padding(top = 16.dp),
+            modifier = m,
             courseId = courseId,
+            collapsingContentState = collapsingContentState,
             onNavigateToConversation = openConversation,
             onNavigateToSavedPosts = {
                 configuration = OpenedSavedPosts(configuration, it)
@@ -100,10 +110,18 @@ internal fun SinglePageConversationBody(
         )
     }
 
+    val conversationOverviewViewModel: ConversationOverviewViewModel = koinViewModel { parametersOf(courseId) }
+    val query by conversationOverviewViewModel.query.collectAsState()
+    val searchConfiguration = CourseSearchConfiguration.Search(
+        hint = stringResource(id = R.string.conversation_overview_search_hint),
+        query = query,
+        onUpdateQuery = conversationOverviewViewModel::onUpdateQuery
+    )
+
     val doAlwaysShowScaffold = getArtemisAppLayout() == ArtemisAppLayout.Tablet
     val scaffoldWrapper = @Composable { content: @Composable () -> Unit ->
         if (doAlwaysShowScaffold) {
-            scaffold(content)
+            scaffold(searchConfiguration, content)
         } else {
             content()
         }
@@ -128,12 +146,22 @@ internal fun SinglePageConversationBody(
             },
             label = "SinglePageConversationBody screen transition animation"
         ) { config ->
+            // This handles the state of the search bar in tablet mode depending on the view
+            // We only want to show it in the conversation overview
+            if (doAlwaysShowScaffold) {
+                if (config is NothingOpened) {
+                    collapsingContentState.resetCollapsingContent()
+                } else {
+                    collapsingContentState.collapseContent()
+                }
+            }
+
             when (config) {
                 NothingOpened -> {
                     if (doAlwaysShowScaffold) {
                         conversationOverview(modifier)
                     } else {
-                        scaffold {
+                        scaffold(searchConfiguration) {
                             conversationOverview(modifier)
                         }
                     }
@@ -279,7 +307,9 @@ internal fun SinglePageConversationBody(
                 }
 
                 is IgnoreCustomBackHandling -> {
-                    throw IllegalStateException("IgnoreCustomBackHandling is only a technical configuration and should not be handled in SinglePageConversationBody")
+                    Log.e(TAG, "IgnoreCustomBackHandling is only a technical configuration and should not be handled in SinglePageConversationBody")
+                    // Somehow users managed to navigate to this configuration, so we just navigate back to the overview screen
+                    configuration = NothingOpened
                 }
             }
         }

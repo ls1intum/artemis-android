@@ -13,8 +13,7 @@ data class ConversationCollections(
     val hidden: ConversationCollection<Conversation>,
     val exerciseChannels: ConversationCollection<ChannelChat>,
     val lectureChannels: ConversationCollection<ChannelChat>,
-    val examChannels: ConversationCollection<ChannelChat>,
-    val recentChannels: ConversationCollection<Conversation>
+    val examChannels: ConversationCollection<ChannelChat>
 ) {
     val conversations: List<Conversation>
         get() = favorites.conversations +
@@ -24,20 +23,34 @@ data class ConversationCollections(
                 hidden.conversations +
                 exerciseChannels.conversations +
                 lectureChannels.conversations +
-                examChannels.conversations +
-                recentChannels.conversations
+                examChannels.conversations
 
-    fun filtered(query: String): ConversationCollections {
+    fun filtered(query: String): ConversationCollections = filterBy { it.filterPredicate(query) }
+
+    fun filterUnread(): ConversationCollections = filterBy { (it.unreadMessagesCount ?: 0) > 0 }
+
+    fun filterRecent(recentChannels: List<Conversation>): ConversationCollections {
+        val recentConversations = recentChannels.toSet()
+        return filterBy { it in recentConversations }
+    }
+
+    fun filterUnresolved(unresolvedChannels: List<Conversation>): ConversationCollections {
+        val unresolved = unresolvedChannels.toSet()
+        return filterBy { unresolved.any { unresolved -> unresolved.id == it.id }  }
+    }
+
+    fun hasUnreadMessages(): Boolean = conversations.any { (it.unreadMessagesCount ?: 0) > 0 }
+
+    private fun filterBy(predicate: (Conversation) -> Boolean): ConversationCollections {
         return ConversationCollections(
-            channels = channels.filter { it.filterPredicate(query) },
-            groupChats = groupChats.filter { it.filterPredicate(query) },
-            directChats = directChats.filter { it.filterPredicate(query) },
-            favorites = favorites.filter { it.filterPredicate(query) },
-            hidden = hidden.filter { it.filterPredicate(query) },
-            exerciseChannels = exerciseChannels.filter { it.filterPredicate(query) },
-            lectureChannels = lectureChannels.filter { it.filterPredicate(query) },
-            examChannels = examChannels.filter { it.filterPredicate(query) },
-            recentChannels = recentChannels.filter { it.filterPredicate(query) }
+            channels = channels.filter(predicate),
+            groupChats = groupChats.filter(predicate),
+            directChats = directChats.filter(predicate),
+            favorites = favorites.filter(predicate),
+            hidden = hidden.filter(predicate),
+            exerciseChannels = exerciseChannels.filter(predicate),
+            lectureChannels = lectureChannels.filter(predicate),
+            examChannels = examChannels.filter(predicate)
         )
     }
 

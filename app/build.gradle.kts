@@ -21,8 +21,8 @@ plugins {
 android {
     namespace = "de.tum.informatics.www1.artemis.native_app.android"
 
-    val versionName = "1.2.0"
-    val versionCode = 619
+    val versionName = "1.3.0"
+    val versionCode = 620
 
     setProperty("archivesBaseName", "artemis-android-$versionName-$versionCode")
 
@@ -121,6 +121,7 @@ dependencies {
     implementation(project(":feature:push"))
     implementation(project(":feature:metis"))
     implementation(project(":feature:faq"))
+    implementation(project(":feature:force-update"))
 
     kover(project(":core:common"))
     kover(project(":core:data"))

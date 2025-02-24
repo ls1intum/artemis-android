@@ -15,6 +15,8 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountServiceS
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.ui.PlayStoreScreenshots
 import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotFrame
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseSearchConfiguration
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProviderStub
 import de.tum.informatics.www1.artemis.native_app.device.test.NetworkStatusProviderStub
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.CourseScaffold
@@ -27,6 +29,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.PostsDataState
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.network.impl.ChannelServiceStub
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.storage.ConversationPreferenceService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.ConversationOverviewBody
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.ConversationOverviewViewModel
@@ -94,6 +97,7 @@ fun `Metis - Conversation Overview`() {
                 )
             )
         ),
+        channelService = ChannelServiceStub,
         serverConfigurationService = ServerConfigurationServiceStub(),
         accountService = AccountServiceStub(),
         conversationPreferenceService = object : ConversationPreferenceService {
@@ -133,12 +137,18 @@ fun `Metis - Conversation Overview`() {
         CourseScaffold(
             modifier = Modifier.fillMaxSize(),
             courseDataState = course,
+            searchConfiguration = CourseSearchConfiguration.Search(
+                query = "",
+                hint = "Search for a conversation",
+                onUpdateQuery = {}
+            ),
             isCourseTabSelected = {
                 it == CourseTab.Communication
             },
             updateSelectedCourseTab = {},
             onNavigateBack = {},
-            onReloadCourse = {}
+            onReloadCourse = {},
+            collapsingContentState = CollapsingContentState()
         ) {
             ConversationOverviewBody(
                 modifier = Modifier.fillMaxSize(),
@@ -148,6 +158,7 @@ fun `Metis - Conversation Overview`() {
                 onRequestCreatePersonalConversation = {},
                 onRequestAddChannel = {},
                 onRequestBrowseChannel = {},
+                collapsingContentState = CollapsingContentState(),
                 canCreateChannel = false
             )
         }

@@ -7,6 +7,6 @@ data class FaqDto(
     val id: Long,
     val questionTitle: String,
     val questionAnswer: String,
-//    val categories: List<String>,     // TODO:  https://github.com/ls1intum/artemis-android/issues/399
+    val categories: List<String>?,
     val faqState: String,
 )

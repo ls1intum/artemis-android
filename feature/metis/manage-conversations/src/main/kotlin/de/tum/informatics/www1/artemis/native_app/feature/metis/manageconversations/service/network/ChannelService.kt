@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversat
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 
 interface ChannelService {
 
@@ -24,6 +25,13 @@ interface ChannelService {
         serverUrl: String,
         authToken: String
     ): NetworkResponse<ChannelChat>
+
+    suspend fun getUnresolvedChannels(
+        courseId: Long,
+        channelIds: List<Long>,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<List<Conversation>>
 
     suspend fun registerInChannel(
         courseId: Long,

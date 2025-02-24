@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.exerciseview
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
@@ -28,7 +29,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
@@ -45,8 +45,8 @@ import kotlin.coroutines.EmptyCoroutineContext
 
 internal class ExerciseViewModel(
     private val exerciseId: Long,
-    private val serverConfigurationService: ServerConfigurationService,
-    private val accountService: AccountService,
+    serverConfigurationService: ServerConfigurationService,
+    accountService: AccountService,
     private val exerciseService: ExerciseService,
     private val liveParticipationService: LiveParticipationService,
     private val courseExerciseService: CourseExerciseService,
@@ -71,19 +71,16 @@ internal class ExerciseViewModel(
             .flowOn(coroutineContext)
             .shareIn(viewModelScope, SharingStarted.Lazily, replay = 1)
 
-    private val fetchedExercise: Flow<DataState<Exercise>> =
-        baseConfigurationFlow
-            .flatMapLatest { (serverUrl, authToken) ->
-                retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                    exerciseService.getExerciseDetails(
-                        exerciseId,
-                        serverUrl,
-                        authToken
-                    )
-                }
+    private val fetchedExercise: Flow<DataState<Exercise>> = flatMapLatest(
+            exerciseService.onReloadRequired,
+            requestReloadExercise.onStart { emit(Unit) }
+        ) { _, _ ->
+            retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+                exerciseService.getExerciseDetails(exerciseId)
             }
-            .flowOn(coroutineContext)
-            .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
+        }
+        .flowOn(coroutineContext)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
 
     /**
      * Emitted to when startExercise is successful
@@ -169,14 +166,7 @@ internal class ExerciseViewModel(
      */
     fun startExercise(): Deferred<Long?> {
         return viewModelScope.async(coroutineContext) {
-            val serverUrl = serverConfigurationService.serverUrl.first()
-            val authToken = accountService.authToken.first()
-
-            val response = courseExerciseService.startExercise(
-                exerciseId,
-                serverUrl,
-                authToken
-            )
+            val response = courseExerciseService.startExercise(exerciseId)
 
             response
                 .onSuccess {

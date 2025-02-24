@@ -3,13 +3,23 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversat
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.network.ChannelService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 
-object ChannelServiceStub: ChannelService {
+object ChannelServiceStub : ChannelService {
     override suspend fun getChannels(
         courseId: Long,
         serverUrl: String,
         authToken: String
     ): NetworkResponse<List<ChannelChat>> {
+        return NetworkResponse.Response(listOf(ChannelChat(id = 1, name = "Chat")))
+    }
+
+    override suspend fun getUnresolvedChannels(
+        courseId: Long,
+        channelIds: List<Long>,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<List<Conversation>> {
         return NetworkResponse.Response(listOf(ChannelChat(id = 1, name = "Chat")))
     }
 

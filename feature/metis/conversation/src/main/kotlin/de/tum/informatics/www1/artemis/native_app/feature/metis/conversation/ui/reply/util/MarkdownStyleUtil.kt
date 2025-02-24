@@ -21,7 +21,7 @@ internal object MarkdownStyleUtil {
             return applyAtCursorPosition(
                 style = style,
                 text = text,
-                selection = selection,
+                cursorIndex = selection.start,
                 startTag = startTag,
                 endTag = endTag
             )
@@ -39,16 +39,16 @@ internal object MarkdownStyleUtil {
     private fun applyAtCursorPosition(
         style: MarkdownStyle,
         text: String,
-        selection: TextRange,
+        cursorIndex: Int,
         startTag: String,
         endTag: String
     ): TextFieldValue {
         if (style == MarkdownStyle.CodeBlock) {
             // Insert code block with newlines
-            val newText = text.substring(0, selection.start) +
+            val newText = text.substring(0, cursorIndex) +
                     "$startTag\n\n$endTag" +
-                    text.substring(selection.end)
-            val newCursorPosition = selection.start + startTag.length + 1
+                    text.substring(cursorIndex)
+            val newCursorPosition = cursorIndex + startTag.length + 1
 
             return TextFieldValue(
                 text = newText,
@@ -58,9 +58,9 @@ internal object MarkdownStyleUtil {
             // Other styles
             val newText = text.substring(
                 0,
-                selection.start
-            ) + startTag + endTag + text.substring(selection.end)
-            val newCursorPosition = selection.start + startTag.length
+                cursorIndex
+            ) + startTag + endTag + text.substring(cursorIndex)
+            val newCursorPosition = cursorIndex + startTag.length
 
             return TextFieldValue(
                 text = newText,
@@ -76,14 +76,14 @@ internal object MarkdownStyleUtil {
         startTag: String,
         endTag: String
     ): TextFieldValue {
-        val selectedText = text.substring(selection.start, selection.end)
+        val selectedText = text.substring(selection.min, selection.max)
         if (style == MarkdownStyle.CodeBlock) {
-            val newText = text.substring(0, selection.start) +
+            val newText = text.substring(0, selection.min) +
                     "$startTag\n$selectedText\n$endTag" +
-                    text.substring(selection.end)
+                    text.substring(selection.max)
             val newSelection = TextRange(
-                selection.start + startTag.length + 1,
-                selection.end + startTag.length + 1
+                selection.min + startTag.length + 1,
+                selection.max + startTag.length + 1
             )
 
             return TextFieldValue(
@@ -91,12 +91,12 @@ internal object MarkdownStyleUtil {
                 selection = newSelection
             )
         } else {
-            val newText = text.substring(0, selection.start) +
+            val newText = text.substring(0, selection.min) +
                     startTag +
                     selectedText +
                     endTag +
-                    text.substring(selection.end)
-            val newSelection = TextRange(selection.end + startTag.length + endTag.length)
+                    text.substring(selection.max)
+            val newSelection = TextRange(selection.max + startTag.length + endTag.length)
 
             return TextFieldValue(
                 text = newText,

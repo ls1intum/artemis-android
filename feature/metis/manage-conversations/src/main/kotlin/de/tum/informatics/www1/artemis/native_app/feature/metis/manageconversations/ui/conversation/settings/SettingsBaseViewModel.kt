@@ -58,12 +58,11 @@ abstract class SettingsBaseViewModel(
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     val clientUsername: StateFlow<DataState<String>> = flatMapLatest(
-        accountService.authToken,
-        serverConfigurationService.serverUrl,
-        onRequestReload.onStart { emit(Unit) }
-    ) { authToken, serverUrl, _ ->
+        onRequestReload.onStart { emit(Unit) },
+        accountDataService.onReloadRequired,
+    ) { _, _ ->
         retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-            accountDataService.getAccountData(serverUrl, authToken)
+            accountDataService.getAccountData()
         }
             .map { accountDataState -> accountDataState.bind { it.username.orEmpty() } }
     }

@@ -1,6 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +32,8 @@ import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -43,13 +51,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicSearchTextField
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.core.ui.endOfPagePadding
 import de.tum.informatics.www1.artemis.native_app.core.ui.pagePadding
 import de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.ui.CodeOfConductUi
@@ -65,6 +74,7 @@ private const val KEY_BUTTON_SHOW_COC = "KEY_BUTTON_SHOW_COC"
 fun ConversationOverviewBody(
     modifier: Modifier,
     courseId: Long,
+    collapsingContentState: CollapsingContentState,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onNavigateToSavedPosts: (SavedPostStatus) -> Unit,
     onRequestCreatePersonalConversation: () -> Unit,
@@ -75,6 +85,7 @@ fun ConversationOverviewBody(
     ConversationOverviewBody(
         modifier = modifier,
         viewModel = koinViewModel { parametersOf(courseId) },
+        collapsingContentState = collapsingContentState,
         onNavigateToConversation = onNavigateToConversation,
         onNavigateToSavedPosts = onNavigateToSavedPosts,
         onRequestCreatePersonalConversation = onRequestCreatePersonalConversation,
@@ -88,6 +99,7 @@ fun ConversationOverviewBody(
 fun ConversationOverviewBody(
     modifier: Modifier,
     viewModel: ConversationOverviewViewModel,
+    collapsingContentState: CollapsingContentState,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onNavigateToSavedPosts: (SavedPostStatus) -> Unit,
     onRequestCreatePersonalConversation: () -> Unit,
@@ -98,10 +110,10 @@ fun ConversationOverviewBody(
     var showCodeOfConduct by rememberSaveable { mutableStateOf(false) }
     val conversationCollectionsDataState: DataState<ConversationCollections> by viewModel.conversations.collectAsState()
     val isDisplayingErrorDialog by viewModel.isDisplayingErrorDialog.collectAsState()
+    val currentFilter by viewModel.currentFilter.collectAsState()
+    val availableFilters by viewModel.availableFilters.collectAsState()
 
     val isConnected by viewModel.isConnected.collectAsState()
-
-    val query by viewModel.query.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.requestReload()
@@ -110,6 +122,7 @@ fun ConversationOverviewBody(
     Box(modifier = Modifier
         .fillMaxSize()
         .padding(horizontal = Spacings.ScreenHorizontalSpacing)
+        .padding(top = Spacings.ScreenTopBarSpacing)
     ) {
         BasicDataStateUi(
             modifier = modifier,
@@ -122,9 +135,14 @@ fun ConversationOverviewBody(
         ) { conversationCollection ->
             Column(
                 modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                AnimatedVisibility(modifier = Modifier.fillMaxWidth(), visible = !isConnected) {
+                AnimatedVisibility(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    visible = !isConnected
+                ) {
                     Box(modifier = Modifier.fillMaxWidth()) {
                         Row(
                             modifier = Modifier.align(Alignment.Center),
@@ -141,16 +159,17 @@ fun ConversationOverviewBody(
                     }
                 }
 
-                BasicSearchTextField(
+                FilterRow(
                     modifier = Modifier.fillMaxWidth(),
-                    hint = stringResource(id = R.string.conversation_overview_search_hint),
-                    query = query,
-                    updateQuery = viewModel::onUpdateQuery
+                    currentFilter = currentFilter,
+                    availableFilters = availableFilters,
+                    onUpdateFilter = viewModel::onUpdateFilter
                 )
 
                 ConversationList(
                     modifier = Modifier.fillMaxSize(),
                     viewModel = viewModel,
+                    collapsingContentState = collapsingContentState,
                     conversationCollections = conversationCollection,
                     onNavigateToConversation = { conversationId ->
                         viewModel.setConversationMessagesRead(conversationId)
@@ -301,6 +320,61 @@ fun ConversationFabWithDropdownMenu(
                     leadingIcon = {
                         Icon(imageVector = Icons.Default.Checklist, contentDescription = null)
                     }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun FilterRow(
+    modifier: Modifier,
+    currentFilter: ConversationOverviewUtils.ConversationFilter,
+    onUpdateFilter: (ConversationOverviewUtils.ConversationFilter) -> Unit,
+    availableFilters: List<ConversationOverviewUtils.ConversationFilter>
+) {
+    val filterChipColorAlpha = 0.8f
+    AnimatedVisibility(
+        visible = availableFilters.isNotEmpty(),
+        enter = fadeIn() + expandHorizontally(),
+        exit = fadeOut() + shrinkHorizontally()
+    ) {
+        Row(
+            modifier = modifier
+                .horizontalScroll(rememberScrollState())
+                .animateContentSize(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            availableFilters.forEach { filter ->
+                val selected = filter == currentFilter
+                FilterChip(
+                    selected = selected,
+                    onClick = {
+                        onUpdateFilter(filter)
+                    },
+                    label = {
+                        Text(
+                            text = stringResource(id = filter.titleId),
+                            color = if (selected) Color.White else MaterialTheme.colorScheme.onSurface
+                        )
+                    },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = if (selected) filter.selectedIcon else filter.icon,
+                            tint = if (selected) Color.White else MaterialTheme.colorScheme.primary,
+                            contentDescription = null
+                        )
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = filter.selectedColor.copy(alpha = filterChipColorAlpha)
+                    ),
+                    border = FilterChipDefaults.filterChipBorder(
+                        borderColor = MaterialTheme.colorScheme.surfaceVariant,
+                        selectedBorderColor = filter.selectedColor.copy(alpha = filterChipColorAlpha),
+                        enabled = true,
+                        selected = selected,
+                    )
                 )
             }
         }
