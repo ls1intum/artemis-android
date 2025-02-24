@@ -18,7 +18,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -37,6 +36,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostItemViewType
@@ -57,6 +57,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.Paging
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisiblePostList
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
@@ -146,7 +147,7 @@ fun MetisChatList(
     onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
     onClickViewPost: (StandalonePostId) -> Unit,
     onUndoDeletePost: (IStandalonePost) -> Unit,
-    generateLinkPreviews: (IBasePost) -> Unit = {},
+    generateLinkPreviews: (String) -> StateFlow<List<LinkPreview>>,
     onRequestRetrySend: (StandalonePostId) -> Unit,
     conversationName: String,
     onFileSelected: (Uri) -> Unit
@@ -251,7 +252,7 @@ private fun ChatList(
     onRequestSave: (IStandalonePost) -> Unit,
     onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Unit,
     onRequestRetrySend: (StandalonePostId) -> Unit,
-    generateLinkPreviews: (IBasePost) -> Unit
+    generateLinkPreviews: (String) -> StateFlow<List<LinkPreview>>
 ) {
     LazyColumn(
         modifier = modifier,
@@ -281,6 +282,9 @@ private fun ChatList(
 
                 is ChatListItem.IndexedPost? -> {
                     val post = chatListItem?.post
+                    val linkPreviews by remember(post?.content) {
+                        generateLinkPreviews(post?.content.orEmpty())
+                    }.collectAsState()
 
                     val postActions = rememberPostActions(
                         post = post,
@@ -309,8 +313,6 @@ private fun ChatList(
                         }
                     )
 
-                    LaunchedEffect(post) { generateLinkPreviews(post ?: return@LaunchedEffect) }
-
                     PostWithBottomSheet(
                         modifier = Modifier
                             .padding(horizontal = Spacings.ScreenHorizontalSpacing)
@@ -327,6 +329,7 @@ private fun ChatList(
                             PostItemViewType.ChatListItem(post?.answers.orEmpty())
                         },
                         postActions = postActions,
+                        linkPreviews = linkPreviews,
                         displayHeader = shouldDisplayHeader(
                             index = index,
                             post = post,

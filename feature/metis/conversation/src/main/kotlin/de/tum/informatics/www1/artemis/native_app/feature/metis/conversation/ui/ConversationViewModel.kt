@@ -546,12 +546,12 @@ internal open class ConversationViewModel(
         }
     }
 
-    fun generateLinkPreviews(post: IBasePost): StateFlow<List<LinkPreview>> =
+    fun generateLinkPreviews(postContent: String): StateFlow<List<LinkPreview>> =
         combine(
             accountService.authToken,
             serverConfigurationService.serverUrl
         ) { authToken, serverUrl ->
-            val links = LinkifyService.findLinks(post.content.orEmpty())
+            val links = LinkifyService.findLinks(postContent)
                 .filter { it.isLinkPreviewRemoved != true }
                 .take(6)
 
