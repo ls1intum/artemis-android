@@ -5,9 +5,9 @@ import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseService
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CommunicationDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.MetisViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -21,19 +21,18 @@ import kotlin.coroutines.EmptyCoroutineContext
 class UserProfileDialogViewModel(
     private val courseId: Long,
     private val userId: Long,
-    serverConfigurationService: ServerConfigurationService,
-    accountService: AccountService,
+    courseService: CourseService,
     accountDataService: AccountDataService,
     networkStatusProvider: NetworkStatusProvider,
     websocketProvider: WebsocketProvider,
     coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : MetisViewModel(
-    serverConfigurationService,
-    accountService,
+    courseService,
     accountDataService,
     networkStatusProvider,
     websocketProvider,
-    coroutineContext
+    coroutineContext,
+    courseId
 ) {
 
     val isSendMessageAvailable: StateFlow<Boolean>  = clientId
@@ -45,7 +44,7 @@ class UserProfileDialogViewModel(
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
     fun navigateToOneToOneChat(context: Context) {
-        val chatLink = "artemis://courses/$courseId/messages?userId=$userId"
+        val chatLink = CommunicationDeeplinks.ToOneToOneChatByUserId.inAppLink(courseId, userId)
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(chatLink))
         context.startActivity(intent)
     }

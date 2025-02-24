@@ -14,19 +14,15 @@ plugins {
     id("com.google.gms.google-services")
     id("com.google.firebase.appdistribution")
     id("com.google.android.gms.oss-licenses-plugin")
-    id("io.sentry.android.gradle") version "4.14.1"
+    id("io.sentry.android.gradle") version "5.2.0"
     id("artemis.android.room")
 }
 
 android {
     namespace = "de.tum.informatics.www1.artemis.native_app.android"
 
-    val versionName = "1.2.0"
-    val versionCode = 619
-    // While we do not have a building pipeline set up, we default back to using manual version
-    // codes, because otherwise we always have to re-install the app when checking out a branch with
-    // less commits.
-//    val versionCode = deriveVersionCodeFromGit()
+    val versionName = "1.3.0"
+    val versionCode = 620
 
     setProperty("archivesBaseName", "artemis-android-$versionName-$versionCode")
 
@@ -124,6 +120,8 @@ dependencies {
     implementation(project(":feature:quiz"))
     implementation(project(":feature:push"))
     implementation(project(":feature:metis"))
+    implementation(project(":feature:faq"))
+    implementation(project(":feature:force-update"))
 
     kover(project(":core:common"))
     kover(project(":core:data"))
@@ -161,13 +159,4 @@ dependencies {
 
 sentry {
     autoInstallation.enabled.set(false)
-}
-
-/**
- * The version code is the number of commits in the current branch.
- */
-fun deriveVersionCodeFromGit(): Int {
-    return providers.exec {
-        commandLine("git", "rev-list", "--count", "HEAD")
-    }.standardOutput.asText.get().trim().toInt()
 }

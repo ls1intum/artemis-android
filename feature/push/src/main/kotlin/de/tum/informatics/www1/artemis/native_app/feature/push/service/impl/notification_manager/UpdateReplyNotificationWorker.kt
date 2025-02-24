@@ -4,20 +4,14 @@ import android.content.Context
 import androidx.work.WorkerParameters
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.work.BaseCreatePostWorker
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
-import kotlinx.coroutines.flow.first
 import kotlinx.datetime.Clock
 
 class UpdateReplyNotificationWorker(
     appContext: Context,
     params: WorkerParameters,
-    private val serverConfigurationService: ServerConfigurationService,
-    private val accountService: AccountService,
     private val accountDataService: AccountDataService,
     private val communicationNotificationManager: CommunicationNotificationManager,
 ) : BaseCreatePostWorker(appContext, params) {
@@ -30,14 +24,8 @@ class UpdateReplyNotificationWorker(
         postType: PostType,
         parentPostId: Long?
     ): Result {
-        val serverUrl = serverConfigurationService.serverUrl.first()
-        val authToken = accountService.authToken.first()
-
         // We can add to the notification that the user has responded. However, this does not have super high priority
-        val accountData = accountDataService.getAccountData(
-            serverUrl = serverUrl,
-            bearerToken = authToken
-        )
+        val accountData = accountDataService.getAccountData()
 
         return when (accountData) {
             is NetworkResponse.Response -> {

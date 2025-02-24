@@ -5,11 +5,13 @@ import com.android.build.gradle.LibraryExtension
 import commonConfiguration.configureJacoco
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.exclude
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.withType
 import util.libs
@@ -38,6 +40,8 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                     // Temporary workaround for https://issuetracker.google.com/174733673
                     force("org.objenesis:objenesis:2.6")
                 }
+
+                applySecurityIssuePatches(this@configureEach, this@with)
             }
 
             configureJacoco(extensions.getByType<LibraryAndroidComponentsExtension>())
@@ -75,6 +79,38 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
 
                     reports.junitXml.required.set(true)
                     reports.junitXml.outputLocation.set(rootProject.rootDir.resolve("test-outputs/${project.name}/$name/"))
+                }
+            }
+        }
+    }
+
+    private fun applySecurityIssuePatches(
+        configuration: Configuration,
+        project: Project
+    ) {
+        // Not used and only added due to firebase-bom dependency
+        // and created a security issue: https://github.com/ls1intum/artemis-android/issues/339
+        configuration.exclude(
+            group = "com.google.firebase",
+            module = "firebase-measurement-connector"
+        )
+
+
+        val supportsConstraintDeclaration = configuration.isCanBeResolved
+        if (!supportsConstraintDeclaration) return
+
+        project.dependencies {
+            constraints {
+                add(configuration.name, "com.google.protobuf:protobuf-java:3.25") {
+                    because("Created several security issues related to protobuf: https://github.com/advisories/GHSA-735f-pc8j-v9w8")
+                }
+
+                add(configuration.name, "com.google.android.gms:play-services-basement:18.0.2") {
+                    because("Created a security issues: https://www.mend.io/vulnerability-database/CVE-2022-2390")
+                }
+
+                add(configuration.name, "com.google.guava:guava:32.0.1-jre") {
+                    because("Created several security issues: https://www.mend.io/vulnerability-database/CVE-2023-2976")
                 }
             }
         }

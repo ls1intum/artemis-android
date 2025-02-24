@@ -11,7 +11,7 @@ import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvi
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.feature.login.BaseAccountViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.network.LoginService
-import de.tum.informatics.www1.artemis.native_app.feature.login.service.network.ServerProfileInfoService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerProfileInfoService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async

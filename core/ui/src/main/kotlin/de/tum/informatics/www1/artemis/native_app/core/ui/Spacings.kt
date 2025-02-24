@@ -9,10 +9,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 object Spacings {
     val ScreenHorizontalSpacing = 16.dp
+    val ScreenTopBarSpacing = ScreenHorizontalSpacing
     val EndOfScrollablePageSpacing = ScreenHorizontalSpacing
+    val AppBarElevation = 8.dp
 
     /**
      * The spacing between the FAB and the end of the screen, according to the M3 guidelines:
@@ -22,8 +25,29 @@ object Spacings {
 
     object Post {
         val innerSpacing = 8.dp
+
+        val postHeadlineHeight = 36.dp
+        val emojiHeight = 27.dp
+        val emojiTextSize = 12.sp
+        // The size of the emoji icon to open the emoji picker (measured in sp to support font scaling)
+        val addEmojiIconSize = 18.sp
     }
 
+    object AutoCompletePopup {
+        val HintHorizontalPadding = 16.dp
+        val ContentVerticalPadding = 8.dp
+    }
+
+    object CourseItem {
+        val height = 250.dp
+        val headerHeight = 70.dp
+        val previewHeaderHeight = 40.dp
+        val gridSpacing = 16.dp
+    }
+
+    object Faq {
+        val categoryChipSpacing = 8.dp
+    }
 
     /**
      * Calculate the padding for the bottom of the screen, considering the navigation bar height.
@@ -34,11 +58,27 @@ object Spacings {
         bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + EndOfScrollablePageSpacing
     )
 
+    /**
+     * Calculates the bottom padding according to calculateEndOfPagePaddingValues.
+     * Adds the default ScreenTopBarSpacing to the top padding to add space between the top of the screen and the content.
+     */
+    @Composable
+    fun calculateContentPaddingValues() = PaddingValues(
+        top = ScreenTopBarSpacing,
+        bottom = calculateEndOfPagePaddingValues().calculateBottomPadding()
+    )
+
     val BottomSheetContentPadding = PaddingValues(
         bottom = 40.dp,
         start = ScreenHorizontalSpacing,
         end = ScreenHorizontalSpacing
     )
+
+    object  UpdateScreen {
+        val imageSize = 300.dp
+        val large = 24.dp
+        val medium = 16.dp
+    }
 }
 
 fun Modifier.endOfPagePadding() = padding(bottom = Spacings.EndOfScrollablePageSpacing).navigationBarsPadding()

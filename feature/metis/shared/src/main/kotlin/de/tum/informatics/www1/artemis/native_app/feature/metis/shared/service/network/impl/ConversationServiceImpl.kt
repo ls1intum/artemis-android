@@ -16,6 +16,7 @@ import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
@@ -157,6 +158,7 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         description: String,
         isPublic: Boolean,
         isAnnouncement: Boolean,
+        isCourseWide: Boolean,
         authToken: String,
         serverUrl: String
     ): NetworkResponse<ChannelChat> {
@@ -170,6 +172,7 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
                     CreateChannelData(
                         isPublic = isPublic,
                         isAnnouncementChannel = isAnnouncement,
+                        isCourseWide = isCourseWide,
                         name = name,
                         description = description.ifBlank { null }
                     )
@@ -187,6 +190,7 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         val type: String = "channel",
         val isPublic: Boolean,
         val isAnnouncementChannel: Boolean,
+        val isCourseWide: Boolean,
         val name: String,
         val description: String?
     )
@@ -510,6 +514,46 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
             }
                 .status
                 .isSuccess()
+        }
+    }
+
+    override suspend fun markConversationAsRead(
+        courseId: Long,
+        conversationId: Long,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<Boolean> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.patch(serverUrl) {
+                url {
+                    appendPathSegments("api", "courses", courseId.toString(), "conversations", conversationId.toString(), "mark-as-read")
+                }
+
+                cookieAuth(authToken)
+                contentType(ContentType.Application.Json)
+            }.status.isSuccess()
+        }
+    }
+
+    override suspend fun markAllConversationsAsRead(
+        courseId: Long,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<Boolean> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.post(serverUrl) {
+                url {
+                    appendPathSegments(
+                        "api",
+                        "courses",
+                        courseId.toString(),
+                        "channels",
+                        "mark-as-read"
+                    )
+                }
+                cookieAuth(authToken)
+                contentType(ContentType.Application.Json)
+            }.status.isSuccess()
         }
     }
 

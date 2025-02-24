@@ -68,6 +68,7 @@ open class ConversationServiceStub(
         description: String,
         isPublic: Boolean,
         isAnnouncement: Boolean,
+        isCourseWide: Boolean,
         authToken: String,
         serverUrl: String
     ): NetworkResponse<ChannelChat> = NetworkResponse.Failure(StubException)
@@ -161,5 +162,18 @@ open class ConversationServiceStub(
         muted: Boolean,
         authToken: String,
         serverUrl: String
+    ): NetworkResponse<Boolean> = NetworkResponse.Failure(StubException)
+
+    override suspend fun markConversationAsRead(
+        courseId: Long,
+        conversationId: Long,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<Boolean> = NetworkResponse.Failure(StubException)
+
+    override suspend fun markAllConversationsAsRead(
+        courseId: Long,
+        serverUrl: String,
+        authToken: String
     ): NetworkResponse<Boolean> = NetworkResponse.Failure(StubException)
 }

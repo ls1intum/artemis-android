@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ListAlt
@@ -44,9 +43,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
@@ -55,22 +51,21 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isUnspecified
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicArtemisTextField
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteType
 import kotlinx.coroutines.launch
 
 
 const val TEST_TAG_MARKDOWN_TEXTFIELD = "TEST_TAG_MARKDOWN_TEXTFIELD"
 val textFormattingOptionsHiddenOffsetY = 200.dp
 
-/**
- * @param sendButton composable centered vertically right to the text field.
- */
+
 @Composable
 internal fun MarkdownTextField(
     modifier: Modifier,
@@ -78,12 +73,11 @@ internal fun MarkdownTextField(
     hintText: AnnotatedString,
     filePickerLauncher: ManagedActivityResultLauncher<String, Uri?>,
     focusRequester: FocusRequester = remember { FocusRequester() },
-    sendButton: @Composable () -> Unit = {},
-    topRightButton: @Composable RowScope.() -> Unit = {},
+    textFieldTrailingContent: @Composable RowScope.() -> Unit = {},
     onFocusAcquired: () -> Unit = {},
     onFocusLost: () -> Unit = {},
     onTextChanged: (TextFieldValue) -> Unit,
-    showAutoCompletePopup: ((AutocompleteType) -> Unit)? = null,
+    showAutoCompletePopup: ((AutoCompleteType) -> Unit)? = null,
     formattingOptionButtons: @Composable () -> Unit = {},
 ) {
     val text = textFieldValue.text
@@ -123,9 +117,7 @@ internal fun MarkdownTextField(
                 }
             }
 
-            sendButton()
-
-            topRightButton()
+            textFieldTrailingContent()
         }
 
 
@@ -181,45 +173,27 @@ fun BasicMarkdownTextField(
     Box(
         modifier = modifier
             .heightIn(max = (localTextStyle.fontSize.value * maxVisibleLines).dp)
-            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(scrollState)
     ) {
-        BasicTextField(
+        BasicArtemisTextField(
             modifier = modifier
-                .focusRequester(focusRequester)
-                .onFocusChanged { focusState ->
-                    if (focusState.hasFocus) {
-                        hadFocus = true
-                        onFocusAcquired()
-                    }
-                    if (!focusState.hasFocus && hadFocus) {
-                        onFocusLost()
-                        hadFocus = false
-                    }
-                }
+                .fillMaxWidth()
                 .testTag(TEST_TAG_MARKDOWN_TEXTFIELD),
+            backgroundColor = MaterialTheme.colorScheme.background,
             value = textFieldValue,
             onValueChange = onTextChanged,
-            decorationBox = { innerTextField ->
-                Box(
-                    modifier = Modifier
-                        .background(MaterialTheme.colorScheme.background)
-                ) {
-                    if (textFieldValue.text.isEmpty()) {
-                        Text(
-                            modifier = Modifier.align(Alignment.CenterStart),
-                            text = hintText,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = localTextStyle,
-                        )
-                    }
-                    innerTextField()
+            focusRequester = focusRequester,
+            onFocusChanged = { hasFocus ->
+                if (hasFocus) {
+                    hadFocus = true
+                    onFocusAcquired()
+                }
+                if (!hasFocus && hadFocus) {
+                    onFocusLost()
+                    hadFocus = false
                 }
             },
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-            textStyle = localTextStyle.copy(color = MaterialTheme.colorScheme.onSurface)
+            hint = hintText.text
         )
     }
 }
@@ -231,7 +205,7 @@ private fun TextFieldOptions(
     isPreviewEnabled: Boolean,
     showFormattingOptions: Boolean,
     onChangeViewType: (ViewType) -> Unit,
-    showAutoCompletePopup: ((AutocompleteType) -> Unit)? = null,
+    showAutoCompletePopup: ((AutoCompleteType) -> Unit)? = null,
     formattingOptionButtons: @Composable () -> Unit = {},
     onOpenFilePicker: () -> Unit = {},
     onOpenImagePicker: () -> Unit = {}
@@ -365,7 +339,7 @@ private fun TextFieldOptionsIconButton(
 @Composable
 private fun TaggingDropdownMenu(
     isTaggingDropdownExpanded: Boolean,
-    showAutoCompletePopup: ((AutocompleteType) -> Unit)?,
+    showAutoCompletePopup: ((AutoCompleteType) -> Unit)?,
     onDismissRequest: () -> Unit,
 ) {
     DropdownMenu(
@@ -385,7 +359,7 @@ private fun TaggingDropdownMenu(
             text = { Text(text = stringResource(R.string.reply_format_mention_members)) },
             onClick = {
                 onDismissRequest()
-                showAutoCompletePopup?.invoke(AutocompleteType.USERS)
+                showAutoCompletePopup?.invoke(AutoCompleteType.USERS)
             }
         )
 
@@ -399,7 +373,7 @@ private fun TaggingDropdownMenu(
             text = { Text(stringResource(R.string.reply_format_mention_channels)) },
             onClick = {
                 onDismissRequest()
-                showAutoCompletePopup?.invoke(AutocompleteType.CHANNELS)
+                showAutoCompletePopup?.invoke(AutoCompleteType.CHANNELS)
             }
         )
 
@@ -413,7 +387,7 @@ private fun TaggingDropdownMenu(
             text = { Text(stringResource(R.string.reply_format_mention_exercises)) },
             onClick = {
                 onDismissRequest()
-                showAutoCompletePopup?.invoke(AutocompleteType.EXERCISES)
+                showAutoCompletePopup?.invoke(AutoCompleteType.EXERCISES)
             }
         )
 
@@ -427,7 +401,7 @@ private fun TaggingDropdownMenu(
             text = { Text(stringResource(R.string.reply_format_mention_lectures)) },
             onClick = {
                 onDismissRequest()
-                showAutoCompletePopup?.invoke(AutocompleteType.LECTURES)
+                showAutoCompletePopup?.invoke(AutoCompleteType.LECTURES)
             }
         )
     }

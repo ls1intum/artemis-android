@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.markdown
 
 import android.content.Context
+import android.text.Spanned
 import android.text.method.LinkMovementMethod
 import android.util.TypedValue
 import android.view.View
@@ -15,6 +16,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.takeOrElse
@@ -31,23 +33,9 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.res.ResourcesCompat
 import coil.ImageLoader
-import coil.request.Disposable
-import coil.request.ImageRequest
-import coil.size.Scale
-import de.tum.informatics.www1.artemis.native_app.core.common.R
 import de.tum.informatics.www1.artemis.native_app.core.common.markdown.ArtemisMarkdownTransformer
-import de.tum.informatics.www1.artemis.native_app.core.common.markdown.TYPE_ICON_RESOURCE_PATH
-import io.noties.markwon.AbstractMarkwonPlugin
 import io.noties.markwon.LinkResolver
 import io.noties.markwon.Markwon
-import io.noties.markwon.MarkwonConfiguration
-import io.noties.markwon.core.MarkwonTheme
-import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
-import io.noties.markwon.ext.tables.TablePlugin
-import io.noties.markwon.html.HtmlPlugin
-import io.noties.markwon.image.AsyncDrawable
-import io.noties.markwon.image.coil.CoilImagesPlugin
-import io.noties.markwon.linkify.LinkifyPlugin
 
 // Copy from: https://github.com/jeziellago/compose-markdown
 /*
@@ -76,10 +64,7 @@ import io.noties.markwon.linkify.LinkifyPlugin
  */
 
 val LocalMarkdownTransformer =
-    compositionLocalOf<ArtemisMarkdownTransformer> { ArtemisMarkdownTransformer }
-
-private const val DEFAULT_IMAGE_HEIGHT = 800
-private const val LINK_TYPE_HINT_ICON_HEIGHT = 52
+    compositionLocalOf<ArtemisMarkdownTransformer> { ArtemisMarkdownTransformer.Default }
 
 @Composable
 fun MarkdownText(
@@ -101,20 +86,20 @@ fun MarkdownText(
     val context: Context = LocalContext.current
     val localMarkwon = LocalMarkwon.current
 
-    val imageWidth = context.resources.displayMetrics.widthPixels
     val markdownRender: Markwon = localMarkwon ?: remember(imageLoader, linkResolver) {
-        createMarkdownRender(context, imageLoader, linkResolver, imageWidth)
+        MarkdownRenderFactory.create(context, imageLoader, linkResolver)
     }
 
     val markdownTransformer = LocalMarkdownTransformer.current
 
-    val transformedMarkdown by remember(markdown, markdownTransformer) {
+    val parsedMarkdown by remember(markdown, markdownTransformer, markdownRender) {
         derivedStateOf {
-            markdownTransformer.transformMarkdown(markdown)
+            val transformedMarkdown = markdownTransformer.transformMarkdown(markdown)
+            markdownRender.toMarkdown(transformedMarkdown)
         }
     }
 
-    val previousTransformedMarkdown = remember { mutableStateOf<String?>(null) }
+    var previousParsedMarkdown by remember { mutableStateOf<Spanned?>(null) }
 
     AndroidView(
         // Added semantics for ui testing.
@@ -140,10 +125,10 @@ fun MarkdownText(
             )
         },
         update = { textView ->
-            // Only update if the transformed markdown has changed
-            if (transformedMarkdown != previousTransformedMarkdown.value) {
-                markdownRender.setMarkdown(textView, transformedMarkdown)
-                previousTransformedMarkdown.value = transformedMarkdown
+            // Only update if the parsed markdown has changed
+            if (parsedMarkdown != previousParsedMarkdown) {
+                markdownRender.setParsedMarkdown(textView, parsedMarkdown)
+                previousParsedMarkdown = parsedMarkdown
             }
 
             textView.movementMethod = LinkMovementMethod.getInstance()
@@ -215,69 +200,12 @@ private fun TextView.applyStyleAndColor(
     )
 
     setTextColor(textColor.toArgb())
-    setTextSize(TypedValue.COMPLEX_UNIT_DIP, mergedStyle.fontSize.value)
+    setTextSize(TypedValue.COMPLEX_UNIT_SP, mergedStyle.fontSize.value)
 
-    textAlign?.let { align ->
-        textAlignment = when (align) {
-            TextAlign.Left, TextAlign.Start -> View.TEXT_ALIGNMENT_TEXT_START
-            TextAlign.Right, TextAlign.End -> View.TEXT_ALIGNMENT_TEXT_END
-            TextAlign.Center -> View.TEXT_ALIGNMENT_CENTER
-            else -> View.TEXT_ALIGNMENT_TEXT_START
-        }
+    textAlignment = when (textAlign) {
+        TextAlign.Left, TextAlign.Start -> View.TEXT_ALIGNMENT_TEXT_START
+        TextAlign.Right, TextAlign.End -> View.TEXT_ALIGNMENT_TEXT_END
+        TextAlign.Center -> View.TEXT_ALIGNMENT_CENTER
+        else -> View.TEXT_ALIGNMENT_TEXT_START
     }
-}
-
-fun createMarkdownRender(context: Context, imageLoader: ImageLoader?, linkResolver: LinkResolver?, imageWidth: Int): Markwon {
-    val imagePlugin: CoilImagesPlugin? =
-        if (imageLoader != null) {
-            CoilImagesPlugin.create(
-                object : CoilImagesPlugin.CoilStore {
-                    override fun load(drawable: AsyncDrawable): ImageRequest {
-                        var height = DEFAULT_IMAGE_HEIGHT
-                        if (drawable.destination.contains(TYPE_ICON_RESOURCE_PATH)) {
-                            height = LINK_TYPE_HINT_ICON_HEIGHT
-                        }
-
-                        return ImageRequest.Builder(context)
-                            .defaults(imageLoader.defaults)
-                            .data(drawable.destination)
-                            .crossfade(true)
-                            .size(imageWidth, height) // We set a fixed height and set the width of the image to the screen width.
-                            .scale(Scale.FIT)
-                            .build()
-                    }
-
-                    override fun cancel(disposable: Disposable) {
-                        disposable.dispose()
-                    }
-                },
-                imageLoader
-            )
-        } else null
-
-    return Markwon.builder(context)
-        .usePlugin(HtmlPlugin.create())
-        .usePlugin(StrikethroughPlugin.create())
-        .usePlugin(TablePlugin.create(context))
-        .usePlugin(LinkifyPlugin.create())
-        .usePlugin(object : AbstractMarkwonPlugin() {
-            override fun configureTheme(builder: MarkwonTheme.Builder) {
-                builder
-                    .linkColor(context.getColor(R.color.link_color))
-                    .isLinkUnderlined(false)
-            }
-        })
-        .apply {
-            if (imagePlugin != null) {
-                usePlugin(imagePlugin)
-            }
-            if (linkResolver != null) {
-                usePlugin(object : AbstractMarkwonPlugin() {
-                    override fun configureConfiguration(builder: MarkwonConfiguration.Builder) {
-                        builder.linkResolver(linkResolver)
-                    }
-                })
-            }
-        }
-        .build()
 }

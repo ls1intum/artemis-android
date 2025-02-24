@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -33,6 +32,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.InfoMessageCard
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.LocalMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
@@ -117,7 +117,7 @@ internal fun SavedPostsScreen (
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
+            ArtemisTopAppBar(
                 title = { TopBarTitle(status = status) },
                 navigationIcon = { NavigationBackButton(onNavigateBack) }
             )
@@ -131,7 +131,9 @@ internal fun SavedPostsScreen (
         ) {
             if (status == SavedPostStatus.ARCHIVED || status == SavedPostStatus.COMPLETED) {
                 InfoMessageCard(
-                    modifier = Modifier.padding(bottom = 8.dp),
+                    modifier = Modifier
+                        .padding(top = Spacings.ScreenTopBarSpacing)
+                        .padding(bottom = 8.dp),
                     infoText = stringResource(R.string.saved_posts_removal_notice)
                 )
             }
@@ -189,7 +191,7 @@ private fun SavedPostsList(
         LazyColumn(
             modifier = modifier,
             verticalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = Spacings.calculateEndOfPagePaddingValues()
+            contentPadding = Spacings.calculateContentPaddingValues()
         ) {
             items(
                 items = savedPosts,

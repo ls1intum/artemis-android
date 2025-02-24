@@ -15,7 +15,8 @@ import coil3.request.ErrorResult
 import coil3.request.SuccessResult
 import coil3.toBitmap
 import de.tum.informatics.www1.artemis.native_app.core.common.ArtemisNotificationChannel
-import de.tum.informatics.www1.artemis.native_app.core.common.markdown.PushNotificationArtemisMarkdownTransformer
+import de.tum.informatics.www1.artemis.native_app.core.common.markdown.ArtemisMarkdownTransformer
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ArtemisNotificationManager
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ArtemisImageProvider
 import de.tum.informatics.www1.artemis.native_app.feature.push.PushCommunicationDatabaseProvider
@@ -43,15 +44,24 @@ internal class CommunicationNotificationManagerImpl(
     private val context: Context,
     private val dbProvider: PushCommunicationDatabaseProvider,
     private val artemisImageProvider: ArtemisImageProvider,
+    private val accountDataService: AccountDataService,
 ) : CommunicationNotificationManager, BaseNotificationManager {
 
     override suspend fun popNotification(
         artemisNotification: ArtemisNotification<CommunicationNotificationType>
     ) {
+        var isPostFromAppUser = false
         val (communication, messages) = dbProvider.database.withTransaction {
-            dbProvider.pushCommunicationDao.insertNotification(artemisNotification) {
-                ArtemisNotificationManager.getNextNotificationId(context)
-            }
+            dbProvider.pushCommunicationDao.insertNotification(
+                artemisNotification = artemisNotification,
+                generateNotificationId = {
+                    ArtemisNotificationManager.getNextNotificationId(context)
+                },
+                isPostFromAppUser = { content ->
+                    isPostFromAppUser = content.authorId == getClientId().toString()
+                    isPostFromAppUser
+                }
+            )
 
             val parentId = artemisNotification.parentId
 
@@ -64,9 +74,22 @@ internal class CommunicationNotificationManagerImpl(
             communication to messages
         }
 
+        // Without this check, we would pop previous notifications in the following scenario:
+        // 1. App user creates post1.
+        // 2. Other user replies answer1 in post1's thread.
+        //      -> User gets notification for answer1 (desired).
+        // 3. App user replies answer2 in post1's thread.
+        //      -> User would get not get notification for answer2 (desired).
+        //      -> BUT: Notification for answer1 would be popped again (not desired).
+        if (isPostFromAppUser) return
 
         if (messages.isEmpty()) return
         popCommunicationNotification(communication, messages)
+    }
+
+    private suspend fun getClientId(): Long? {
+        val accountData = accountDataService.getCachedAccountData()
+        return accountData?.id
     }
 
     override suspend fun addSelfMessage(
@@ -177,7 +200,7 @@ internal class CommunicationNotificationManagerImpl(
 
             style.addMessage(
                 NotificationCompat.MessagingStyle.Message(
-                    PushNotificationArtemisMarkdownTransformer.transformMarkdown(message.text),
+                    ArtemisMarkdownTransformer.Default.transformMarkdown(message.text),
                     message.date.toEpochMilliseconds(),
                     Person.Builder()
                         .setIcon(icon)

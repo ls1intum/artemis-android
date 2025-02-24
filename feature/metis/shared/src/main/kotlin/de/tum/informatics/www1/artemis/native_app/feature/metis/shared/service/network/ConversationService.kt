@@ -75,6 +75,7 @@ interface ConversationService {
         description: String,
         isPublic: Boolean,
         isAnnouncement: Boolean,
+        isCourseWide: Boolean,
         authToken: String,
         serverUrl: String
     ): NetworkResponse<ChannelChat>
@@ -168,6 +169,19 @@ interface ConversationService {
         muted: Boolean,
         authToken: String,
         serverUrl: String
+    ): NetworkResponse<Boolean>
+
+    suspend fun markConversationAsRead(
+        courseId: Long,
+        conversationId: Long,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<Boolean>
+
+    suspend fun markAllConversationsAsRead(
+        courseId: Long,
+        serverUrl: String,
+        authToken: String
     ): NetworkResponse<Boolean>
 }
 

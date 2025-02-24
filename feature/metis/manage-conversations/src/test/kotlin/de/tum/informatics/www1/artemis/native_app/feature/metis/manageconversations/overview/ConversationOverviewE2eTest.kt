@@ -17,7 +17,10 @@ import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTi
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
+import de.tum.informatics.www1.artemis.native_app.core.data.onFailure
+import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Username
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
@@ -43,6 +46,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.metistest.Conversation
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -85,6 +91,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
                 description = "some description",
                 isPublic = true,
                 isAnnouncement = false,
+                isCourseWide = true,
                 authToken = accessToken,
                 serverUrl = testServerUrl
             )
@@ -222,6 +229,23 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
         )
     }
 
+    @Test(timeout = DefaultTestTimeoutMillis)
+    fun `mark all conversations as read api called successfully`() = runTest {
+        val response = conversationService.markAllConversationsAsRead(
+            courseId = course.id!!,
+            authToken = accessToken,
+            serverUrl = testServerUrl
+        )
+
+        response
+            .onSuccess {
+                assertTrue(true)
+            }
+            .onFailure {
+                fail("API call failed with exception: ${it.message}")
+            }
+    }
+
     /**
      * Checks that updates to conversations are automatically received over the websocket connection.
      */
@@ -236,6 +260,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
                 description = "some description",
                 isPublic = true,
                 isAnnouncement = false,
+                isCourseWide = false,
                 authToken = accessToken,
                 serverUrl = testServerUrl
             )
@@ -373,6 +398,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
             application = context.applicationContext as Application,
             courseId = course.id!!,
             conversationService = get(),
+            channelService = get(),
             serverConfigurationService = get(),
             accountService = get(),
             conversationPreferenceService = get(),
@@ -387,6 +413,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
             ConversationOverviewBody(
                 modifier = Modifier.fillMaxSize(),
                 viewModel = viewModel,
+                collapsingContentState = CollapsingContentState(),
                 onNavigateToConversation = {},
                 onNavigateToSavedPosts = {},
                 onRequestCreatePersonalConversation = { },

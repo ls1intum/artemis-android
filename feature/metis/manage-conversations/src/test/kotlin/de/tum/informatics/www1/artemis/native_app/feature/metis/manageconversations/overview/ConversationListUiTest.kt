@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.ConversationList
@@ -79,8 +80,8 @@ class ConversationListUiTest : BaseComposeTest() {
                 togglePersonalConversationsExpanded = {},
                 toggleHiddenExpanded = {},
                 toggleSavedPostsExpanded = {},
-                toggleRecentExpanded = {},
                 conversationCollections = conversations,
+                collapsingContentState = CollapsingContentState(),
                 onNavigateToConversation = {},
                 onNavigateToSavedPosts = {},
                 onToggleMarkAsFavourite = { _, _ -> },
@@ -100,8 +101,7 @@ class ConversationListUiTest : BaseComposeTest() {
             hidden = ConversationCollections.ConversationCollection(emptyList(), isExpanded = true),
             exerciseChannels = ConversationCollections.ConversationCollection(emptyList(), isExpanded = true),
             lectureChannels = ConversationCollections.ConversationCollection(emptyList(), isExpanded = true),
-            examChannels = ConversationCollections.ConversationCollection(emptyList(), isExpanded = true),
-            recentChannels = ConversationCollections.ConversationCollection(emptyList(), isExpanded = true)
+            examChannels = ConversationCollections.ConversationCollection(emptyList(), isExpanded = true)
         )
     }
 }

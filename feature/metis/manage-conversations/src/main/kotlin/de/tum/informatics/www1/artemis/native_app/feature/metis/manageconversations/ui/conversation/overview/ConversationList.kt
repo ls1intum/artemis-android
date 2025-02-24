@@ -20,7 +20,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowRight
 import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.Message
-import androidx.compose.material.icons.filled.AccessTimeFilled
+import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.ChatBubble
@@ -28,12 +28,10 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Forum
 import androidx.compose.material.icons.filled.MoreHoriz
-import androidx.compose.material.icons.filled.NotInterested
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.material.icons.filled.School
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.Unarchive
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -50,11 +48,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
@@ -90,7 +90,6 @@ internal const val KEY_SUFFIX_GROUPS = "_g"
 internal const val KEY_SUFFIX_PERSONAL = "_p"
 internal const val KEY_SUFFIX_HIDDEN = "_h"
 internal const val KEY_SUFFIX_SAVED_MESSAGES = "_s"
-internal const val KEY_SUFFIX_RECENT = "_r"
 
 internal fun tagForConversation(conversationId: Long, suffix: String) = "$conversationId$suffix"
 internal fun tagForConversationOptions(tagForConversation: String) = "${tagForConversation}_options"
@@ -105,6 +104,7 @@ private sealed class ConversationSectionState(val isExpanded: Boolean) {
 internal fun ConversationList(
     modifier: Modifier,
     viewModel: ConversationOverviewViewModel,
+    collapsingContentState: CollapsingContentState,
     conversationCollections: ConversationCollections,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onNavigateToSavedPosts: (status: SavedPostStatus) -> Unit,
@@ -127,8 +127,8 @@ internal fun ConversationList(
         togglePersonalConversationsExpanded = viewModel::togglePersonalConversationsExpanded,
         toggleHiddenExpanded = viewModel::toggleHiddenExpanded,
         toggleSavedPostsExpanded = viewModel::toggleSavedPostsExpanded,
-        toggleRecentExpanded = viewModel::toggleRecentExpanded,
         conversationCollections = conversationCollections,
+        collapsingContentState = collapsingContentState,
         onNavigateToConversation = onNavigateToConversation,
         onNavigateToSavedPosts = onNavigateToSavedPosts,
         onToggleMarkAsFavourite = onToggleMarkAsFavourite,
@@ -151,7 +151,7 @@ internal fun ConversationList(
     togglePersonalConversationsExpanded: () -> Unit,
     toggleHiddenExpanded: () -> Unit,
     toggleSavedPostsExpanded: () -> Unit,
-    toggleRecentExpanded: () -> Unit,
+    collapsingContentState: CollapsingContentState,
     conversationCollections: ConversationCollections,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onNavigateToSavedPosts: (status: SavedPostStatus) -> Unit,
@@ -183,7 +183,9 @@ internal fun ConversationList(
         }
 
     LazyColumn (
-        modifier = modifier.testTag(TEST_TAG_CONVERSATION_LIST)
+        modifier = modifier
+            .nestedScroll(collapsingContentState.nestedScrollConnection)
+            .testTag(TEST_TAG_CONVERSATION_LIST)
     ) {
         if (conversationCollections.favorites.conversations.isNotEmpty()) {
             listWithHeader(
@@ -196,24 +198,15 @@ internal fun ConversationList(
             )
         }
 
-        if (conversationCollections.recentChannels.conversations.isNotEmpty()) {
+        if (conversationCollections.channels.conversations.isNotEmpty()) {
             listWithHeader(
-                ConversationSectionState.Conversations(conversationCollections.recentChannels),
-                SECTION_RECENT_KEY,
-                KEY_SUFFIX_RECENT,
-                R.string.conversation_overview_section_recent,
-                toggleRecentExpanded,
-                { Icon(imageVector = Icons.Default.AccessTimeFilled, contentDescription = null) }
-            )
+                ConversationSectionState.Conversations(conversationCollections.channels),
+                SECTION_CHANNELS_KEY,
+                KEY_SUFFIX_CHANNELS,
+                R.string.conversation_overview_section_general_channels,
+                toggleGeneralsExpanded
+            ) { Icon(imageVector = Icons.Default.ChatBubble, contentDescription = null) }
         }
-
-        listWithHeader(
-            ConversationSectionState.Conversations(conversationCollections.channels),
-            SECTION_CHANNELS_KEY,
-            KEY_SUFFIX_CHANNELS,
-            R.string.conversation_overview_section_general_channels,
-            toggleGeneralsExpanded
-        ) { Icon(imageVector = Icons.Default.ChatBubble, contentDescription = null) }
 
         if (conversationCollections.exerciseChannels.conversations.isNotEmpty()) {
             listWithHeader(
@@ -272,7 +265,7 @@ internal fun ConversationList(
                 KEY_SUFFIX_HIDDEN,
                 R.string.conversation_overview_section_hidden,
                 toggleHiddenExpanded
-            ) { Icon(imageVector = Icons.Default.NotInterested, contentDescription = null) }
+            ) { Icon(imageVector = Icons.Default.Archive, contentDescription = null) }
         }
 
         listWithHeader(
@@ -298,6 +291,7 @@ private fun LazyListScope.conversationSectionHeader(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .animateItem()
                 .testTag(key)
                 .clickable { onClick() }
                 .padding(vertical = 8.dp),
@@ -352,7 +346,9 @@ private fun LazyListScope.conversationList(
                 SavedPostStatus.entries
             ) {
                 SavedPostsListItem(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .animateItem(),
                     status = it,
                     onClick = {
                         onNavigateToSavedPosts(it)
@@ -371,6 +367,7 @@ private fun LazyListScope.conversationList(
                 ConversationListItem(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .animateItem()
                         .testTag(itemTag),
                     itemBaseTag = itemTag,
                     conversation = conversation,
@@ -603,7 +600,7 @@ private fun ConversationListItemDropdownMenu(
         DropdownMenuItem(
             leadingIcon = {
                 Icon(
-                    imageVector = if (conversation.isHidden) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                    imageVector = if (conversation.isHidden) Icons.Default.Unarchive else Icons.Default.Archive,
                     contentDescription = null
                 )
             },
