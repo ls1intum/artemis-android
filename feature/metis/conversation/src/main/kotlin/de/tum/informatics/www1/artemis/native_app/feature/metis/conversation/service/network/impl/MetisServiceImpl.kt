@@ -16,10 +16,18 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.http.appendPathSegments
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
 
 internal class MetisServiceImpl(
     private val ktorProvider: KtorProvider,
 ) : MetisService {
+
+    private val json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+    }
 
     override suspend fun getPosts(
         standalonePostsContext: MetisService.StandalonePostsContext,
@@ -149,15 +157,20 @@ internal class MetisServiceImpl(
         url: String,
         serverUrl: String,
         authToken: String
-    ): NetworkResponse<LinkPreview> {
+    ): NetworkResponse<LinkPreview?> {
         return performNetworkCall {
-            ktorProvider.ktorClient.get(serverUrl) {
-                url{
-                    appendPathSegments("api", "link-preview")
-                }
-                parameter("url", url)
-                cookieAuth(authToken)
-            }.body()
+            runCatching {
+                val response: JsonObject = ktorProvider.ktorClient.get(serverUrl) {
+                    url {
+                        appendPathSegments("api", "link-preview")
+                    }
+                    parameter("url", url)
+                    cookieAuth(authToken)
+                }.body()
+
+                if (response.jsonObject.isEmpty()) null
+                else json.decodeFromJsonElement(LinkPreview.serializer(), response)
+            }.getOrNull()
         }
     }
 }

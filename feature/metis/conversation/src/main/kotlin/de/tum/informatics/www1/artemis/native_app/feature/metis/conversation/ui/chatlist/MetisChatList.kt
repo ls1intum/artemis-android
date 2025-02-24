@@ -18,6 +18,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -115,6 +116,7 @@ internal fun MetisChatList(
             onRequestRetrySend = viewModel::retryCreatePost,
             onUndoDeletePost = viewModel::undoDeletePost,
             conversationName = conversationName,
+            generateLinkPreviews = viewModel::generateLinkPreviews,
             onFileSelected = { uri ->
                 viewModel.onFileSelected(uri, context)
             }
@@ -144,6 +146,7 @@ fun MetisChatList(
     onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
     onClickViewPost: (StandalonePostId) -> Unit,
     onUndoDeletePost: (IStandalonePost) -> Unit,
+    generateLinkPreviews: (IBasePost) -> Unit = {},
     onRequestRetrySend: (StandalonePostId) -> Unit,
     conversationName: String,
     onFileSelected: (Uri) -> Unit
@@ -211,6 +214,7 @@ fun MetisChatList(
                             onRequestSave = onSavePostDelegate,
                             onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
                             onRequestRetrySend = onRequestRetrySend,
+                            generateLinkPreviews = generateLinkPreviews
                         )
                     }
                 }
@@ -246,7 +250,8 @@ private fun ChatList(
     onRequestPin: (IStandalonePost) -> Unit,
     onRequestSave: (IStandalonePost) -> Unit,
     onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Unit,
-    onRequestRetrySend: (StandalonePostId) -> Unit
+    onRequestRetrySend: (StandalonePostId) -> Unit,
+    generateLinkPreviews: (IBasePost) -> Unit
 ) {
     LazyColumn(
         modifier = modifier,
@@ -303,6 +308,8 @@ private fun ChatList(
                             )
                         }
                     )
+
+                    LaunchedEffect(post) { generateLinkPreviews(post ?: return@LaunchedEffect) }
 
                     PostWithBottomSheet(
                         modifier = Modifier

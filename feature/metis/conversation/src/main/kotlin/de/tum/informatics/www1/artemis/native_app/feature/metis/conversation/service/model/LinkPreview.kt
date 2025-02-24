@@ -8,7 +8,7 @@ data class LinkPreview(
     val description: String,
     val image: String,
     val url: String,
-    val shouldPreviewBeShown: Boolean?
+    var shouldPreviewBeShown: Boolean = false
 )
 
 data class Link(

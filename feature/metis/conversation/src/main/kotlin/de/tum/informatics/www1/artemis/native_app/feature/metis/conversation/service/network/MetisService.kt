@@ -38,7 +38,7 @@ interface MetisService {
         url: String,
         serverUrl: String,
         authToken: String
-    ): NetworkResponse<LinkPreview>
+    ): NetworkResponse<LinkPreview?>
 
     /**
      * The metis context needed to query standalone posts.

@@ -3,7 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.Link
 
 object LinkifyService {
-    private val urlRegex = "/https?:\\/\\/[^\\s/\$.?#>][^\\s>]*?(?=\\s|[\\])]|\$)/g".toRegex()
+    private val urlRegex = """https?:\/\/[^\s<>()\[\]]+""".toRegex()
 
     fun findLinks(text: String): List<Link> {
         val linkableItems = mutableListOf<Link>()
