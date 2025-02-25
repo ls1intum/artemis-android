@@ -1,8 +1,11 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.overview
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -11,6 +14,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.MarkdownTextAlertDialog
@@ -24,7 +28,8 @@ internal fun ConversationOtherSettings(
     modifier: Modifier,
     conversation: Conversation,
     onLeaveConversation: () -> Unit,
-    onToggleChannelArchivation: () -> Unit
+    onToggleChannelArchivation: () -> Unit,
+    onDeleteChannel: () -> Unit
 ) {
     var displayArchiveChannelDialog by remember { mutableStateOf(false) }
 
@@ -61,6 +66,19 @@ internal fun ConversationOtherSettings(
                             R.string.conversation_settings_section_other_archive_channel
                         }
                     )
+                )
+            }
+
+            OutlinedButton(
+                modifier = buttonModifier,
+                onClick = { onDeleteChannel() },
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.error,
+                ),
+                border = BorderStroke(1.dp, SolidColor(MaterialTheme.colorScheme.error))
+            ) {
+                Text(
+                    text = stringResource(R.string.conversation_settings_section_other_delete_channel)
                 )
             }
         }

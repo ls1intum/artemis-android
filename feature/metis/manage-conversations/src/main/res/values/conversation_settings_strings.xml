@@ -24,6 +24,8 @@
     <string name="conversation_settings_section_other_archive_channel">Archive channel</string>
     <string name="conversation_settings_section_other_unarchive_channel">Unarchive channel</string>
 
+    <string name="conversation_settings_section_other_delete_channel">Delete channel</string>
+
     <string name="conversation_settings_section_members">Members</string>
     <plurals name="conversation_settings_section_members_count">
         <item quantity="zero">No members</item>

@@ -20,7 +20,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversati
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
-
 @Composable
 fun ConversationSettingsScreen(
     modifier: Modifier,
@@ -29,7 +28,8 @@ fun ConversationSettingsScreen(
     onNavigateBack: () -> Unit,
     onRequestAddMembers: () -> Unit,
     onRequestViewAllMembers: () -> Unit,
-    onConversationLeft: () -> Unit
+    onConversationLeft: () -> Unit,
+    onChannelDeleted: () -> Unit
 ) {
     ConversationSettingsScreen(
         modifier = modifier,
@@ -39,7 +39,8 @@ fun ConversationSettingsScreen(
         onNavigateBack = onNavigateBack,
         onRequestAddMembers = onRequestAddMembers,
         onRequestViewAllMembers = onRequestViewAllMembers,
-        onConversationLeft = onConversationLeft
+        onConversationLeft = onConversationLeft,
+        onChannelDeleted = onChannelDeleted
     )
 }
 
@@ -52,7 +53,8 @@ internal fun ConversationSettingsScreen(
     onNavigateBack: () -> Unit,
     onRequestAddMembers: () -> Unit,
     onRequestViewAllMembers: () -> Unit,
-    onConversationLeft: () -> Unit
+    onConversationLeft: () -> Unit,
+    onChannelDeleted: () -> Unit
 ) {
     LaunchedEffect(courseId, conversationId) {
         viewModel.updateConversation(courseId, conversationId)
@@ -60,6 +62,12 @@ internal fun ConversationSettingsScreen(
 
     LaunchedEffect(key1 = Unit) {
         viewModel.requestReload()
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.onChannelDeleted.collect {
+            onChannelDeleted()
+        }
     }
 
     Scaffold(
