@@ -79,7 +79,7 @@ internal fun ConversationOtherSettings(
                 border = BorderStroke(1.dp, SolidColor(MaterialTheme.colorScheme.error))
             ) {
                 Text(
-                    text = stringResource(R.string.conversation_settings_section_other_delete_channel)
+                    text = stringResource(R.string.conversation_settings_section_delete_channel)
                 )
             }
         }
@@ -129,13 +129,13 @@ internal fun ConversationOtherSettings(
         }
 
         MarkdownTextAlertDialog(
-            title = stringResource(R.string.conversation_settings_section_other_delete_channel_title),
+            title = stringResource(R.string.conversation_settings_section_delete_channel_title),
             text = stringResource(
-                R.string.conversation_settings_section_other_delete_channel_message,
+                R.string.conversation_settings_section_delete_channel_message,
                 channelName
             ),
-            confirmButtonText = stringResource(R.string.conversation_settings_section_other_delete_channel),
-            dismissButtonText = stringResource(R.string.conversation_settings_section_other_delete_channel_negative),
+            confirmButtonText = stringResource(R.string.conversation_settings_section_delete_channel),
+            dismissButtonText = stringResource(R.string.conversation_settings_section_delete_channel_negative),
             onPressPositiveButton = {
                 displayDeleteChannelDialog = false
                 onDeleteChannel()

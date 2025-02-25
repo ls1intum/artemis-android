@@ -70,8 +70,8 @@
     <string name="conversation_settings_dialog_unarchive_channel_positive">Unarchive channel</string>
     <string name="conversation_settings_dialog_unarchive_channel_negative">@android:string/cancel</string>
 
-    <string name="conversation_settings_section_other_delete_channel">Delete channel</string>
-    <string name="conversation_settings_section_other_delete_channel_title">Delete channel?</string>
-    <string name="conversation_settings_section_other_delete_channel_message">**Are you sure to delete the channel %1$s?** This is a permanent action and cannot be undone.</string>
-    <string name="conversation_settings_section_other_delete_channel_negative">@android:string/cancel</string>
+    <string name="conversation_settings_section_delete_channel">Delete channel</string>
+    <string name="conversation_settings_section_delete_channel_title">Delete channel?</string>
+    <string name="conversation_settings_section_delete_channel_message">**Are you sure to delete the channel %1$s?** This is a permanent action and cannot be undone.</string>
+    <string name="conversation_settings_section_delete_channel_negative">@android:string/cancel</string>
 </resources>
