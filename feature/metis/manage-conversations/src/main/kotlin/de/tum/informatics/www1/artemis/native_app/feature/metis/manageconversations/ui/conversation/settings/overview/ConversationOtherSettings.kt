@@ -32,6 +32,7 @@ internal fun ConversationOtherSettings(
     onDeleteChannel: () -> Unit
 ) {
     var displayArchiveChannelDialog by remember { mutableStateOf(false) }
+    var displayDeleteChannelDialog by remember { mutableStateOf(false) }
 
     val buttonModifier = Modifier.fillMaxWidth()
 
@@ -71,7 +72,7 @@ internal fun ConversationOtherSettings(
 
             OutlinedButton(
                 modifier = buttonModifier,
-                onClick = { onDeleteChannel() },
+                onClick = { displayDeleteChannelDialog = true },
                 colors = ButtonDefaults.outlinedButtonColors(
                     contentColor = MaterialTheme.colorScheme.error,
                 ),
@@ -84,6 +85,7 @@ internal fun ConversationOtherSettings(
         }
     }
 
+    // Archive/Unarchive Confirmation Dialog
     if (displayArchiveChannelDialog) {
         val channelName = when (conversation) {
             is ChannelChat -> conversation.name
@@ -117,5 +119,28 @@ internal fun ConversationOtherSettings(
             dismissButtonText = stringResource(id = dismiss),
             onPressPositiveButton = onToggleChannelArchivation,
             onDismissRequest = { displayArchiveChannelDialog = false })
+    }
+
+    // Delete Channel Confirmation Dialog
+    if (displayDeleteChannelDialog) {
+        val channelName = when (conversation) {
+            is ChannelChat -> conversation.name
+            else -> ""
+        }
+
+        MarkdownTextAlertDialog(
+            title = stringResource(R.string.conversation_settings_section_other_delete_channel_title),
+            text = stringResource(
+                R.string.conversation_settings_section_other_delete_channel_message,
+                channelName
+            ),
+            confirmButtonText = stringResource(R.string.conversation_settings_section_other_delete_channel),
+            dismissButtonText = stringResource(R.string.conversation_settings_section_other_delete_channel_negative),
+            onPressPositiveButton = {
+                displayDeleteChannelDialog = false
+                onDeleteChannel()
+            },
+            onDismissRequest = { displayDeleteChannelDialog = false }
+        )
     }
 }

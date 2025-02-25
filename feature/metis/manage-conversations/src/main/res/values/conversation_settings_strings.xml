@@ -24,8 +24,6 @@
     <string name="conversation_settings_section_other_archive_channel">Archive channel</string>
     <string name="conversation_settings_section_other_unarchive_channel">Unarchive channel</string>
 
-    <string name="conversation_settings_section_other_delete_channel">Delete channel</string>
-
     <string name="conversation_settings_section_members">Members</string>
     <plurals name="conversation_settings_section_members_count">
         <item quantity="zero">No members</item>
@@ -71,4 +69,9 @@
     <string name="conversation_settings_dialog_unarchive_channel_message">**Do you really want to unarchive channel %1$s?** Unarchiving a channel will allow members to post. You can archive the channel again at any time.</string>
     <string name="conversation_settings_dialog_unarchive_channel_positive">Unarchive channel</string>
     <string name="conversation_settings_dialog_unarchive_channel_negative">@android:string/cancel</string>
+
+    <string name="conversation_settings_section_other_delete_channel">Delete channel</string>
+    <string name="conversation_settings_section_other_delete_channel_title">Delete channel?</string>
+    <string name="conversation_settings_section_other_delete_channel_message">**Are you sure to delete the channel %1$s?** This is a permanent action and cannot be undone.</string>
+    <string name="conversation_settings_section_other_delete_channel_negative">@android:string/cancel</string>
 </resources>
