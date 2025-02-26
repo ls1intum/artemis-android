@@ -123,6 +123,7 @@ internal fun PostItem(
     isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     postActions: PostActions,
     linkPreviews: List<LinkPreview>,
+    onRemoveLinkPreview: (LinkPreview) -> Unit,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     onRequestRetrySend: () -> Unit,
@@ -170,11 +171,13 @@ internal fun PostItem(
             .padding(horizontal = Spacings.Post.innerSpacing),
         post = post,
         isExpanded = isExpanded,
+        isAuthor = post?.authorId == clientId,
         isPlaceholder = isPlaceholder,
         isDeleting = isDeleting,
         postStatus = postStatus,
         displayHeader = displayHeader,
         linkPreviews = linkPreviews,
+        onRemoveLinkPreview = onRemoveLinkPreview,
         onClick = onClick,
         onLongClick = onLongClick,
         onUndoDelete = { postActions.requestUndoDeletePost?.invoke() },
@@ -266,9 +269,11 @@ fun PostItemMainContent(
     isExpanded: Boolean = true,
     isPlaceholder: Boolean = false,
     isDeleting: Boolean = false,
+    isAuthor: Boolean = false,
     postStatus: CreatePostService.Status = CreatePostService.Status.FINISHED,
     displayHeader: Boolean = true,
     linkPreviews: List<LinkPreview> = emptyList(),
+    onRemoveLinkPreview: (LinkPreview) -> Unit = {},
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     onUndoDelete: () -> Unit = {},
@@ -336,7 +341,9 @@ fun PostItemMainContent(
 
                     LinkPreviewColumn(
                         modifier = Modifier.fillMaxWidth(),
-                        linkPreviews = linkPreviews
+                        linkPreviews = linkPreviews,
+                        isAuthor = isAuthor,
+                        onRemoveLinkPreview = onRemoveLinkPreview
                     )
                 }
 

@@ -118,6 +118,7 @@ internal fun MetisChatList(
             onUndoDeletePost = viewModel::undoDeletePost,
             conversationName = conversationName,
             generateLinkPreviews = viewModel::generateLinkPreviews,
+            onRemoveLinkPreview = viewModel::removeLinkPreview,
             onFileSelected = { uri ->
                 viewModel.onFileSelected(uri, context)
             }
@@ -148,6 +149,7 @@ fun MetisChatList(
     onClickViewPost: (StandalonePostId) -> Unit,
     onUndoDeletePost: (IStandalonePost) -> Unit,
     generateLinkPreviews: (String) -> StateFlow<List<LinkPreview>>,
+    onRemoveLinkPreview: (LinkPreview, IBasePost, IStandalonePost?) -> Unit,
     onRequestRetrySend: (StandalonePostId) -> Unit,
     conversationName: String,
     onFileSelected: (Uri) -> Unit
@@ -215,7 +217,8 @@ fun MetisChatList(
                             onRequestSave = onSavePostDelegate,
                             onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
                             onRequestRetrySend = onRequestRetrySend,
-                            generateLinkPreviews = generateLinkPreviews
+                            generateLinkPreviews = generateLinkPreviews,
+                            onRemoveLinkPreview = onRemoveLinkPreview
                         )
                     }
                 }
@@ -252,7 +255,8 @@ private fun ChatList(
     onRequestSave: (IStandalonePost) -> Unit,
     onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Unit,
     onRequestRetrySend: (StandalonePostId) -> Unit,
-    generateLinkPreviews: (String) -> StateFlow<List<LinkPreview>>
+    generateLinkPreviews: (String) -> StateFlow<List<LinkPreview>>,
+    onRemoveLinkPreview: (LinkPreview, IBasePost, IStandalonePost?) -> Unit
 ) {
     LazyColumn(
         modifier = modifier,
@@ -354,6 +358,9 @@ private fun ChatList(
                                     }
                                 }
                             ),
+                        onRemoveLinkPreview = { linkPreview ->
+                            onRemoveLinkPreview(linkPreview, post as IStandalonePost, null)
+                        },
                         onClick = {
                             val standalonePostId = post?.standalonePostId
 

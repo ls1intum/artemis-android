@@ -150,6 +150,7 @@ internal fun MetisThreadUi(
             onRequestReload = viewModel::requestReload,
             onRequestRetrySend = viewModel::retryCreateReply,
             generateLinkPreviews = viewModel::generateLinkPreviews,
+            onRemoveLinkPreview = viewModel::removeLinkPreview,
             onFileSelect = { uri, context ->
                 viewModel.onFileSelected(uri, context)
             }
@@ -170,6 +171,7 @@ internal fun MetisThreadUi(
     emojiService: EmojiService,
     initialReplyTextProvider: InitialReplyTextProvider,
     generateLinkPreviews: (String) -> StateFlow<List<LinkPreview>>,
+    onRemoveLinkPreview: (LinkPreview, IBasePost, IStandalonePost?) -> Unit,
     onCreatePost: () -> Deferred<MetisModificationFailure?>,
     onEditPost: (IBasePost, String) -> Deferred<MetisModificationFailure?>,
     onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure?>)?,
@@ -238,6 +240,7 @@ internal fun MetisThreadUi(
                                 onRequestPin = onPinPostDelegate,
                                 onRequestSave = onSavePostDelegate,
                                 generateLinkPreviews = generateLinkPreviews,
+                                onRemoveLinkPreview = onRemoveLinkPreview,
                                 state = listState,
                                 onRequestRetrySend = onRequestRetrySend
                             )
@@ -278,6 +281,7 @@ private fun PostAndRepliesList(
     onRequestPin: (IBasePost) -> Unit,
     onRequestSave: (IBasePost) -> Unit,
     generateLinkPreviews: (String) -> StateFlow<List<LinkPreview>>,
+    onRemoveLinkPreview: (LinkPreview, IBasePost, IStandalonePost?) -> Unit,
     onRequestReactWithEmoji: (IBasePost, emojiId: String, create: Boolean) -> Unit,
     onRequestRetrySend: (clientSidePostId: String, content: String) -> Unit
 ) {
@@ -331,6 +335,9 @@ private fun PostAndRepliesList(
                     postItemViewType = PostItemViewType.ThreadContextPostItem,
                     postActions = postActions,
                     linkPreviews = linkPreviews,
+                    onRemoveLinkPreview = { linkPreview ->
+                        onRemoveLinkPreview(linkPreview, post, null)
+                    },
                     isMarkedAsDeleteList = isMarkedAsDeleteList,
                     displayHeader = true,
                     joinedItemType = PostItemViewJoinedType.PARENT,
@@ -365,6 +372,9 @@ private fun PostAndRepliesList(
                 post = answerPost,
                 postActions = postActions,
                 linkPreviews = answerPostLinkPreviews,
+                onRemoveLinkPreview = { linkPreview ->
+                    onRemoveLinkPreview(linkPreview, answerPost, post as? IStandalonePost)
+                },
                 isMarkedAsDeleteList = isMarkedAsDeleteList,
                 postItemViewType = PostItemViewType.ThreadAnswerItem,
                 clientId = clientId,

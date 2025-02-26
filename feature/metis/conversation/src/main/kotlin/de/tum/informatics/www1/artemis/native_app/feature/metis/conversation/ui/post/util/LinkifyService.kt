@@ -30,4 +30,22 @@ object LinkifyService {
         }
         return linkableItems
     }
+
+    fun removeLinkPreview(text: String, urlToSearchFor: String): String {
+        var modifiedContent = text
+        val matches = urlRegex.findAll(modifiedContent).toList()
+
+        for (match in matches) {
+            val url = match.value
+            val normalizedUrl = if (!url.endsWith("/")) urlToSearchFor.trimEnd('/') else urlToSearchFor
+            val start = match.range.first
+            val end = match.range.last + 1
+
+            if (url == normalizedUrl || normalizedUrl.contains(url)) {
+                modifiedContent = modifiedContent.substring(0, start) + "<$url>" + modifiedContent.substring(end)
+            }
+        }
+
+        return modifiedContent
+    }
 }

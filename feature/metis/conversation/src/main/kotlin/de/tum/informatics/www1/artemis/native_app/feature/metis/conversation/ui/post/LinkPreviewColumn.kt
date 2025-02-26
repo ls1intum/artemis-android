@@ -6,11 +6,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,15 +32,25 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 @Composable
 fun LinkPreviewColumn(
     modifier: Modifier,
-    linkPreviews: List<LinkPreview>
+    linkPreviews: List<LinkPreview>,
+    isAuthor: Boolean,
+    onRemoveLinkPreview: (LinkPreview) -> Unit
 ) {
     Column(modifier = modifier) {
+        val shownImagesCount = linkPreviews.filter { it.shouldPreviewBeShown }.size
+        val showImage = remember { shownImagesCount <= 1 }
+
         linkPreviews.forEach { linkPreview ->
             if (linkPreview.shouldPreviewBeShown) {
                 LinkPreviewItem(
                     modifier = Modifier.fillMaxWidth(),
-                    linkPreview = linkPreview
+                    linkPreview = linkPreview,
+                    isAuthor = isAuthor,
+                    showImage = showImage,
+                    onRemoveLinkPreview = onRemoveLinkPreview
                 )
+
+                Spacer(modifier = Modifier.height(8.dp))
             }
         }
     }
@@ -45,6 +60,9 @@ fun LinkPreviewColumn(
 private fun LinkPreviewItem(
     modifier: Modifier,
     linkPreview: LinkPreview,
+    isAuthor: Boolean,
+    showImage: Boolean,
+    onRemoveLinkPreview: (LinkPreview) -> Unit
 ) {
     val context = LocalContext.current
 
@@ -54,9 +72,9 @@ private fun LinkPreviewItem(
     ) {
         Box(
             modifier = Modifier
-                .clip(shape = MaterialTheme.shapes.medium)
+                .clip(shape = MaterialTheme.shapes.large)
                 .fillMaxHeight()
-                .width(8.dp)
+                .width(6.dp)
                 .background(color = MaterialTheme.colorScheme.primary)
         )
 
@@ -64,21 +82,34 @@ private fun LinkPreviewItem(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            val model = remember(linkPreview.image) {
-                ImageRequest
-                    .Builder(context)
-                    .data(linkPreview.image)
-                    .build()
-            }
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ){
                 Text(
+                    modifier = Modifier.weight(1f),
                     text = linkPreview.title,
                     style = MaterialTheme.typography.titleMedium
                 )
+
+                if (isAuthor) {
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    IconButton(
+                        modifier = Modifier.size(24.dp),
+                        onClick = {
+                            linkPreview.shouldPreviewBeShown = false
+                            onRemoveLinkPreview(linkPreview)
+                        }
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(18.dp),
+                            imageVector = Icons.Default.Close,
+                            contentDescription = null
+                        )
+                    }
+                }
             }
 
             Text(
@@ -86,11 +117,20 @@ private fun LinkPreviewItem(
                 style = MaterialTheme.typography.bodyMedium
             )
 
-            AsyncImage(
-                modifier = Modifier.size(94.dp),
-                model = model,
-                contentDescription = null
-            )
+            if (showImage){
+                val model = remember(linkPreview.image) {
+                    ImageRequest
+                        .Builder(context)
+                        .data(linkPreview.image)
+                        .build()
+                }
+
+                AsyncImage(
+                    modifier = Modifier.size(94.dp),
+                    model = model,
+                    contentDescription = null
+                )
+            }
         }
     }
 }

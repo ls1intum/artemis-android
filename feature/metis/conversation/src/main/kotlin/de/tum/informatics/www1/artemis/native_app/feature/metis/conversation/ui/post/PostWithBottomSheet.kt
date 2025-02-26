@@ -41,6 +41,7 @@ internal fun PostWithBottomSheet(
     clientId: Long,
     displayHeader: Boolean,
     joinedItemType: PostItemViewJoinedType,
+    onRemoveLinkPreview: (LinkPreview) -> Unit,
     onClick: () -> Unit
 ) {
     var displayBottomSheet by remember(post, postItemViewType) { mutableStateOf(false) }
@@ -104,6 +105,7 @@ internal fun PostWithBottomSheet(
             isMarkedAsDeleteList = isMarkedAsDeleteList,
             postActions = postActions,
             linkPreviews = linkPreviews,
+            onRemoveLinkPreview = onRemoveLinkPreview,
             onClick = onClick,
             onLongClick = {
                 displayBottomSheet = true

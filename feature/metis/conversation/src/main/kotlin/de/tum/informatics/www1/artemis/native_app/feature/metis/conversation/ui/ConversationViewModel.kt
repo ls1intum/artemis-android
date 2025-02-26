@@ -546,6 +546,21 @@ internal open class ConversationViewModel(
         }
     }
 
+    fun removeLinkPreview(
+        linkPreview: LinkPreview,
+        post: IBasePost,
+        parentPost: IStandalonePost?
+    ): Deferred<MetisModificationFailure?> {
+        val newContent = LinkifyService.removeLinkPreview(post.content.orEmpty(), linkPreview.url)
+        return when (post) {
+            is IStandalonePost -> editPost(post, newContent)
+            is AnswerPostPojo -> {
+                parentPost?.let { editAnswerPost(it, post, newContent) } ?: throw IllegalArgumentException()
+            }
+            else -> throw IllegalArgumentException()
+        }
+    }
+
     fun generateLinkPreviews(postContent: String): StateFlow<List<LinkPreview>> =
         combine(
             accountService.authToken,

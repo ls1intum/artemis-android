@@ -21,6 +21,7 @@ import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvid
 import de.tum.informatics.www1.artemis.native_app.device.test.NetworkStatusProviderStub
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.CourseScaffold
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.CourseTab
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.EmojiServiceStub
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationChatListScreen
@@ -254,6 +255,7 @@ fun `Metis - Conversation Channel`() {
                     onSavePost = { CompletableDeferred() },
                     onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                     generateLinkPreviews = { _ -> flowOf(emptyList<LinkPreview>()) as StateFlow<List<LinkPreview>> },
+                    onRemoveLinkPreview = { _, _, _ -> CompletableDeferred<MetisModificationFailure>() },
                     bottomItem = null,
                     onClickViewPost = {},
                     onRequestRetrySend = {},

@@ -15,6 +15,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArt
 import de.tum.informatics.www1.artemis.native_app.core.ui.test.ArtemisImageProviderStub
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.EmojiServiceStub
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.PostsDataState
@@ -36,6 +37,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visibleme
 import de.tum.informatics.www1.artemis.native_app.feature.metistest.VisibleMetisContextManagerMock
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.datetime.Clock
 
 
@@ -181,6 +184,8 @@ abstract class BaseChatUITest : BaseComposeTest() {
                     isAtLeastTutorInCourse = isAtLeastTutorInCourse,
                     hasModerationRights = hasModerationRights,
                 ),
+                generateLinkPreviews = { _ -> flowOf(emptyList<LinkPreview>()) as StateFlow<List<LinkPreview>> },
+                onRemoveLinkPreview = { _, _, _ -> CompletableDeferred<MetisModificationFailure>() },
                 serverUrl = "",
                 isMarkedAsDeleteList = mutableStateListOf(),
                 emojiService = EmojiServiceStub,
@@ -235,6 +240,8 @@ abstract class BaseChatUITest : BaseComposeTest() {
                     emojiService = EmojiServiceStub,isMarkedAsDeleteList = mutableStateListOf(),
                     bottomItem = null,
                     isReplyEnabled = true,
+                    generateLinkPreviews = { _ -> flowOf(emptyList<LinkPreview>()) as StateFlow<List<LinkPreview>> },
+                    onRemoveLinkPreview = { _, _, _ -> CompletableDeferred<MetisModificationFailure>() },
                     onCreatePost = { CompletableDeferred() },
                     onEditPost = { _, _ -> CompletableDeferred() },
                     onPinPost = onPinPost,
