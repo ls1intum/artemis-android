@@ -18,9 +18,7 @@ data class SavedPost(
     override val referencePostId: Long,
     override val authorRole: UserRole? = null,
     override val reactions: List<Reaction>? = null,
-    override val hasForwardedMessages: Boolean? = null,
-    override val forwardedPosts: List<IStandalonePost>? = null,
-    override val forwardedAnswerPosts: List<IAnswerPost>? = null
+    override val hasForwardedMessages: Boolean? = null
 ) : BasePost(), ISavedPost {
 
 

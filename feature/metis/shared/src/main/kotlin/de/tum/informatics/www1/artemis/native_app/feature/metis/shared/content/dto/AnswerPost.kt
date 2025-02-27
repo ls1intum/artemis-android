@@ -20,8 +20,6 @@ data class AnswerPost(
     override val resolvesPost: Boolean = false,
     override val isSaved: Boolean = false,
     override val hasForwardedMessages: Boolean = false,
-    override val forwardedPosts: List<IStandalonePost>? = null,
-    override val forwardedAnswerPosts: List<IAnswerPost>? = null,
     val post: StandalonePost? = null,
 ) : BasePost(), IAnswerPost {
 

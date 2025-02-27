@@ -15,8 +15,6 @@ sealed class BasePost : IBasePost {
     abstract override val reactions: List<Reaction>?
     abstract override val isSaved: Boolean?
     abstract override val hasForwardedMessages: Boolean?
-    abstract override val forwardedPosts: List<IStandalonePost>?
-    abstract override val forwardedAnswerPosts: List<IAnswerPost>?
 
     override val serverPostId: Long?
         get() = id

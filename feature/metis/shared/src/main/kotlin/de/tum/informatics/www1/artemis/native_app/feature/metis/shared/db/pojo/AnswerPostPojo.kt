@@ -4,7 +4,6 @@ import androidx.room.ColumnInfo
 import androidx.room.Ignore
 import androidx.room.Relation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.BasePostingEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.MetisPostContextEntity
@@ -74,13 +73,6 @@ data class AnswerPostPojo(
 
     @Ignore
     override val hasForwardedMessages: Boolean = basePostingCache.hasForwardedMessages
-
-    // We don't store the forwarded posts in the database.
-    @Ignore
-    override val forwardedPosts: List<IStandalonePost>? = null
-
-    @Ignore
-    override val forwardedAnswerPosts: List<IAnswerPost>? = null
 
     @Ignore
     override val serverPostId: Long? = serverPostIdCache.serverPostId
