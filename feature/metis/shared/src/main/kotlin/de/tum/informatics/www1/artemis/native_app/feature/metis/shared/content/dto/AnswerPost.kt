@@ -19,7 +19,10 @@ data class AnswerPost(
     @SerialName("resolvesPost")
     override val resolvesPost: Boolean = false,
     override val isSaved: Boolean = false,
-    val post: StandalonePost? = null
+    override val hasForwardedMessages: Boolean = false,
+    override val forwardedPosts: List<IStandalonePost>? = null,
+    override val forwardedAnswerPosts: List<IAnswerPost>? = null,
+    val post: StandalonePost? = null,
 ) : BasePost(), IAnswerPost {
 
     @Transient

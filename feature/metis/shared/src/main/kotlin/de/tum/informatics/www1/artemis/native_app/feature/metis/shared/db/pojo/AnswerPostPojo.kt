@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Ignore
 import androidx.room.Relation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.BasePostingEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.MetisPostContextEntity
@@ -22,7 +23,7 @@ data class AnswerPostPojo(
         entity = BasePostingEntity::class,
         entityColumn = "id",
         parentColumn = "post_id",
-        projection = ["author_id", "creation_date", "updated_date", "content", "author_role", "is_saved"]
+        projection = ["author_id", "creation_date", "updated_date", "content", "author_role", "is_saved", "has_forwarded_messages"]
     )
     private val basePostingCache: BasePostingCache,
     @Relation(
@@ -72,6 +73,16 @@ data class AnswerPostPojo(
     override val isSaved: Boolean = basePostingCache.isSaved
 
     @Ignore
+    override val hasForwardedMessages: Boolean = basePostingCache.hasForwardedMessages
+
+    // We don't store the forwarded posts in the database.
+    @Ignore
+    override val forwardedPosts: List<IStandalonePost>? = null
+
+    @Ignore
+    override val forwardedAnswerPosts: List<IAnswerPost>? = null
+
+    @Ignore
     override val serverPostId: Long? = serverPostIdCache.serverPostId
 
     @Ignore
@@ -109,6 +120,8 @@ data class AnswerPostPojo(
         val authorImageUrl: String?,
         @ColumnInfo(name = "is_saved")
         val isSaved: Boolean,
+        @ColumnInfo(name = "has_forwarded_messages")
+        val hasForwardedMessages: Boolean
     )
 
     // The ids have primitive types (Long), that's why we need to add the wrapper cache class around them.

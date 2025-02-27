@@ -26,7 +26,10 @@ data class StandalonePost(
     val conversation: Conversation? = null,
     val courseWideContext: CourseWideContext? = null,
     override val displayPriority: DisplayPriority? = null,
-    override val resolved: Boolean? = null
+    override val resolved: Boolean? = null,
+    override val hasForwardedMessages: Boolean? = null,
+    override val forwardedPosts: List<IStandalonePost>? = null,
+    override val forwardedAnswerPosts: List<IAnswerPost>? = null,
 ) : BasePost(), IStandalonePost {
 
     constructor(post: IStandalonePost, conversation: Conversation) : this(
@@ -45,6 +48,9 @@ data class StandalonePost(
         resolved = post.resolved,
         displayPriority = post.displayPriority,
         isSaved = post.isSaved,
+        hasForwardedMessages = post.hasForwardedMessages,
+        forwardedPosts = post.forwardedPosts,
+        forwardedAnswerPosts = post.forwardedAnswerPosts
     )
 
     @Transient

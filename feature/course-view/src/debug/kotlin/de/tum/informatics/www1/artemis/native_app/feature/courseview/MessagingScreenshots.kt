@@ -288,7 +288,8 @@ private fun generateMessage(
             tags = emptyList(),
             answers = emptyList(),
             reactions = emptyList(),
-            displayPriority = null
+            displayPriority = null,
+            hasForwardedMessages = false
         )
     )
 }

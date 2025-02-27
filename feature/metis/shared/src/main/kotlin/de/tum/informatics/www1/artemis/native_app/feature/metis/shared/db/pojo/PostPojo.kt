@@ -41,6 +41,8 @@ data class PostPojo(
     override val resolved: Boolean,
     @ColumnInfo(name = "is_saved")
     override val isSaved: Boolean,
+    @ColumnInfo(name = "has_forwarded_messages")
+    override val hasForwardedMessages: Boolean,
     @ColumnInfo(name = "context")
     val courseWideContext: BasePostingEntity.CourseWideContext?,
     @ColumnInfo(name = "display_priority")
@@ -75,6 +77,13 @@ data class PostPojo(
 
     @Ignore
     override val standalonePostId: StandalonePostId = StandalonePostId.ClientSideId(clientPostId)
+
+    // We don't store the forwarded posts in the database.
+    @Ignore
+    override val forwardedPosts: List<IStandalonePost>? = null
+
+    @Ignore
+    override val forwardedAnswerPosts: List<IAnswerPost>? = null
 
     data class Reaction(
         @ColumnInfo(name = "emoji")

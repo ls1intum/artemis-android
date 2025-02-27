@@ -14,6 +14,9 @@ sealed interface IBasePost {
     val content: String?
     val reactions: List<IReaction>?
     val isSaved: Boolean?
+    val hasForwardedMessages: Boolean?
+    val forwardedPosts: List<IStandalonePost>?
+    val forwardedAnswerPosts: List<IAnswerPost>?
 
     val serverPostId: Long?
     val clientPostId: String?
