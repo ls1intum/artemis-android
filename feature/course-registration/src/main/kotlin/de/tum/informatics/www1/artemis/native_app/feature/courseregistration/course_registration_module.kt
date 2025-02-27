@@ -6,6 +6,6 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val courseRegistrationModule = module {
-    single<CourseRegistrationService> { CourseRegistrationServiceImpl(get()) }
-    viewModel { RegisterForCourseViewModel(get(), get(), get(), get()) }
+    single<CourseRegistrationService> { CourseRegistrationServiceImpl(get(), get()) }
+    viewModel { RegisterForCourseViewModel(get(), get()) }
 }

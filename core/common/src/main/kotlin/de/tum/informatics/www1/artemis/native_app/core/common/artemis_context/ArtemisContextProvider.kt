@@ -4,5 +4,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface ArtemisContextProvider {
 
-    val current: Flow<ArtemisContext>
+    val flow: Flow<ArtemisContext>
 }

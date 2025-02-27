@@ -10,8 +10,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ListAlt
 import androidx.compose.material.icons.filled.EditNote
-import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -38,6 +38,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.isInitializationAfterDueDate
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
+import de.tum.informatics.www1.artemis.native_app.core.ui.collectAsState
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.ArtemisWebView
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
@@ -53,8 +54,7 @@ internal fun TextExerciseParticipationScreen(
     exercise: Exercise,
     onNavigateUp: () -> Unit
 ) {
-    val serverUrl: String by viewModel.serverUrl.collectAsState()
-    val authToken: String by viewModel.authToken.collectAsState()
+    val artemisContext by viewModel.artemisContextProvider.collectAsState()
 
     val courseId: Long? = exercise.course?.id
     val exerciseId: Long = exercise.id ?: 0L
@@ -69,7 +69,7 @@ internal fun TextExerciseParticipationScreen(
         .widthSizeClass >= WindowWidthSizeClass.Medium
 
     val webViewState: WebViewState? = getProblemStatementWebViewState(
-        serverUrl = serverUrl,
+        serverUrl = artemisContext.serverUrl,
         courseId = courseId,
         exerciseId = exerciseId,
         // participationId is only relevant for programming exercises
@@ -129,8 +129,7 @@ internal fun TextExerciseParticipationScreen(
                         webViewState = webViewState,
                         webView = webView,
                         setWebView = { webView = it },
-                        serverUrl = serverUrl,
-                        authToken = authToken
+                        artemisContext = artemisContext
                     )
                 } else {
                     Box(modifier = modifier)
@@ -199,7 +198,7 @@ private fun TabView(
 
     Column(modifier = modifier) {
         TabRow(selectedTabIndex = selectedTab.index) {
-            Tab.values().forEach { tab ->
+            Tab.entries.forEach { tab ->
                 Tab(
                     text = { Text(text = stringResource(id = tab.title)) },
                     icon = { Icon(imageVector = tab.icon, contentDescription = null) },
@@ -218,7 +217,8 @@ private fun TabView(
 
 private enum class Tab(@StringRes val title: Int, val icon: ImageVector, val index: Int) {
     SUBMISSION(R.string.participate_text_exercise_tab_submission, Icons.Default.EditNote, 0),
-    PROBLEM_STATEMENT(R.string.participate_text_exercise_tab_problem_statement, Icons.Default.ListAlt, 1)
+    PROBLEM_STATEMENT(R.string.participate_text_exercise_tab_problem_statement,
+        Icons.AutoMirrored.Filled.ListAlt, 1)
 }
 
 private fun isAlwaysActive(

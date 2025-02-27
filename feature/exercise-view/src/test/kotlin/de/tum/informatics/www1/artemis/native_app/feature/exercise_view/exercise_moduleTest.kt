@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.exercise_view
 
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseExerciseService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ExerciseService
@@ -33,6 +34,7 @@ internal class exercise_moduleTest {
                 definition<TextExerciseParticipationViewModel>(Long::class, Long::class)
             ),
             extraTypes = listOf(
+                ArtemisContextProvider::class,
                 ServerConfigurationService::class,
                 NetworkStatusProvider::class,
                 AccountService::class,

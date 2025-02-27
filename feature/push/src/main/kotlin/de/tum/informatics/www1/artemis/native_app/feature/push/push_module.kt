@@ -28,7 +28,7 @@ import org.koin.dsl.module
 val pushModule = module {
     single<PushNotificationJobService> {
         WorkManagerPushNotificationJobService(
-            androidContext()
+            androidContext(), get()
         )
     }
 

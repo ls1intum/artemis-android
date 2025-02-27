@@ -1,33 +1,30 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.markdown.link_resolving
 
-import android.content.Context
 import android.view.View
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.common.markdown.MarkdownUrlUtil
-import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.ui.LinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
+import de.tum.informatics.www1.artemis.native_app.core.ui.collectAsState
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.LinkBottomSheet
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.LinkBottomSheetState
 import io.noties.markwon.LinkResolver
 
 class MarkdownLinkResolverImpl(
-    private val accountService: AccountService,
-    private val serverConfigurationService: ServerConfigurationService,
+    private val artemisContextProvider: ArtemisContextProvider
 ): MarkdownLinkResolver {
     @Composable
     override fun rememberMarkdownLinkResolver(): LinkResolver {
-        val serverUrl by serverConfigurationService.serverUrl.collectAsState(initial = "")
-        val authToken by accountService.authToken.collectAsState(initial = "")
+        val artemisContext by artemisContextProvider.collectAsState()
+        val serverUrl = artemisContext.serverUrl
+        val authToken = artemisContext.authToken
         val context = LocalContext.current
         val localLinkOpener = LocalLinkOpener.current
 
@@ -41,8 +38,7 @@ class MarkdownLinkResolverImpl(
                 ) else null
             LinkBottomSheet(
                 modifier = Modifier.fillMaxSize(),
-                serverUrl = serverUrl,
-                authToken = authToken,
+                artemisContext = artemisContext,
                 link = bottomSheetLink,
                 fileName = filename,
                 state = bottomSheetState,
@@ -51,15 +47,13 @@ class MarkdownLinkResolverImpl(
         }
 
         return remember(context, localLinkOpener, authToken, serverUrl) {
-            BaseMarkdownLinkResolver(context, localLinkOpener, serverUrl, setLinkToShow, setBottomSheetState)
+            BaseMarkdownLinkResolver(localLinkOpener, setLinkToShow, setBottomSheetState)
         }
     }
 }
 
 class BaseMarkdownLinkResolver(
-    private val context: Context,
     private val linkOpener: LinkOpener,
-    private val serverUrl: String = "",
     private val showModalBottomSheet: (String) -> Unit,
     private val setBottomSheetState: (LinkBottomSheetState) -> Unit
 ) : LinkResolver {

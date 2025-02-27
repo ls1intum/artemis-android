@@ -4,9 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
-import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.CourseWithScore
 import de.tum.informatics.www1.artemis.native_app.core.model.Dashboard
@@ -30,7 +28,6 @@ import kotlin.coroutines.EmptyCoroutineContext
 internal class CourseOverviewViewModel(
     private val dashboardService: DashboardService,
     private val dashboardStorageService: DashboardStorageService,
-    private val accountService: AccountService,
     private val serverConfigurationService: ServerConfigurationService,
     private val networkStatusProvider: NetworkStatusProvider,
     coroutineContext: CoroutineContext = EmptyCoroutineContext
@@ -102,10 +99,10 @@ internal class CourseOverviewViewModel(
      */
     private fun loadDashboard(context: CoroutineContext) {
         viewModelScope.launch(context) {
-            val authToken = accountService.authToken.first()
             val serverUrl = serverConfigurationService.serverUrl.first()
+
             retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                dashboardService.loadDashboard(authToken, serverUrl).bind { dashboard ->
+                dashboardService.loadDashboard().bind { dashboard ->
                     extractCoursesInSections(serverUrl, dashboard)
                 }
             }.collect {
