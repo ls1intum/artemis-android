@@ -10,8 +10,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversati
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
-import io.ktor.client.call.body
-import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -42,31 +40,24 @@ class ChannelServiceImpl(
     override suspend fun getUnresolvedChannels(
         courseId: Long,
         channelIds: List<Long>,
-        serverUrl: String,
-        authToken: String
     ): NetworkResponse<List<Conversation>> {
-        return performNetworkCall {
-            ktorProvider.ktorClient.get(serverUrl) {
-                url {
-                    appendPathSegments(
-                        "api",
-                        "courses",
-                        courseId.toString(),
-                        "messages"
-                    )
-                }
+        return getRequest<List<StandalonePost>> {
+            url {
+                appendPathSegments(
+                    "api",
+                    "courses",
+                    courseId.toString(),
+                    "messages"
+                )
+            }
 
-                parameter("courseWideChannelIds", channelIds.joinToString(","))
-                parameter("postSortCriterion", "CREATION_DATE")
-                parameter("sortingOrder", "DESCENDING")
-                parameter("pagingEnabled", "true")
-                parameter("page", "0")
-                parameter("size", "\\(50)")
-                parameter("filterToUnresolved", "true")
-
-                cookieAuth(authToken)
-                contentType(ContentType.Application.Json)
-            }.body() as List<StandalonePost>
+            parameter("courseWideChannelIds", channelIds.joinToString(","))
+            parameter("postSortCriterion", "CREATION_DATE")
+            parameter("sortingOrder", "DESCENDING")
+            parameter("pagingEnabled", "true")
+            parameter("page", "0")
+            parameter("size", "\\(50)")
+            parameter("filterToUnresolved", "true")
         }.bind {
             it.map { message ->
                 message.conversation ?: error("Conversation is null")

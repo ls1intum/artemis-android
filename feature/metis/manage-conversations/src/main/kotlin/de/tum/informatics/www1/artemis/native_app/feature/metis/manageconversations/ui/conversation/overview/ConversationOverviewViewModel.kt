@@ -16,7 +16,6 @@ import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseService
-import de.tum.informatics.www1.artemis.native_app.core.data.service.performAutoReloadingNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -260,15 +259,6 @@ class ConversationOverviewViewModel(
     private val isFiltering: StateFlow<Boolean> = query
         .map { it.isNotBlank() }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
-
-    private val course: StateFlow<DataState<Course>> = courseService
-        .performAutoReloadingNetworkCall(
-            networkStatusProvider = networkStatusProvider,
-            manualReloadFlow = onRequestReload
-        ) {
-            getCourse(courseId).bind { it.course }
-        }
-            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
 
     private val conversationsAsCollections: StateFlow<DataState<ConversationCollections>> =
