@@ -6,6 +6,8 @@
     <string name="browse_channel_list_loading">Loading channels…</string>
     <string name="browse_channel_list_failure">Something went wrong while loading the channels.</string>
     <string name="browse_channel_list_try_again">Try again</string>
+    <string name="browse_channel_list_no_search_results_title">No channels found</string>
+    <string name="browse_channel_list_no_search_results_body">\"%s\" did not match any channels.</string>
     <string name="joined_channel">Joined</string>
     <string name="join_button_title">Join</string>
 

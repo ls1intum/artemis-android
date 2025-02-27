@@ -58,8 +58,8 @@ import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -592,14 +592,16 @@ private fun StandalonePostFooter(
                     modifier = modifier
                         .background(color = PostColors.EmojiChipColors.background, CircleShape)
                         .clip(CircleShape)
+                        .sizeIn(minHeight = Spacings.Post.emojiHeight, minWidth = Spacings.Post.emojiHeight)
+                        .padding(with(LocalDensity.current) { 5.sp.toDp() } )
                         .clickable(onClick = {
                             showEmojiDialog = true
                         })
                 ) {
                     Icon(
                         modifier = Modifier
-                            .sizeIn(minHeight = Spacings.Post.emojiHeight)
-                            .padding(5.dp),
+                            .align(Alignment.Center)
+                            .size(with(LocalDensity.current) { Spacings.Post.addEmojiIconSize.toDp() } ),
                         imageVector = Icons.Default.InsertEmoticon,
                         contentDescription = null,
                     )
@@ -659,7 +661,7 @@ private fun AnimatedCounter(currentCount: Int, selected: Boolean) {
     ) { targetCount ->
         Text(
             text = "$targetCount",
-            fontSize = 12.sp,
+            fontSize = Spacings.Post.emojiTextSize,
             color = if (selected) MaterialTheme.colorScheme.primary else Color.Unspecified
         )
     }
@@ -699,13 +701,13 @@ private fun EmojiChip(
     ) {
         Row(
             modifier = Modifier
-                .padding(2.dp)
-                .padding(horizontal = 4.dp),
+                .align(Alignment.Center)
+                .padding(horizontal = 6.dp, vertical = 1.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
                 text = getUnicodeForEmojiId(emojiId = emojiId),
-                fontSize = 12.sp
+                fontSize = Spacings.Post.emojiTextSize
             )
 
             AnimatedCounter(reactionCount, selected)

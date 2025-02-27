@@ -4,9 +4,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.withPrevious
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
+import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternetIndefinetly
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.performAutoReloadingNetworkCall
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseService
+import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.core.model.Course
+import de.tum.informatics.www1.artemis.native_app.core.model.account.isAtLeastTutorInCourse
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -24,13 +30,38 @@ import kotlin.coroutines.CoroutineContext
  * Base view model which handles logic such as creating posts and reactions.
  */
 abstract class MetisViewModel(
+    courseService: CourseService,
     accountDataService: AccountDataService,
     networkStatusProvider: NetworkStatusProvider,
     websocketProvider: WebsocketProvider,
-    coroutineContext: CoroutineContext
+    coroutineContext: CoroutineContext,
+    private val courseId: Long
 ) : ViewModel() {
 
     protected val onRequestReload = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+
+    val course: StateFlow<DataState<Course>> = flatMapLatest(
+        accountDataService.onReloadRequired,
+        onRequestReload.onStart { emit(Unit) }
+    ) { _, _ ->
+        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+            courseService.getCourse(courseId).bind { it.course }
+        }
+    }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
+
+    val isAtLeastTutorInCourse: StateFlow<Boolean> = flatMapLatest(
+        course,
+        accountDataService.onReloadRequired,
+        onRequestReload.onStart { emit(Unit) }
+    ) { course, _, _ ->
+        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+            accountDataService.getAccountData()
+                .bind { it.isAtLeastTutorInCourse(course = course.orThrow()) }
+        }
+            .map { it.orElse(false) }
+    }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
     // Emits when a reload is manually requested or when we have a websocket reconnect
     val onReloadRequestAndWebsocketReconnect = merge(

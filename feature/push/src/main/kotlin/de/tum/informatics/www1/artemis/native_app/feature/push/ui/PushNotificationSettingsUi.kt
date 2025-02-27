@@ -34,13 +34,12 @@ import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.ui.Scaling
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.linkTextColor
 import de.tum.informatics.www1.artemis.native_app.feature.push.R
 import kotlinx.coroutines.Job
 import org.koin.androidx.compose.koinViewModel
-
-internal const val SWITCH_SCALE = 0.9f
 
 @Composable
 fun PushNotificationSettingsUi(
@@ -172,7 +171,7 @@ private fun ReceivePushNotificationsSwitch(
                 )
 
                 Switch(
-                    modifier = Modifier.scale(SWITCH_SCALE),
+                    modifier = Modifier.scale(Scaling.SWITCH),
                     checked = isChecked,
                     onCheckedChange = { isChecked ->
                         // Handle the cases where we need to ask thew user for permission

@@ -6,7 +6,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.feature.login.saml2_login.Saml2LoginViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.login.service.network.ServerProfileInfoService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerProfileInfoService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import org.junit.Test
 import org.junit.experimental.categories.Category

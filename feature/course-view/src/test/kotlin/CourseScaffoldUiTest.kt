@@ -4,6 +4,8 @@ import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseSearchConfiguration
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.CourseScaffold
 import org.junit.Test
@@ -49,7 +51,9 @@ class CourseScaffoldUiTest : BaseComposeTest() {
                 updateSelectedCourseTab = {},
                 onNavigateBack = {},
                 onReloadCourse = {},
-                content = {}
+                content = {},
+                searchConfiguration = CourseSearchConfiguration.Search("", "", {}),
+                collapsingContentState = CollapsingContentState()
             )
         }
     }

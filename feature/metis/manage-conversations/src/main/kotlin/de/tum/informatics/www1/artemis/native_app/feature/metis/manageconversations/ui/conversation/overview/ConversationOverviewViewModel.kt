@@ -22,10 +22,10 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
-import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections.ConversationCollection
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.network.ChannelService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.storage.ConversationPreferenceService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisCrudAction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisPostDTO
@@ -49,6 +49,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
@@ -59,6 +60,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
@@ -76,6 +78,7 @@ class ConversationOverviewViewModel(
     currentActivityListener: CurrentActivityListener?,
     val courseId: Long,
     private val conversationService: ConversationService,
+    private val channelService: ChannelService,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
     private val conversationPreferenceService: ConversationPreferenceService,
@@ -85,16 +88,19 @@ class ConversationOverviewViewModel(
     courseService: CourseService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : MetisViewModel(
+    courseService,
     accountDataService,
     networkStatusProvider,
     websocketProvider,
-    coroutineContext
+    coroutineContext,
+    courseId
 ) {
 
     constructor(
         application: Application,
         courseId: Long,
         conversationService: ConversationService,
+        channelService: ChannelService,
         serverConfigurationService: ServerConfigurationService,
         accountService: AccountService,
         conversationPreferenceService: ConversationPreferenceService,
@@ -107,6 +113,7 @@ class ConversationOverviewViewModel(
         application as? CurrentActivityListener,
         courseId,
         conversationService,
+        channelService,
         serverConfigurationService,
         accountService,
         conversationPreferenceService,
@@ -133,6 +140,10 @@ class ConversationOverviewViewModel(
 
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query
+
+    private val _currentFilter =
+        MutableStateFlow<ConversationOverviewUtils.ConversationFilter>(ConversationOverviewUtils.ConversationFilter.All)
+    val currentFilter: StateFlow<ConversationOverviewUtils.ConversationFilter> = _currentFilter
 
     private val conversationUpdates: Flow<ConversationWebsocketDto> = clientId
         .filterSuccess()
@@ -190,6 +201,48 @@ class ConversationOverviewViewModel(
             }
             .stateIn(viewModelScope + coroutineContext, SharingStarted.WhileSubscribed())
 
+    private val unresolvedChannels: StateFlow<DataState<List<Conversation>>> =
+        loadedConversations.flatMapLatest { conversations ->
+            when (conversations) {
+                is Success -> {
+                    val channelIds = conversations.data.filterIsInstance<ChannelChat>()
+                        .filter { channel -> !channel.isAnnouncementChannel && channel.isCourseWide }
+                        .map { it.id }
+
+                    retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+                        channelService.getUnresolvedChannels(
+                            courseId,
+                            channelIds,
+                            serverConfigurationService.serverUrl.first(),
+                            accountService.authToken.first()
+                        )
+                    }
+                }
+                is DataState.Loading -> flowOf(DataState.Loading())
+                is DataState.Failure -> flowOf(DataState.Failure(conversations.throwable))
+            }
+        }
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
+
+    private val recentConversations: StateFlow<DataState<List<Conversation>>> =
+        combine(updatedConversations, course) { conversationsDataState, courseDataState ->
+            when {
+                conversationsDataState is Success && courseDataState is Success -> {
+                    Success(conversationsDataState.data.filter { conversation ->
+                        ConversationOverviewUtils.isRecent(conversation, courseDataState.data)
+                    })
+                }
+                conversationsDataState is DataState.Loading || courseDataState is DataState.Loading -> {
+                    DataState.Loading()
+                }
+                else -> {
+                    DataState.Failure(
+                        IllegalStateException("Failed to load recent conversations: $conversationsDataState")
+                    )
+                }
+            }
+        }.stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
+
     val isConnected: StateFlow<Boolean> =
         websocketProvider
             .isConnected
@@ -205,8 +258,8 @@ class ConversationOverviewViewModel(
             .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 
     private val isFiltering: StateFlow<Boolean> = query
-            .map { it.isNotBlank() }
-            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
+        .map { it.isNotBlank() }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
     private val course: StateFlow<DataState<Course>> = courseService
         .performAutoReloadingNetworkCall(
@@ -228,7 +281,11 @@ class ConversationOverviewViewModel(
 
                 ConversationCollections(
                     channels = conversations.filterNotHidden<ChannelChat>()
-                        .filter { !it.filterPredicate("exercise") && !it.filterPredicate("lecture") && !it.filterPredicate("exam") }
+                        .filter {
+                            !it.filterPredicate("exercise") && !it.filterPredicate("lecture") && !it.filterPredicate(
+                                "exam"
+                            )
+                        }
                         .asCollection(filterActive || preferences.generalsExpanded),
 
                     groupChats = conversations.filterNotHidden<GroupChat>()
@@ -246,26 +303,23 @@ class ConversationOverviewViewModel(
                     exerciseChannels = conversations.filter {
                         it is ChannelChat && !it.isHidden && it.filterPredicate("exercise")
                     }.map { it as ChannelChat }
-                        .asCollection(filterActive || preferences.exercisesExpanded, showPrefix = false),
+                        .asCollection(
+                            filterActive || preferences.exercisesExpanded,
+                            showPrefix = false
+                        ),
 
                     lectureChannels = conversations.filter {
                         it is ChannelChat && !it.isHidden && it.filterPredicate("lecture")
                     }.map { it as ChannelChat }
-                        .asCollection(filterActive || preferences.lecturesExpanded, showPrefix = false),
+                        .asCollection(
+                            filterActive || preferences.lecturesExpanded,
+                            showPrefix = false
+                        ),
 
                     examChannels = conversations.filter {
                         it is ChannelChat && !it.isHidden && it.filterPredicate("exam")
                     }.map { it as ChannelChat }
-                        .asCollection(filterActive || preferences.examsExpanded, showPrefix = false),
-
-                    recentChannels = conversations.filter { ConversationOverviewUtils.isRecent(
-                        it,
-                        course.value.orNull()
-                    ) }
-                        .asCollection(
-                            filterActive || preferences.recentExpanded,
-                            showPrefix = true
-                        )
+                        .asCollection(filterActive || preferences.examsExpanded, showPrefix = false)
                 )
             }
         }
@@ -299,19 +353,68 @@ class ConversationOverviewViewModel(
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     val conversations: StateFlow<DataState<ConversationCollections>> =
-        combine(latestConversations, query) { latestConversationsDataState, query ->
-            if (query.isBlank()) {
-                latestConversationsDataState
-            } else {
-                latestConversationsDataState.bind { latestConversations ->
-                    latestConversations.filtered(query)
+        combine(
+            latestConversations,
+            unresolvedChannels,
+            recentConversations,
+            query,
+            currentFilter
+        ) { latestConversationsDataState, unresolvedChannels, recentConversations, query, filter ->
+            latestConversationsDataState.bind { latestConversations ->
+                var filteredConversations = latestConversations
+
+                filteredConversations = when (filter) {
+                    ConversationOverviewUtils.ConversationFilter.Unread -> filteredConversations.filterUnread()
+                    ConversationOverviewUtils.ConversationFilter.Recent -> {
+                        recentConversations.orNull()?.let {
+                            filteredConversations.filterRecent(it)
+                        } ?: filteredConversations
+                    }
+                    ConversationOverviewUtils.ConversationFilter.Unresolved -> {
+                        filteredConversations.filterUnresolved(
+                            unresolvedChannels.orNull() ?: emptyList()
+                        )
+                    }
+                    else -> filteredConversations
                 }
+
+                if (query.isNotBlank()) {
+                    filteredConversations = filteredConversations.filtered(query)
+                }
+                filteredConversations
             }
         }
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     private val _isDisplayingErrorDialog = MutableStateFlow(false)
     val isDisplayingErrorDialog: StateFlow<Boolean> = _isDisplayingErrorDialog
+
+    val availableFilters: StateFlow<List<ConversationOverviewUtils.ConversationFilter>> = combine(
+        latestConversations,
+        recentConversations,
+        isAtLeastTutorInCourse
+    ) { conversationsDataState, recentConversations, isAtLeastTutorInCourse ->
+        val filters = mutableListOf<ConversationOverviewUtils.ConversationFilter>()
+
+        conversationsDataState.bind { conversations ->
+            // only tutors should see the unresolved filter
+            if (isAtLeastTutorInCourse) filters.add(ConversationOverviewUtils.ConversationFilter.Unresolved)
+            if (recentConversations.orNull()?.isNotEmpty() == true) filters.add(
+                ConversationOverviewUtils.ConversationFilter.Recent
+            )
+            if (conversations.hasUnreadMessages()) filters.add(ConversationOverviewUtils.ConversationFilter.Unread)
+            if (filters.isNotEmpty()) filters.add(ConversationOverviewUtils.ConversationFilter.All)
+
+            filters.toList().reversed()
+        }.orNull() ?: emptyList()
+    }.debounce(200)
+        .onEach { filters ->
+            // if the current filter is not available anymore, we reset it to all
+            if (filters.none { it.id == _currentFilter.value.id }) {
+                onUpdateFilter(ConversationOverviewUtils.ConversationFilter.All)
+            }
+        }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, emptyList())
 
     private fun getUpdateConversationsFlow(loadedConversations: List<Conversation>): Flow<Success<List<Conversation>>> =
         flow {
@@ -328,8 +431,10 @@ class ConversationOverviewViewModel(
                 .collect { update ->
                     when (update) {
                         is MarkMessagesRead -> {
-                            val affectedConversation = currentConversations[update.conversationId] ?: return@collect
-                            currentConversations[update.conversationId] = affectedConversation.withUnreadMessagesCount(0L)
+                            val affectedConversation =
+                                currentConversations[update.conversationId] ?: return@collect
+                            currentConversations[update.conversationId] =
+                                affectedConversation.withUnreadMessagesCount(0L)
                         }
 
                         is ServerSentConversationUpdate -> {
@@ -354,10 +459,14 @@ class ConversationOverviewViewModel(
                             Log.d(TAG, "Received post creation update: $postUpdate")
 
                             val conversationId = postUpdate.post.conversation?.id ?: return@collect
-                            val isConversationVisible = visibleMetisContexts.value.any { it.isInConversation(conversationId) }
+                            val isConversationVisible =
+                                visibleMetisContexts.value.any { it.isInConversation(conversationId) }
                             // The user is currently looking at the conversation in the UI
                             if (isConversationVisible) {
-                                Log.d(TAG, "Conversation is visible, not increasing unread messages count")
+                                Log.d(
+                                    TAG,
+                                    "Conversation is visible, not increasing unread messages count"
+                                )
                                 conversationService.markConversationAsRead(
                                     courseId,
                                     conversationId,
@@ -367,11 +476,13 @@ class ConversationOverviewViewModel(
                                 return@collect
                             }
 
-                            val existingConversation = currentConversations[conversationId] ?: return@collect
+                            val existingConversation =
+                                currentConversations[conversationId] ?: return@collect
 
-                            currentConversations[conversationId] = existingConversation.withUnreadMessagesCount(
-                                (existingConversation.unreadMessagesCount ?: 0) + 1
-                            )
+                            currentConversations[conversationId] =
+                                existingConversation.withUnreadMessagesCount(
+                                    (existingConversation.unreadMessagesCount ?: 0) + 1
+                                )
                         }
                     }
 
@@ -382,6 +493,10 @@ class ConversationOverviewViewModel(
 
     fun onUpdateQuery(newQuery: String) {
         _query.value = newQuery
+    }
+
+    fun onUpdateFilter(newFilter: ConversationOverviewUtils.ConversationFilter) {
+        _currentFilter.value = newFilter
     }
 
     fun markConversationAsHidden(conversationId: Long, hidden: Boolean): Deferred<Boolean> {
@@ -502,10 +617,6 @@ class ConversationOverviewViewModel(
 
     fun toggleSavedPostsExpanded() {
         expandOrCollapseSection { copy(savedPostsExpanded = !savedPostsExpanded) }
-    }
-
-    fun toggleRecentExpanded() {
-        expandOrCollapseSection { copy(recentExpanded = !recentExpanded) }
     }
 
     private fun expandOrCollapseSection(update: ConversationPreferenceService.Preferences.() -> ConversationPreferenceService.Preferences) {

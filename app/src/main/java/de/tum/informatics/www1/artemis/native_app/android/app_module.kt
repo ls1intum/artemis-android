@@ -11,6 +11,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.courseview.courseViewM
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.dashboardModule
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.exerciseModule
 import de.tum.informatics.www1.artemis.native_app.feature.faq.faqModule
+import de.tum.informatics.www1.artemis.native_app.feature.force_update.updateModule
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lectureModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.metis.communicationModule
@@ -36,5 +37,6 @@ val appModule = module { includes(
     lectureModule,
     faqModule,
     pushModule,
-    dbModule
+    dbModule,
+    updateModule
 )}

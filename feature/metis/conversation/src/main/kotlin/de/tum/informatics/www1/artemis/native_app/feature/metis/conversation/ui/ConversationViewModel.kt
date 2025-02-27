@@ -135,10 +135,12 @@ internal open class ConversationViewModel(
     metisService: MetisService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : MetisViewModel(
+    courseService,
     accountDataService,
     networkStatusProvider,
     websocketProvider,
-    coroutineContext
+    coroutineContext,
+    courseId
 ), InitialReplyTextProvider, ReplyAutoCompleteHintProvider {
 
     private var currentlySavingPost = false
@@ -201,37 +203,8 @@ internal open class ConversationViewModel(
         metisStorageService = metisStorageService
     )
 
-    private val course: StateFlow<DataState<Course>> = courseService.performAutoReloadingNetworkCall(
-        networkStatusProvider = networkStatusProvider,
-        manualReloadFlow = onReloadRequestAndWebsocketReconnect
-    ) {
-        getCourse(metisContext.courseId)
-            .bind { it.course }
-    }
-        .stateIn(viewModelScope + coroutineContext, SharingStarted.Lazily)
-
     private val hasModerationRights: StateFlow<Boolean> = conversation.map {
         it.bind { conversation -> conversation.hasModerationRights }
-            .orElse(false)
-    }
-        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
-
-
-    private val accountDataStateFlow: Flow<DataState<Account>> = accountDataService
-        .performAutoReloadingNetworkCall(
-            networkStatusProvider = networkStatusProvider,
-            manualReloadFlow = onRequestReload
-        ) {
-            getAccountData()
-        }
-
-    private val isAtLeastTutorInCourse: StateFlow<Boolean> = combine(
-        accountDataStateFlow,
-        course,
-    ) { accountDataState, courseDataState ->
-        accountDataState.bind {
-            it.isAtLeastTutorInCourse(course = courseDataState.orThrow())
-        }
             .orElse(false)
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)

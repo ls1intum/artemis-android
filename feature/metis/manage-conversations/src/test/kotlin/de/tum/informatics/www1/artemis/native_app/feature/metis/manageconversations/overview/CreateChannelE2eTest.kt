@@ -20,6 +20,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversati
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_channel.CreateChannelViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_channel.TEST_TAG_CREATE_CHANNEL_BUTTON
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_channel.TEST_TAG_SET_ANNOUNCEMENT_UNRESTRICTED_SWITCH
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_channel.TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_channel.TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
@@ -44,7 +45,8 @@ class CreateChannelE2eTest : ConversationBaseTest() {
             channelName = "testchannel1",
             channelDescription = "testchannel description",
             isPrivate = false,
-            isAnnouncement = true
+            isAnnouncement = true,
+            isCourseWide = false
         )
     }
 
@@ -54,7 +56,8 @@ class CreateChannelE2eTest : ConversationBaseTest() {
             channelName = "testchannel2",
             channelDescription = "",
             isPrivate = false,
-            isAnnouncement = true
+            isAnnouncement = true,
+            isCourseWide = false
         )
     }
 
@@ -64,7 +67,19 @@ class CreateChannelE2eTest : ConversationBaseTest() {
             channelName = "testchannel3",
             channelDescription = "description",
             isPrivate = true,
-            isAnnouncement = false
+            isAnnouncement = false,
+            isCourseWide = false
+        )
+    }
+
+    @Test(timeout = DefaultTestTimeoutMillis)
+    fun `can create course-wide channel`() {
+        canCreateChannelTestImpl(
+            channelName = "testchannel4",
+            channelDescription = "Course-wide channel test",
+            isPrivate = false,
+            isAnnouncement = false,
+            isCourseWide = true
         )
     }
 
@@ -72,10 +87,11 @@ class CreateChannelE2eTest : ConversationBaseTest() {
         channelName: String,
         channelDescription: String,
         isPrivate: Boolean,
-        isAnnouncement: Boolean
+        isAnnouncement: Boolean,
+        isCourseWide: Boolean
     ) {
         Logger.info(
-            "Testing create channel with properties: channelname=$channelName, channelDescription$channelDescription, isPublic=$isPrivate, isAnnouncement=$isAnnouncement"
+            "Testing create channel with properties: channelname=$channelName, channelDescription$channelDescription, isPublic=$isPrivate, isAnnouncement=$isAnnouncement, isCourseWide=$isCourseWide"
         )
 
         val viewModel = CreateChannelViewModel(
@@ -136,6 +152,20 @@ class CreateChannelE2eTest : ConversationBaseTest() {
                 .assertIsOff()
         }
 
+        if (isCourseWide) {
+            composeTestRule
+                .onNodeWithTag(TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH)
+                .performScrollTo()
+                .performClick()
+            composeTestRule
+                .onNodeWithTag(TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH)
+                .assertIsOn()
+        } else {
+            composeTestRule
+                .onNodeWithTag(TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH)
+                .assertIsOff()
+        }
+
         composeTestRule
             .onNodeWithTag(TEST_TAG_CREATE_CHANNEL_BUTTON)
             .performScrollTo()
@@ -166,5 +196,11 @@ class CreateChannelE2eTest : ConversationBaseTest() {
             channel.isAnnouncementChannel,
             "Announcement property not set correctly"
         )
+        assertEquals(
+            isCourseWide,
+            channel.isCourseWide,
+            "Course Wide property not set correctly"
+        )
+
     }
 }
