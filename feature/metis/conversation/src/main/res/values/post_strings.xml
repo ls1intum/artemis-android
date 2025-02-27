@@ -28,5 +28,8 @@
     </plurals>
     <string name="post_reactions_show_all">All (%d)</string>
 
+    <string name="post_forwarded_from">Forwarded from %s</string>
+    <string name="post_forwarded_view_conversation">View Conversation</string>
+
     <string name="post_sending_failed">Sending post failed. Click to try again.</string>
 </resources>

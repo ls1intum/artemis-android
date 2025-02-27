@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,11 +17,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
@@ -77,21 +80,25 @@ private fun ForwardedMessageItem(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
-
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.replies),
+                    modifier = Modifier.height(14.dp),
+                    painter = painterResource(id = R.drawable.forward),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
                 )
 
                 Text(
-                    text = forwardedPost.content ?: "D",
+                    text = stringResource(R.string.post_forwarded_from, "DDDD"), // TODO
                     style = MaterialTheme.typography.bodySmall,
                 )
 
+                VerticalDivider(modifier = Modifier.height(12.dp), color = MaterialTheme.colorScheme.onSurface)
+
                 Text(
-                    text = forwardedPost.creationDate.toString(),
+                    modifier = Modifier.clickable {  }, // TODO
+                    text = stringResource(R.string.post_forwarded_view_conversation),
+                    color = MaterialTheme.colorScheme.primary,
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
