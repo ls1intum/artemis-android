@@ -211,9 +211,7 @@ class ConversationOverviewViewModel(
                     retryOnInternet(networkStatusProvider.currentNetworkStatus) {
                         channelService.getUnresolvedChannels(
                             courseId,
-                            channelIds,
-                            serverConfigurationService.serverUrl.first(),
-                            accountService.authToken.first()
+                            channelIds
                         )
                     }
                 }

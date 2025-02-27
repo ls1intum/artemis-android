@@ -16,8 +16,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.plus
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -41,14 +39,13 @@ internal class BrowseChannelsViewModel(
         ) {
             getChannels(courseId)
         }
-    }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
-    private val channels = combine(
+    val channels: StateFlow<DataState<List<ChannelChat>>> = combine(
         allChannels,
         query
-    ) {channels, query ->
-        channels.bind { channels ->
+    ) {channelsDataState, query ->
+        channelsDataState.bind { channels ->
             channels.filter { it.name.contains(query, ignoreCase = true) }
         }
     }
