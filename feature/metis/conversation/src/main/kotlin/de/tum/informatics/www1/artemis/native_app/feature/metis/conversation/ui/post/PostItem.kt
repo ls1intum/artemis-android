@@ -124,6 +124,13 @@ sealed class PostItemViewType {
             val forwardedPosts: List<IBasePost>
         ) : ThreadAnswerItem()
     }
+
+    fun hasForwardedMessage(): Boolean = when (this) {
+        is ChatListItem.PostWithForwardedMessage -> true
+        is ThreadContextItem.PostWithForwardedMessage -> true
+        is ThreadAnswerItem.PostWithForwardedMessage -> true
+        else -> false
+    }
 }
 
 private const val PlaceholderContent = "WWWWWWW"
@@ -191,6 +198,7 @@ internal fun PostItem(
         isPlaceholder = isPlaceholder,
         isDeleting = isDeleting,
         postStatus = postStatus,
+        postItemViewType = postItemViewType,
         displayHeader = displayHeader,
         onClick = onClick,
         onLongClick = onLongClick,
@@ -284,6 +292,7 @@ fun PostItemMainContent(
     isPlaceholder: Boolean = false,
     isDeleting: Boolean = false,
     postStatus: CreatePostService.Status = CreatePostService.Status.FINISHED,
+    postItemViewType: PostItemViewType = PostItemViewType.ChatListItem.Post(emptyList()), // TODO: ADD support for eg. saved posts
     displayHeader: Boolean = true,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
@@ -344,6 +353,16 @@ fun PostItemMainContent(
                         text = stringResource(id = R.string.post_edited_hint, updateTime),
                         style = MaterialTheme.typography.bodySmall,
                         color = PostColors.editedHintText
+                    )
+                }
+
+                if (postItemViewType.hasForwardedMessage()) {
+                    Spacer(modifier = Modifier.height(Spacings.Post.innerSpacing))
+
+                    ForwardedMessageColumn(
+                        modifier = Modifier.fillMaxWidth(),
+                        post = post,
+                        postItemViewType = postItemViewType
                     )
                 }
 
@@ -612,8 +631,11 @@ private fun StandalonePostFooter(
                     modifier = modifier
                         .background(color = PostColors.EmojiChipColors.background, CircleShape)
                         .clip(CircleShape)
-                        .sizeIn(minHeight = Spacings.Post.emojiHeight, minWidth = Spacings.Post.emojiHeight)
-                        .padding(with(LocalDensity.current) { 5.sp.toDp() } )
+                        .sizeIn(
+                            minHeight = Spacings.Post.emojiHeight,
+                            minWidth = Spacings.Post.emojiHeight
+                        )
+                        .padding(with(LocalDensity.current) { 5.sp.toDp() })
                         .clickable(onClick = {
                             showEmojiDialog = true
                         })
@@ -621,7 +643,7 @@ private fun StandalonePostFooter(
                     Icon(
                         modifier = Modifier
                             .align(Alignment.Center)
-                            .size(with(LocalDensity.current) { Spacings.Post.addEmojiIconSize.toDp() } ),
+                            .size(with(LocalDensity.current) { Spacings.Post.addEmojiIconSize.toDp() }),
                         imageVector = Icons.Default.InsertEmoticon,
                         contentDescription = null,
                     )
