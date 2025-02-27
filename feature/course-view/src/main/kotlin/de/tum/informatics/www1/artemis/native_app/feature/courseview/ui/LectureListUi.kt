@@ -52,7 +52,7 @@ internal fun LectureListUi(
         EmptyListHint(
             modifier = modifier,
             hint = stringResource(id = R.string.course_ui_lectures_no_search_results_title),
-            icon = Icons.Default.School
+            imageVector = Icons.Default.School
         )
         return
     }
@@ -100,7 +100,7 @@ private fun LectureListItem(modifier: Modifier, lecture: Lecture, onClick: () ->
                 Icon(
                     modifier = Modifier
                         .size(40.dp)
-                        .padding(end = 8.dp)
+                        .padding(end = 16.dp)
                         .fillMaxSize(),
                     painter = painterResource(id = R.drawable.chalkboard_teacher),
                     contentDescription = null

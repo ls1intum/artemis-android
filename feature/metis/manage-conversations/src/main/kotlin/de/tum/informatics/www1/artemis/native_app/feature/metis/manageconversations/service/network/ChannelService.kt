@@ -19,6 +19,13 @@ interface ChannelService {
         authToken: String
     ): NetworkResponse<ChannelChat>
 
+    suspend fun getLectureChannel(
+        lectureId: Long,
+        courseId: Long,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<ChannelChat>
+
     suspend fun getUnresolvedChannels(
         courseId: Long,
         channelIds: List<Long>,
