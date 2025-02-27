@@ -1,8 +1,11 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.overview
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -11,6 +14,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.MarkdownTextAlertDialog
@@ -24,9 +28,11 @@ internal fun ConversationOtherSettings(
     modifier: Modifier,
     conversation: Conversation,
     onLeaveConversation: () -> Unit,
-    onToggleChannelArchivation: () -> Unit
+    onToggleChannelArchivation: () -> Unit,
+    onDeleteChannel: () -> Unit
 ) {
     var displayArchiveChannelDialog by remember { mutableStateOf(false) }
+    var displayDeleteChannelDialog by remember { mutableStateOf(false) }
 
     val buttonModifier = Modifier.fillMaxWidth()
 
@@ -63,9 +69,23 @@ internal fun ConversationOtherSettings(
                     )
                 )
             }
+
+            OutlinedButton(
+                modifier = buttonModifier,
+                onClick = { displayDeleteChannelDialog = true },
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.error,
+                ),
+                border = BorderStroke(1.dp, SolidColor(MaterialTheme.colorScheme.error))
+            ) {
+                Text(
+                    text = stringResource(R.string.conversation_settings_section_delete_channel)
+                )
+            }
         }
     }
 
+    // Archive/Unarchive Confirmation Dialog
     if (displayArchiveChannelDialog) {
         val channelName = when (conversation) {
             is ChannelChat -> conversation.name
@@ -99,5 +119,28 @@ internal fun ConversationOtherSettings(
             dismissButtonText = stringResource(id = dismiss),
             onPressPositiveButton = onToggleChannelArchivation,
             onDismissRequest = { displayArchiveChannelDialog = false })
+    }
+
+    // Delete Channel Confirmation Dialog
+    if (displayDeleteChannelDialog) {
+        val channelName = when (conversation) {
+            is ChannelChat -> conversation.name
+            else -> ""
+        }
+
+        MarkdownTextAlertDialog(
+            title = stringResource(R.string.conversation_settings_section_delete_channel_title),
+            text = stringResource(
+                R.string.conversation_settings_section_delete_channel_message,
+                channelName
+            ),
+            confirmButtonText = stringResource(R.string.conversation_settings_section_delete_channel),
+            dismissButtonText = stringResource(R.string.conversation_settings_section_delete_channel_negative),
+            onPressPositiveButton = {
+                displayDeleteChannelDialog = false
+                onDeleteChannel()
+            },
+            onDismissRequest = { displayDeleteChannelDialog = false }
+        )
     }
 }

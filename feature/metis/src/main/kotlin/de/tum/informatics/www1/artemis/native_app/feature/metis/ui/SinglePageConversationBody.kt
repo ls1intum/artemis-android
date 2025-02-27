@@ -283,6 +283,10 @@ internal fun SinglePageConversationBody(
                                 },
                                 onConversationLeft = {
                                     configuration = NothingOpened
+                                },
+                                onChannelDeleted = {
+                                    configuration = NothingOpened
+
                                 }
                             )
                         }

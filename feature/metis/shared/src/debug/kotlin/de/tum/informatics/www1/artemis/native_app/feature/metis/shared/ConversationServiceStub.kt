@@ -176,4 +176,11 @@ open class ConversationServiceStub(
         serverUrl: String,
         authToken: String
     ): NetworkResponse<Boolean> = NetworkResponse.Failure(StubException)
+
+    override suspend fun deleteChannel(
+        courseId: Long,
+        conversationId: Long,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<Boolean> =  NetworkResponse.Failure(StubException)
 }

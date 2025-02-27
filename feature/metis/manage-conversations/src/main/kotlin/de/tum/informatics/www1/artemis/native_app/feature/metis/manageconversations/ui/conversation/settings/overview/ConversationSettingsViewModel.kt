@@ -27,9 +27,11 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.n
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -87,6 +89,9 @@ internal class ConversationSettingsViewModel(
         .map { it.orEmpty() }
         .mapIsDescriptionOrTopicIllegal()
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
+
+    private val _onChannelDeleted = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val onChannelDeleted = _onChannelDeleted.asSharedFlow()
 
     private val savedName = MutableStateFlow<String?>(null)
     private val savedDescription = MutableStateFlow<String?>(null)
@@ -360,5 +365,25 @@ internal class ConversationSettingsViewModel(
         }
 
         is OneToOneChat -> conversation
+    }
+
+    fun deleteConversation(): Deferred<Boolean> {
+        return viewModelScope.async(coroutineContext) {
+            val result =
+                conversationService.deleteChannel(
+                    courseId = conversationSettings.value.courseId,
+                    conversationId = conversationSettings.value.conversationId,
+                    authToken = accountService.authToken.first(),
+                    serverUrl = serverConfigurationService.serverUrl.first()
+                ).onFailure {
+                    Log.d(TAG, "Could not delete channel", it)
+                }.or(false)
+
+            if (result) {
+                _onChannelDeleted.tryEmit(Unit)
+            }
+
+            result
+        }
     }
 }

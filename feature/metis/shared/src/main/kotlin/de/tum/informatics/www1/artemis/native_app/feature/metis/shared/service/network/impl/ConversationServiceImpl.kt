@@ -14,6 +14,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.n
 import io.ktor.client.call.body
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.accept
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.patch
@@ -565,6 +566,29 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
             is ChannelChat -> appendPathSegments("channels", conversationId.toString())
             is GroupChat -> appendPathSegments("group-chats", conversationId.toString())
             is OneToOneChat -> {} // One to one chats cannot be updated
+        }
+    }
+
+    override suspend fun deleteChannel(
+        courseId: Long,
+        conversationId: Long,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<Boolean> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.delete(serverUrl) {
+                url {
+                    appendPathSegments(
+                        "api",
+                        "courses",
+                        courseId.toString(),
+                        "channels",
+                        conversationId.toString()
+                    )
+                }
+                cookieAuth(authToken)
+                contentType(ContentType.Application.Json)
+            }.status.isSuccess()
         }
     }
 }

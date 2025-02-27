@@ -3,8 +3,11 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversat
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -12,6 +15,7 @@ import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.lifecycle.SavedStateHandle
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
+import de.tum.informatics.www1.artemis.native_app.core.data.onFailure
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.overview.ConversationSettingsScreen
@@ -20,6 +24,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metistest.ConversationBaseTest
 import org.koin.test.get
+import kotlin.test.assertEquals
 import kotlin.test.assertIs
 
 @OptIn(ExperimentalTestApi::class)
@@ -117,7 +122,8 @@ internal abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest()
                 onNavigateBack = { },
                 onRequestAddMembers = { },
                 onRequestViewAllMembers = { },
-                onConversationLeft = onConversationLeft
+                onConversationLeft = onConversationLeft,
+                onChannelDeleted = { }
             )
         }
 
@@ -149,4 +155,78 @@ internal abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest()
             DefaultTimeoutMillis
         )
     }
+
+    protected fun deleteChannelTestImpl(conversation: Conversation) {
+        val deleteButtonText =
+            context.getString(R.string.conversation_settings_section_delete_channel)
+
+        composeTestRule.waitUntilAtLeastOneExists(
+            hasText(deleteButtonText),
+            DefaultTimeoutMillis
+        )
+
+        composeTestRule
+            .onNodeWithText(deleteButtonText)
+            .performScrollTo()
+            .assertIsDisplayed()
+            .performClick()
+
+        composeTestRule
+            .onNode(
+                hasAnyAncestor(isDialog()) and hasText(context.getString(R.string.conversation_settings_section_delete_channel_title))
+            )
+            .assertExists()
+
+        composeTestRule
+            .onNode(
+                hasAnyAncestor(isDialog()) and hasText(context.getString(R.string.conversation_settings_section_delete_channel))
+            )
+            .assertExists()
+            .performClick()
+
+        val deleteResponse = runBlockingWithTestTimeout {
+            val result = conversationService.deleteChannel(
+                courseId = course.id!!,
+                conversationId = conversation.id,
+                authToken = accessToken,
+                serverUrl = testServerUrl
+            )
+            result
+        }
+
+        (deleteResponse.onFailure {
+            throw AssertionError("❌ ERROR: API call to delete conversation failed!")
+
+        })
+
+        composeTestRule.waitUntil(DefaultTimeoutMillis) {
+            runBlockingWithTestTimeout {
+                val deletedChannel = conversationService.getConversation(
+                    courseId = course.id!!,
+                    conversationId = conversation.id,
+                    authToken = accessToken,
+                    serverUrl = testServerUrl
+                ).orNull()
+
+                deletedChannel == null
+            }
+        }
+
+        assertChannelDeleted(conversation.id)
+    }
+
+
+    private fun assertChannelDeleted(channelId: Long) {
+        val deletedChannel = runBlockingWithTestTimeout {
+            conversationService.getConversation(
+                courseId = course.id!!,
+                conversationId = channelId,
+                authToken = accessToken,
+                serverUrl = testServerUrl
+            ).orNull()
+        }
+
+        assertEquals(null, deletedChannel, "The channel should be deleted but still exists!")
+    }
+
 }

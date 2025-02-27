@@ -187,4 +187,24 @@ internal class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
             }
         )
     }
+
+    @Test(timeout = DefaultTestTimeoutMillis)
+    fun `can delete channel`() {
+        val channel = runBlockingWithTestTimeout {
+            conversationService.createChannel(
+                courseId = course.id!!,
+                name = "deletechannel",
+                description = "To be deleted",
+                isPublic = true,
+                isAnnouncement = false,
+                isCourseWide = false,
+                authToken = accessToken,
+                serverUrl = testServerUrl
+            )
+                .orThrow("Could not create channel")
+        }
+
+        setupUiAndViewModel(channel)
+        deleteChannelTestImpl(channel)
+    }
 }

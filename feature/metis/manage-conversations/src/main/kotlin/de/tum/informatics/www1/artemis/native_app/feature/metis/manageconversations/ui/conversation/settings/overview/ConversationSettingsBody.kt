@@ -63,6 +63,7 @@ internal fun ConversationSettingsBody(
     var savingJob: Deferred<Boolean>? by remember { mutableStateOf(null) }
     var leaveConversationJob: Deferred<Boolean>? by remember { mutableStateOf(null) }
     var archiveChannelJob: Deferred<Boolean>? by remember { mutableStateOf(null) }
+    var deleteChannelJob: Deferred<Boolean>? by remember { mutableStateOf(null) }
 
     var displaySaveFailedDialog by remember { mutableStateOf(false) }
 
@@ -183,6 +184,9 @@ internal fun ConversationSettingsBody(
                 },
                 onToggleChannelArchivation = {
                     archiveChannelJob = viewModel.toggleChannelArchivation()
+                },
+                onDeleteChannel = {
+                    deleteChannelJob = viewModel.deleteConversation()
                 }
             )
         }
