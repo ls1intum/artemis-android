@@ -74,6 +74,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.PostColors
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.getUnicodeForEmojiId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.EmojiDialog
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.EmojiSelection
@@ -97,13 +98,32 @@ import java.time.Duration
 
 sealed class PostItemViewType {
 
-    data class ChatListItem(
-        val answerPosts: List<IAnswerPost>
-    ) : PostItemViewType()
+    sealed class ChatListItem : PostItemViewType() {
+        abstract val answerPosts: List<IAnswerPost>
 
-    data object ThreadContextPostItem : PostItemViewType()
+        data class Post(override val answerPosts: List<IAnswerPost>) : ChatListItem()
 
-    data object ThreadAnswerItem : PostItemViewType()
+        data class PostWithForwardedMessage(
+            override val answerPosts: List<IAnswerPost>,
+            val forwardedPosts: List<IBasePost>
+        ) : ChatListItem()
+    }
+
+    sealed class ThreadContextItem : PostItemViewType() {
+        data object Post : ThreadContextItem()
+
+        data class PostWithForwardedMessage(
+            val forwardedPosts: List<IBasePost>
+        ) : ThreadContextItem()
+    }
+
+    sealed class ThreadAnswerItem : PostItemViewType() {
+        data object Post : ThreadAnswerItem()
+
+        data class PostWithForwardedMessage(
+            val forwardedPosts: List<IBasePost>
+        ) : ThreadAnswerItem()
+    }
 }
 
 private const val PlaceholderContent = "WWWWWWW"
@@ -128,7 +148,7 @@ internal fun PostItem(
 ) {
     val isPlaceholder = post == null
     val isExpanded = when (postItemViewType) {
-        PostItemViewType.ThreadContextPostItem -> true
+        is PostItemViewType.ThreadContextItem -> true
         else -> false
     }
     val isDeleting by remember(post) { derivedStateOf { isMarkedAsDeleteList.contains(post) } }
@@ -587,7 +607,7 @@ private fun StandalonePostFooter(
                     onLongClick = onShowReactionsBottomSheet
                 )
             }
-            if (reactionCount.isNotEmpty() || postItemViewType is PostItemViewType.ThreadContextPostItem) {
+            if (reactionCount.isNotEmpty() || postItemViewType is PostItemViewType.ThreadContextItem) {
                 Box(
                     modifier = modifier
                         .background(color = PostColors.EmojiChipColors.background, CircleShape)

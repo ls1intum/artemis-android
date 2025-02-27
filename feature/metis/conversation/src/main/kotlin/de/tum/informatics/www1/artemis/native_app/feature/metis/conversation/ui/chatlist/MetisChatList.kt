@@ -304,6 +304,24 @@ private fun ChatList(
                         }
                     )
 
+                    val postItemViewType = when (chatListItem) {
+                        is ChatListItem.IndexedItem.Post -> remember(post?.answers) {
+                            PostItemViewType.ChatListItem.Post(post?.answers.orEmpty())
+                        }
+
+                        is ChatListItem.IndexedItem.PostWithForwardedMessage -> remember(
+                            chatListItem.forwardedPosts,
+                            post?.answers
+                        ) {
+                            PostItemViewType.ChatListItem.PostWithForwardedMessage(
+                                post?.answers.orEmpty(),
+                                chatListItem.forwardedPosts
+                            )
+                        }
+
+                        else -> PostItemViewType.ChatListItem.Post(emptyList())
+                    }
+
                     PostWithBottomSheet(
                         modifier = Modifier
                             .padding(horizontal = Spacings.ScreenHorizontalSpacing)
@@ -316,9 +334,7 @@ private fun ChatList(
                         post = post,
                         clientId = clientId,
                         isMarkedAsDeleteList = isMarkedAsDeleteList,
-                        postItemViewType = remember(post?.answers) {
-                            PostItemViewType.ChatListItem(post?.answers.orEmpty())
-                        },
+                        postItemViewType = postItemViewType,
                         postActions = postActions,
                         displayHeader = shouldDisplayHeader(
                             index = index,

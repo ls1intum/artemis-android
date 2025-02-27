@@ -319,7 +319,7 @@ private fun PostAndRepliesList(
                     modifier = Modifier
                         .testTag(testTagForPost(post.standalonePostId)),
                     post = post,
-                    postItemViewType = PostItemViewType.ThreadContextPostItem,
+                    postItemViewType = PostItemViewType.ThreadContextItem.Post, // TODO
                     postActions = postActions,
                     isMarkedAsDeleteList = isMarkedAsDeleteList,
                     displayHeader = true,
@@ -351,7 +351,7 @@ private fun PostAndRepliesList(
                 post = answerPost,
                 postActions = postActions,
                 isMarkedAsDeleteList = isMarkedAsDeleteList,
-                postItemViewType = PostItemViewType.ThreadAnswerItem,
+                postItemViewType = PostItemViewType.ThreadAnswerItem.Post, // TODO
                 clientId = clientId,
                 displayHeader = shouldDisplayHeader(
                     index = index,
