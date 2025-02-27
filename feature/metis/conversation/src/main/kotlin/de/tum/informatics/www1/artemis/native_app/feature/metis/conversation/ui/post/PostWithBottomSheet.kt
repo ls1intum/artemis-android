@@ -85,7 +85,7 @@ internal fun PostWithBottomSheet(
         }
 
     val cardModifier = applyPaddingToModifier(modifier, 4.dp)
-    val innerModifier = applyPaddingToModifier(modifier, Spacings.Post.innerSpacing)
+    val innerModifier = applyPaddingToModifier(Modifier, Spacings.Post.innerSpacing)
 
     Card(
         modifier = cardModifier,
