@@ -21,7 +21,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.alert.MarkdownTextAler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.hasModerationRights
 
 @Composable
 internal fun ConversationOtherSettings(
@@ -54,33 +53,43 @@ internal fun ConversationOtherSettings(
             }
         }
 
-        if (conversation.hasModerationRights && conversation is ChannelChat) {
-            OutlinedButton(
-                modifier = buttonModifier,
-                onClick = { displayArchiveChannelDialog = true }
-            ) {
-                Text(
-                    text = stringResource(
-                        id = if (conversation.isArchived) {
-                            R.string.conversation_settings_section_other_unarchive_channel
-                        } else {
-                            R.string.conversation_settings_section_other_archive_channel
-                        }
-                    )
-                )
-            }
+        if (conversation is ChannelChat) {
+            val isCreator = conversation.isCreator
+            val hasChannelModerationRights = conversation.hasChannelModerationRights
+            val isChannelModerator = conversation.isChannelModerator
+            val isTutorialGroupChannel = conversation.tutorialGroupId != null || conversation.tutorialGroupTitle != null
 
-            OutlinedButton(
-                modifier = buttonModifier,
-                onClick = { displayDeleteChannelDialog = true },
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = MaterialTheme.colorScheme.error,
-                ),
-                border = BorderStroke(1.dp, SolidColor(MaterialTheme.colorScheme.error))
-            ) {
-                Text(
-                    text = stringResource(R.string.conversation_settings_section_delete_channel)
-                )
+            val canManageChannels = !isTutorialGroupChannel && hasChannelModerationRights && isChannelModerator && isCreator
+
+            // Archive/Unarchive and Delete Buttons (Only if user has moderation rights)
+            if (canManageChannels) {
+                OutlinedButton(
+                    modifier = buttonModifier,
+                    onClick = { displayArchiveChannelDialog = true }
+                ) {
+                    Text(
+                        text = stringResource(
+                            id = if (conversation.isArchived) {
+                                R.string.conversation_settings_section_other_unarchive_channel
+                            } else {
+                                R.string.conversation_settings_section_other_archive_channel
+                            }
+                        )
+                    )
+                }
+
+                OutlinedButton(
+                    modifier = buttonModifier,
+                    onClick = { displayDeleteChannelDialog = true },
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error,
+                    ),
+                    border = BorderStroke(1.dp, SolidColor(MaterialTheme.colorScheme.error))
+                ) {
+                    Text(
+                        text = stringResource(R.string.conversation_settings_section_delete_channel)
+                    )
+                }
             }
         }
     }

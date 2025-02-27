@@ -195,7 +195,7 @@ internal abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest()
         }
 
         (deleteResponse.onFailure {
-            throw AssertionError("❌ ERROR: API call to delete conversation failed!")
+            throw AssertionError("ERROR: API call to delete conversation failed!")
 
         })
 
