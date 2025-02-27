@@ -54,10 +54,11 @@ fun ArtemisTopAppBar(
     scrollBehavior: TopAppBarScrollBehavior? = null,
     colors: TopAppBarColors = TopAppBarDefaults.topAppBarColors(
         containerColor = ComponentColors.ArtemisTopAppBar.background,
-    )
+    ),
+    isElevated: Boolean = true
 ) {
     Surface(
-        shadowElevation = Spacings.AppBarElevation,
+        shadowElevation = if (isElevated) Spacings.AppBarElevation else 0.dp,
     ) {
         TopAppBar(
             title = title,
