@@ -195,13 +195,21 @@ class ConversationChatListUseCase(
             .shareIn(viewModelScope + coroutineContext, SharingStarted.Lazily, replay = 1)
 
 
-    private fun  Flow<PagingData<out IStandalonePost>>.mapIndexedPosts(): Flow<PagingData<ChatListItem.IndexedPost>> {
+    private fun Flow<PagingData<out IStandalonePost>>.mapIndexedPosts(): Flow<PagingData<ChatListItem.IndexedItem>> {
         // TODO: this indexing seems to work, BUT if a chat has between 40 and 60 posts, the pager messes something up
         //  https://github.com/ls1intum/artemis-android/issues/392
         return this.map { pagingData ->
             var indexCounter = 0L
             pagingData.map { post ->
-                ChatListItem.IndexedPost(post, indexCounter++)
+                if (post.hasForwardedMessages == true) { // TODO
+                    ChatListItem.IndexedItem.PostWithForwardedMessage(
+                        post,
+                        indexCounter++,
+                        emptyList()
+                    )
+                } else {
+                    ChatListItem.IndexedItem.Post(post, indexCounter++)
+                }
             }
         }
     }
@@ -303,8 +311,8 @@ class ConversationChatListUseCase(
         _query.value = new.ifEmpty { null }
     }
 
-    private fun insertDateSeparators(pagingList: PagingData<ChatListItem.IndexedPost>) =
-        pagingList.insertSeparators { before: ChatListItem.IndexedPost?, after: ChatListItem.IndexedPost? ->
+    private fun insertDateSeparators(pagingList: PagingData<ChatListItem.IndexedItem>) =
+        pagingList.insertSeparators { before: ChatListItem.IndexedItem?, after: ChatListItem.IndexedItem? ->
             when {
                 before == null && after == null -> null
                 before != null && after == null -> {
@@ -328,7 +336,7 @@ class ConversationChatListUseCase(
         pagingList.insertSeparators { _, after: ChatListItem? ->
             // If we already know the id, great
             if (lastAlreadyReadPostId != null) {
-                if (after != null && after is ChatListItem.IndexedPost && after.post.serverPostId == lastAlreadyReadPostId) {
+                if (after != null && after is ChatListItem.IndexedItem && after.post.serverPostId == lastAlreadyReadPostId) {
                     return@insertSeparators ChatListItem.UnreadIndicator
                 } else {
                     return@insertSeparators null
@@ -343,7 +351,7 @@ class ConversationChatListUseCase(
                 return@insertSeparators null
             }
 
-            if (after != null && after is ChatListItem.IndexedPost && after.index == unreadMessagesCount) {
+            if (after != null && after is ChatListItem.IndexedItem && after.index == unreadMessagesCount) {
                 lastAlreadyReadPostId = after.post.serverPostId
                 return@insertSeparators ChatListItem.UnreadIndicator
             }
