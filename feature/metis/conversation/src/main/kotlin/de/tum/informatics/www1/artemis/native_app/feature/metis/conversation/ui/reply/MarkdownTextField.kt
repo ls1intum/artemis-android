@@ -46,6 +46,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -343,6 +344,11 @@ private fun TaggingDropdownMenu(
     showAutoCompletePopup: ((AutoCompleteType) -> Unit)?,
     onDismissRequest: () -> Unit,
 ) {
+    val onClick: (AutoCompleteType) -> Unit = { autoCompleteType ->
+        showAutoCompletePopup?.invoke(autoCompleteType)
+        onDismissRequest()
+    }
+
     DropdownMenu(
         expanded = isTaggingDropdownExpanded,
         onDismissRequest = onDismissRequest,
@@ -350,77 +356,63 @@ private fun TaggingDropdownMenu(
             focusable = false
         )
     ) {
-        DropdownMenuItem(
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.tag),
-                    contentDescription = null
-                )
-            },
-            text = { Text(text = stringResource(R.string.reply_format_mention_members)) },
-            onClick = {
-                onDismissRequest()
-                showAutoCompletePopup?.invoke(AutoCompleteType.USERS)
-            }
+        TaggingDropDownMenuItem(
+            painter = painterResource(id = R.drawable.tag),
+            text = stringResource(R.string.reply_format_mention_members),
+            onClick = { onClick(AutoCompleteType.USERS) }
         )
 
-        DropdownMenuItem(
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Tag,
-                    contentDescription = null
-                )
-            },
-            text = { Text(stringResource(R.string.reply_format_mention_channels)) },
-            onClick = {
-                onDismissRequest()
-                showAutoCompletePopup?.invoke(AutoCompleteType.CHANNELS)
-            }
+        TaggingDropDownMenuItem(
+            imageVector = Icons.Default.Tag,
+            text = stringResource(R.string.reply_format_mention_channels),
+            onClick = { onClick(AutoCompleteType.CHANNELS) }
         )
 
-        DropdownMenuItem(
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ListAlt,
-                    contentDescription = null
-                )
-            },
-            text = { Text(stringResource(R.string.reply_format_mention_exercises)) },
-            onClick = {
-                onDismissRequest()
-                showAutoCompletePopup?.invoke(AutoCompleteType.EXERCISES)
-            }
+        TaggingDropDownMenuItem(
+            imageVector = Icons.AutoMirrored.Filled.ListAlt,
+            text = stringResource(R.string.reply_format_mention_exercises),
+            onClick = { onClick(AutoCompleteType.EXERCISES) }
         )
 
-        DropdownMenuItem(
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.School,
-                    contentDescription = null
-                )
-            },
-            text = { Text(stringResource(R.string.reply_format_mention_lectures)) },
-            onClick = {
-                onDismissRequest()
-                showAutoCompletePopup?.invoke(AutoCompleteType.LECTURES)
-            }
+        TaggingDropDownMenuItem(
+            imageVector = Icons.Default.School,
+            text = stringResource(R.string.reply_format_mention_lectures),
+            onClick = { onClick(AutoCompleteType.LECTURES) }
         )
 
-        DropdownMenuItem(
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.QuestionMark,
-                    contentDescription = null
-                )
-            },
-            text = { Text(stringResource(R.string.reply_format_mention_faqs)) },
-            onClick = {
-                onDismissRequest()
-                showAutoCompletePopup?.invoke(AutoCompleteType.FAQS)
-            }
+        TaggingDropDownMenuItem(
+            imageVector = Icons.Default.QuestionMark,
+            text = stringResource(R.string.reply_format_mention_faqs),
+            onClick = { onClick(AutoCompleteType.FAQS) }
         )
     }
 }
+
+@Composable
+private fun TaggingDropDownMenuItem(
+    modifier: Modifier = Modifier,
+    painter: Painter? = null,
+    imageVector: ImageVector? = null,
+    text: String,
+    onClick: () -> Unit
+) {
+    require(painter != null || imageVector != null)
+
+    val iconPainter = painter ?: rememberVectorPainter(imageVector!!)
+
+    DropdownMenuItem(
+        modifier = modifier,
+        leadingIcon = {
+            Icon(
+                painter = iconPainter,
+                contentDescription = text
+            )
+        },
+        text = { Text(text) },
+        onClick = onClick
+    )
+}
+
 
 @Composable
 private fun PreviewEditRow(
