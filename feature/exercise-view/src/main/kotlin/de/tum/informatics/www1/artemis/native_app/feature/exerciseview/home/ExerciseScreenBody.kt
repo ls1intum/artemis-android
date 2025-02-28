@@ -165,19 +165,19 @@ private fun BodyWithTabs(
             selectedTabIndex = selectedTabIndex
         ) {
             DefaultTab(
-                0,
-                Icons.Default.ViewHeadline,
-                R.string.exercise_view_tab_overview,
-                selectedTabIndex,
-                onUpdateSelectedTabIndex
+                index =  0,
+                imageVector = Icons.Default.ViewHeadline,
+                textRes = R.string.exercise_view_tab_overview,
+                selectedTabIndex = selectedTabIndex,
+                updateSelectedTabIndex = onUpdateSelectedTabIndex
             )
 
             DefaultTab(
-                1,
-                Icons.AutoMirrored.Filled.HelpCenter,
-                R.string.exercise_view_tab_qna,
-                selectedTabIndex,
-                onUpdateSelectedTabIndex
+                index = 1,
+                imageVector = Icons.Default.HelpCenter,
+                textRes =  R.string.exercise_view_tab_qna,
+                selectedTabIndex =  selectedTabIndex,
+                updateSelectedTabIndex = onUpdateSelectedTabIndex
             )
         }
 

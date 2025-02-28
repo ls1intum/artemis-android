@@ -31,6 +31,15 @@ object ChannelServiceStub : ChannelService {
         return NetworkResponse.Response(ChannelChat(id = 1, name = "Exercise Chat"))
     }
 
+    override suspend fun getLectureChannel(
+        lectureId: Long,
+        courseId: Long,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<ChannelChat> {
+        return NetworkResponse.Response(ChannelChat(id = 1, name = "Lecture Chat"))
+    }
+
     override suspend fun registerInChannel(
         courseId: Long,
         conversationId: Long,
@@ -38,4 +47,3 @@ object ChannelServiceStub : ChannelService {
         return NetworkResponse.Response(true)
     }
 }
-

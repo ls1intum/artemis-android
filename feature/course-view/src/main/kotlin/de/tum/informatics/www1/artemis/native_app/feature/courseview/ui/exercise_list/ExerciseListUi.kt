@@ -49,7 +49,7 @@ internal fun ExerciseListUi(
         EmptyListHint(
             modifier = modifier,
             hint = stringResource(id = R.string.course_ui_exercises_no_search_results_title),
-            icon = Icons.Default.ListAlt
+            imageVector = Icons.Default.ListAlt
         )
         return
     }
