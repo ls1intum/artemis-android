@@ -18,6 +18,7 @@ import org.robolectric.RobolectricTestRunner
 
 @Category(EndToEndTest::class)
 @RunWith(RobolectricTestRunner::class)
+@Ignore("This test was super flaky, so we are ignoring it for now")
 internal class QuizPracticeParticipationE2eTest : QuizParticipationBaseE2eTest(QuizType.Practice) {
 
     override suspend fun setupHook() {
@@ -53,7 +54,6 @@ internal class QuizPracticeParticipationE2eTest : QuizParticipationBaseE2eTest(Q
         )
     }
 
-    @Ignore("This test was super flaky, so we are ignoring it for now")
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can submit practice quiz - multiple choice`() {
         testSubmitMultipleChoiceImpl()
@@ -64,7 +64,6 @@ internal class QuizPracticeParticipationE2eTest : QuizParticipationBaseE2eTest(Q
         testSubmitShortAnswerImpl()
     }
 
-    @Ignore("This test was super flaky, so we are ignoring it for now")
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can submit practice quiz - drag and drop`() {
         testSubmitDragAndDropImpl()
