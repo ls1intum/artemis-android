@@ -184,21 +184,6 @@ internal abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest()
             .assertExists()
             .performClick()
 
-        val deleteResponse = runBlockingWithTestTimeout {
-            val result = conversationService.deleteChannel(
-                courseId = course.id!!,
-                conversationId = conversation.id,
-                authToken = accessToken,
-                serverUrl = testServerUrl
-            )
-            result
-        }
-
-        (deleteResponse.onFailure {
-            throw AssertionError("ERROR: API call to delete conversation failed!")
-
-        })
-
         composeTestRule.waitUntil(DefaultTimeoutMillis) {
             runBlockingWithTestTimeout {
                 val deletedChannel = conversationService.getConversation(
@@ -211,22 +196,6 @@ internal abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest()
                 deletedChannel == null
             }
         }
-
-        assertChannelDeleted(conversation.id)
-    }
-
-
-    private fun assertChannelDeleted(channelId: Long) {
-        val deletedChannel = runBlockingWithTestTimeout {
-            conversationService.getConversation(
-                courseId = course.id!!,
-                conversationId = channelId,
-                authToken = accessToken,
-                serverUrl = testServerUrl
-            ).orNull()
-        }
-
-        assertEquals(null, deletedChannel, "The channel should be deleted but still exists!")
     }
 
 }
