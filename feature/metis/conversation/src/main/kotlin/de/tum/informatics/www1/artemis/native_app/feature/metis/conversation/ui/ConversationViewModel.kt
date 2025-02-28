@@ -110,9 +110,9 @@ internal open class ConversationViewModel(
     private val networkStatusProvider: NetworkStatusProvider,
     private val conversationService: ConversationService,
     private val replyTextStorageService: ReplyTextStorageService,
-    private val courseService: CourseService,
+    courseService: CourseService,
     private val createPostService: CreatePostService,
-    private val faqRepository: FaqRepository,
+    faqRepository: FaqRepository,
     accountDataService: AccountDataService,
     metisService: MetisService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext

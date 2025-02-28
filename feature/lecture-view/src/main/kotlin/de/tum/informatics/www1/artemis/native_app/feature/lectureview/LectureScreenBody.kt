@@ -60,9 +60,9 @@ internal fun LectureScreenBody(
     val qnaTabIndex = 2
 
     val selectedTabIndex =
-        if (selectedTabIndexState.value == qnaTabIndex && displayCommunicationOnSide) {
+        if (selectedTabIndexState.intValue == qnaTabIndex && displayCommunicationOnSide) {
             overviewTabIndex
-        } else selectedTabIndexState.value
+        } else selectedTabIndexState.intValue
 
     val lectureChannel by viewModel.channelDataState.collectAsState()
     val markLectureUnitDeferredMap = remember { SnapshotStateMap<Long, Deferred<Boolean>>() }
