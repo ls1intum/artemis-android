@@ -26,6 +26,10 @@ data class NormalizedAppVersion(private val versionName: String): Comparable<Nor
     }
 
     companion object {
+        /**
+         * Parses a full version name into a [NormalizedAppVersion] by taking only the version part.
+         * The Build.VERSION_NAME eg also contains flavor and build type information after a dash.
+         */
         fun fromFullVersionName(versionName: String): NormalizedAppVersion {
             return NormalizedAppVersion(versionName.substringBefore("-").trim())
         }
