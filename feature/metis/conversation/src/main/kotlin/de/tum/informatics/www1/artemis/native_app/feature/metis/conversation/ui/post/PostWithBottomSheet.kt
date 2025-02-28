@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.PostColors
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.EmojiSelection
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostContextBottomSheet
@@ -33,7 +34,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 internal fun PostWithBottomSheet(
     modifier: Modifier,
     post: IBasePost?,
-    postItemViewType: PostItemViewType,
+    chatListItem: ChatListItem.PostItem,
     isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     postActions: PostActions,
     clientId: Long,
@@ -41,8 +42,8 @@ internal fun PostWithBottomSheet(
     joinedItemType: PostItemViewJoinedType,
     onClick: () -> Unit
 ) {
-    var displayBottomSheet by remember(post, postItemViewType) { mutableStateOf(false) }
-    var displayReactionBottomSheet by remember(post, postItemViewType) { mutableStateOf(false) }
+    var displayBottomSheet by remember(post, chatListItem) { mutableStateOf(false) }
+    var displayReactionBottomSheet by remember(post, chatListItem) { mutableStateOf(false) }
     var emojiSelection: EmojiSelection by remember { mutableStateOf(EmojiSelection.ALL) }
 
     val isPinned = post is IStandalonePost && post.displayPriority == DisplayPriority.PINNED
@@ -95,7 +96,7 @@ internal fun PostWithBottomSheet(
         PostItem(
             modifier = innerModifier,
             post = post,
-            postItemViewType = postItemViewType,
+            chatListItem = chatListItem,
             clientId = clientId,
             displayHeader = displayHeader,
             postItemViewJoinedType = joinedItemType,

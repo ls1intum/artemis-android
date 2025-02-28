@@ -96,43 +96,6 @@ import kotlinx.datetime.Instant
 import org.koin.compose.koinInject
 import java.time.Duration
 
-sealed class PostItemViewType {
-
-    sealed class ChatListItem : PostItemViewType() {
-        abstract val answerPosts: List<IAnswerPost>
-
-        data class Post(override val answerPosts: List<IAnswerPost>) : ChatListItem()
-
-        data class PostWithForwardedMessage(
-            override val answerPosts: List<IAnswerPost>,
-            val forwardedPosts: List<IBasePost>
-        ) : ChatListItem()
-    }
-
-    sealed class ThreadContextItem : PostItemViewType() {
-        data object Post : ThreadContextItem()
-
-        data class PostWithForwardedMessage(
-            val forwardedPosts: List<IBasePost>
-        ) : ThreadContextItem()
-    }
-
-    sealed class ThreadAnswerItem : PostItemViewType() {
-        data object Post : ThreadAnswerItem()
-
-        data class PostWithForwardedMessage(
-            val forwardedPosts: List<IBasePost>
-        ) : ThreadAnswerItem()
-    }
-
-    fun hasForwardedMessage(): Boolean = when (this) {
-        is ChatListItem.PostWithForwardedMessage -> true
-        is ThreadContextItem.PostWithForwardedMessage -> true
-        is ThreadAnswerItem.PostWithForwardedMessage -> true
-        else -> false
-    }
-}
-
 private const val PlaceholderContent = "WWWWWWW"
 
 /**
@@ -142,7 +105,7 @@ private const val PlaceholderContent = "WWWWWWW"
 internal fun PostItem(
     modifier: Modifier,
     post: IBasePost?,
-    postItemViewType: PostItemViewType,
+    chatListItem: ChatListItem.PostItem,
     clientId: Long,
     displayHeader: Boolean,
     postItemViewJoinedType: PostItemViewJoinedType,
@@ -154,10 +117,7 @@ internal fun PostItem(
     onShowReactionsBottomSheet: (EmojiSelection) -> Unit
 ) {
     val isPlaceholder = post == null
-    val isExpanded = when (postItemViewType) {
-        is PostItemViewType.ThreadContextItem -> true
-        else -> false
-    }
+    val isExpanded = chatListItem.isThreadContextItem()
     val isDeleting by remember(post) { derivedStateOf { isMarkedAsDeleteList.contains(post) } }
 
     val isPinned = post is IStandalonePost && post.displayPriority == DisplayPriority.PINNED
@@ -198,7 +158,7 @@ internal fun PostItem(
         isPlaceholder = isPlaceholder,
         isDeleting = isDeleting,
         postStatus = postStatus,
-        postItemViewType = postItemViewType,
+        chatListItem = chatListItem,
         displayHeader = displayHeader,
         onClick = onClick,
         onLongClick = onLongClick,
@@ -276,7 +236,7 @@ internal fun PostItem(
                     },
                 clientId = clientId,
                 reactions = remember(post?.reactions) { post?.reactions.orEmpty() },
-                postItemViewType = postItemViewType,
+                chatListItem = chatListItem,
                 postActions = postActions,
                 onShowReactionsBottomSheet = onShowReactionsBottomSheet
             )
@@ -292,7 +252,7 @@ fun PostItemMainContent(
     isPlaceholder: Boolean = false,
     isDeleting: Boolean = false,
     postStatus: CreatePostService.Status = CreatePostService.Status.FINISHED,
-    postItemViewType: PostItemViewType = PostItemViewType.ChatListItem.Post(emptyList()), // TODO: ADD support for eg. saved posts
+    chatListItem: ChatListItem.PostItem? = null, // TODO: ADD support for eg. saved posts
     displayHeader: Boolean = true,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
@@ -356,13 +316,13 @@ fun PostItemMainContent(
                     )
                 }
 
-                if (postItemViewType.hasForwardedMessage()) {
+                if (chatListItem is ChatListItem.PostItem.ForwardedMessage) {
                     Spacer(modifier = Modifier.height(Spacings.Post.innerSpacing))
 
                     ForwardedMessageColumn(
                         modifier = Modifier.fillMaxWidth(),
                         post = post,
-                        postItemViewType = postItemViewType
+                        chatListItem = chatListItem
                     )
                 }
 
@@ -581,7 +541,7 @@ private fun StandalonePostFooter(
     modifier: Modifier,
     clientId: Long,
     reactions: List<IReaction>,
-    postItemViewType: PostItemViewType,
+    chatListItem: ChatListItem.PostItem,
     postActions: PostActions,
     onShowReactionsBottomSheet: (EmojiSelection) -> Unit
 ) {
@@ -626,7 +586,7 @@ private fun StandalonePostFooter(
                     onLongClick = onShowReactionsBottomSheet
                 )
             }
-            if (reactionCount.isNotEmpty() || postItemViewType is PostItemViewType.ThreadContextItem) {
+            if (reactionCount.isNotEmpty() || chatListItem.isThreadContextItem()) {
                 Box(
                     modifier = modifier
                         .background(color = PostColors.EmojiChipColors.background, CircleShape)
@@ -651,8 +611,8 @@ private fun StandalonePostFooter(
             }
         }
 
-        if (postItemViewType is PostItemViewType.ChatListItem) {
-            val replyCount = postItemViewType.answerPosts.size
+        if (chatListItem is ChatListItem.PostItem.IndexedItem) {
+            val replyCount = chatListItem.answers.size
 
             if (replyCount > 0) {
                 Row(

@@ -195,20 +195,21 @@ class ConversationChatListUseCase(
             .shareIn(viewModelScope + coroutineContext, SharingStarted.Lazily, replay = 1)
 
 
-    private fun Flow<PagingData<out IStandalonePost>>.mapIndexedPosts(): Flow<PagingData<ChatListItem.IndexedItem>> {
+    private fun Flow<PagingData<out IStandalonePost>>.mapIndexedPosts(): Flow<PagingData<ChatListItem.PostItem.IndexedItem>> {
         // TODO: this indexing seems to work, BUT if a chat has between 40 and 60 posts, the pager messes something up
         //  https://github.com/ls1intum/artemis-android/issues/392
         return this.map { pagingData ->
             var indexCounter = 0L
             pagingData.map { post ->
                 if (post.hasForwardedMessages == true) { // TODO
-                    ChatListItem.IndexedItem.PostWithForwardedMessage(
+                    ChatListItem.PostItem.IndexedItem.PostWithForwardedMessage(
                         post,
+                        post.answers.orEmpty(),
                         indexCounter++,
                         emptyList()
                     )
                 } else {
-                    ChatListItem.IndexedItem.Post(post, indexCounter++)
+                    ChatListItem.PostItem.IndexedItem.Post(post, post.answers.orEmpty(), indexCounter++)
                 }
             }
         }
@@ -311,17 +312,17 @@ class ConversationChatListUseCase(
         _query.value = new.ifEmpty { null }
     }
 
-    private fun insertDateSeparators(pagingList: PagingData<ChatListItem.IndexedItem>) =
-        pagingList.insertSeparators { before: ChatListItem.IndexedItem?, after: ChatListItem.IndexedItem? ->
+    private fun insertDateSeparators(pagingList: PagingData<ChatListItem.PostItem.IndexedItem>) =
+        pagingList.insertSeparators { before: ChatListItem.PostItem.IndexedItem?, after: ChatListItem.PostItem.IndexedItem? ->
             when {
                 before == null && after == null -> null
                 before != null && after == null -> {
-                    ChatListItem.DateDivider(before.post.creationLocalDate)
+                    ChatListItem.DateDivider((before.post as IStandalonePost).creationLocalDate)
                 }
 
                 after != null && before != null -> {
-                    val beforeDate = before.post.creationLocalDate
-                    val afterDate = after.post.creationLocalDate
+                    val beforeDate = (before.post as IStandalonePost).creationLocalDate
+                    val afterDate = (after.post as IStandalonePost).creationLocalDate
 
                     if (beforeDate != afterDate) {
                         ChatListItem.DateDivider(beforeDate)
@@ -336,7 +337,7 @@ class ConversationChatListUseCase(
         pagingList.insertSeparators { _, after: ChatListItem? ->
             // If we already know the id, great
             if (lastAlreadyReadPostId != null) {
-                if (after != null && after is ChatListItem.IndexedItem && after.post.serverPostId == lastAlreadyReadPostId) {
+                if (after != null && after is ChatListItem.PostItem && after.post.serverPostId == lastAlreadyReadPostId) {
                     return@insertSeparators ChatListItem.UnreadIndicator
                 } else {
                     return@insertSeparators null
@@ -351,7 +352,7 @@ class ConversationChatListUseCase(
                 return@insertSeparators null
             }
 
-            if (after != null && after is ChatListItem.IndexedItem && after.index == unreadMessagesCount) {
+            if (after != null && after is ChatListItem.PostItem && after.index == unreadMessagesCount) {
                 lastAlreadyReadPostId = after.post.serverPostId
                 return@insertSeparators ChatListItem.UnreadIndicator
             }

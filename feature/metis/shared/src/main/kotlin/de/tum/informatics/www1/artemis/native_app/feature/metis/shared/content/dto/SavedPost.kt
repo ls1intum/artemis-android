@@ -21,5 +21,7 @@ data class SavedPost(
     override val hasForwardedMessages: Boolean? = null
 ) : BasePost(), ISavedPost {
 
+    override val key: Any
+        get() = "$serverPostId|$postingType"
 
 }

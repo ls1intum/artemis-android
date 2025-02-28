@@ -26,20 +26,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 
 @Composable
 fun ForwardedMessageColumn(
     modifier: Modifier,
     post: IBasePost?,
-    postItemViewType: PostItemViewType,
+    chatListItem: ChatListItem.PostItem.ForwardedMessage,
 ) {
-    val forwardedPosts = when (postItemViewType) {
-        is PostItemViewType.ChatListItem.PostWithForwardedMessage -> postItemViewType.forwardedPosts
-        is PostItemViewType.ThreadContextItem.PostWithForwardedMessage -> postItemViewType.forwardedPosts
-        is PostItemViewType.ThreadAnswerItem.PostWithForwardedMessage -> postItemViewType.forwardedPosts
-        else -> emptyList()
-    }
+    val forwardedPosts = chatListItem.forwardedPosts
 
     Column(
         modifier = modifier,

@@ -37,11 +37,11 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ProvideEmojis
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisPostListHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.testTagForPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostItemViewJoinedType
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostWithBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.determinePostItemViewJoinedType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionBar
@@ -319,7 +319,7 @@ private fun PostAndRepliesList(
                     modifier = Modifier
                         .testTag(testTagForPost(post.standalonePostId)),
                     post = post,
-                    postItemViewType = PostItemViewType.ThreadContextItem.Post, // TODO
+                    chatListItem = ChatListItem.PostItem.ThreadItem.ContextItem.ContextPost(post), // TODO
                     postActions = postActions,
                     isMarkedAsDeleteList = isMarkedAsDeleteList,
                     displayHeader = true,
@@ -351,7 +351,7 @@ private fun PostAndRepliesList(
                 post = answerPost,
                 postActions = postActions,
                 isMarkedAsDeleteList = isMarkedAsDeleteList,
-                postItemViewType = PostItemViewType.ThreadAnswerItem.Post, // TODO
+                chatListItem = ChatListItem.PostItem.ThreadItem.Answer.AnswerPost(answerPost), // TODO
                 clientId = clientId,
                 displayHeader = shouldDisplayHeader(
                     index = index,

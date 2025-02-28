@@ -83,6 +83,9 @@ data class AnswerPostPojo(
     @Ignore
     override val parentAuthorId: Long = parentAuthorIdCache.authorId
 
+    @Ignore
+    override val key: Any = postId
+
     data class BasePostingCache(
         @ColumnInfo(name = "id")
         val serverPostId: Long,

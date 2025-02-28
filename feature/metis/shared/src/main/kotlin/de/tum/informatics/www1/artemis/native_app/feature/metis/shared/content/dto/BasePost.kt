@@ -29,4 +29,7 @@ sealed class BasePost : IBasePost {
 
     override val authorImageUrl: String?
         get() = author?.imageUrl
+
+    override val key: Any
+        get() = id ?: clientPostId ?: this
 }

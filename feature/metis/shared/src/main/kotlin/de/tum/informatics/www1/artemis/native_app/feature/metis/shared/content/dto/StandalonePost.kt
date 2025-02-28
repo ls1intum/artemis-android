@@ -48,11 +48,7 @@ data class StandalonePost(
         isSaved = post.isSaved,
         hasForwardedMessages = post.hasForwardedMessages
     )
-
-    @Transient
-    override val key: Any = id ?: hashCode()
     
     @Transient
     override val standalonePostId = id?.let(StandalonePostId::ServerSideId)
-
 }
