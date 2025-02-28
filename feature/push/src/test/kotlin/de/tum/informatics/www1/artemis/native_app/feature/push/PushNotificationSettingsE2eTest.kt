@@ -9,6 +9,7 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
+import de.tum.informatics.www1.artemis.native_app.core.common.app_version.NormalizedAppVersion
 import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
@@ -181,7 +182,8 @@ class PushNotificationSettingsE2eTest : BaseComposeTest() {
             pushNotificationSettingsService.uploadPushNotificationDeviceConfigurationsToServer(
                 serverUrl = testServerUrl,
                 authToken = accessToken,
-                firebaseToken = generateId()
+                firebaseToken = generateId(),
+                appVersion = NormalizedAppVersion.ZERO
             ).orThrow("Could not register for push notifications")
 
             pushNotificationSettingsService.unsubscribeFromNotifications(

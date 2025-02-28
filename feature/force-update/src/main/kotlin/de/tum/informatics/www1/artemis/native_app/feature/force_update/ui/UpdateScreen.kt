@@ -22,14 +22,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import de.tum.informatics.www1.artemis.native_app.core.common.app_version.NormalizedAppVersion
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.feature.forceupdate.R
 
 @Composable
 fun UpdateScreen(
     onDownloadClick: () -> Unit,
-    currentVersion: String,
-    minVersion: String
+    currentVersion: NormalizedAppVersion,
+    minVersion: NormalizedAppVersion
 ) {
     Scaffold { paddingValues ->
         Column(

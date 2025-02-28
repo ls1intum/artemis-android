@@ -33,7 +33,7 @@ val pushModule = module {
     }
 
     single<PushNotificationConfigurationService> {
-        PushNotificationConfigurationServiceImpl(androidContext(), get())
+        PushNotificationConfigurationServiceImpl(androidContext(), get(), get())
     }
 
     single<NotificationManager> { NotificationManagerImpl(get(), get()) }

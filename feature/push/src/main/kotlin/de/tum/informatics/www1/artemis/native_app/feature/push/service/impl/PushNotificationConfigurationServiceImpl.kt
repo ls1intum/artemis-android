@@ -3,7 +3,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.push.service.impl
 import android.content.Context
 import android.security.keystore.KeyProperties
 import android.security.keystore.KeyProtection
-import android.util.Base64
 import android.util.Log
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
@@ -11,20 +10,10 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.google.firebase.installations.FirebaseInstallations
 import com.google.firebase.messaging.FirebaseMessaging
+import de.tum.informatics.www1.artemis.native_app.core.common.app_version.AppVersionProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
-import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
-import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
-import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.network.NotificationSettingsService
-import io.ktor.client.call.body
-import io.ktor.client.request.delete
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.appendPathSegments
-import io.ktor.http.contentType
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -35,15 +24,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.Serializable
 import java.security.KeyStore
 import javax.crypto.SecretKey
-import javax.crypto.spec.SecretKeySpec
 
 @OptIn(DelicateCoroutinesApi::class)
 class PushNotificationConfigurationServiceImpl internal constructor(
     private val context: Context,
-    private val notificationSettingsService: NotificationSettingsService
+    private val notificationSettingsService: NotificationSettingsService,
+    private val appVersionProvider: AppVersionProvider,
 ) : PushNotificationConfigurationService {
 
     companion object {
@@ -105,7 +93,8 @@ class PushNotificationConfigurationServiceImpl internal constructor(
                 notificationSettingsService.uploadPushNotificationDeviceConfigurationsToServer(
                     serverUrl = serverUrl,
                     authToken = authToken,
-                    firebaseToken = fireBaseToken
+                    firebaseToken = fireBaseToken,
+                    appVersion = appVersionProvider.appVersion.normalized
                 )
 
             when (secretKeyResponse) {
