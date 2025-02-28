@@ -31,11 +31,14 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExerci
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.UnknownExercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ExerciseDeeplinks
+import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.FaqDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.LectureDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.getExerciseTypeIconId
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.PostArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
+import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.FaqRepository
+import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.Faq
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
@@ -127,6 +130,7 @@ internal open class ConversationViewModel(
     private val replyTextStorageService: ReplyTextStorageService,
     private val courseService: CourseService,
     private val createPostService: CreatePostService,
+    private val faqRepository: FaqRepository,
     accountDataService: AccountDataService,
     metisService: MetisService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
@@ -241,6 +245,9 @@ internal open class ConversationViewModel(
                 .getConversations(metisContext.courseId, authToken, serverUrl)
         }
     }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Lazily)
+
+    private val faqs: StateFlow<DataState<List<Faq>>> = faqRepository.getFaqs(courseId)
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Lazily)
 
     private val isAbleToPin: StateFlow<Boolean> = conversation
@@ -552,10 +559,11 @@ internal open class ConversationViewModel(
         '#' -> {
             combine(
                 produceExerciseAndLectureAutoCompleteHints(query),
-                produceConversationAutoCompleteHints(query)
-            ) { exerciseAndLectureHints, conversationHints ->
-                (exerciseAndLectureHints join conversationHints)
-                    .bind { (a, b) -> a + b }
+                produceConversationAutoCompleteHints(query),
+                produceFaqAutoCompletionHints(query)
+            ) { exerciseAndLectureHints, conversationHints, faqHints ->
+                exerciseAndLectureHints.join(conversationHints, faqHints)
+                    .bind { (a, b, c) -> a + b + c }
             }
         }
 
@@ -674,6 +682,29 @@ internal open class ConversationViewModel(
                     AutoCompleteHintCollection(
                         type = AutoCompleteType.CHANNELS,
                         items = conversationAutoCompleteItems
+                    )
+                )
+            }
+        }
+
+    private fun produceFaqAutoCompletionHints(query: String): Flow<DataState<List<AutoCompleteHintCollection>>> =
+        faqs.map { faqsDataState ->
+            faqsDataState.bind { faqs ->
+                val faqAutoCompleteItems = faqs
+                    .filter { it.questionTitle.contains(query, ignoreCase = true) }
+                    .map { faq ->
+                        val link = FaqDeeplinks.ToFaq.markdownLink(courseId, faq.id)
+                        AutoCompleteHint(
+                            hint = faq.questionTitle,
+                            replacementText = "[faq]${faq.questionTitle}($link)[/faq]",
+                            id = "Faq:${faq.id}"
+                        )
+                    }
+
+                listOf(
+                    AutoCompleteHintCollection(
+                        type = AutoCompleteType.FAQS,
+                        items = faqAutoCompleteItems
                     )
                 )
             }

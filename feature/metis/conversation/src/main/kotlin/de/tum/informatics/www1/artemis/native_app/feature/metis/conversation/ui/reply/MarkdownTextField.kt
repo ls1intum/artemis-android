@@ -22,6 +22,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ListAlt
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material3.DropdownMenu
@@ -402,6 +403,20 @@ private fun TaggingDropdownMenu(
             onClick = {
                 onDismissRequest()
                 showAutoCompletePopup?.invoke(AutoCompleteType.LECTURES)
+            }
+        )
+
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.QuestionMark,
+                    contentDescription = null
+                )
+            },
+            text = { Text(stringResource(R.string.reply_format_mention_faqs)) },
+            onClick = {
+                onDismissRequest()
+                showAutoCompletePopup?.invoke(AutoCompleteType.FAQS)
             }
         )
     }

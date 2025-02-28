@@ -36,6 +36,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.dropShadowBelow
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
 
 const val TEST_TAG_REPLY_AUTO_COMPLETE_POPUP_LIST = "TEST_TAG_REPLY_AUTO_COMPLETE_POPUP_LIST"
@@ -77,8 +78,9 @@ private fun ReplyAutoCompletePopupBody(
 ) {
     LazyColumn(
         modifier = modifier
+            .dropShadowBelow()
             .clip(MaterialTheme.shapes.large)
-            .background(color = MaterialTheme.colorScheme.surfaceContainer)
+            .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
             .padding(8.dp)
             .testTag(TEST_TAG_REPLY_AUTO_COMPLETE_POPUP_LIST)
     ) {
@@ -124,7 +126,7 @@ private fun AutoCompleteCategoryComposable(modifier: Modifier, name: String) {
         Text(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(color = MaterialTheme.colorScheme.surfaceContainer)
+                .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
                 .padding(horizontal = Spacings.AutoCompletePopup.HintHorizontalPadding, vertical = 4.dp),
             text = name,
             color = MaterialTheme.colorScheme.primary,
