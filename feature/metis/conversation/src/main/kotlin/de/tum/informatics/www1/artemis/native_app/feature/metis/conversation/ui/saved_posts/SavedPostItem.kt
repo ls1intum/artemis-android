@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MoreHoriz
@@ -61,7 +62,7 @@ fun SavedPostItem(
     ) {
 
         PostItemMainContent(
-            modifier = Modifier,
+            modifier = Modifier.wrapContentHeight(unbounded = true),
             post = savedPost,
             onClick = onClick,
             onLongClick = onLongClick,
