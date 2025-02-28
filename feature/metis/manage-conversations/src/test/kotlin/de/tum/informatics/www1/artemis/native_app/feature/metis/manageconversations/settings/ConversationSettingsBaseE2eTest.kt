@@ -15,7 +15,6 @@ import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.lifecycle.SavedStateHandle
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
-import de.tum.informatics.www1.artemis.native_app.core.data.onFailure
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.overview.ConversationSettingsScreen
@@ -24,7 +23,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metistest.ConversationBaseTest
 import org.koin.test.get
-import kotlin.test.assertEquals
 import kotlin.test.assertIs
 
 @OptIn(ExperimentalTestApi::class)
