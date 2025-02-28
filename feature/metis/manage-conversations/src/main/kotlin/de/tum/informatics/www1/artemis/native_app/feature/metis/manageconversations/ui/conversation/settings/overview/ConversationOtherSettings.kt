@@ -61,7 +61,7 @@ internal fun ConversationOtherSettings(
 
             val canManageChannels = !isTutorialGroupChannel && hasChannelModerationRights && isChannelModerator && isCreator
 
-            // Archive/Unarchive and Delete Buttons (Only if user has moderation rights)
+            // Archive/Unarchive and Delete Buttons
             if (canManageChannels) {
                 OutlinedButton(
                     modifier = buttonModifier,
@@ -94,62 +94,83 @@ internal fun ConversationOtherSettings(
         }
     }
 
-    // Archive/Unarchive Confirmation Dialog
-    if (displayArchiveChannelDialog) {
-        val channelName = when (conversation) {
-            is ChannelChat -> conversation.name
-            else -> ""
-        }
-
-        val doArchive = when (conversation) {
-            is ChannelChat -> !conversation.isArchived
-            else -> false
-        }
-
-        val title =
-            if (doArchive) R.string.conversation_settings_dialog_archive_channel_title else R.string.conversation_settings_dialog_unarchive_channel_title
-
-        val text =
-            if (doArchive) R.string.conversation_settings_dialog_archive_channel_message else R.string.conversation_settings_dialog_unarchive_channel_message
-
-        val confirm =
-            if (doArchive) R.string.conversation_settings_dialog_archive_channel_positive else R.string.conversation_settings_dialog_unarchive_channel_positive
-
-        val dismiss =
-            if (doArchive) R.string.conversation_settings_dialog_archive_channel_negative else R.string.conversation_settings_dialog_unarchive_channel_negative
-
-        MarkdownTextAlertDialog(
-            title = stringResource(id = title),
-            text = stringResource(
-                id = text,
-                channelName
-            ),
-            confirmButtonText = stringResource(id = confirm),
-            dismissButtonText = stringResource(id = dismiss),
-            onPressPositiveButton = onToggleChannelArchivation,
-            onDismissRequest = { displayArchiveChannelDialog = false })
-    }
-
-    // Delete Channel Confirmation Dialog
-    if (displayDeleteChannelDialog) {
-        val channelName = when (conversation) {
-            is ChannelChat -> conversation.name
-            else -> ""
-        }
-
-        MarkdownTextAlertDialog(
-            title = stringResource(R.string.conversation_settings_section_delete_channel_title),
-            text = stringResource(
-                R.string.conversation_settings_section_delete_channel_message,
-                channelName
-            ),
-            confirmButtonText = stringResource(R.string.conversation_settings_section_delete_channel),
-            dismissButtonText = stringResource(R.string.conversation_settings_section_delete_channel_negative),
-            onPressPositiveButton = {
-                displayDeleteChannelDialog = false
-                onDeleteChannel()
+    if (displayArchiveChannelDialog && conversation is ChannelChat) {
+        ArchiveChannelDialog(
+            conversation = conversation,
+            onToggleChannelArchivation = {
+                displayArchiveChannelDialog = false
+                onToggleChannelArchivation()
             },
-            onDismissRequest = { displayDeleteChannelDialog = false }
+            onDismiss = { displayArchiveChannelDialog = false }
         )
     }
+
+    if (displayDeleteChannelDialog && conversation is ChannelChat) {
+        DeleteChannelDialog(
+            conversation = conversation,
+            onDeleteChannel = onDeleteChannel,
+            onDismiss = { displayDeleteChannelDialog = false }
+        )
+    }
+}
+
+@Composable
+private fun DeleteChannelDialog(
+    conversation: ChannelChat,
+    onDeleteChannel: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    MarkdownTextAlertDialog(
+        title = stringResource(R.string.conversation_settings_section_delete_channel_title),
+        text = stringResource(
+            R.string.conversation_settings_section_delete_channel_message,
+            conversation.name
+        ),
+        confirmButtonText = stringResource(R.string.conversation_settings_section_delete_channel),
+        dismissButtonText = stringResource(R.string.conversation_settings_section_delete_channel_negative),
+        onPressPositiveButton = {
+            onDismiss()
+            onDeleteChannel()
+        },
+        onDismissRequest = onDismiss
+    )
+}
+
+@Composable
+private fun ArchiveChannelDialog(
+    conversation: ChannelChat,
+    onToggleChannelArchivation: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val doArchive = !conversation.isArchived
+    val channelName = conversation.name
+
+    val titleRes = if (doArchive)
+        R.string.conversation_settings_dialog_archive_channel_title
+    else
+        R.string.conversation_settings_dialog_unarchive_channel_title
+
+    val messageRes = if (doArchive)
+        R.string.conversation_settings_dialog_archive_channel_message
+    else
+        R.string.conversation_settings_dialog_unarchive_channel_message
+
+    val confirmRes = if (doArchive)
+        R.string.conversation_settings_dialog_archive_channel_positive
+    else
+        R.string.conversation_settings_dialog_unarchive_channel_positive
+
+    val dismissRes = if (doArchive)
+        R.string.conversation_settings_dialog_archive_channel_negative
+    else
+        R.string.conversation_settings_dialog_unarchive_channel_negative
+
+    MarkdownTextAlertDialog(
+        title = stringResource(id = titleRes),
+        text = stringResource(id = messageRes, channelName),
+        confirmButtonText = stringResource(id = confirmRes),
+        dismissButtonText = stringResource(id = dismissRes),
+        onPressPositiveButton = onToggleChannelArchivation,
+        onDismissRequest = onDismiss
+    )
 }

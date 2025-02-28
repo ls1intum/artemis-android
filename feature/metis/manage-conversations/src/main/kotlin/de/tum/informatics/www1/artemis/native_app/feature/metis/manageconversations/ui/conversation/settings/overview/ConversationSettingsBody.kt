@@ -104,6 +104,15 @@ internal fun ConversationSettingsBody(
         }
     )
 
+    AwaitDeferredCompletion(
+        job = deleteChannelJob,
+        onComplete = { successful ->
+            deleteChannelJob = null
+
+            onSaveResult(successful)
+        }
+    )
+
     val editableConversationInfo = rememberEditableConversationInfo(
         name = name,
         description = description,
