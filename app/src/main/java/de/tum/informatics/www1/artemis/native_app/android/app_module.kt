@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.android
 
 import de.tum.informatics.www1.artemis.native_app.android.db.dbModule
+import de.tum.informatics.www1.artemis.native_app.core.common.commonModule
 import de.tum.informatics.www1.artemis.native_app.core.data.dataModule
 import de.tum.informatics.www1.artemis.native_app.core.datastore.datastoreModule
 import de.tum.informatics.www1.artemis.native_app.core.device.deviceModule
@@ -21,6 +22,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.settings.settingsModul
 import org.koin.dsl.module
 
 val appModule = module { includes(
+    commonModule,
     dataModule,
     uiModule,
     datastoreModule,

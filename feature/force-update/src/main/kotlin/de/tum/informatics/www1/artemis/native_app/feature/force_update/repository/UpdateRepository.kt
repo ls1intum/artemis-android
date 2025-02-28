@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import de.tum.informatics.www1.artemis.native_app.core.common.app_version.AppVersionProvider
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.force_update.service.UpdateService
 import kotlinx.coroutines.flow.Flow
@@ -17,7 +18,7 @@ private val Context.dataStore by preferencesDataStore("update_preferences")
 class UpdateRepository(
     private val context: Context,
     private val updateService: UpdateService,
-    version: String,
+    appVersionProvider: AppVersionProvider,
     serverConfigurationService: ServerConfigurationService,
 ) {
 
@@ -26,7 +27,7 @@ class UpdateRepository(
         private val LAST_KNOWN_VERSION = stringPreferencesKey("last_known_version")
     }
 
-    private val currentVersionNormalized = UpdateUtil.normalizeVersion(version)
+    private val currentVersionNormalized = appVersionProvider.appVersion.normalized
 
     /**
      * Checks for an update whenever the server URL changes or every 2 days.

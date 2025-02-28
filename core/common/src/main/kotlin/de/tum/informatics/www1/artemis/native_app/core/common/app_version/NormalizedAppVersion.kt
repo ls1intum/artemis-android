@@ -29,5 +29,7 @@ data class NormalizedAppVersion(private val versionName: String): Comparable<Nor
         fun fromFullVersionName(versionName: String): NormalizedAppVersion {
             return NormalizedAppVersion(versionName.substringBefore("-").trim())
         }
+
+        val ZERO = NormalizedAppVersion("0.0.0")
     }
 }

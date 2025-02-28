@@ -10,6 +10,8 @@ dependencies {
     api(libs.kotlinx.coroutines.android)
     api(libs.kotlinx.datetime)
 
+    implementation(libs.koin.core)
+
     api(libs.androidx.work.runtime.ktx)
     testImplementation(project(":core:common-test"))
 }
