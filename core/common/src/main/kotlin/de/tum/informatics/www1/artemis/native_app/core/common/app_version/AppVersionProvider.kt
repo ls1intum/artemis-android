@@ -5,5 +5,5 @@ interface AppVersionProvider {
 }
 
 class AppVersionProviderImpl : AppVersionProvider {
-    override var appVersion: AppVersion = AppVersion(0, NormalizedAppVersion.ZERO.toString())
+    override var appVersion: AppVersion = AppVersion.UNKNOWN
 }

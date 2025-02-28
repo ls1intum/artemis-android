@@ -8,4 +8,11 @@ data class AppVersion(
     val normalized: NormalizedAppVersion by lazy {
         NormalizedAppVersion.fromFullVersionName(fullVersionName)
     }
+
+    companion object {
+        val UNKNOWN = AppVersion(
+            versionCode = 0,
+            fullVersionName = NormalizedAppVersion.ZERO.toString()
+        )
+    }
 }
