@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.force_update
 
+import de.tum.informatics.www1.artemis.native_app.core.common.app_version.NormalizedAppVersion
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.feature.force_update.repository.UpdateUtil
@@ -17,27 +18,9 @@ import java.util.concurrent.TimeUnit
 @RunWith(RobolectricTestRunner::class)
 class UpdateUtilTest {
 
-    @Test
-    fun `normalizeVersion should remove suffix after dash`() {
-        assertEquals("1.2.3", UpdateUtil.normalizeVersion("1.2.3-prod"))
-        assertEquals("2.0.0", UpdateUtil.normalizeVersion("2.0.0-beta"))
-        assertEquals("3.5.1", UpdateUtil.normalizeVersion("3.5.1-alpha"))
-        assertEquals("1.2.3", UpdateUtil.normalizeVersion("1.2.3"))
-    }
-
-    @Test
-    fun `isVersionGreater should return true when server version is newer`() {
-        assertTrue(UpdateUtil.isVersionGreater("1.2.4", "1.2.3"))
-        assertTrue(UpdateUtil.isVersionGreater("2.0.0", "1.9.9"))
-        assertTrue(UpdateUtil.isVersionGreater("1.3.0", "1.2.9"))
-    }
-
-    @Test
-    fun `isVersionGreater should return false when server version is older or the same`() {
-        assertFalse(UpdateUtil.isVersionGreater("1.2.3", "1.2.3"))
-        assertFalse(UpdateUtil.isVersionGreater("1.2.2", "1.2.3"))
-        assertFalse(UpdateUtil.isVersionGreater("0.9.9", "1.0.0"))
-    }
+    private val version1_1_9 = NormalizedAppVersion("1.1.9")
+    private val version1_2_3 = NormalizedAppVersion("1.2.3")
+    private val version1_3_0 = NormalizedAppVersion("1.3.0")
 
     @Test
     fun `isTimeToCheckUpdate should return true if more than 2 days have passed`() {
@@ -57,15 +40,12 @@ class UpdateUtilTest {
 
     @Test
     fun `createUpdateResultBasedOnServiceResponse should detect update if server version is newer`() = runBlocking {
-        var detectedVersion: String? = null
-        val response: NetworkResponse.Response<String?> = NetworkResponse.Response("1.3.0")
-        val currentVersion = "1.2.3"
-        val storedServerVersion = "1.2.3"
+        var detectedVersion: NormalizedAppVersion? = null
 
         val result = UpdateUtil.createUpdateResultBasedOnServiceResponse(
-            response = response,
-            currentVersion = currentVersion,
-            storedServerVersion = storedServerVersion,
+            response = NetworkResponse.Response(version1_3_0),
+            currentVersion = version1_2_3,
+            storedServerVersion = version1_2_3,
             onUpdateDetected = { newVersion ->
                 detectedVersion = newVersion
             }
@@ -73,71 +53,64 @@ class UpdateUtilTest {
 
         assertTrue(result.updateAvailable)
         assertTrue(result.forceUpdate)
-        assertEquals(currentVersion, result.currentVersion)
-        assertEquals("1.3.0", result.minVersion)
-        assertEquals("1.3.0", detectedVersion)
+        assertEquals(version1_2_3, result.currentVersion)
+        assertEquals(version1_3_0, result.minVersion)
+        assertEquals(version1_3_0, detectedVersion)
     }
+
+
 
     @Test
     fun `createUpdateResultBasedOnServiceResponse should not detect update if server version is same`() = runBlocking {
-        var detectedVersion: String? = null
-        val response: NetworkResponse.Response<String?> = NetworkResponse.Response("1.2.3")
-        val currentVersion = "1.2.3"
-        val storedServerVersion = "1.2.3"
+        var detectedVersion: NormalizedAppVersion? = null
 
         val result = UpdateUtil.createUpdateResultBasedOnServiceResponse(
-            response = response,
-            currentVersion = currentVersion,
-            storedServerVersion = storedServerVersion,
+            response = NetworkResponse.Response(version1_2_3),
+            currentVersion = version1_2_3,
+            storedServerVersion = version1_2_3,
             onUpdateDetected = { detectedVersion = it }
         )
 
         assertFalse(result.updateAvailable)
         assertFalse(result.forceUpdate)
-        assertEquals(currentVersion, result.currentVersion)
-        assertEquals("1.2.3", result.minVersion)
+        assertEquals(version1_2_3, result.currentVersion)
+        assertEquals(version1_2_3, result.minVersion)
         assertEquals(null, detectedVersion)
     }
 
     @Test
     fun `createUpdateResultBasedOnServiceResponse should not detect update if server version is older`() = runBlocking {
-        var detectedVersion: String? = null
-        val response: NetworkResponse.Response<String?> = NetworkResponse.Response("1.1.9")
-        val currentVersion = "1.2.3"
-        val storedServerVersion = "1.2.3"
+        var detectedVersion: NormalizedAppVersion? = null
 
         val result = UpdateUtil.createUpdateResultBasedOnServiceResponse(
-            response = response,
-            currentVersion = currentVersion,
-            storedServerVersion = storedServerVersion,
+            response = NetworkResponse.Response(version1_1_9),
+            currentVersion = version1_2_3,
+            storedServerVersion = version1_2_3,
             onUpdateDetected = { detectedVersion = it }
         )
 
         assertFalse(result.updateAvailable)
         assertFalse(result.forceUpdate)
-        assertEquals(currentVersion, result.currentVersion)
-        assertEquals("1.1.9", result.minVersion)
+        assertEquals(version1_2_3, result.currentVersion)
+        assertEquals(version1_1_9, result.minVersion)
         assertEquals(null, detectedVersion)
     }
 
     @Test
     fun `createUpdateResultBasedOnServiceResponse should return no update needed if network failure`() = runBlocking {
-        var detectedVersion: String? = null
-        val response: NetworkResponse.Response<String?> = NetworkResponse.Response(null)
-        val currentVersion = "1.2.3"
-        val fallbackVersion = "0.0.0"
+        var detectedVersion: NormalizedAppVersion? = null
 
         val result = UpdateUtil.createUpdateResultBasedOnServiceResponse(
-            response = response,
-            currentVersion = currentVersion,
-            storedServerVersion = fallbackVersion,
+            response = NetworkResponse.Failure(Exception()),
+            currentVersion = version1_2_3,
+            storedServerVersion = NormalizedAppVersion.ZERO,
             onUpdateDetected = { detectedVersion = it }
         )
 
         assertFalse(result.updateAvailable)
         assertFalse(result.forceUpdate)
-        assertEquals(currentVersion, result.currentVersion)
-        assertEquals(fallbackVersion, result.minVersion)
+        assertEquals(version1_2_3, result.currentVersion)
+        assertEquals(NormalizedAppVersion.ZERO, result.minVersion)
         assertEquals(null, detectedVersion)
     }
 }

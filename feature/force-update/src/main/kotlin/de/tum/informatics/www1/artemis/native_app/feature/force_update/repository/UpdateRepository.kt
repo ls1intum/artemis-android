@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import de.tum.informatics.www1.artemis.native_app.core.common.app_version.AppVersionProvider
+import de.tum.informatics.www1.artemis.native_app.core.common.app_version.NormalizedAppVersion
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.force_update.service.UpdateService
 import kotlinx.coroutines.flow.Flow
@@ -36,10 +37,7 @@ class UpdateRepository(
     val updateResultFlow: Flow<UpdateResult> =
         serverConfigurationService.serverUrl.mapLatest { latestServerUrl ->
 
-            // Read the stored server version from DataStore; default to "0.0.0" if none.
-            val storedServerVersion = context.dataStore.data
-                .map { it[LAST_KNOWN_VERSION] ?: "0.0.0" }
-                .first()
+            val storedServerVersion = getLastKnownVersion()
 
             val noUpdateNeeded =  UpdateResult(
                 updateAvailable = false,
@@ -49,7 +47,7 @@ class UpdateRepository(
             )
 
             // If the stored version is greater than our current version, then an update is required.
-            if (UpdateUtil.isVersionGreater(storedServerVersion, currentVersionNormalized)) {
+            if (storedServerVersion > currentVersionNormalized) {
                 return@mapLatest UpdateResult(
                     updateAvailable = true,
                     forceUpdate = true,
@@ -58,9 +56,7 @@ class UpdateRepository(
                 )
             }
 
-            val lastCheckTime = context.dataStore.data
-                .map { it[LAST_UPDATE_CHECK] ?: 0L }
-                .first()
+            val lastCheckTime = getLastUpdateCheck()
 
             // If it's not yet time to re-check (less than 2 days since last check), then assume no update.
             if (!UpdateUtil.isTimeToCheckUpdate(lastCheckTime, System.currentTimeMillis())) {
@@ -84,14 +80,28 @@ class UpdateRepository(
         context.dataStore.edit { it[LAST_UPDATE_CHECK] = timestamp }
     }
 
-    private suspend fun saveLastKnownVersion(version: String) {
-        context.dataStore.edit { it[LAST_KNOWN_VERSION] = version }
+    private suspend fun getLastUpdateCheck(): Long {
+        return context.dataStore.data
+            .map { it[LAST_UPDATE_CHECK] ?: 0L }
+            .first()
+    }
+
+
+    private suspend fun saveLastKnownVersion(version: NormalizedAppVersion) {
+        context.dataStore.edit { it[LAST_KNOWN_VERSION] = version.toString() }
+    }
+
+    private suspend fun getLastKnownVersion(): NormalizedAppVersion {
+        val versionString = context.dataStore.data
+            .map { it[LAST_KNOWN_VERSION] }
+            .first()
+        return NormalizedAppVersion.fromNullable(versionString)
     }
 
     data class UpdateResult(
         val updateAvailable: Boolean,
         val forceUpdate: Boolean,
-        val currentVersion: String,
-        val minVersion: String
+        val currentVersion: NormalizedAppVersion,
+        val minVersion: NormalizedAppVersion
     )
 }

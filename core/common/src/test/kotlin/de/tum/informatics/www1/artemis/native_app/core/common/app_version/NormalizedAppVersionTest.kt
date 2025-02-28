@@ -22,7 +22,7 @@ class NormalizedAppVersionTest {
     }
 
     @Test
-    fun `test valid two digit version string`() {
+    fun `test valid version string with two digit patch number`() {
         val version = NormalizedAppVersion("1.2.30")
         assertEquals(1, version.major)
         assertEquals(2, version.minor)
@@ -56,13 +56,15 @@ class NormalizedAppVersionTest {
     fun `test compareTo`() {
         val version1 = NormalizedAppVersion("1.2.3")
         val version2 = NormalizedAppVersion("1.2.4")
-        val version3 = NormalizedAppVersion("1.3.0")
-        val version4 = NormalizedAppVersion("2.0.0")
+        val version3 = NormalizedAppVersion("1.2.10")
+        val version4 = NormalizedAppVersion("1.3.0")
+        val version5 = NormalizedAppVersion("2.0.0")
 
         assertTrue(version1 < version2)
         assertTrue(version2 < version3)
         assertTrue(version3 < version4)
-        assertTrue(version4 > version1)
+        assertTrue(version4 < version5)
+        assertTrue(version5 > version1)
     }
 
 }

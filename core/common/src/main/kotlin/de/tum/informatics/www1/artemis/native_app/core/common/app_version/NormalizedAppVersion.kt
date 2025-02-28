@@ -31,5 +31,9 @@ data class NormalizedAppVersion(private val versionName: String): Comparable<Nor
         }
 
         val ZERO = NormalizedAppVersion("0.0.0")
+
+        fun fromNullable(versionName: String?): NormalizedAppVersion {
+            return versionName?.let { NormalizedAppVersion(it) } ?: ZERO
+        }
     }
 }
