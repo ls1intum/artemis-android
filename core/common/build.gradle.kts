@@ -11,4 +11,5 @@ dependencies {
     api(libs.kotlinx.datetime)
 
     api(libs.androidx.work.runtime.ktx)
+    testImplementation(project(":core:common-test"))
 }
