@@ -46,7 +46,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -58,6 +57,7 @@ import androidx.compose.ui.unit.isUnspecified
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicArtemisTextField
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.toPainter
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteType
@@ -357,31 +357,31 @@ private fun TaggingDropdownMenu(
         )
     ) {
         TaggingDropDownMenuItem(
-            painter = painterResource(id = R.drawable.tag),
+            iconPainter = painterResource(id = R.drawable.tag),
             text = stringResource(R.string.reply_format_mention_members),
             onClick = { onClick(AutoCompleteType.USERS) }
         )
 
         TaggingDropDownMenuItem(
-            imageVector = Icons.Default.Tag,
+            iconPainter = Icons.Default.Tag.toPainter(),
             text = stringResource(R.string.reply_format_mention_channels),
             onClick = { onClick(AutoCompleteType.CHANNELS) }
         )
 
         TaggingDropDownMenuItem(
-            imageVector = Icons.AutoMirrored.Filled.ListAlt,
+            iconPainter = Icons.AutoMirrored.Filled.ListAlt.toPainter(),
             text = stringResource(R.string.reply_format_mention_exercises),
             onClick = { onClick(AutoCompleteType.EXERCISES) }
         )
 
         TaggingDropDownMenuItem(
-            imageVector = Icons.Default.School,
+            iconPainter = Icons.Default.School.toPainter(),
             text = stringResource(R.string.reply_format_mention_lectures),
             onClick = { onClick(AutoCompleteType.LECTURES) }
         )
 
         TaggingDropDownMenuItem(
-            imageVector = Icons.Default.QuestionMark,
+            iconPainter = Icons.Default.QuestionMark.toPainter(),
             text = stringResource(R.string.reply_format_mention_faqs),
             onClick = { onClick(AutoCompleteType.FAQS) }
         )
@@ -391,15 +391,10 @@ private fun TaggingDropdownMenu(
 @Composable
 private fun TaggingDropDownMenuItem(
     modifier: Modifier = Modifier,
-    painter: Painter? = null,
-    imageVector: ImageVector? = null,
+    iconPainter: Painter,
     text: String,
     onClick: () -> Unit
 ) {
-    require(painter != null || imageVector != null)
-
-    val iconPainter = painter ?: rememberVectorPainter(imageVector!!)
-
     DropdownMenuItem(
         modifier = modifier,
         leadingIcon = {

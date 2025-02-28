@@ -89,14 +89,14 @@ internal fun LectureScreenBody(
             ) {
                 DefaultTab(
                     index = overviewTabIndex,
-                    painter = painterResource(id = de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R.drawable.list),
+                    iconPainter = painterResource(id = de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R.drawable.list),
                     textRes = R.string.lecture_view_tab_overview,
                     selectedTabIndex = selectedTabIndexState
                 )
 
                 DefaultTab(
                     index = attachmentsTabIndex,
-                    painter = painterResource(id = de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R.drawable.attachment),
+                    iconPainter = painterResource(id = de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R.drawable.attachment),
                     textRes = R.string.lecture_view_tab_attachments,
                     selectedTabIndex = selectedTabIndexState
                 )
