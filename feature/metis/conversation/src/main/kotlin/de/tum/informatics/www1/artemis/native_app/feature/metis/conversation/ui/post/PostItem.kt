@@ -289,20 +289,22 @@ fun PostItemMainContent(
                     return@PostHeadline
                 }
 
-                MarkdownText(
-                    markdown = remember(post?.content, isPlaceholder) {
-                        if (isPlaceholder) {
-                            PlaceholderContent
-                        } else post?.content.orEmpty()
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .placeholder(visible = isPlaceholder),
-                    style = MaterialTheme.typography.bodyMedium,
-                    onClick = onClick,
-                    onLongClick = onLongClick,
-                    color = if (post?.serverPostId == null) PostColors.unsentMessageText else Color.Unspecified
-                )
+                if (post?.content?.isNotEmpty() == true) {
+                    MarkdownText(
+                        markdown = remember(post.content, isPlaceholder) {
+                            if (isPlaceholder) {
+                                PlaceholderContent
+                            } else post.content.orEmpty()
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .placeholder(visible = isPlaceholder),
+                        style = MaterialTheme.typography.bodyMedium,
+                        onClick = onClick,
+                        onLongClick = onLongClick,
+                        color = if (post.serverPostId == null) PostColors.unsentMessageText else Color.Unspecified
+                    )
+                }
 
                 val instant = post?.updatedDate
                 if (instant != null) {

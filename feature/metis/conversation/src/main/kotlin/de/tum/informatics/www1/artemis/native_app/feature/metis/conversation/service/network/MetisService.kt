@@ -4,8 +4,12 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisFilter
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisSortingStrategy
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseWideContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ForwardedMessage
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.PostingType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
+import kotlinx.serialization.Serializable
 
 interface MetisService {
 
@@ -30,6 +34,28 @@ interface MetisService {
         authToken: String
     ): NetworkResponse<StandalonePost>
 
+    suspend fun getForwardedMessagesByIds(
+        metisContext: MetisContext,
+        postIds: List<Long>,
+        postType: PostingType,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<List<ForwardedMessage>>
+
+    suspend fun getPostsByIds(
+        metisContext: MetisContext,
+        postIds: List<Long>,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<List<StandalonePost>>
+
+    suspend fun getAnswerPostsByIds(
+        metisContext: MetisContext,
+        answerPostIds: List<Long>,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<List<AnswerPost>>
+
     /**
      * The metis context needed to query standalone posts.
      * @param query if not null the posts will be filtered to contain the given query.
@@ -40,5 +66,11 @@ interface MetisService {
         val query: String?,
         val sortingStrategy: MetisSortingStrategy = MetisSortingStrategy.DATE_DESCENDING,
         val courseWideContext: CourseWideContext? = null
+    )
+
+    @Serializable
+    data class ForwardedMessagesResponse(
+        val id: Long,
+        val messages: List<ForwardedMessage>
     )
 }

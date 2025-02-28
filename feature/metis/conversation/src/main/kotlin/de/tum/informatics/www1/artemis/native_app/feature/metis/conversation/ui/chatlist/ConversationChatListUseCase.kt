@@ -17,9 +17,11 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService.StandalonePostsContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.DataStatus
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.ForwardedMessagesHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisFilter
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.PostingType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
@@ -131,6 +133,12 @@ class ConversationChatListUseCase(
                 pageSize = PAGE_SIZE,
                 enablePlaceholders = true
             )
+            val forwardedMessagesHandler = ForwardedMessagesHandler(
+                metisService = metisService,
+                metisContext = metisContext,
+                authToken = pagingDataInput.authenticationData.authToken,
+                serverUrl = pagingDataInput.serverUrl
+            )
 
             val isSearchActive = !pagingDataInput.standalonePostsContext.query.isNullOrBlank()
             val pagerFlow = if (!isSearchActive) {
@@ -161,7 +169,8 @@ class ConversationChatListUseCase(
                     }
                 )
                     .flow
-                    .mapIndexedPosts()
+                    .mapIndexedPosts(forwardedMessagesHandler)
+                    .resolveForwardedPosts(forwardedMessagesHandler)
                     .cachedIn(viewModelScope + coroutineContext)
             } else {
                 Pager(
@@ -178,7 +187,8 @@ class ConversationChatListUseCase(
                     }
                 )
                     .flow
-                    .mapIndexedPosts()
+                    .mapIndexedPosts(forwardedMessagesHandler)
+                    .resolveForwardedPosts(forwardedMessagesHandler)
                     .cachedIn(viewModelScope + coroutineContext)
             }
 
@@ -195,22 +205,32 @@ class ConversationChatListUseCase(
             .shareIn(viewModelScope + coroutineContext, SharingStarted.Lazily, replay = 1)
 
 
-    private fun Flow<PagingData<out IStandalonePost>>.mapIndexedPosts(): Flow<PagingData<ChatListItem.PostItem.IndexedItem>> {
+    private fun Flow<PagingData<out IStandalonePost>>.mapIndexedPosts(forwardedMessagesHandler: ForwardedMessagesHandler): Flow<PagingData<ChatListItem.PostItem.IndexedItem>> {
         // TODO: this indexing seems to work, BUT if a chat has between 40 and 60 posts, the pager messes something up
         //  https://github.com/ls1intum/artemis-android/issues/392
         return this.map { pagingData ->
             var indexCounter = 0L
             pagingData.map { post ->
-                if (post.hasForwardedMessages == true) { // TODO
+                if (post.hasForwardedMessages == true) {
+                    forwardedMessagesHandler.forwardedPostIds.add(post.serverPostId ?: -1)
                     ChatListItem.PostItem.IndexedItem.PostWithForwardedMessage(
                         post,
                         post.answers.orEmpty(),
                         indexCounter++,
-                        emptyList()
+                        emptyList() // This is only a placeholder, forwarded messages will be resolved in the next step
                     )
                 } else {
                     ChatListItem.PostItem.IndexedItem.Post(post, post.answers.orEmpty(), indexCounter++)
                 }
+            }
+        }
+    }
+
+    private fun Flow<PagingData<ChatListItem.PostItem.IndexedItem>>.resolveForwardedPosts(forwardedMessagesHandler: ForwardedMessagesHandler): Flow<PagingData<ChatListItem.PostItem.IndexedItem>> {
+        return this.map { pagingData ->
+            forwardedMessagesHandler.loadForwardedMessages(PostingType.POST)
+            pagingData.map { chatListItem ->
+                forwardedMessagesHandler.resolveForwardedMessagesForIndexedPost(chatListItem)
             }
         }
     }

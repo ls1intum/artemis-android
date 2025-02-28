@@ -341,7 +341,8 @@ private fun PostAndRepliesList(
 
         itemsIndexed(
             post.orderedAnswerPostings,
-            key = { index, post -> post.clientPostId ?: index }) { index, answerPost ->
+            key = { index, post -> post.clientPostId ?: index }
+        ) { index, answerPost ->
             val postActions = rememberPostActions(answerPost)
 
             PostWithBottomSheet(

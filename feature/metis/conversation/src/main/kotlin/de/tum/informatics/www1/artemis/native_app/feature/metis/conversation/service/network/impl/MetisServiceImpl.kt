@@ -9,12 +9,17 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisFilter
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisSortingStrategy
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseWideContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ForwardedMessage
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.PostingType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.http.appendPathSegments
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
 
 internal class MetisServiceImpl(
     private val ktorProvider: KtorProvider,
@@ -141,6 +146,74 @@ internal class MetisServiceImpl(
 
                 return NetworkResponse.Response(posts.data.first())
             }
+        }
+    }
+
+    override suspend fun getForwardedMessagesByIds(
+        metisContext: MetisContext,
+        postIds: List<Long>,
+        postType: PostingType,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<List<ForwardedMessage>> {
+        return performNetworkCall {
+           val response = ktorProvider.ktorClient.get(serverUrl) {
+                url {
+                    appendPathSegments("api", "communication", "forwarded-messages")
+                }
+                parameter("postingIds", postIds.joinToString(","))
+                parameter("type", postType.toString())
+                parameter("courseId", metisContext.courseId.toString())
+                cookieAuth(authToken)
+            }
+
+            // We are only interested in the actual forwarded messages.
+            val messageWrapper: List<MetisService.ForwardedMessagesResponse> = Json.decodeFromJsonElement(ListSerializer(MetisService.ForwardedMessagesResponse.serializer()), response.body())
+            messageWrapper.flatMap { it.messages }
+        }
+    }
+
+    override suspend fun getPostsByIds(
+        metisContext: MetisContext,
+        postIds: List<Long>,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<List<StandalonePost>> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.get(serverUrl) {
+                url {
+                    appendPathSegments("api")
+                    appendPathSegments("communication")
+                    appendPathSegments("courses")
+                    appendPathSegments(metisContext.courseId.toString())
+                    appendPathSegments("messages-source-posts")
+                }
+
+                parameter("postIds", postIds.joinToString(","))
+                cookieAuth(authToken)
+            }.body()
+        }
+    }
+
+    override suspend fun getAnswerPostsByIds(
+        metisContext: MetisContext,
+        answerPostIds: List<Long>,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<List<AnswerPost>> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.get(serverUrl) {
+                url {
+                    appendPathSegments("api")
+                    appendPathSegments("communication")
+                    appendPathSegments("courses")
+                    appendPathSegments(metisContext.courseId.toString())
+                    appendPathSegments("answer-messages-source-posts")
+                }
+
+                parameter("answerPostIds", answerPostIds.joinToString(","))
+                cookieAuth(authToken)
+            }.body()
         }
     }
 }

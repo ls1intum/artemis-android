@@ -6,8 +6,8 @@ import kotlinx.serialization.Serializable
 data class ForwardedMessage(
     override val sourceId: Long?,
     override val sourceType: PostingType?,
-    override val destinationPostId: Long?,
-    override val destinationAnswerPostId: Long?,
+    override val destinationPostId: Long? = null,
+    override val destinationAnswerPostId: Long? = null,
     val id: Long? = null,
     val content: String? = null,
     val destinationPost: StandalonePost? = null,
