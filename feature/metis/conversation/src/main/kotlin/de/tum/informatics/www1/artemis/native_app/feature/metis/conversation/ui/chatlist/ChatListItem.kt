@@ -19,7 +19,7 @@ sealed class ChatListItem {
         val key: Any
             get() = post.key
 
-        abstract fun copy(post: IBasePost, index: Long): PostItem
+        abstract fun copy(post: IBasePost = this.post, index: Long = this.index): PostItem
 
         interface ForwardedMessage {
             val forwardedPosts: List<IBasePost>
