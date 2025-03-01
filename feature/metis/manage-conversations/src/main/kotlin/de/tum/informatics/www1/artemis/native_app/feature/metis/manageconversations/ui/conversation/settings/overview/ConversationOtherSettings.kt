@@ -55,9 +55,7 @@ internal fun ConversationOtherSettings(
 
         if (conversation is ChannelChat) {
             val isCreator = conversation.isCreator
-            // A course instructor has channel moderation rights but is not necessarily a moderator of the channel
             val hasChannelModerationRights = conversation.hasChannelModerationRights
-            // Member of the channel that is also a moderator of the channel
             val isChannelModerator = conversation.isChannelModerator
             val isTutorialGroupChannel = conversation.tutorialGroupId != null || conversation.tutorialGroupTitle != null
 

@@ -64,12 +64,6 @@ internal fun ConversationSettingsScreen(
         viewModel.requestReload()
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.onChannelDeleted.collect {
-            onChannelDeleted()
-        }
-    }
-
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -92,7 +86,8 @@ internal fun ConversationSettingsScreen(
             viewModel = viewModel,
             onRequestViewAllMembers = onRequestViewAllMembers,
             onRequestAddMembers = onRequestAddMembers,
-            onConversationLeft = onConversationLeft
+            onConversationLeft = onConversationLeft,
+            onChannelDeleted = onChannelDeleted
         )
     }
 }

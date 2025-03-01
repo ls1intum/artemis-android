@@ -39,7 +39,8 @@ internal fun ConversationSettingsBody(
     viewModel: ConversationSettingsViewModel,
     onRequestAddMembers: () -> Unit,
     onRequestViewAllMembers: () -> Unit,
-    onConversationLeft: () -> Unit
+    onConversationLeft: () -> Unit,
+    onChannelDeleted: () -> Unit
 ) {
     val conversationDataState by viewModel.conversation.collectAsState()
     val usernameDataState by viewModel.clientUsername.collectAsState()
@@ -110,6 +111,10 @@ internal fun ConversationSettingsBody(
             deleteChannelJob = null
 
             onSaveResult(successful)
+
+            if (successful) {
+                onChannelDeleted()
+            }
         }
     )
 
