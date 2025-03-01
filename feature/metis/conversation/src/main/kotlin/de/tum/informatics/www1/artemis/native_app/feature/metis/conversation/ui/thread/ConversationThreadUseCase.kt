@@ -11,9 +11,13 @@ import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.DataStatus
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.ForwardedMessagesHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.PostingType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.BasePostingEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
@@ -21,11 +25,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.plus
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -37,7 +44,7 @@ internal class ConversationThreadUseCase(
     metisContext: MetisContext,
     postId: Flow<StandalonePostId>,
     onRequestSoftReload: Flow<Unit>,
-    viewModelScope: CoroutineScope,
+    private val viewModelScope: CoroutineScope,
     private val metisStorageService: MetisStorageService,
     private val metisService: MetisService,
     private val networkStatusProvider: NetworkStatusProvider,
@@ -53,6 +60,20 @@ internal class ConversationThreadUseCase(
             } else DataState.Failure(RuntimeException("Post not found"))
         }
     }
+
+    private val forwardedMessagesHandler: StateFlow<ForwardedMessagesHandler> = flatMapLatest(
+        serverConfigurationService.serverUrl,
+        accountService.authToken
+    ) { serverUrl, authToken ->
+        flowOf(
+            ForwardedMessagesHandler(
+                metisService = metisService,
+                metisContext = metisContext,
+                authToken = authToken,
+                serverUrl = serverUrl
+            )
+        )
+    }.stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, ForwardedMessagesHandler(metisService, metisContext, "", ""))
 
     /**
      * The post data state flow as loading from the server.
@@ -85,6 +106,10 @@ internal class ConversationThreadUseCase(
         }
     }
         .map { dataState -> dataState.bind { it } } // Type check adaption
+        .combine(forwardedMessagesHandler) { postDataState, forwardedMessagesHandler ->
+            loadForwardedMessages(postDataState, forwardedMessagesHandler)
+            postDataState
+        }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     val dataStatus: Flow<DataStatus> = post.map { dataState ->
@@ -94,6 +119,47 @@ internal class ConversationThreadUseCase(
             is DataState.Success -> DataStatus.UpToDate
         }
     }
+
+    val chatListItem: StateFlow<ChatListItem.PostItem.ThreadItem?> = combine(
+        post,
+        forwardedMessagesHandler
+    ) { postDataState, forwardedMessagesHandler ->
+        when (postDataState) {
+            is DataState.Success -> {
+                val standalonePost = postDataState.data
+                if (standalonePost.hasForwardedMessages == true) {
+                    forwardedMessagesHandler.resolveForwardedMessagesForThreadPost(
+                        chatListItem = ChatListItem.PostItem.ThreadItem.ContextItem.ContextPostWithForwardedMessage(
+                            post = standalonePost,
+                            forwardedPosts = emptyList()
+                        )
+                    )
+                } else {
+                    ChatListItem.PostItem.ThreadItem.ContextItem.ContextPost(standalonePost)
+                }
+            }
+
+            is DataState.Loading -> null
+            is DataState.Failure -> null
+        }
+    }.stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, null)
+
+    fun getAnswerChatListItem(answerPost: IAnswerPost): StateFlow<ChatListItem.PostItem.ThreadItem.Answer?> =
+        forwardedMessagesHandler.flatMapLatest { forwardedMessagesHandler ->
+            flow {
+                val chatListItem = if (answerPost.hasForwardedMessages == true) {
+                    forwardedMessagesHandler.resolveForwardedMessagesForThreadPost(
+                        chatListItem = ChatListItem.PostItem.ThreadItem.Answer.AnswerPostWithForwardedMessage(
+                            post = answerPost,
+                            forwardedPosts = emptyList()
+                        )
+                    ) as ChatListItem.PostItem.ThreadItem.Answer
+                } else {
+                    ChatListItem.PostItem.ThreadItem.Answer.AnswerPost(answerPost)
+                }
+                emit(chatListItem)
+            }
+        }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     /**
      * Handles when the post has been directly loaded from the server. Stores the resulting post in the db.
@@ -131,6 +197,28 @@ internal class ConversationThreadUseCase(
 
             is DataState.Failure -> flowOf(DataState.Failure(standalonePostDataState.throwable))
             is DataState.Loading -> flowOf(DataState.Loading())
+        }
+    }
+
+    private suspend fun loadForwardedMessages(
+        postDataState: DataState<IStandalonePost>,
+        forwardedMessagesHandler: ForwardedMessagesHandler
+    ) {
+        if (postDataState is DataState.Success) {
+            val post = postDataState.data
+
+            if (post.hasForwardedMessages == true) {
+                forwardedMessagesHandler.forwardedPostIds.add(post.serverPostId ?: -1)
+                forwardedMessagesHandler.loadForwardedMessages(PostingType.POST)
+            }
+            if (post.answers.orEmpty().isNotEmpty()) {
+                post.answers?.forEach { answerPost ->
+                    if (answerPost.hasForwardedMessages == true) {
+                        forwardedMessagesHandler.forwardedPostIds.add(answerPost.serverPostId ?: -1)
+                    }
+                }
+                forwardedMessagesHandler.loadForwardedMessages(PostingType.ANSWER)
+            }
         }
     }
 }

@@ -117,6 +117,7 @@ internal fun ConversationChatListScreen(
 
     LaunchedEffect(courseId, conversationId) {
         chatListState.scrollToItem(0)
+        viewModel.onCloseThread = null
     }
 
     ConversationChatListScreen(

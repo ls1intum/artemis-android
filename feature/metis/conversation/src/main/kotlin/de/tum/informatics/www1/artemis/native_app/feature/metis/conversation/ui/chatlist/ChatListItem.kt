@@ -15,11 +15,10 @@ sealed class ChatListItem {
 
     sealed class PostItem : ChatListItem() {
         abstract val post: IBasePost
-        abstract val index: Long
         val key: Any
             get() = post.key
 
-        abstract fun copy(post: IBasePost = this.post, index: Long = this.index): PostItem
+        abstract fun copy(post: IBasePost = this.post): PostItem
 
         interface ForwardedMessage {
             val forwardedPosts: List<IBasePost>
@@ -27,13 +26,14 @@ sealed class ChatListItem {
 
         sealed class IndexedItem : PostItem() {
             abstract val answers: List<IAnswerPost>
+            abstract val index: Long
 
             data class Post(
                 override val post: IStandalonePost,
                 override val answers: List<IAnswerPost>,
                 override val index: Long = -1L
             ) : IndexedItem() {
-                override fun copy(post: IBasePost, index: Long) = copy(post = post as IStandalonePost, index = index, answers = answers)
+                override fun copy(post: IBasePost) = copy(post = post as IStandalonePost, index = index, answers = answers)
             }
 
             data class PostWithForwardedMessage(
@@ -42,38 +42,36 @@ sealed class ChatListItem {
                 override val index: Long = -1L,
                 override val forwardedPosts: List<IBasePost>
             ) : IndexedItem(), ForwardedMessage {
-                override fun copy(post: IBasePost, index: Long) = copy(post = post as IStandalonePost, index = index, answers = answers, forwardedPosts = forwardedPosts)
+                override fun copy(post: IBasePost) = copy(post = post as IStandalonePost, index = index, answers = answers, forwardedPosts = forwardedPosts)
             }
         }
 
         sealed class ThreadItem : PostItem() {
             sealed class Answer : ThreadItem() {
-                data class AnswerPost(override val post: IAnswerPost, override val index: Long = -1L) :
+                data class AnswerPost(override val post: IAnswerPost) :
                     Answer() {
-                    override fun copy(post: IBasePost, index: Long) = copy(post = post as IAnswerPost, index = index)
+                    override fun copy(post: IBasePost) = copy(post = post as IAnswerPost)
                     }
 
                 data class AnswerPostWithForwardedMessage(
                     override val post: IAnswerPost,
-                    override val index: Long = -1L,
                     override val forwardedPosts: List<IBasePost>
                 ) : Answer(), ForwardedMessage {
-                    override fun copy(post: IBasePost, index: Long) = copy(post = post as IAnswerPost, index = index, forwardedPosts = forwardedPosts)
+                    override fun copy(post: IBasePost) = copy(post = post as IAnswerPost, forwardedPosts = forwardedPosts)
                 }
             }
 
             sealed class ContextItem : ThreadItem() {
-                data class ContextPost(override val post: IStandalonePost, override val index: Long = -1L) :
+                data class ContextPost(override val post: IStandalonePost) :
                     ContextItem() {
-                    override fun copy(post: IBasePost, index: Long) = copy(post = post as IStandalonePost, index = index)
+                    override fun copy(post: IBasePost) = copy(post = post as IStandalonePost)
                     }
 
                 data class ContextPostWithForwardedMessage(
                     override val post: IStandalonePost,
-                    override val index: Long = -1L,
                     override val forwardedPosts: List<IBasePost>
                 ) : ContextItem(), ForwardedMessage {
-                    override fun copy(post: IBasePost, index: Long) = copy(post = post as IStandalonePost, index = index, forwardedPosts = forwardedPosts)
+                    override fun copy(post: IBasePost) = copy(post = post as IStandalonePost, forwardedPosts = forwardedPosts)
                 }
             }
         }

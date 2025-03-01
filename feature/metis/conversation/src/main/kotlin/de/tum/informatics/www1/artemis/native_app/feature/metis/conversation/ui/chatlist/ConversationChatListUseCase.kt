@@ -357,7 +357,7 @@ class ConversationChatListUseCase(
         pagingList.insertSeparators { _, after: ChatListItem? ->
             // If we already know the id, great
             if (lastAlreadyReadPostId != null) {
-                if (after != null && after is ChatListItem.PostItem && after.post.serverPostId == lastAlreadyReadPostId) {
+                if (after != null && after is ChatListItem.PostItem.IndexedItem && after.post.serverPostId == lastAlreadyReadPostId) {
                     return@insertSeparators ChatListItem.UnreadIndicator
                 } else {
                     return@insertSeparators null
@@ -372,7 +372,7 @@ class ConversationChatListUseCase(
                 return@insertSeparators null
             }
 
-            if (after != null && after is ChatListItem.PostItem && after.index == unreadMessagesCount) {
+            if (after != null && after is ChatListItem.PostItem.IndexedItem && after.index == unreadMessagesCount) {
                 lastAlreadyReadPostId = after.post.serverPostId
                 return@insertSeparators ChatListItem.UnreadIndicator
             }

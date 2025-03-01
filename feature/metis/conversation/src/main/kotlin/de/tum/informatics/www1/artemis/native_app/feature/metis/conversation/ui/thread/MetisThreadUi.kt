@@ -54,6 +54,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.isReplyEnabled
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.util.rememberDerivedConversationName
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
@@ -63,6 +64,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visibleme
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleStandalonePostDetails
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.flow.StateFlow
 import org.koin.compose.koinInject
 
 internal const val TEST_TAG_THREAD_LIST = "TEST_TAG_THREAD_LIST"
@@ -77,6 +79,10 @@ internal fun MetisThreadUi(
     viewModel: ConversationViewModel
 ) {
     val postDataState: DataState<IStandalonePost> by viewModel.threadUseCase.post.collectAsState()
+    val chatListContextItem by viewModel.threadUseCase.chatListItem.collectAsState()
+    val answerChatListItemState: (IAnswerPost) -> StateFlow<ChatListItem.PostItem.ThreadItem.Answer?> =
+        { viewModel.threadUseCase.getAnswerChatListItem(it) }
+
     val clientId: Long by viewModel.clientIdOrDefault.collectAsState()
 
     val serverUrl by viewModel.serverUrl.collectAsState()
@@ -103,11 +109,13 @@ internal fun MetisThreadUi(
             initialReplyTextProvider = viewModel,
             conversationDataState = conversationDataState,
             postDataState = postDataState,
+            chatListContextItem = chatListContextItem,
             postActionFlags = postActionFlags,
             serverUrl = serverUrl,
             emojiService = koinInject(),
             isMarkedAsDeleteList = viewModel.isMarkedAsDeleteList,
             clientId = clientId,
+            answerChatListItemState = answerChatListItemState,
             onCreatePost = viewModel::createReply,
             onEditPost = { post, newText ->
                 val parentPost = postDataState.orNull()
@@ -161,11 +169,13 @@ internal fun MetisThreadUi(
     clientId: Long,
     postDataState: DataState<IStandalonePost>,
     conversationDataState: DataState<Conversation>,
+    chatListContextItem: ChatListItem.PostItem.ThreadItem?,
     postActionFlags: PostActionFlags,
     serverUrl: String,
     isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     emojiService: EmojiService,
     initialReplyTextProvider: InitialReplyTextProvider,
+    answerChatListItemState: (IAnswerPost) -> StateFlow<ChatListItem.PostItem.ThreadItem.Answer?>,
     onCreatePost: () -> Deferred<MetisModificationFailure?>,
     onEditPost: (IBasePost, String) -> Deferred<MetisModificationFailure?>,
     onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure?>)?,
@@ -223,8 +233,10 @@ internal fun MetisThreadUi(
                                     .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                                     .testTag(TEST_TAG_THREAD_LIST),
                                 post = post,
+                                chatListContextItem = chatListContextItem,
                                 postActionFlags = postActionFlags,
                                 clientId = clientId,
+                                answerChatListItemState = answerChatListItemState,
                                 isMarkedAsDeleteList = isMarkedAsDeleteList,
                                 onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
                                 onRequestEdit = onEditPostDelegate,
@@ -263,9 +275,11 @@ private fun PostAndRepliesList(
     modifier: Modifier,
     state: LazyListState,
     post: IStandalonePost,
+    chatListContextItem: ChatListItem.PostItem.ThreadItem?,
     postActionFlags: PostActionFlags,
     isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     clientId: Long,
+    answerChatListItemState: (IAnswerPost) -> StateFlow<ChatListItem.PostItem.ThreadItem.Answer?>,
     onRequestEdit: (IBasePost) -> Unit,
     onRequestDelete: (IBasePost) -> Unit,
     onRequestUndoDelete: (IBasePost) -> Unit,
@@ -319,7 +333,7 @@ private fun PostAndRepliesList(
                     modifier = Modifier
                         .testTag(testTagForPost(post.standalonePostId)),
                     post = post,
-                    chatListItem = ChatListItem.PostItem.ThreadItem.ContextItem.ContextPost(post), // TODO
+                    chatListItem = chatListContextItem ?: ChatListItem.PostItem.ThreadItem.ContextItem.ContextPost(post),
                     postActions = postActions,
                     isMarkedAsDeleteList = isMarkedAsDeleteList,
                     displayHeader = true,
@@ -344,6 +358,7 @@ private fun PostAndRepliesList(
             key = { index, post -> post.clientPostId ?: index }
         ) { index, answerPost ->
             val postActions = rememberPostActions(answerPost)
+            val answerChatListItem = answerChatListItemState(answerPost).collectAsState()
 
             PostWithBottomSheet(
                 modifier = Modifier
@@ -352,7 +367,7 @@ private fun PostAndRepliesList(
                 post = answerPost,
                 postActions = postActions,
                 isMarkedAsDeleteList = isMarkedAsDeleteList,
-                chatListItem = ChatListItem.PostItem.ThreadItem.Answer.AnswerPost(answerPost), // TODO
+                chatListItem = answerChatListItem.value ?: ChatListItem.PostItem.ThreadItem.Answer.AnswerPost(answerPost),
                 clientId = clientId,
                 displayHeader = shouldDisplayHeader(
                     index = index,
