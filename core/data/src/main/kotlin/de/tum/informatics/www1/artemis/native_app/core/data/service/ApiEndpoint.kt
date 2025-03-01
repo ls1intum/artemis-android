@@ -8,6 +8,7 @@ object ApiEndpoint {
 
     val core = arrayOf(api, "core")
     val core_public = arrayOf(*core, "public")
+    val core_courses = arrayOf(*core, "courses")
 
     val exercise = arrayOf(api, "exercise")
     val exercise_exercises = arrayOf(*exercise, "exercises")
