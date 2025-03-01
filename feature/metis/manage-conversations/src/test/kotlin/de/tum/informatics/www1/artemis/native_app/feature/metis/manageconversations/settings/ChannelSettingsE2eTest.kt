@@ -204,7 +204,11 @@ internal class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
                 .orThrow("Could not create channel")
         }
 
-        setupUiAndViewModel(channel)
-        deleteChannelTestImpl(channel)
+        var channelDeleted = false
+        setupUiAndViewModel(channel, onChannelDeleted = { channelDeleted = true })
+
+        deleteChannelTestImpl()
+
+        composeTestRule.waitUntil(DefaultTimeoutMillis) { channelDeleted }
     }
 }

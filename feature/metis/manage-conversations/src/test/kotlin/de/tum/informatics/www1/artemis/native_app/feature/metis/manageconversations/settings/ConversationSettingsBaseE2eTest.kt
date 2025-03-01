@@ -97,7 +97,8 @@ internal abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest()
 
     protected fun setupUiAndViewModel(
         conversation: Conversation,
-        onConversationLeft: () -> Unit = {}
+        onConversationLeft: () -> Unit = {},
+        onChannelDeleted: () -> Unit = {}
     ): ConversationSettingsViewModel {
         val viewModel = ConversationSettingsViewModel(
             initialCourseId = course.id!!,
@@ -121,7 +122,7 @@ internal abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest()
                 onRequestAddMembers = { },
                 onRequestViewAllMembers = { },
                 onConversationLeft = onConversationLeft,
-                onChannelDeleted = { }
+                onChannelDeleted = onChannelDeleted
             )
         }
 
@@ -154,7 +155,7 @@ internal abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest()
         )
     }
 
-    protected fun deleteChannelTestImpl(conversation: Conversation) {
+    protected fun deleteChannelTestImpl() {
         val deleteButtonText =
             context.getString(R.string.conversation_settings_section_delete_channel)
 
@@ -181,19 +182,6 @@ internal abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest()
             )
             .assertExists()
             .performClick()
-
-        composeTestRule.waitUntil(DefaultTimeoutMillis) {
-            runBlockingWithTestTimeout {
-                val deletedChannel = conversationService.getConversation(
-                    courseId = course.id!!,
-                    conversationId = conversation.id,
-                    authToken = accessToken,
-                    serverUrl = testServerUrl
-                ).orNull()
-
-                deletedChannel == null
-            }
-        }
     }
 
 }
