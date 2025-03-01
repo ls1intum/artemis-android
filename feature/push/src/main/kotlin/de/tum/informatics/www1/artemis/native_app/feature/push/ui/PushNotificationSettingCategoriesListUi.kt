@@ -37,13 +37,13 @@ internal fun testTagForSetting(settingId: String) = "notification setting $setti
 @Composable
 internal fun PushNotificationSettingCategoriesListUi(
     modifier: Modifier,
-    settingsByGroupDataStore: DataState<List<PushNotificationSettingsViewModel.NotificationCategory>>,
+    settingsByGroupDataState: DataState<List<PushNotificationSettingsViewModel.NotificationCategory>>,
     onUpdate: (PushNotificationSetting, webapp: Boolean?, email: Boolean?, push: Boolean?) -> Unit,
     onRequestReload: () -> Unit
 ) {
     BasicDataStateUi(
         modifier = modifier,
-        dataState = settingsByGroupDataStore,
+        dataState = settingsByGroupDataState,
         loadingText = stringResource(id = R.string.push_notification_settings_loading),
         failureText = stringResource(id = R.string.push_notification_settings_failure),
         retryButtonText = stringResource(id = R.string.push_notification_settings_try_again),

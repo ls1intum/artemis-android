@@ -8,6 +8,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.onFailure
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
@@ -15,6 +16,8 @@ import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvi
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.network.NotificationSettingsService
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.PushNotificationSetting
+import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.PushNotificationSettingUtil.filterByAuthorities
+import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.PushNotificationSettingUtil.filterEditable
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.group
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
@@ -42,6 +45,7 @@ class PushNotificationSettingsViewModel internal constructor(
     networkStatusProvider: NetworkStatusProvider,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
+    private val accountDataService: AccountDataService,
     private val pushNotificationConfigurationService: PushNotificationConfigurationService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : ViewModel() {
@@ -102,28 +106,19 @@ class PushNotificationSettingsViewModel internal constructor(
         }
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
 
-    /**
-     * These settings can not be edited by the user
-     */
-    private val nonEditableSettingIds = listOf(
-        "notification.user-notification.vcs-access-token-added",
-        "notification.user-notification.vcs-access-token-expired",
-        "notification.user-notification.vcs-access-token-expires-soon",
-        "notification.user-notification.ssh-key-added",
-        "notification.user-notification.ssh-key-expires-soon",
-        "notification.user-notification.ssh-key-has-expired",
-        "notification.user-notification.data-export-created",
-        "notification.user-notification.data-export-failed"
-    )
+
 
     internal val currentSettingsByGroup: StateFlow<DataState<List<NotificationCategory>>> =
         currentSettings
             .map { currentSettings ->
                 currentSettings.bind { settings ->
+                    val authorities = accountDataService.getCachedAccountData()?.authorities ?: emptyList()
+
                     settings
-                        .filterNot { nonEditableSettingIds.contains(it.settingId) }
+                        .filterEditable()
                         .groupBy { it.group }
                         .map { NotificationCategory(it.key, it.value) }
+                        .filterByAuthorities(authorities)
                         .sortedBy { it.categoryId }
                 }
             }

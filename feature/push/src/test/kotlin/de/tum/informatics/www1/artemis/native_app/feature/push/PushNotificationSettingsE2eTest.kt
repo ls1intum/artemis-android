@@ -198,6 +198,7 @@ class PushNotificationSettingsE2eTest : BaseComposeTest() {
             networkStatusProvider = get(),
             serverConfigurationService = get(),
             accountService = get(),
+            accountDataService = get(),
             pushNotificationConfigurationService = get(),
             coroutineContext = testDispatcher
         )
