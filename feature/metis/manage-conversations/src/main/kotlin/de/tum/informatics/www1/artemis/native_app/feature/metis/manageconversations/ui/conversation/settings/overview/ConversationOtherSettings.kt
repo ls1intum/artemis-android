@@ -59,10 +59,10 @@ internal fun ConversationOtherSettings(
             val isChannelModerator = conversation.isChannelModerator
             val isTutorialGroupChannel = conversation.tutorialGroupId != null || conversation.tutorialGroupTitle != null
 
-            val canManageChannels = !isTutorialGroupChannel && hasChannelModerationRights && isChannelModerator && isCreator
+            val canDeleteChannels = !isTutorialGroupChannel && hasChannelModerationRights && isChannelModerator && isCreator
 
             // Archive/Unarchive and Delete Buttons
-            if (canManageChannels) {
+            if (hasChannelModerationRights) {
                 OutlinedButton(
                     modifier = buttonModifier,
                     onClick = { displayArchiveChannelDialog = true }
@@ -77,7 +77,9 @@ internal fun ConversationOtherSettings(
                         )
                     )
                 }
+            }
 
+            if (canDeleteChannels) {
                 OutlinedButton(
                     modifier = buttonModifier,
                     onClick = { displayDeleteChannelDialog = true },
