@@ -17,8 +17,6 @@ interface ChannelService : ArtemisContextBasedService {
     suspend fun getLectureChannel(
         lectureId: Long,
         courseId: Long,
-        serverUrl: String,
-        authToken: String
     ): NetworkResponse<ChannelChat>
 
     suspend fun getUnresolvedChannels(

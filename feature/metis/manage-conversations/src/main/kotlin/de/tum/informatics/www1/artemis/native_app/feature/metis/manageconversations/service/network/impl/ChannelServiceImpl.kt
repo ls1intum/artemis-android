@@ -86,25 +86,18 @@ class ChannelServiceImpl(
     override suspend fun getLectureChannel(
         lectureId: Long,
         courseId: Long,
-        serverUrl: String,
-        authToken: String
     ): NetworkResponse<ChannelChat> {
-        return performNetworkCall {
-            ktorProvider.ktorClient.get(serverUrl) {
-                url {
-                    appendPathSegments(
-                        "api",
-                        "courses",
-                        courseId.toString(),
-                        "lectures",
-                        lectureId.toString(),
-                        "channel"
-                    )
-                }
-
-                cookieAuth(authToken)
-                contentType(ContentType.Application.Json)
-            }.body()
+        return getRequest {
+            url {
+                appendPathSegments(
+                    "api",
+                    "courses",
+                    courseId.toString(),
+                    "lectures",
+                    lectureId.toString(),
+                    "channel"
+                )
+            }
         }
     }
 

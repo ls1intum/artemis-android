@@ -34,8 +34,6 @@ object ChannelServiceStub : ChannelService {
     override suspend fun getLectureChannel(
         lectureId: Long,
         courseId: Long,
-        serverUrl: String,
-        authToken: String
     ): NetworkResponse<ChannelChat> {
         return NetworkResponse.Response(ChannelChat(id = 1, name = "Lecture Chat"))
     }
