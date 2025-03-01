@@ -61,6 +61,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.compose.toPainter
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteType
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.LocalReplyAutoCompleteHintProvider
 import kotlinx.coroutines.launch
 
 
@@ -344,6 +345,8 @@ private fun TaggingDropdownMenu(
     showAutoCompletePopup: ((AutoCompleteType) -> Unit)?,
     onDismissRequest: () -> Unit,
 ) {
+    val isFaqEnabled = LocalReplyAutoCompleteHintProvider.current.isFaqEnabled
+
     val onClick: (AutoCompleteType) -> Unit = { autoCompleteType ->
         showAutoCompletePopup?.invoke(autoCompleteType)
         onDismissRequest()
@@ -380,11 +383,13 @@ private fun TaggingDropdownMenu(
             onClick = { onClick(AutoCompleteType.LECTURES) }
         )
 
-        TaggingDropDownMenuItem(
-            iconPainter = Icons.Default.QuestionMark.toPainter(),
-            text = stringResource(R.string.reply_format_mention_faqs),
-            onClick = { onClick(AutoCompleteType.FAQS) }
-        )
+        if (isFaqEnabled) {
+            TaggingDropDownMenuItem(
+                iconPainter = Icons.Default.QuestionMark.toPainter(),
+                text = stringResource(R.string.reply_format_mention_faqs),
+                onClick = { onClick(AutoCompleteType.FAQS) }
+            )
+        }
     }
 }
 

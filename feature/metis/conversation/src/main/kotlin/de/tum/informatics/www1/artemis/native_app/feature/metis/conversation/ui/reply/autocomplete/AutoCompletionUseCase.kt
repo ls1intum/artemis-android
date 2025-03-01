@@ -33,9 +33,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -65,8 +67,19 @@ class AutoCompletionUseCase(
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Lazily)
 
 
-
     override val legalTagChars: List<Char> = listOf('@', '#')
+
+    override var isFaqEnabled: Boolean = false
+
+    init {
+        viewModelScope.launch(coroutineContext) {
+            course.collectLatest {
+                if (it is DataState.Success) {
+                    isFaqEnabled = it.data.faqEnabled
+                }
+            }
+        }
+    }
 
     override fun produceAutoCompleteHints(
         tagChar: Char,
@@ -194,8 +207,10 @@ class AutoCompletionUseCase(
             }
         }
 
-    private fun produceFaqAutoCompletionHints(query: String): Flow<DataState<List<AutoCompleteHintCollection>>> =
-        faqRepository.getFaqs(courseId).map { faqsDataState ->
+    private fun produceFaqAutoCompletionHints(query: String): Flow<DataState<List<AutoCompleteHintCollection>>> {
+        if (!isFaqEnabled) return flowOf(DataState.Success(emptyList()))
+
+        return faqRepository.getFaqs(courseId).map { faqsDataState ->
             faqsDataState.bind { faqs ->
                 val faqAutoCompleteItems = faqs
                     .filter { it.questionTitle.contains(query, ignoreCase = true) }
@@ -217,4 +232,5 @@ class AutoCompletionUseCase(
                 )
             }
         }
+    }
 }
