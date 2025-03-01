@@ -11,6 +11,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
+import de.tum.informatics.www1.artemis.native_app.core.data.service.ApiEndpoint
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
@@ -44,7 +45,7 @@ internal class QuizWaitingScreenE2eTest : QuizBaseE2eTest(QuizType.Live) {
                 createExerciseFormBodyWithPng(
                     getAdminAccessToken(),
                     courseId,
-                    endpoint = "quiz-exercises",
+                    pathSegments = ApiEndpoint.quiz_quizExercises,
                     pngFilePath = path,
                     pngByteArray = getBackgroundImageBytes(),
                     creator = { name, courseId ->
@@ -102,7 +103,7 @@ internal class QuizWaitingScreenE2eTest : QuizBaseE2eTest(QuizType.Live) {
                 createExerciseFormBodyWithPng(
                     getAdminAccessToken(),
                     courseId,
-                    endpoint = "quiz-exercises",
+                    pathSegments = ApiEndpoint.quiz_quizExercises,
                     pngByteArray = getBackgroundImageBytes(),
                     pngFilePath = path,
                     creator = { name, courseId ->
