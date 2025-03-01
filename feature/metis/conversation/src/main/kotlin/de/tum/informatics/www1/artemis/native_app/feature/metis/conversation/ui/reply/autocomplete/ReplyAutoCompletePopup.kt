@@ -27,6 +27,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -173,7 +174,9 @@ private fun AutoCompleteHintComposable(
 
         Text(
             modifier = Modifier.fillMaxWidth(),
-            text = hint.hint
+            text = hint.hint,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }

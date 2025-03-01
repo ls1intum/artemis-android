@@ -1,5 +1,8 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.QuestionMark
+import androidx.compose.material.icons.filled.School
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.join
@@ -149,7 +152,8 @@ class AutoCompletionUseCase(
                         AutoCompleteHint(
                             hint = lecture.title,
                             replacementText = "[lecture]${lecture.title}($link)[/lecture]",
-                            id = "Lecture:$lectureId"
+                            id = "Lecture:$lectureId",
+                            icon = AutoCompleteIcon.DrawableFromImageVector(Icons.Default.School)
                         )
                     }
 
@@ -200,7 +204,8 @@ class AutoCompletionUseCase(
                         AutoCompleteHint(
                             hint = faq.questionTitle,
                             replacementText = "[faq]${faq.questionTitle}($link)[/faq]",
-                            id = "Faq:${faq.id}"
+                            id = "Faq:${faq.id}",
+                            icon = AutoCompleteIcon.DrawableFromImageVector(Icons.Default.QuestionMark)
                         )
                     }
 
