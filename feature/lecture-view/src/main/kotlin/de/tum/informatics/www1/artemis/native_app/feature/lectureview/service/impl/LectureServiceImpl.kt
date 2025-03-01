@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.lectureview.service.i
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.service.LectureService
@@ -22,7 +23,7 @@ class LectureServiceImpl(private val ktorProvider: KtorProvider) : LectureServic
         return performNetworkCall {
             ktorProvider.ktorClient.get(serverUrl) {
                 url {
-                    appendPathSegments("api", "lectures", lectureId.toString(), "details")
+                    appendPathSegments(*Api.Lecture.Lectures.path, lectureId.toString(), "details")
                 }
 
                 contentType(ContentType.Application.Json)
@@ -42,8 +43,7 @@ class LectureServiceImpl(private val ktorProvider: KtorProvider) : LectureServic
             ktorProvider.ktorClient.post(serverUrl) {
                 url {
                     appendPathSegments(
-                        "api",
-                        "lectures",
+                        *Api.Lecture.Lectures.path,
                         lectureId.toString(),
                         "lecture-units",
                         lectureUnitId.toString(),

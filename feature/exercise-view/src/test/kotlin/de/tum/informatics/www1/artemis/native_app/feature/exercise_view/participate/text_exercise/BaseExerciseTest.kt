@@ -1,7 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.participate.text_exercise
 
 import androidx.test.platform.app.InstrumentationRegistry
-import de.tum.informatics.www1.artemis.native_app.core.data.service.ApiEndpoint
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
@@ -48,7 +48,7 @@ abstract class BaseExerciseTest : BaseComposeTest() {
             exercise = createExercise(
                 getAdminAccessToken(),
                 course.id!!,
-                pathSegments = ApiEndpoint.text_textExercises,
+                pathSegments = Api.Text.TextExercises.path,
                 creator = ::createTextExercise
             ) as TextExercise
         }

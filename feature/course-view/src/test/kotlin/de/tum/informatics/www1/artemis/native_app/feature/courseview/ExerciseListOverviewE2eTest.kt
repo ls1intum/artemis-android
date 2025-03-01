@@ -7,7 +7,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performScrollToKey
 import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
-import de.tum.informatics.www1.artemis.native_app.core.data.service.ApiEndpoint
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createExercise
@@ -33,7 +33,7 @@ class ExerciseListOverviewE2eTest : BaseCourseTest() {
             createExercise(
                 getAdminAccessToken(),
                 course.id!!,
-                pathSegments = ApiEndpoint.text_textExercises,
+                pathSegments = Api.Text.TextExercises.path,
                 creator = ::createTextExercise
             )
         }
@@ -45,7 +45,7 @@ class ExerciseListOverviewE2eTest : BaseCourseTest() {
             createExercise(
                 getAdminAccessToken(),
                 course.id!!,
-                pathSegments = ApiEndpoint.modeling_modelingExercises,
+                pathSegments = Api.Modeling.ModelingExercises.path,
                 creator = ::createModelingExercise
             )
         }
@@ -58,7 +58,7 @@ class ExerciseListOverviewE2eTest : BaseCourseTest() {
             createExercise(
                 getAdminAccessToken(),
                 course.id!!,
-                pathSegments = ApiEndpoint.programming_programmingExercises,
+                pathSegments = Api.Programming.ProgrammingExercises.path,
                 creator = ::createProgramingExercise
             )
         }

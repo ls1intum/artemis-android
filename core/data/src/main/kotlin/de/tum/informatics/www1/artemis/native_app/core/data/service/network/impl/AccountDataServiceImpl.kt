@@ -7,7 +7,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
-import de.tum.informatics.www1.artemis.native_app.core.data.service.ApiEndpoint
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.ArtemisContextBasedServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
@@ -33,7 +33,7 @@ internal class AccountDataServiceImpl(
     override suspend fun getAccountData(): NetworkResponse<Account> {
         return getRequest<Account> {
             url {
-                appendPathSegments(*ApiEndpoint.core_public, "account")
+                appendPathSegments(*Api.Core.Public.path, "account")
             }
         }.onSuccess { account ->
             context.accountDataCache.edit { data ->

@@ -5,7 +5,7 @@ import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.Ar
 import de.tum.informatics.www1.artemis.native_app.core.common.offsetBy
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.retryNetworkCall
-import de.tum.informatics.www1.artemis.native_app.core.data.service.ApiEndpoint
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.ArtemisContextBasedServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ServerTimeService
@@ -101,7 +101,7 @@ internal class ServerTimeServiceImpl(
             val sentTime = clock.now().toEpochMilliseconds()
             getRequest<Instant> {
                 url {
-                    appendPathSegments(*ApiEndpoint.core_public, "time")
+                    appendPathSegments(*Api.Core.Public.path, "time")
                 }
             }
                 .bind { serverTime ->
