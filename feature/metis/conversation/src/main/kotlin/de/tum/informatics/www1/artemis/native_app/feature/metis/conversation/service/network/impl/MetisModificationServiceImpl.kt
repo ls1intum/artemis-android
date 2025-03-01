@@ -263,13 +263,23 @@ internal class MetisModificationServiceImpl(
             val courseId = context.courseId.toString()
             val conversationId = context.conversationId.toString()
             val response =  ktorProvider.ktorClient.submitFormWithBinaryData(
-                url = serverUrl +"api/files/courses/$courseId/conversations/$conversationId",
                 formData = formData {
                     append("file", fileBytes, Headers.build {
                         append(HttpHeaders.ContentDisposition, "filename=$fileName")
                     })
                 }
             ) {
+                url {
+                    appendPathSegments(
+                        "api",
+                        "files",
+                        "courses",
+                        courseId,
+                        "conversations",
+                        conversationId
+                    )
+                }
+
                 cookieAuth(authToken)
             }
 
