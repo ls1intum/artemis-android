@@ -16,6 +16,7 @@ sealed class Api(
         data object Courses : Api(*Communication.path, "courses")
         data object NotificationSettings : Api(*Communication.path, "notification-settings")
         data object PushNotification : Api(*Communication.path, "push_notification")
+        data object SavedPosts : Api(*Communication.path, "saved-posts")
     }
 
     data object Lecture: Api(api, "lecture") {

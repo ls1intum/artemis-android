@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseUser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
@@ -37,7 +38,7 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         return performNetworkCall {
             ktorProvider.ktorClient.get(serverUrl) {
                 url {
-                    appendPathSegments("api", "courses", courseId.toString(), "conversations")
+                    appendPathSegments(*Api.Communication.Courses.path, courseId.toString(), "conversations")
                 }
 
                 cookieAuth(authToken)
@@ -62,7 +63,7 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         return performNetworkCall {
             ktorProvider.ktorClient.get(serverUrl) {
                 url {
-                    appendPathSegments("api", "courses", courseId.toString(), "users", "search")
+                    appendPathSegments(*Api.Communication.Courses.path, courseId.toString(), "users", "search")
 
                     parameter("loginOrName", query)
                     parameter("roles", roles.joinToString(","))
@@ -82,7 +83,7 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         return performNetworkCall {
             ktorProvider.ktorClient.get(serverUrl) {
                 url {
-                    appendPathSegments("api", "courses", courseId.toString(), "members", "search")
+                    appendPathSegments(*Api.Communication.Courses.path, courseId.toString(), "members", "search")
 
                     parameter("loginOrName", query)
                 }
@@ -101,7 +102,7 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         return performNetworkCall {
             ktorProvider.ktorClient.post(serverUrl) {
                 url {
-                    appendPathSegments("api", "courses", courseId.toString(), "group-chats")
+                    appendPathSegments(*Api.Communication.Courses.path, courseId.toString(), "group-chats")
                 }
 
                 setBody(groupMembers)
@@ -122,7 +123,7 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         return performNetworkCall {
             ktorProvider.ktorClient.post(serverUrl) {
                 url {
-                    appendPathSegments("api", "courses", courseId.toString(), "one-to-one-chats")
+                    appendPathSegments(*Api.Communication.Courses.path, courseId.toString(), "one-to-one-chats")
                 }
 
                 setBody(listOf(partner))
@@ -143,7 +144,7 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         return performNetworkCall {
             ktorProvider.ktorClient.post(serverUrl) {
                 url {
-                    appendPathSegments("api", "courses", courseId.toString(), "one-to-one-chats", partnerId.toString())
+                    appendPathSegments(*Api.Communication.Courses.path, courseId.toString(), "one-to-one-chats", partnerId.toString())
                 }
 
                 accept(ContentType.Application.Json)
@@ -165,7 +166,7 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         return performNetworkCall {
             ktorProvider.ktorClient.post(serverUrl) {
                 url {
-                    appendPathSegments("api", "courses", courseId.toString(), "channels")
+                    appendPathSegments(*Api.Communication.Courses.path, courseId.toString(), "channels")
                 }
 
                 setBody(
@@ -208,7 +209,7 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         return performNetworkCall {
             ktorProvider.ktorClient.put(serverUrl) {
                 url {
-                    appendPathSegments("api", "courses", courseId.toString())
+                    appendPathSegments(*Api.Communication.Courses.path, courseId.toString())
 
                     appendConversationTypeWithId(conversation, conversationId)
                 }
@@ -284,8 +285,7 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
             ktorProvider.ktorClient.get(serverUrl) {
                 url {
                     appendPathSegments(
-                        "api",
-                        "courses",
+                        *Api.Communication.Courses.path,
                         courseId.toString(),
                         "conversations",
                         conversationId.toString(),
@@ -452,7 +452,7 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         return performNetworkCall {
             ktorProvider.ktorClient.post(serverUrl) {
                 url {
-                    appendPathSegments("api", "courses", courseId.toString())
+                    appendPathSegments(*Api.Communication.Courses.path, courseId.toString())
 
                     appendConversationTypeWithId(conversation, conversation.id)
 
@@ -498,8 +498,7 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
             ktorProvider.ktorClient.post(serverUrl) {
                 url {
                     appendPathSegments(
-                        "api",
-                        "courses",
+                        *Api.Communication.Courses.path,
                         courseId.toString(),
                         conversationTypePath,
                         conversationId.toString()
@@ -526,7 +525,7 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         return performNetworkCall {
             ktorProvider.ktorClient.patch(serverUrl) {
                 url {
-                    appendPathSegments("api", "courses", courseId.toString(), "conversations", conversationId.toString(), "mark-as-read")
+                    appendPathSegments(*Api.Communication.Courses.path, courseId.toString(), "conversations", conversationId.toString(), "mark-as-read")
                 }
 
                 cookieAuth(authToken)
@@ -544,8 +543,7 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
             ktorProvider.ktorClient.post(serverUrl) {
                 url {
                     appendPathSegments(
-                        "api",
-                        "courses",
+                        *Api.Communication.Courses.path,
                         courseId.toString(),
                         "channels",
                         "mark-as-read"

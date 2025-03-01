@@ -4,6 +4,7 @@ import android.util.Log
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.FileUploadResponse
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
@@ -271,7 +272,7 @@ internal class MetisModificationServiceImpl(
             ) {
                 url {
                     appendPathSegments(
-                        "api",
+                        *Api.Core.path,
                         "files",
                         "courses",
                         courseId,
