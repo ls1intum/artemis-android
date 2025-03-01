@@ -12,8 +12,8 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
-import de.tum.informatics.www1.artemis.native_app.feature.push.service.network.NotificationSettingsService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.network.NotificationSettingsService
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.PushNotificationSetting
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.group
 import kotlinx.coroutines.Deferred
@@ -102,11 +102,26 @@ class PushNotificationSettingsViewModel internal constructor(
         }
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
 
+    /**
+     * These settings can not be edited by the user
+     */
+    private val nonEditableSettingIds = listOf(
+        "notification.user-notification.vcs-access-token-added",
+        "notification.user-notification.vcs-access-token-expired",
+        "notification.user-notification.vcs-access-token-expires-soon",
+        "notification.user-notification.ssh-key-added",
+        "notification.user-notification.ssh-key-expires-soon",
+        "notification.user-notification.ssh-key-has-expired",
+        "notification.user-notification.data-export-created",
+        "notification.user-notification.data-export-failed"
+    )
+
     internal val currentSettingsByGroup: StateFlow<DataState<List<NotificationCategory>>> =
         currentSettings
             .map { currentSettings ->
                 currentSettings.bind { settings ->
                     settings
+                        .filterNot { nonEditableSettingIds.contains(it.settingId) }
                         .groupBy { it.group }
                         .map { NotificationCategory(it.key, it.value) }
                         .sortedBy { it.categoryId }
