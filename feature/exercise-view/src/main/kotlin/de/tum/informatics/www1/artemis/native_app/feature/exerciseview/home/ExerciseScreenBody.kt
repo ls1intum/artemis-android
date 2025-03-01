@@ -174,7 +174,7 @@ private fun BodyWithTabs(
 
             DefaultTab(
                 index = 1,
-                imageVector = Icons.Default.HelpCenter,
+                imageVector = Icons.AutoMirrored.Filled.HelpCenter,
                 textRes =  R.string.exercise_view_tab_qna,
                 selectedTabIndex =  selectedTabIndex,
                 updateSelectedTabIndex = onUpdateSelectedTabIndex
