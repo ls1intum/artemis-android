@@ -103,6 +103,31 @@ class ChannelServiceImpl(private val ktorProvider: KtorProvider) : ChannelServic
         }
     }
 
+    override suspend fun getLectureChannel(
+        lectureId: Long,
+        courseId: Long,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<ChannelChat> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.get(serverUrl) {
+                url {
+                    appendPathSegments(
+                        "api",
+                        "courses",
+                        courseId.toString(),
+                        "lectures",
+                        lectureId.toString(),
+                        "channel"
+                    )
+                }
+
+                cookieAuth(authToken)
+                contentType(ContentType.Application.Json)
+            }.body()
+        }
+    }
+
     override suspend fun registerInChannel(
         courseId: Long,
         conversationId: Long,

@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.QuestionMark
+import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -182,7 +182,7 @@ private fun FaqOverviewBody(
             EmptyListHint(
                 modifier = Modifier.fillMaxSize(),
                 hint = stringResource(R.string.faq_overview_no_faqs),
-                icon = Icons.Default.QuestionMark
+                imageVector = Icons.AutoMirrored.Filled.Help
             )
             return
         }
