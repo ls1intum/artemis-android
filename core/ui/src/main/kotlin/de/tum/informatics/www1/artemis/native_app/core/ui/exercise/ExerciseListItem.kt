@@ -71,7 +71,7 @@ fun ExerciseListItem(
                         Icon(
                             modifier = Modifier
                                 .size(40.dp)
-                                .padding(end = 8.dp)
+                                .padding(end = 16.dp)
                                 .fillMaxSize(),
                             painter = it,
                             contentDescription = null

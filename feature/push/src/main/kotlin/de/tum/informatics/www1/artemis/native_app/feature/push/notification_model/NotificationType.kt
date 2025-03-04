@@ -24,7 +24,8 @@ enum class ReplyPostCommunicationNotificationType : CommunicationNotificationTyp
     NEW_REPLY_FOR_EXERCISE_POST,
     NEW_REPLY_FOR_LECTURE_POST,
     NEW_REPLY_FOR_COURSE_POST,
-    CONVERSATION_NEW_REPLY_MESSAGE
+    CONVERSATION_NEW_REPLY_MESSAGE,
+    CONVERSATION_USER_MENTIONED
 }
 
 @Serializable
