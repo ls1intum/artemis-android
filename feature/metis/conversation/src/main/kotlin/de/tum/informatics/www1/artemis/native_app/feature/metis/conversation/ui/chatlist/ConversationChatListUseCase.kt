@@ -62,7 +62,8 @@ class ConversationChatListUseCase(
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
     conversation: StateFlow<DataState<Conversation>>,
-    private val coroutineContext: CoroutineContext = EmptyCoroutineContext
+    private val coroutineContext: CoroutineContext = EmptyCoroutineContext,
+    private val courseId: Long
 ) {
     companion object {
         private const val TAG = "ConversationChatListUseCase"
@@ -217,7 +218,8 @@ class ConversationChatListUseCase(
                         post,
                         post.answers.orEmpty(),
                         indexCounter++,
-                        emptyList() // This is only a placeholder, forwarded messages will be resolved in the next step
+                        emptyList(), // This is only a placeholder, forwarded messages will be resolved in the next step
+                        courseId
                     )
                 } else {
                     ChatListItem.PostItem.IndexedItem.Post(post, post.answers.orEmpty(), indexCounter++)

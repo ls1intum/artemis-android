@@ -22,6 +22,7 @@ sealed class ChatListItem {
 
         interface ForwardedMessage {
             val forwardedPosts: List<IBasePost>
+            val courseId: Long
         }
 
         sealed class IndexedItem : PostItem() {
@@ -40,9 +41,10 @@ sealed class ChatListItem {
                 override val post: IStandalonePost,
                 override val answers: List<IAnswerPost>,
                 override val index: Long = -1L,
-                override val forwardedPosts: List<IBasePost>
+                override val forwardedPosts: List<IBasePost>,
+                override val courseId: Long
             ) : IndexedItem(), ForwardedMessage {
-                override fun copy(post: IBasePost) = copy(post = post as IStandalonePost, index = index, answers = answers, forwardedPosts = forwardedPosts)
+                override fun copy(post: IBasePost) = copy(post = post as IStandalonePost, index = index, answers = answers, forwardedPosts = forwardedPosts, courseId = courseId)
             }
         }
 
@@ -55,9 +57,10 @@ sealed class ChatListItem {
 
                 data class AnswerPostWithForwardedMessage(
                     override val post: IAnswerPost,
-                    override val forwardedPosts: List<IBasePost>
+                    override val forwardedPosts: List<IBasePost>,
+                    override val courseId: Long
                 ) : Answer(), ForwardedMessage {
-                    override fun copy(post: IBasePost) = copy(post = post as IAnswerPost, forwardedPosts = forwardedPosts)
+                    override fun copy(post: IBasePost) = copy(post = post as IAnswerPost, forwardedPosts = forwardedPosts, courseId = courseId)
                 }
             }
 
@@ -69,9 +72,10 @@ sealed class ChatListItem {
 
                 data class ContextPostWithForwardedMessage(
                     override val post: IStandalonePost,
-                    override val forwardedPosts: List<IBasePost>
+                    override val forwardedPosts: List<IBasePost>,
+                    override val courseId: Long
                 ) : ContextItem(), ForwardedMessage {
-                    override fun copy(post: IBasePost) = copy(post = post as IStandalonePost, forwardedPosts = forwardedPosts)
+                    override fun copy(post: IBasePost) = copy(post = post as IStandalonePost, forwardedPosts = forwardedPosts, courseId = courseId)
                 }
             }
         }

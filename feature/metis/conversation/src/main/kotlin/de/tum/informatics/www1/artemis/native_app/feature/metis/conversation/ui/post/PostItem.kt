@@ -323,7 +323,6 @@ fun PostItemMainContent(
 
                     ForwardedMessageColumn(
                         modifier = Modifier.fillMaxWidth(),
-                        post = post,
                         chatListItem = chatListItem
                     )
                 }

@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,14 +24,22 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
+import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CommunicationDeeplinks
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 
 @Composable
 fun ForwardedMessageColumn(
     modifier: Modifier,
-    post: IBasePost?,
     chatListItem: ChatListItem.PostItem.ForwardedMessage,
 ) {
     val forwardedPosts = chatListItem.forwardedPosts
@@ -43,6 +50,7 @@ fun ForwardedMessageColumn(
         forwardedPosts.forEach{ forwardedPost ->
             ForwardedMessageItem(
                 modifier = Modifier.fillMaxWidth(),
+                courseId = chatListItem.courseId,
                 forwardedPost = forwardedPost,
             )
 
@@ -54,8 +62,12 @@ fun ForwardedMessageColumn(
 @Composable
 private fun ForwardedMessageItem(
     modifier: Modifier,
+    courseId: Long,
     forwardedPost: IBasePost,
 ) {
+    val linkOpener = LocalLinkOpener.current
+    val (sourceConversationId, sourceChannelText) = resolveConversation(forwardedPost)
+
     Row(
         modifier = modifier.height(IntrinsicSize.Min),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -74,7 +86,6 @@ private fun ForwardedMessageItem(
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
@@ -84,16 +95,23 @@ private fun ForwardedMessageItem(
                     tint = MaterialTheme.colorScheme.primary,
                 )
 
+                Spacer(Modifier.width(8.dp))
+
                 Text(
-                    text = stringResource(R.string.post_forwarded_from, "DDDD"), // TODO
+                    text = stringResource(R.string.post_forwarded_from),
                     style = MaterialTheme.typography.bodySmall,
                 )
 
-                VerticalDivider(modifier = Modifier.height(12.dp), color = MaterialTheme.colorScheme.onSurface)
+                Spacer(Modifier.width(2.dp))
 
                 Text(
-                    modifier = Modifier.clickable {  }, // TODO
-                    text = stringResource(R.string.post_forwarded_view_conversation),
+                    modifier = Modifier.clickable {
+                        linkOpener.openLink(CommunicationDeeplinks.ToConversation.inAppLink(
+                            courseId = courseId,
+                            conversationId = sourceConversationId ?: return@clickable
+                        ))
+                    },
+                    text = sourceChannelText,
                     color = MaterialTheme.colorScheme.primary,
                     style = MaterialTheme.typography.bodySmall,
                 )
@@ -107,4 +125,30 @@ private fun ForwardedMessageItem(
             )
         }
     }
+}
+
+@Composable
+private fun resolveConversation(forwardedPost: IBasePost): Pair<Long?, String> {
+    val conversation = when (forwardedPost) {
+        is IStandalonePost ->  (forwardedPost as StandalonePost).conversation
+        is IAnswerPost -> (forwardedPost as AnswerPost).post?.conversation
+        else -> return null to stringResource(R.string.post_forwarded_from_default)
+    }
+
+    if (conversation is OneToOneChat) {
+        return conversation.id to stringResource(R.string.post_forwarded_from_a_direct_message)
+    }
+    if (conversation is GroupChat) {
+        return conversation.id to stringResource(R.string.post_forwarded_from_a_group_chat)
+    }
+
+    var conversationName = conversation?.humanReadableName ?: stringResource(R.string.post_forwarded_from_default)
+    if (conversation != null) conversationName = "#$conversationName"
+    val conversationId = conversation?.id
+
+    if (forwardedPost is IAnswerPost) {
+        return conversationId to stringResource(R.string.post_forwarded_from_a_thread, conversationName)
+    }
+
+    return conversationId to conversationName
 }

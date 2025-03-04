@@ -50,7 +50,8 @@ internal class ConversationThreadUseCase(
     private val networkStatusProvider: NetworkStatusProvider,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
-    coroutineContext: CoroutineContext = EmptyCoroutineContext
+    coroutineContext: CoroutineContext = EmptyCoroutineContext,
+    private val courseId: Long
 ) {
 
     companion object {
@@ -131,7 +132,8 @@ internal class ConversationThreadUseCase(
                     forwardedMessagesHandler.resolveForwardedMessagesForThreadPost(
                         chatListItem = ChatListItem.PostItem.ThreadItem.ContextItem.ContextPostWithForwardedMessage(
                             post = standalonePost,
-                            forwardedPosts = emptyList()
+                            forwardedPosts = emptyList(),
+                            courseId = courseId
                         )
                     )
                 } else {
@@ -151,7 +153,8 @@ internal class ConversationThreadUseCase(
                     forwardedMessagesHandler.resolveForwardedMessagesForThreadPost(
                         chatListItem = ChatListItem.PostItem.ThreadItem.Answer.AnswerPostWithForwardedMessage(
                             post = answerPost,
-                            forwardedPosts = emptyList()
+                            forwardedPosts = emptyList(),
+                            courseId = courseId
                         )
                     ) as ChatListItem.PostItem.ThreadItem.Answer
                 } else {
