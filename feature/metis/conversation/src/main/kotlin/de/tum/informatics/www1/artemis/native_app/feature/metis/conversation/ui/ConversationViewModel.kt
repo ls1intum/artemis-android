@@ -50,7 +50,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.ReplyTextStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ConversationChatListUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.util.LinkifyService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.util.LinkPreviewUtil
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteHint
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteHintCollection
@@ -551,7 +551,7 @@ internal open class ConversationViewModel(
         post: IBasePost,
         parentPost: IStandalonePost?
     ): Deferred<MetisModificationFailure?> {
-        val newContent = LinkifyService.removeLinkPreview(post.content.orEmpty(), linkPreview.url)
+        val newContent = LinkPreviewUtil.removeLinkPreview(post.content.orEmpty(), linkPreview.url)
         return when (post) {
             is IStandalonePost -> editPost(post, newContent)
             is AnswerPostPojo -> {
@@ -566,9 +566,9 @@ internal open class ConversationViewModel(
             accountService.authToken,
             serverConfigurationService.serverUrl
         ) { authToken, serverUrl ->
-            val links = LinkifyService.findLinks(postContent)
+            val links = LinkPreviewUtil.generatePreviewableLinks(postContent)
                 .filter { it.isLinkPreviewRemoved != true }
-                .take(6)
+                .take(LinkPreviewUtil.MAX_LINK_PREVIEWS_PER_MESSAGE)
 
             val previews = links.map { link ->
                 viewModelScope.async {
@@ -589,9 +589,7 @@ internal open class ConversationViewModel(
                 authToken = authToken,
                 serverUrl = serverUrl
             ).bind { preview ->
-                preview?.takeIf {
-                    it.url.isNotEmpty() && it.title.isNotEmpty() && it.description.isNotEmpty() && it.image.isNotEmpty()
-                }?.apply {
+                preview?.takeIf { it.isValid() }?.apply {
                     shouldPreviewBeShown = true
                 }
             }

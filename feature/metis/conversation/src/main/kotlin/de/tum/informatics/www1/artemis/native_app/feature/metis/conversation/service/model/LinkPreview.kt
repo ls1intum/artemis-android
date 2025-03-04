@@ -9,7 +9,11 @@ data class LinkPreview(
     val image: String,
     val url: String,
     var shouldPreviewBeShown: Boolean = false
-)
+) {
+    fun isValid(): Boolean {
+        return title.isNotEmpty() && description.isNotEmpty() && image.isNotEmpty() && url.isNotEmpty()
+    }
+}
 
 data class Link(
     val value: String,

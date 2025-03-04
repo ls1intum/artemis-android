@@ -2,10 +2,16 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.Link
 
-object LinkifyService {
+object LinkPreviewUtil {
     private val urlRegex = """https?:\/\/[^\s<>()\[\]]+""".toRegex()
+    private const val REMOVED_PREVIEW_OPENING_TAG = '<'
+    private const val REMOVED_PREVIEW_CLOSING_TAG = '>'
 
-    fun findLinks(text: String): List<Link> {
+    // This value is currently hardcoded and will be configurable in the future
+    // See https://github.com/ls1intum/Artemis/blob/develop/src/main/webapp/app/shared/link-preview/components/link-preview-container/link-preview-container.component.ts
+    const val MAX_LINK_PREVIEWS_PER_MESSAGE = 5
+
+    fun generatePreviewableLinks(text: String): List<Link> {
         val linkableItems = mutableListOf<Link>()
 
         val matches = urlRegex.findAll(text)
@@ -14,17 +20,18 @@ object LinkifyService {
             val start = match.range.first
             val end = match.range.last + 1
 
-            val isRemoved = text.getOrNull(start - 1) == '<' && text.getOrNull(end) == '>'
+            val isPreviewRemoved =
+                text.getOrNull(start - 1) == REMOVED_PREVIEW_OPENING_TAG && text.getOrNull(end) == REMOVED_PREVIEW_CLOSING_TAG
 
             val linkableItem = Link(
                 value = url,
                 isLink = true,
                 start = start,
                 end = end,
-                isLinkPreviewRemoved = isRemoved
+                isLinkPreviewRemoved = isPreviewRemoved
             )
 
-            if (!isRemoved) {
+            if (!isPreviewRemoved) {
                 linkableItems.add(linkableItem)
             }
         }
@@ -37,15 +44,19 @@ object LinkifyService {
 
         for (match in matches) {
             val url = match.value
-            val normalizedUrl = if (!url.endsWith("/")) urlToSearchFor.trimEnd('/') else urlToSearchFor
+            val normalizedUrl =
+                if (!url.endsWith("/")) urlToSearchFor.trimEnd('/') else urlToSearchFor
             val start = match.range.first
             val end = match.range.last + 1
 
             if (url == normalizedUrl || normalizedUrl.contains(url)) {
-                modifiedContent = modifiedContent.substring(0, start) + "<$url>" + modifiedContent.substring(end)
+                modifiedContent = modifiedContent.removeLinkPreviewTags(start, end, url)
             }
         }
 
         return modifiedContent
     }
+
+    private fun String.removeLinkPreviewTags(start: Int, end: Int, url: String): String =
+        this.substring(0, start) + "$REMOVED_PREVIEW_OPENING_TAG$url$REMOVED_PREVIEW_CLOSING_TAG" + this.substring(end)
 }
