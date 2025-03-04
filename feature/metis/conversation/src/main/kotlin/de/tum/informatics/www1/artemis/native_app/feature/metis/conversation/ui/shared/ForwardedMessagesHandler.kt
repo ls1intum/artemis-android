@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ForwardedMessage
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.PostingType
@@ -16,9 +17,10 @@ class ForwardedMessagesHandler(
 ) {
     val forwardedPostIds = mutableListOf<Long>()
     private var cachedForwardedMessages: List<ForwardedMessage> = emptyList()
-    private var standaloneSourcePosts: List<StandalonePost?> = emptyList()
+    private var cachedStandaloneSourcePosts: Map<Long, List<StandalonePost?>> = mapOf()
+    private var cachedAnswerSourcePosts: Map<Long, List<AnswerPost?>> = mapOf()
 
-    suspend fun resolveForwardedMessagesForThreadPost(chatListItem: ChatListItem.PostItem.ThreadItem): ChatListItem.PostItem.ThreadItem {
+    fun resolveForwardedMessagesForThreadPost(chatListItem: ChatListItem.PostItem.ThreadItem): ChatListItem.PostItem.ThreadItem {
         if (chatListItem !is ChatListItem.PostItem.ForwardedMessage) return chatListItem
 
         return when (chatListItem) {
@@ -32,7 +34,7 @@ class ForwardedMessagesHandler(
         }
     }
 
-    suspend fun resolveForwardedMessagesForIndexedPost(
+    fun resolveForwardedMessagesForIndexedPost(
         chatListItem: ChatListItem.PostItem.IndexedItem,
     ): ChatListItem.PostItem.IndexedItem {
         if (chatListItem !is ChatListItem.PostItem.ForwardedMessage) return chatListItem
@@ -40,66 +42,18 @@ class ForwardedMessagesHandler(
         return resolveForwardedMessages(chatListItem as ChatListItem.PostItem.IndexedItem.PostWithForwardedMessage) as ChatListItem.PostItem.IndexedItem.PostWithForwardedMessage
     }
 
-    private suspend fun resolveForwardedMessages(
+    private fun resolveForwardedMessages(
         chatListItem: ChatListItem.PostItem
     ): ChatListItem.PostItem.ForwardedMessage {
-        val sourcePostIds = mutableListOf<Long>()
-        val sourceAnswerPostIds = mutableListOf<Long>()
-        var modifiedChatListItem = chatListItem.copy() as ChatListItem.PostItem.ForwardedMessage
+        var forwardedSourcePosts = listOf<IBasePost?>()
+        val id =
+            cachedForwardedMessages.find { it.destinationPostId == chatListItem.post.serverPostId }?.sourceId
+        forwardedSourcePosts = forwardedSourcePosts + (cachedStandaloneSourcePosts[id] ?: emptyList())
+        forwardedSourcePosts = forwardedSourcePosts + (cachedAnswerSourcePosts[id] ?: emptyList())
 
-        val relevantForwardedMessages = cachedForwardedMessages.filter {
-            it.destinationPostId == chatListItem.post.serverPostId
-        }
-
-        relevantForwardedMessages.forEach { forwardedMessage ->
-            forwardedMessage.sourceId?.let { sourceId ->
-                if (forwardedMessage.sourceType == PostingType.POST) {
-                    sourcePostIds.add(sourceId)
-                } else {
-                    sourceAnswerPostIds.add(sourceId)
-                }
-            }
-        }
-
-        if (sourcePostIds.isNotEmpty()) {
-            metisService.getPostsByIds(
-                metisContext = metisContext,
-                postIds = sourcePostIds,
-                serverUrl = serverUrl,
-                authToken = authToken
-            ).bind { sourcePosts ->
-                val updatedSourcePosts = sourcePostIds.map { id ->
-                    sourcePosts.find { it.serverPostId == id } // inserts null for missing posts
-                }
-
-                standaloneSourcePosts = updatedSourcePosts
-                val oldForwardedPosts = modifiedChatListItem.forwardedPosts
-                modifiedChatListItem =
-                    modifiedChatListItem.copyWithNewForwardedPosts(oldForwardedPosts + updatedSourcePosts)
-            }
-        }
-
-        if (sourceAnswerPostIds.isNotEmpty()) {
-            metisService.getAnswerPostsByIds(
-                metisContext = metisContext,
-                answerPostIds = sourceAnswerPostIds,
-                serverUrl = serverUrl,
-                authToken = authToken
-            ).bind { sourceAnswerPosts ->
-                val updatedSourceAnswerPosts = sourceAnswerPostIds.map { id ->
-                    sourceAnswerPosts.find { it.serverPostId == id } // inserts null for missing posts
-                }
-
-                val oldForwardedPosts = modifiedChatListItem.forwardedPosts
-                modifiedChatListItem =
-                    modifiedChatListItem.copyWithNewForwardedPosts(oldForwardedPosts + updatedSourceAnswerPosts)
-            }
-        }
-
-        sourcePostIds.clear()
-        sourceAnswerPostIds.clear()
-
-        return modifiedChatListItem
+        val newChatListItem = chatListItem.copy() as ChatListItem.PostItem.ForwardedMessage
+        val oldForwardedPosts = newChatListItem.forwardedPosts
+        return newChatListItem.copyWithNewForwardedPosts(oldForwardedPosts + forwardedSourcePosts)
     }
 
     suspend fun loadForwardedMessages(postingType: PostingType) {
@@ -110,8 +64,50 @@ class ForwardedMessagesHandler(
             serverUrl = serverUrl,
             authToken = authToken
         ).bind { forwardedMessages ->
-            cachedForwardedMessages = cachedForwardedMessages + forwardedMessages
-            cachedForwardedMessages = cachedForwardedMessages.distinctBy { it.id }
+            cachedForwardedMessages =
+                (cachedForwardedMessages + forwardedMessages).distinctBy { it.id }
+
+            val (sourcePostIds, sourceAnswerPostIds) = forwardedMessages.partition { it.sourceType == PostingType.POST }
+                .let { it.first.mapNotNull { msg -> msg.sourceId } to it.second.mapNotNull { msg -> msg.sourceId } }
+
+            fetchAndCachePosts(sourcePostIds, sourceAnswerPostIds)
+        }
+    }
+
+    private suspend fun fetchAndCachePosts(
+        sourcePostIds: List<Long>,
+        sourceAnswerPostIds: List<Long>
+    ) {
+        if (sourcePostIds.isNotEmpty()) {
+            metisService.getPostsByIds(
+                metisContext = metisContext,
+                postIds = sourcePostIds,
+                serverUrl = serverUrl,
+                authToken = authToken
+            ).bind { sourcePosts ->
+                val updatedSourcePosts = sourcePostIds.associateWith { id ->
+                    val posts = sourcePosts.filter { it.serverPostId == id }
+                    posts.ifEmpty { listOf(null) } // pairs id with the found post or null for missing posts
+                }
+
+                cachedStandaloneSourcePosts = updatedSourcePosts
+            }
+        }
+
+        if (sourceAnswerPostIds.isNotEmpty()) {
+            metisService.getAnswerPostsByIds(
+                metisContext = metisContext,
+                answerPostIds = sourceAnswerPostIds,
+                serverUrl = serverUrl,
+                authToken = authToken
+            ).bind { sourceAnswerPosts ->
+                val updatedSourceAnswerPosts = sourceAnswerPostIds.associateWith { id ->
+                    val posts = sourceAnswerPosts.filter { it.serverPostId == id }
+                    posts.ifEmpty { listOf(null) } // pairs id with the found post or null for missing posts
+                }
+
+                cachedAnswerSourcePosts = updatedSourceAnswerPosts
+            }
         }
     }
 

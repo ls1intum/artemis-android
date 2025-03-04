@@ -25,6 +25,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -38,6 +39,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
@@ -141,6 +143,7 @@ class ConversationChatListUseCase(
                 serverUrl = pagingDataInput.serverUrl
             )
 
+            val loadForwardedMessagesCompletion = CompletableDeferred<Unit>()
             val isSearchActive = !pagingDataInput.standalonePostsContext.query.isNullOrBlank()
             val pagerFlow = if (!isSearchActive) {
                 Pager(
@@ -171,6 +174,7 @@ class ConversationChatListUseCase(
                 )
                     .flow
                     .mapIndexedPosts(forwardedMessagesHandler)
+                    .onEach { forwardedMessagesHandler.loadForwardedMessages(PostingType.POST) }
                     .resolveForwardedPosts(forwardedMessagesHandler)
                     .cachedIn(viewModelScope + coroutineContext)
             } else {
@@ -189,6 +193,7 @@ class ConversationChatListUseCase(
                 )
                     .flow
                     .mapIndexedPosts(forwardedMessagesHandler)
+                    .onEach { forwardedMessagesHandler.loadForwardedMessages(PostingType.POST) }
                     .resolveForwardedPosts(forwardedMessagesHandler)
                     .cachedIn(viewModelScope + coroutineContext)
             }
