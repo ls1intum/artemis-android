@@ -33,6 +33,7 @@
     <string name="post_forwarded_from_a_direct_message">a direct message</string>
     <string name="post_forwarded_from_a_group_chat">a group message</string>
     <string name="post_forwarded_from_default">a conversation</string>
+    <string name="post_forwarded_deleted">This message has been deleted</string>
 
     <string name="post_sending_failed">Sending post failed. Click to try again.</string>
 </resources>

@@ -16,7 +16,7 @@ class ForwardedMessagesHandler(
 ) {
     val forwardedPostIds = mutableListOf<Long>()
     private var cachedForwardedMessages: List<ForwardedMessage> = emptyList()
-    private var standaloneSourcePosts: List<StandalonePost> = emptyList()
+    private var standaloneSourcePosts: List<StandalonePost?> = emptyList()
 
     suspend fun resolveForwardedMessagesForThreadPost(chatListItem: ChatListItem.PostItem.ThreadItem): ChatListItem.PostItem.ThreadItem {
         if (chatListItem !is ChatListItem.PostItem.ForwardedMessage) return chatListItem
@@ -68,10 +68,14 @@ class ForwardedMessagesHandler(
                 serverUrl = serverUrl,
                 authToken = authToken
             ).bind { sourcePosts ->
-                standaloneSourcePosts = sourcePosts
+                val updatedSourcePosts = sourcePostIds.map { id ->
+                    sourcePosts.find { it.serverPostId == id } // inserts null for missing posts
+                }
+
+                standaloneSourcePosts = updatedSourcePosts
                 val oldForwardedPosts = modifiedChatListItem.forwardedPosts
                 modifiedChatListItem =
-                    modifiedChatListItem.copyWithNewForwardedPosts(oldForwardedPosts + sourcePosts)
+                    modifiedChatListItem.copyWithNewForwardedPosts(oldForwardedPosts + updatedSourcePosts)
             }
         }
 
@@ -82,9 +86,13 @@ class ForwardedMessagesHandler(
                 serverUrl = serverUrl,
                 authToken = authToken
             ).bind { sourceAnswerPosts ->
+                val updatedSourceAnswerPosts = sourceAnswerPostIds.map { id ->
+                    sourceAnswerPosts.find { it.serverPostId == id } // inserts null for missing posts
+                }
+
                 val oldForwardedPosts = modifiedChatListItem.forwardedPosts
                 modifiedChatListItem =
-                    modifiedChatListItem.copyWithNewForwardedPosts(oldForwardedPosts + sourceAnswerPosts)
+                    modifiedChatListItem.copyWithNewForwardedPosts(oldForwardedPosts + updatedSourceAnswerPosts)
             }
         }
 
@@ -107,7 +115,7 @@ class ForwardedMessagesHandler(
         }
     }
 
-    private fun ChatListItem.PostItem.ForwardedMessage.copyWithNewForwardedPosts(newForwardedPosts: List<IBasePost>): ChatListItem.PostItem.ForwardedMessage {
+    private fun ChatListItem.PostItem.ForwardedMessage.copyWithNewForwardedPosts(newForwardedPosts: List<IBasePost?>): ChatListItem.PostItem.ForwardedMessage {
         return when (this) {
             is ChatListItem.PostItem.IndexedItem.PostWithForwardedMessage -> copy(forwardedPosts = newForwardedPosts)
             is ChatListItem.PostItem.ThreadItem.Answer.AnswerPostWithForwardedMessage -> copy(

@@ -180,18 +180,20 @@ internal class MetisServiceImpl(
         authToken: String
     ): NetworkResponse<List<StandalonePost>> {
         return performNetworkCall {
-            ktorProvider.ktorClient.get(serverUrl) {
-                url {
-                    appendPathSegments("api")
-                    appendPathSegments("communication")
-                    appendPathSegments("courses")
-                    appendPathSegments(metisContext.courseId.toString())
-                    appendPathSegments("messages-source-posts")
-                }
+            runCatching {
+                ktorProvider.ktorClient.get(serverUrl) {
+                    url {
+                        appendPathSegments("api")
+                        appendPathSegments("communication")
+                        appendPathSegments("courses")
+                        appendPathSegments(metisContext.courseId.toString())
+                        appendPathSegments("messages-source-posts")
+                    }
 
-                parameter("postIds", postIds.joinToString(","))
-                cookieAuth(authToken)
-            }.body()
+                    parameter("postIds", postIds.joinToString(","))
+                    cookieAuth(authToken)
+                }.body<List<StandalonePost>>()
+            }.getOrElse { emptyList() }
         }
     }
 
@@ -202,18 +204,20 @@ internal class MetisServiceImpl(
         authToken: String
     ): NetworkResponse<List<AnswerPost>> {
         return performNetworkCall {
-            ktorProvider.ktorClient.get(serverUrl) {
-                url {
-                    appendPathSegments("api")
-                    appendPathSegments("communication")
-                    appendPathSegments("courses")
-                    appendPathSegments(metisContext.courseId.toString())
-                    appendPathSegments("answer-messages-source-posts")
-                }
+            runCatching {
+                ktorProvider.ktorClient.get(serverUrl) {
+                    url {
+                        appendPathSegments("api")
+                        appendPathSegments("communication")
+                        appendPathSegments("courses")
+                        appendPathSegments(metisContext.courseId.toString())
+                        appendPathSegments("answer-messages-source-posts")
+                    }
 
-                parameter("answerPostIds", answerPostIds.joinToString(","))
-                cookieAuth(authToken)
-            }.body()
+                    parameter("answerPostIds", answerPostIds.joinToString(","))
+                    cookieAuth(authToken)
+                }.body<List<AnswerPost>>()
+            }.getOrElse { emptyList() }
         }
     }
 }

@@ -42,20 +42,19 @@ fun ForwardedMessageColumn(
     modifier: Modifier,
     chatListItem: ChatListItem.PostItem.ForwardedMessage,
 ) {
-    val forwardedPosts = chatListItem.forwardedPosts
+    if (chatListItem.forwardedPosts.isEmpty()) return
+    val forwardedPost = chatListItem.forwardedPosts[0]
 
     Column(
         modifier = modifier,
     ) {
-        forwardedPosts.forEach{ forwardedPost ->
-            ForwardedMessageItem(
-                modifier = Modifier.fillMaxWidth(),
-                courseId = chatListItem.courseId,
-                forwardedPost = forwardedPost,
-            )
+        ForwardedMessageItem(
+            modifier = Modifier.fillMaxWidth(),
+            courseId = chatListItem.courseId,
+            forwardedPost = forwardedPost,
+        )
 
-            Spacer(modifier = Modifier.height(8.dp))
-        }
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }
 
@@ -63,7 +62,7 @@ fun ForwardedMessageColumn(
 private fun ForwardedMessageItem(
     modifier: Modifier,
     courseId: Long,
-    forwardedPost: IBasePost,
+    forwardedPost: IBasePost?,
 ) {
     val linkOpener = LocalLinkOpener.current
     val (sourceConversationId, sourceChannelText) = resolveConversation(forwardedPost)
@@ -112,9 +111,19 @@ private fun ForwardedMessageItem(
                         ))
                     },
                     text = sourceChannelText,
-                    color = MaterialTheme.colorScheme.primary,
+                    color = if (forwardedPost != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.bodySmall,
                 )
+            }
+
+            if (forwardedPost == null) {
+                Text(
+                    modifier = Modifier.wrapContentHeight(unbounded = true),
+                    text = stringResource(R.string.post_forwarded_deleted),
+                    color = MaterialTheme.colorScheme.secondary,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                return
             }
 
             PostItemMainContent(
@@ -124,13 +133,12 @@ private fun ForwardedMessageItem(
                 onClick = {},
                 onLongClick = {},
             )
-            println(forwardedPost.reactions)
         }
     }
 }
 
 @Composable
-private fun resolveConversation(forwardedPost: IBasePost): Pair<Long?, String> {
+private fun resolveConversation(forwardedPost: IBasePost?): Pair<Long?, String> {
     val conversation = when (forwardedPost) {
         is IStandalonePost ->  (forwardedPost as StandalonePost).conversation
         is IAnswerPost -> (forwardedPost as AnswerPost).post?.conversation
