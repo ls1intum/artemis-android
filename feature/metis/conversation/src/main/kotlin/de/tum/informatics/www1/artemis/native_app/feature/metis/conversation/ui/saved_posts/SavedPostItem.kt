@@ -64,6 +64,7 @@ fun SavedPostItem(
         PostItemMainContent(
             modifier = Modifier.wrapContentHeight(unbounded = true),
             post = savedPost,
+            isRoleBadgeVisible = false,
             onClick = onClick,
             onLongClick = onLongClick,
         )

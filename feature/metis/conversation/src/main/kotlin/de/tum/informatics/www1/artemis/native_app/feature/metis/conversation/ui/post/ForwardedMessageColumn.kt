@@ -120,9 +120,11 @@ private fun ForwardedMessageItem(
             PostItemMainContent(
                 modifier = Modifier.wrapContentHeight(unbounded = true),
                 post = forwardedPost,
+                isRoleBadgeVisible = false,
                 onClick = {},
                 onLongClick = {},
             )
+            println(forwardedPost.reactions)
         }
     }
 }
