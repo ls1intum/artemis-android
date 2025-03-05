@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions
 
-import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -51,14 +50,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
-import androidx.core.view.ViewCompat
-import androidx.emoji2.emojipicker.EmojiPickerView
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.LocalEmojiProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.getUnicodeForEmojiId
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.emoji.EmojiPicker
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.emoji.getUnicodeForEmojiId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
@@ -330,39 +326,8 @@ fun EmojiDialog(
                     .fillMaxWidth()
                     .fillMaxHeight(0.8f)
                     .padding(horizontal = 8.dp),
-                onReactWithEmoji = onSelectEmoji
+                onEmojiClicked = onSelectEmoji
             )
         }
     }
-}
-
-@Composable
-private fun EmojiPicker(
-    modifier: Modifier,
-    onReactWithEmoji: (emojiId: String) -> Unit
-) {
-    val emojiProvider = LocalEmojiProvider.current
-    val unicodeToEmojiIdMap by emojiProvider.unicodeToEmojiIdMap
-
-    AndroidView(
-        modifier = modifier,
-        factory = { context ->
-            EmojiPickerView(
-                ContextThemeWrapper(
-                    context,
-                    androidx.appcompat.R.style.Theme_AppCompat_DayNight
-                )
-            ).apply {
-                ViewCompat.setNestedScrollingEnabled(this, true)
-            }
-        },
-        update = { emojiPicker ->
-            emojiPicker.setOnEmojiPickedListener { pickedEmoji ->
-                val emojiId = unicodeToEmojiIdMap?.get(pickedEmoji.emoji)
-                if (emojiId != null) {
-                    onReactWithEmoji(emojiId)
-                }
-            }
-        }
-    )
 }

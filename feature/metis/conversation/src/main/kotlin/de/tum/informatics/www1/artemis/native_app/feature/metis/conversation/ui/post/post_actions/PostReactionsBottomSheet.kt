@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.getUnicodeForEmojiId
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.emoji.getUnicodeForEmojiId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IReaction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo

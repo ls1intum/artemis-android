@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
+package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.emoji
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider

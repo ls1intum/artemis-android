@@ -36,9 +36,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ProvideEmojis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisPostListHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.testTagForPost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.emoji.ProvideEmojis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostItemViewJoinedType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostItemViewType

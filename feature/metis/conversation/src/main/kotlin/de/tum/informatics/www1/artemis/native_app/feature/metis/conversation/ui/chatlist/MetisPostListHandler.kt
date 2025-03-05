@@ -24,7 +24,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.LocalMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.rememberPostArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ProvideEmojis
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.emoji.ProvideEmojis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
