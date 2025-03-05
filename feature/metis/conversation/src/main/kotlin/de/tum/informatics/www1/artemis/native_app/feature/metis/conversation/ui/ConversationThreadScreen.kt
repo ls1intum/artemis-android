@@ -84,7 +84,7 @@ internal fun ConversationThreadScreen(
                 .fillMaxSize()
                 .imePadding(),
         ) {
-            CompositionLocalProvider(LocalReplyAutoCompleteHintProvider provides viewModel) {
+            CompositionLocalProvider(LocalReplyAutoCompleteHintProvider provides viewModel.autoCompletionUseCase) {
                 MetisThreadUi(
                     modifier = Modifier
                         .fillMaxWidth()

@@ -12,6 +12,7 @@ abstract class ArtemisMarkdownTransformer {
     private val channelMarkdownPattern = "\\[channel](.*?)\\((\\d+?)\\)\\[/channel]".toRegex()
     private val lectureContentMarkdownPattern = "\\[(attachment|lecture-unit|slide)](.*?)\\(([/\\w\\d\\-_\\.\\s]+)\\)\\[/\\1]".toRegex()
     private val fileUploadMessagePattern = "(\\!?)\\[(.*?)]\\((/api(/core)?/files/[\\w\\d/\\-_.\\s]+)\\)".toRegex()
+    private val faqMarkdownPattern = "\\[faq](.*?)\\((.*?)\\)\\[/faq]".toRegex()
 
     fun transformMarkdown(markdown: String): String {
         return exerciseMarkdownPattern.replace(markdown) { matchResult ->
@@ -62,6 +63,12 @@ abstract class ArtemisMarkdownTransformer {
                     filePath = filePath
                 )
             }
+        }.let {
+            faqMarkdownPattern.replace(it) { matchResult ->
+                val title = matchResult.groups[1]?.value.orEmpty()
+                val url = matchResult.groups[2]?.value.orEmpty()
+                transformFaqMarkdown(title, url)
+            }
         }
     }
 
@@ -93,4 +100,9 @@ abstract class ArtemisMarkdownTransformer {
         fileName: String,
         filePath: String
     ): String = fileName
+
+    protected open fun transformFaqMarkdown(
+        title: String,
+        url: String
+    ): String = "FAQ: $title"
 }

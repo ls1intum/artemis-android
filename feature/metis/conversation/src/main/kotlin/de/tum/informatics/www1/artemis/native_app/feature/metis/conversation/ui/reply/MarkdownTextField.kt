@@ -22,6 +22,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ListAlt
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material3.DropdownMenu
@@ -56,9 +57,11 @@ import androidx.compose.ui.unit.isUnspecified
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicArtemisTextField
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.toPainter
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteType
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.LocalReplyAutoCompleteHintProvider
 import kotlinx.coroutines.launch
 
 
@@ -342,6 +345,13 @@ private fun TaggingDropdownMenu(
     showAutoCompletePopup: ((AutoCompleteType) -> Unit)?,
     onDismissRequest: () -> Unit,
 ) {
+    val isFaqEnabled = LocalReplyAutoCompleteHintProvider.current.isFaqEnabled
+
+    val onClick: (AutoCompleteType) -> Unit = { autoCompleteType ->
+        showAutoCompletePopup?.invoke(autoCompleteType)
+        onDismissRequest()
+    }
+
     DropdownMenu(
         expanded = isTaggingDropdownExpanded,
         onDismissRequest = onDismissRequest,
@@ -349,63 +359,60 @@ private fun TaggingDropdownMenu(
             focusable = false
         )
     ) {
-        DropdownMenuItem(
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.tag),
-                    contentDescription = null
-                )
-            },
-            text = { Text(text = stringResource(R.string.reply_format_mention_members)) },
-            onClick = {
-                onDismissRequest()
-                showAutoCompletePopup?.invoke(AutoCompleteType.USERS)
-            }
+        TaggingDropDownMenuItem(
+            iconPainter = painterResource(id = R.drawable.tag),
+            text = stringResource(R.string.reply_format_mention_members),
+            onClick = { onClick(AutoCompleteType.USERS) }
         )
 
-        DropdownMenuItem(
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Tag,
-                    contentDescription = null
-                )
-            },
-            text = { Text(stringResource(R.string.reply_format_mention_channels)) },
-            onClick = {
-                onDismissRequest()
-                showAutoCompletePopup?.invoke(AutoCompleteType.CHANNELS)
-            }
+        TaggingDropDownMenuItem(
+            iconPainter = Icons.Default.Tag.toPainter(),
+            text = stringResource(R.string.reply_format_mention_channels),
+            onClick = { onClick(AutoCompleteType.CHANNELS) }
         )
 
-        DropdownMenuItem(
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ListAlt,
-                    contentDescription = null
-                )
-            },
-            text = { Text(stringResource(R.string.reply_format_mention_exercises)) },
-            onClick = {
-                onDismissRequest()
-                showAutoCompletePopup?.invoke(AutoCompleteType.EXERCISES)
-            }
+        TaggingDropDownMenuItem(
+            iconPainter = Icons.AutoMirrored.Filled.ListAlt.toPainter(),
+            text = stringResource(R.string.reply_format_mention_exercises),
+            onClick = { onClick(AutoCompleteType.EXERCISES) }
         )
 
-        DropdownMenuItem(
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.School,
-                    contentDescription = null
-                )
-            },
-            text = { Text(stringResource(R.string.reply_format_mention_lectures)) },
-            onClick = {
-                onDismissRequest()
-                showAutoCompletePopup?.invoke(AutoCompleteType.LECTURES)
-            }
+        TaggingDropDownMenuItem(
+            iconPainter = Icons.Default.School.toPainter(),
+            text = stringResource(R.string.reply_format_mention_lectures),
+            onClick = { onClick(AutoCompleteType.LECTURES) }
         )
+
+        if (isFaqEnabled) {
+            TaggingDropDownMenuItem(
+                iconPainter = Icons.Default.QuestionMark.toPainter(),
+                text = stringResource(R.string.reply_format_mention_faqs),
+                onClick = { onClick(AutoCompleteType.FAQS) }
+            )
+        }
     }
 }
+
+@Composable
+private fun TaggingDropDownMenuItem(
+    modifier: Modifier = Modifier,
+    iconPainter: Painter,
+    text: String,
+    onClick: () -> Unit
+) {
+    DropdownMenuItem(
+        modifier = modifier,
+        leadingIcon = {
+            Icon(
+                painter = iconPainter,
+                contentDescription = text
+            )
+        },
+        text = { Text(text) },
+        onClick = onClick
+    )
+}
+
 
 @Composable
 private fun PreviewEditRow(

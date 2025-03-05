@@ -6,11 +6,11 @@ import kotlinx.coroutines.flow.Flow
 
 interface FaqRepository {
 
-    suspend fun getFaqs(
+    fun getFaqs(
         courseId: Long,
     ): Flow<DataState<List<Faq>>>
 
-    suspend fun getFaq(
+    fun getFaq(
         courseId: Long,
         faqId: Long,
     ): Flow<DataState<Faq>>

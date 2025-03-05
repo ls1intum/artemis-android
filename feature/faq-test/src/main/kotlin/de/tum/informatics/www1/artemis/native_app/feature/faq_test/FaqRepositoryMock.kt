@@ -10,11 +10,11 @@ class FaqRepositoryMock(
     var faqs: List<Faq> = emptyList()
 ) : FaqRepository {
 
-    override suspend fun getFaqs(courseId: Long): Flow<DataState<List<Faq>>> {
+    override fun getFaqs(courseId: Long): Flow<DataState<List<Faq>>> {
         return flowOf(DataState.Success(faqs))
     }
 
-    override suspend fun getFaq(courseId: Long, faqId: Long): Flow<DataState<Faq>> {
+    override fun getFaq(courseId: Long, faqId: Long): Flow<DataState<Faq>> {
         val faq: Faq? = faqs.firstOrNull { it.id == faqId }
         val dataState = if (faq != null) {
             DataState.Success(faq)
