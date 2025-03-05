@@ -8,6 +8,9 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.defaults.Artemi
 
 abstract class ArtemisDeeplink {
     abstract val path: String
+    /**
+     * The type of the deeplink. This determines on which hosts the deeplink is supported.
+     */
     abstract val type: Type
 
     fun generateLinks(

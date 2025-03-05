@@ -10,6 +10,7 @@ import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.QuizSubmission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.DragAndDropSubmittedAnswer
@@ -47,7 +48,7 @@ internal abstract class QuizParticipationBaseE2eTest(quizType: QuizType.Workable
             createExerciseFormBodyWithPng(
                 accessToken = getAdminAccessToken(),
                 courseId = courseId,
-                endpoint = "quiz-exercises",
+                pathSegments = Api.Quiz.QuizExercises.path,
                 pngByteArray = getBackgroundImageBytes(),
                 pngFilePath = filePath,
                 creator = { name, courseId ->

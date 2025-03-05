@@ -14,6 +14,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.test.platform.app.InstrumentationRegistry
 import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.test.awaitFirstSuccess
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
@@ -114,7 +115,7 @@ class LectureE2eTest : BaseComposeTest() {
             createExercise(
                 getAdminAccessToken(),
                 course.id!!,
-                endpoint = "text-exercises",
+                pathSegments = Api.Text.TextExercises.path,
                 creator = ::createTextExercise
             )
         }

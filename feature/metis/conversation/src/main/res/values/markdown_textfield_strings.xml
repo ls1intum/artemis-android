@@ -7,6 +7,7 @@
     <string name="markdown_textfield_autocomplete_category_exercises">Exercises</string>
     <string name="markdown_textfield_autocomplete_category_lectures">Lectures</string>
     <string name="markdown_textfield_autocomplete_category_channels">Channels</string>
+    <string name="markdown_textfield_autocomplete_category_faqs">FAQs</string>
 
     <string name="markdown_textfield_unsupported_warning">Unsupported file type selected.</string>
 </resources>

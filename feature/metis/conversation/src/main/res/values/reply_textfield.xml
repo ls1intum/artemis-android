@@ -10,4 +10,5 @@
     <string name="reply_format_mention_channels">Channels</string>
     <string name="reply_format_mention_exercises">Exercises</string>
     <string name="reply_format_mention_lectures">Lectures</string>
+    <string name="reply_format_mention_faqs">FAQs</string>
 </resources>

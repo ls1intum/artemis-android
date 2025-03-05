@@ -4,6 +4,7 @@ import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.Ar
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.ArtemisContextBasedServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.network.ChannelService
@@ -27,8 +28,7 @@ class ChannelServiceImpl(
         return getRequest {
             url {
                 appendPathSegments(
-                    "api",
-                    "courses",
+                    *Api.Communication.Courses.path,
                     courseId.toString(),
                     "channels",
                     "overview"
@@ -44,8 +44,7 @@ class ChannelServiceImpl(
         return getRequest<List<StandalonePost>> {
             url {
                 appendPathSegments(
-                    "api",
-                    "courses",
+                    *Api.Communication.Courses.path,
                     courseId.toString(),
                     "messages"
                 )
@@ -72,8 +71,7 @@ class ChannelServiceImpl(
         return getRequest {
             url {
                 appendPathSegments(
-                    "api",
-                    "courses",
+                    *Api.Communication.Courses.path,
                     courseId.toString(),
                     "exercises",
                     exerciseId.toString(),
@@ -90,8 +88,7 @@ class ChannelServiceImpl(
         return getRequest {
             url {
                 appendPathSegments(
-                    "api",
-                    "courses",
+                    *Api.Communication.Courses.path,
                     courseId.toString(),
                     "lectures",
                     lectureId.toString(),
@@ -109,8 +106,7 @@ class ChannelServiceImpl(
             ktorProvider.ktorClient.post(serverUrl()) {
                 url {
                     appendPathSegments(
-                        "api",
-                        "courses",
+                        *Api.Communication.Courses.path,
                         courseId.toString(),
                         "channels",
                         conversationId.toString(),

@@ -4,11 +4,12 @@ import androidx.annotation.DrawableRes
 import de.tum.informatics.www1.artemis.native_app.core.common.R
 import de.tum.informatics.www1.artemis.native_app.core.common.markdown.ArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.common.markdown.MarkdownUrlUtil
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ArtemisDeeplink
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CommunicationDeeplinks
 
 const val TYPE_ICON_RESOURCE_PATH = "android.resource://de.tum.cit.aet.artemis/"
-const val ATTACHMENTS_ENDPOINT = "/api/files/attachments/"
+val ATTACHMENTS_ENDPOINT = "/${Api.Core.getJointPath()}/files/attachments/"
 
 class PostArtemisMarkdownTransformer(val serverUrl: String, val courseId: Long) : ArtemisMarkdownTransformer() {
 
@@ -19,7 +20,7 @@ class PostArtemisMarkdownTransformer(val serverUrl: String, val courseId: Long) 
         "[$fileName]($serverUrl$ATTACHMENTS_ENDPOINT$filePath)"
 
     override fun transformExerciseMarkdown(title: String, url: String, type: String): String {
-        val namedLink = "[$title](${ArtemisDeeplink.IN_APP_HOST}$url)"
+        val namedLink = createInAppLinkWithTitle(title, url)
         val typeIcon =  when (type) {
             "text" -> R.drawable.font_link_icon
             "quiz" -> R.drawable.check_double_link_icon
@@ -67,5 +68,14 @@ class PostArtemisMarkdownTransformer(val serverUrl: String, val courseId: Long) 
         filePath: String
     ): String {
         return if (isImage) "![$fileName]($serverUrl$filePath)" else "[$fileName]($serverUrl$filePath)"
+    }
+
+    override fun transformFaqMarkdown(title: String, url: String): String {
+        val namedLink = createInAppLinkWithTitle(title, url)
+        return "${createFileTypeIconMarkdown(R.drawable.faq_link_icon)}  $namedLink"
+    }
+
+    private fun createInAppLinkWithTitle(title: String, url: String): String {
+        return "[$title](${ArtemisDeeplink.IN_APP_HOST}$url)"
     }
 }

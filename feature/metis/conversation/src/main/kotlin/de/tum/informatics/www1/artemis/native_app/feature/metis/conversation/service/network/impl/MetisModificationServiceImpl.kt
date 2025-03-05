@@ -4,6 +4,7 @@ import android.util.Log
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.FileUploadResponse
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
@@ -263,13 +264,23 @@ internal class MetisModificationServiceImpl(
             val courseId = context.courseId.toString()
             val conversationId = context.conversationId.toString()
             val response =  ktorProvider.ktorClient.submitFormWithBinaryData(
-                url = serverUrl +"api/files/courses/$courseId/conversations/$conversationId",
                 formData = formData {
                     append("file", fileBytes, Headers.build {
                         append(HttpHeaders.ContentDisposition, "filename=$fileName")
                     })
                 }
             ) {
+                url {
+                    appendPathSegments(
+                        *Api.Core.path,
+                        "files",
+                        "courses",
+                        courseId,
+                        "conversations",
+                        conversationId
+                    )
+                }
+
                 cookieAuth(authToken)
             }
 
