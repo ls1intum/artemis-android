@@ -67,7 +67,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 
 internal const val TEST_TAG_POST_CONTEXT_BOTTOM_SHEET = "TEST_TAG_POST_CONTEXT_BOTTOM_SHEET"
 
-internal val predefinedEmojiIds = listOf("heavy_plus_sign", "rocket", "tada", "recycle")
+internal val predefinedEmojiIds = listOf("joy", "+1", "heavy_plus_sign", "rocket")
 
 @Composable
 internal fun PostContextBottomSheet(
