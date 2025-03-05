@@ -1,11 +1,10 @@
 package de.tum.informatics.www1.artemis.native_app.feature.courseview.ui
 
 import androidx.lifecycle.viewModelScope
-import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseExerciseService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.performAutoReloadingNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
@@ -22,7 +21,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.datetime.DateTimeUnit
@@ -40,7 +38,7 @@ import kotlin.coroutines.EmptyCoroutineContext
 
 class CourseViewModel(
     private val courseId: Long,
-    private val courseService: CourseService,
+    courseService: CourseService,
     private val liveParticipationService: LiveParticipationService,
     courseExerciseService: CourseExerciseService,
     networkStatusProvider: NetworkStatusProvider,
@@ -55,16 +53,13 @@ class CourseViewModel(
     private val _lectureQuery = MutableStateFlow("")
     val lectureQuery: StateFlow<String> = _lectureQuery
 
-    val course: StateFlow<DataState<Course>> =
-        flatMapLatest(
-            courseService.onReloadRequired,
-            requestReloadCourse.onStart { emit(Unit) }
-        ) { _, _ ->
-            retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                courseService
-                    .getCourse(courseId)
-                    .bind { it.course }
-            }
+    val course: StateFlow<DataState<Course>> = courseService
+        .performAutoReloadingNetworkCall(
+            networkStatusProvider = networkStatusProvider,
+            manualReloadFlow = requestReloadCourse
+        ) {
+            getCourse(courseId)
+                .bind { it.course }
         }
             .flowOn(coroutineContext)
             .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())

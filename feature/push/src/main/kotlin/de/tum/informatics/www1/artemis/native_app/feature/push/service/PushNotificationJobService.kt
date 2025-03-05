@@ -20,9 +20,5 @@ interface PushNotificationJobService {
      * Schedule a task that will tell the server that the user with the specified auth token no longer wants to receive
      * push notifications.
      */
-    fun scheduleUnsubscribeFromNotifications(
-        serverUrl: String,
-        authToken: String,
-        firebaseToken: String
-    )
+    suspend fun scheduleUnsubscribeFromNotifications(firebaseToken: String)
 }

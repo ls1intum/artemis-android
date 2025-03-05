@@ -119,7 +119,7 @@ internal fun LectureScreen(
 
     val lectureDataState by viewModel.lectureDataState.collectAsState()
     val serverUrl by viewModel.serverUrl.collectAsState()
-    val authToken by viewModel.authToken.collectAsState()
+    val artemisContext by viewModel.artemisContext.collectAsState()
 
     val lectureTitle = lectureDataState.bind<String?> { it.title }.orElse(null)
 
@@ -226,8 +226,7 @@ internal fun LectureScreen(
 
                 LinkBottomSheet(
                     modifier = Modifier.fillMaxSize(),
-                    serverUrl = serverUrl,
-                    authToken = authToken,
+                    artemisContext = artemisContext,
                     link = formattedUrl,
                     fileName = currentPendingOpenFileAttachment.name.orEmpty(),
                     state = LinkBottomSheetState.PDFVIEWSTATE,

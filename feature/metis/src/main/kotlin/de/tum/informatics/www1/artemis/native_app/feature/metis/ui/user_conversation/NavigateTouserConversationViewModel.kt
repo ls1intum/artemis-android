@@ -7,6 +7,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.join
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.performAutoReloadingNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -35,14 +36,13 @@ internal class NavigateToUserConversationViewModel(
 
     private val requestReload = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
-    private val accountData: StateFlow<DataState<Account>> = flatMapLatest(
-        accountDataService.onReloadRequired,
-        requestReload.onStart { emit(Unit) }
-    ) { _, _ ->
-        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-            accountDataService.getAccountData()
+    private val accountData: StateFlow<DataState<Account>> = accountDataService
+        .performAutoReloadingNetworkCall(
+            networkStatusProvider = networkStatusProvider,
+            manualReloadFlow = requestReload,
+        ) {
+            getAccountData()
         }
-    }
         .stateIn(viewModelScope, SharingStarted.Eagerly)
 
     private val existingConversations: StateFlow<DataState<List<Conversation>>> = flatMapLatest(

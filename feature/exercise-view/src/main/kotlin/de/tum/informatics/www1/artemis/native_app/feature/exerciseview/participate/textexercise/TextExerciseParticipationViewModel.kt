@@ -2,23 +2,20 @@ package de.tum.informatics.www1.artemis.native_app.feature.exerciseview.particip
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryNetworkCall
-import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
-import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
+import de.tum.informatics.www1.artemis.native_app.core.data.service.performAutoReloadingNetworkCall
+import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.SubmissionType
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.TextSubmission
-import de.tum.informatics.www1.artemis.native_app.core.ui.authTokenStateFlow
-import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.service.TextEditorService
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.service.TextSubmissionService
 import kotlinx.coroutines.delay
@@ -39,6 +36,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import kotlinx.datetime.Clock
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -48,10 +46,9 @@ internal class TextExerciseParticipationViewModel(
     private val exerciseId: Long,
     private val participationId: Long,
     private val textSubmissionService: TextSubmissionService,
-    private val serverConfigurationService: ServerConfigurationService,
-    private val accountService: AccountService,
-    private val textEditorService: TextEditorService,
-    private val networkStatusProvider: NetworkStatusProvider,
+    val artemisContextProvider: ArtemisContextProvider,
+    textEditorService: TextEditorService,
+    networkStatusProvider: NetworkStatusProvider,
     coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : ViewModel() {
 
@@ -60,18 +57,10 @@ internal class TextExerciseParticipationViewModel(
     }
 
     private val initialParticipationDataState: StateFlow<DataState<Participation>> =
-        transformLatest(
-            serverConfigurationService.serverUrl,
-            accountService.authToken
-        ) { serverUrl, authToken ->
-            emitAll(
-                retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                    textEditorService.getParticipation(participationId, serverUrl, authToken)
-                }
-            )
+        textEditorService.performAutoReloadingNetworkCall(networkStatusProvider) {
+            getParticipation(participationId)
         }
-            .flowOn(coroutineContext)
-            .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     val initialParticipation: StateFlow<Participation?> = initialParticipationDataState
         .filterSuccess()
@@ -144,10 +133,6 @@ internal class TextExerciseParticipationViewModel(
         .flowOn(coroutineContext)
         .stateIn(viewModelScope, SharingStarted.Lazily, null)
 
-    val serverUrl = serverUrlStateFlow(serverConfigurationService)
-
-    val authToken = authTokenStateFlow(accountService)
-
     init {
         viewModelScope.launch(coroutineContext) {
             updateText(serverText.first())
@@ -170,14 +155,6 @@ internal class TextExerciseParticipationViewModel(
         initialSubmission: TextSubmission,
         text: String
     ): NetworkResponse<TextSubmission> {
-        val serverUrl = serverConfigurationService.serverUrl.first()
-        val authToken = when (val authData = accountService.authenticationData.first()) {
-            is AccountService.AuthenticationData.LoggedIn -> authData.authToken
-            AccountService.AuthenticationData.NotLoggedIn -> return NetworkResponse.Failure(
-                RuntimeException()
-            )
-        }
-
         return retryNetworkCall {
             textSubmissionService.update(
                 textSubmission = TextSubmission(
@@ -188,9 +165,7 @@ internal class TextExerciseParticipationViewModel(
                     text = text,
                     submissionType = SubmissionType.MANUAL
                 ),
-                exerciseId = exerciseId,
-                serverUrl = serverUrl,
-                authToken = authToken,
+                exerciseId = exerciseId
             )
         }
     }
