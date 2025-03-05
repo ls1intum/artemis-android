@@ -35,6 +35,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisPostListHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.testTagForPost
@@ -63,6 +64,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visibleme
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleStandalonePostDetails
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.flow.StateFlow
 import org.koin.compose.koinInject
 
 internal const val TEST_TAG_THREAD_LIST = "TEST_TAG_THREAD_LIST"
@@ -147,6 +149,8 @@ internal fun MetisThreadUi(
             onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
             onRequestReload = viewModel::requestReload,
             onRequestRetrySend = viewModel::retryCreateReply,
+            generateLinkPreviews = viewModel::generateLinkPreviews,
+            onRemoveLinkPreview = viewModel::removeLinkPreview,
             onFileSelect = { uri, context ->
                 viewModel.onFileSelected(uri, context)
             }
@@ -166,6 +170,8 @@ internal fun MetisThreadUi(
     isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     emojiService: EmojiService,
     initialReplyTextProvider: InitialReplyTextProvider,
+    generateLinkPreviews: (String) -> StateFlow<List<LinkPreview>>,
+    onRemoveLinkPreview: (LinkPreview, IBasePost, IStandalonePost?) -> Unit,
     onCreatePost: () -> Deferred<MetisModificationFailure?>,
     onEditPost: (IBasePost, String) -> Deferred<MetisModificationFailure?>,
     onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure?>)?,
@@ -233,6 +239,8 @@ internal fun MetisThreadUi(
                                 onRequestResolve = onResolvePostDelegate,
                                 onRequestPin = onPinPostDelegate,
                                 onRequestSave = onSavePostDelegate,
+                                generateLinkPreviews = generateLinkPreviews,
+                                onRemoveLinkPreview = onRemoveLinkPreview,
                                 state = listState,
                                 onRequestRetrySend = onRequestRetrySend
                             )
@@ -272,6 +280,8 @@ private fun PostAndRepliesList(
     onRequestResolve: (IBasePost) -> Unit,
     onRequestPin: (IBasePost) -> Unit,
     onRequestSave: (IBasePost) -> Unit,
+    generateLinkPreviews: (String) -> StateFlow<List<LinkPreview>>,
+    onRemoveLinkPreview: (LinkPreview, IBasePost, IStandalonePost?) -> Unit,
     onRequestReactWithEmoji: (IBasePost, emojiId: String, create: Boolean) -> Unit,
     onRequestRetrySend: (clientSidePostId: String, content: String) -> Unit
 ) {
@@ -310,6 +320,9 @@ private fun PostAndRepliesList(
     ) {
         item {
             val postActions = rememberPostActions(post)
+            val linkPreviews by remember(post.content) {
+                generateLinkPreviews(post.content.orEmpty())
+            }.collectAsState()
 
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -321,6 +334,10 @@ private fun PostAndRepliesList(
                     post = post,
                     postItemViewType = PostItemViewType.ThreadContextPostItem,
                     postActions = postActions,
+                    linkPreviews = linkPreviews,
+                    onRemoveLinkPreview = { linkPreview ->
+                        onRemoveLinkPreview(linkPreview, post, null)
+                    },
                     isMarkedAsDeleteList = isMarkedAsDeleteList,
                     displayHeader = true,
                     joinedItemType = PostItemViewJoinedType.PARENT,
@@ -343,6 +360,10 @@ private fun PostAndRepliesList(
             post.orderedAnswerPostings,
             key = { index, post -> post.clientPostId ?: index }) { index, answerPost ->
             val postActions = rememberPostActions(answerPost)
+            val answerPostLinkPreviews by remember(answerPost.content) {
+                generateLinkPreviews(answerPost.content.orEmpty())
+            }.collectAsState()
+
 
             PostWithBottomSheet(
                 modifier = Modifier
@@ -350,6 +371,10 @@ private fun PostAndRepliesList(
                     .testTag(testTagForAnswerPost(answerPost.clientPostId)),
                 post = answerPost,
                 postActions = postActions,
+                linkPreviews = answerPostLinkPreviews,
+                onRemoveLinkPreview = { linkPreview ->
+                    onRemoveLinkPreview(linkPreview, answerPost, post as? IStandalonePost)
+                },
                 isMarkedAsDeleteList = isMarkedAsDeleteList,
                 postItemViewType = PostItemViewType.ThreadAnswerItem,
                 clientId = clientId,

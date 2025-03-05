@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.core.data.service.network.imp
 
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.ArtemisContextBasedServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ParticipationService
@@ -15,7 +16,7 @@ internal class ParticipationServiceImpl(
     override suspend fun findParticipation(exerciseId: Long): NetworkResponse<Participation> {
         return getRequest {
             url {
-                appendPathSegments("api", "exercises", exerciseId.toString(), "participation")
+                appendPathSegments(*Api.Exercise.Exercises.path, exerciseId.toString(), "participation")
             }
         }
     }
