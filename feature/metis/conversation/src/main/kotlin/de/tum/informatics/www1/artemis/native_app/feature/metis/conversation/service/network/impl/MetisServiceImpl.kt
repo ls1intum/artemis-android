@@ -3,7 +3,9 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.se
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.RESOURCE_PATH_SEGMENTS
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
@@ -15,10 +17,18 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.http.appendPathSegments
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
 
 internal class MetisServiceImpl(
     private val ktorProvider: KtorProvider,
 ) : MetisService {
+
+    private val json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+    }
 
     override suspend fun getPosts(
         standalonePostsContext: MetisService.StandalonePostsContext,
@@ -141,6 +151,28 @@ internal class MetisServiceImpl(
 
                 return NetworkResponse.Response(posts.data.first())
             }
+        }
+    }
+
+    override suspend fun fetchLinkPreview(
+        url: String,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<LinkPreview?> {
+        return performNetworkCall {
+            runCatching {
+                val response: JsonObject = ktorProvider.ktorClient.get(serverUrl) {
+                    url {
+                        appendPathSegments(*Api.Communication.path, "link-preview")
+                    }
+                    parameter("url", url)
+                    cookieAuth(authToken)
+                }.body()
+
+                // For some reason, the server sometimes returns an empty response.
+                if (response.jsonObject.isEmpty()) null
+                else json.decodeFromJsonElement(LinkPreview.serializer(), response)
+            }.getOrNull()
         }
     }
 }

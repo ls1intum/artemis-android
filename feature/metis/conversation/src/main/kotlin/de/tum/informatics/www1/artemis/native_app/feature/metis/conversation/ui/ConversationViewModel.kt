@@ -18,24 +18,11 @@ import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseService
-import de.tum.informatics.www1.artemis.native_app.core.data.service.performAutoReloadingNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
-import de.tum.informatics.www1.artemis.native_app.core.model.Course
-import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
-import de.tum.informatics.www1.artemis.native_app.core.model.account.isAtLeastTutorInCourse
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.FileUploadExercise
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ModelingExercise
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExercise
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.UnknownExercise
-import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ExerciseDeeplinks
-import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.LectureDeeplinks
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.getExerciseTypeIconId
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.PostArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
@@ -45,6 +32,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.asMetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.FileValidationConstants.isImage
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.Link
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.SavedPostService
@@ -52,6 +41,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.ReplyTextStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ConversationChatListUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.util.LinkPreviewUtil
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompletionUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.ConversationThreadUseCase
@@ -84,6 +74,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -93,6 +84,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -127,7 +119,7 @@ internal open class ConversationViewModel(
     private val createPostService: CreatePostService,
     faqRepository: FaqRepository,
     accountDataService: AccountDataService,
-    metisService: MetisService,
+    private val metisService: MetisService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : MetisViewModel(
     courseService,
@@ -538,6 +530,56 @@ internal open class ConversationViewModel(
             )
                 .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
         }
+    }
+
+    fun removeLinkPreview(
+        linkPreview: LinkPreview,
+        post: IBasePost,
+        parentPost: IStandalonePost?
+    ): Deferred<MetisModificationFailure?> {
+        val newContent = LinkPreviewUtil.removeLinkPreview(post.content.orEmpty(), linkPreview.url)
+        return when (post) {
+            is IStandalonePost -> editPost(post, newContent)
+            is AnswerPostPojo -> {
+                parentPost?.let { editAnswerPost(it, post, newContent) } ?: throw IllegalArgumentException()
+            }
+            else -> throw IllegalArgumentException()
+        }
+    }
+
+    fun generateLinkPreviews(postContent: String): StateFlow<List<LinkPreview>> =
+        combine(
+            accountService.authToken,
+            serverConfigurationService.serverUrl
+        ) { authToken, serverUrl ->
+            val links = LinkPreviewUtil.generatePreviewableLinks(postContent)
+                .filter { it.isLinkPreviewRemoved != true }
+                .take(LinkPreviewUtil.MAX_LINK_PREVIEWS_PER_MESSAGE)
+
+            val previews = links.map { link ->
+                viewModelScope.async {
+                    fetchPreview(link, authToken, serverUrl)
+                }
+            }.awaitAll().filterNotNull()
+            previews
+        }.stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, emptyList())
+
+    private suspend fun fetchPreview(
+        link: Link,
+        authToken: String,
+        serverUrl: String
+    ): LinkPreview? {
+        return retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+            metisService.fetchLinkPreview(
+                url = link.value,
+                authToken = authToken,
+                serverUrl = serverUrl
+            ).bind { preview ->
+                preview?.takeIf { it.isValid() }?.apply {
+                    shouldPreviewBeShown = true
+                }
+            }
+        }.filterSuccess().firstOrNull()
     }
 
     init {
