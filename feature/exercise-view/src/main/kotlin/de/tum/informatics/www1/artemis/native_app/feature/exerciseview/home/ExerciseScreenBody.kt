@@ -5,8 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.HelpCenter
 import androidx.compose.material.icons.filled.Create
-import androidx.compose.material.icons.filled.HelpCenter
 import androidx.compose.material.icons.filled.ViewHeadline
 import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
@@ -18,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import com.google.accompanist.web.WebViewState
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
@@ -42,8 +43,7 @@ internal fun ExerciseScreenBody(
     displayCommunicationOnSide: Boolean,
     navController: NavController,
     metisContext: MetisContext?,
-    serverUrl: String,
-    authToken: String,
+    artemisContext: ArtemisContext,
     actions: ExerciseActions,
     webViewState: WebViewState?,
     setWebView: (WebView) -> Unit,
@@ -70,8 +70,7 @@ internal fun ExerciseScreenBody(
                         setWebView = setWebView,
                         webView = webView,
                         actions = actions,
-                        serverUrl = serverUrl,
-                        authToken = authToken
+                        artemisContext = artemisContext
                     )
                 }
 
@@ -175,7 +174,7 @@ private fun BodyWithTabs(
 
             DefaultTab(
                 index = 1,
-                imageVector = Icons.Default.HelpCenter,
+                imageVector = Icons.AutoMirrored.Filled.HelpCenter,
                 textRes =  R.string.exercise_view_tab_qna,
                 selectedTabIndex =  selectedTabIndex,
                 updateSelectedTabIndex = onUpdateSelectedTabIndex
