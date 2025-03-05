@@ -6,12 +6,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material.icons.automirrored.filled.ArrowRight
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -23,6 +23,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
@@ -78,10 +79,6 @@ internal fun <T> TimeFrameItemsLazyColumn(
                     itemContent(Modifier.animateItem(), item)
                 }
             }
-
-            if (index < timeFrameGroup.size - 1) {
-                item { HorizontalDivider() }
-            }
         }
     }
 }
@@ -118,23 +115,29 @@ private fun <T> TimeFrameItemsSectionHeader(
     }
 
     Row(
-        modifier = modifier,
+        modifier = modifier.padding(vertical = Spacings.TimeFrameItems.small),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = Spacings.TimeFrameItems.small),
             text = groupTitle,
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
         )
 
-        val icon = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore
         val contentDescription =
             stringResource(
                 id = if (expanded) R.string.course_ui_list_expand_button_less_content_info
                 else R.string.course_ui_list_expand_button_more_content_info
             )
 
-        Icon(icon, contentDescription)
+        Icon(
+            imageVector = if (expanded) Icons.Default.ArrowDropDown else Icons.AutoMirrored.Filled.ArrowRight,
+            contentDescription = contentDescription,
+            modifier = Modifier.size(Spacings.TimeFrameItems.iconSize),
+            tint = MaterialTheme.colorScheme.primary
+        )
     }
 }
 
