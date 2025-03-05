@@ -253,7 +253,7 @@ fun PostItemMainContent(
     isDeleting: Boolean = false,
     isRoleBadgeVisible: Boolean = true,
     postStatus: CreatePostService.Status = CreatePostService.Status.FINISHED,
-    chatListItem: ChatListItem.PostItem? = null, // TODO: ADD support for eg. saved posts
+    chatListItem: ChatListItem.PostItem? = null, // TODO: ADD support for eg. saved posts (https://github.com/ls1intum/artemis-android/issues/459)
     displayHeader: Boolean = true,
     onClick: () -> Unit,
     onLongClick: () -> Unit,

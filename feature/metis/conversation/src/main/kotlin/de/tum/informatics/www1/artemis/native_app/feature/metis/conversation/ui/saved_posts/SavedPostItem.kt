@@ -61,6 +61,8 @@ fun SavedPostItem(
         trailingCardContent = trailingCardContent
     ) {
 
+        // TODO: A ChatListItem.PostItem should be passed here to support forwarded messages
+        // https://github.com/ls1intum/artemis-android/issues/459
         PostItemMainContent(
             modifier = Modifier.wrapContentHeight(unbounded = true),
             post = savedPost,
