@@ -64,7 +64,7 @@ private fun ForwardedMessageItem(
     forwardedPost: IBasePost?,
 ) {
     val linkOpener = LocalLinkOpener.current
-    val (sourceConversationId, sourceChannelText) = resolveConversation(forwardedPost)
+    val (sourceConversationId, sourceChannelText, conversationType) = resolveConversation(forwardedPost)
 
     Row(
         modifier = modifier.height(IntrinsicSize.Min),
@@ -102,15 +102,23 @@ private fun ForwardedMessageItem(
 
                 Spacer(Modifier.width(2.dp))
 
+                val isConversationPublic = conversationType == ConversationType.CHANNEL
+                val isConversationClickable = isConversationPublic && sourceConversationId != null && forwardedPost != null
                 Text(
-                    modifier = Modifier.clickable {
-                        linkOpener.openLink(CommunicationDeeplinks.ToConversation.inAppLink(
-                            courseId = courseId,
-                            conversationId = sourceConversationId ?: return@clickable
-                        ))
+                    modifier = Modifier.apply {
+                        if (isConversationClickable) {
+                            clickable {
+                                linkOpener.openLink(
+                                    CommunicationDeeplinks.ToConversation.inAppLink(
+                                        courseId = courseId,
+                                        conversationId = sourceConversationId ?: return@clickable
+                                    )
+                                )
+                            }
+                        }
                     },
                     text = sourceChannelText,
-                    color = if (forwardedPost != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                    color = if (isConversationClickable) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
@@ -137,11 +145,11 @@ private fun ForwardedMessageItem(
 }
 
 @Composable
-private fun resolveConversation(forwardedPost: IBasePost?): Pair<Long?, String> {
+private fun resolveConversation(forwardedPost: IBasePost?): Triple<Long?, String, ConversationType> {
     val conversation = when (forwardedPost) {
         is StandalonePost -> forwardedPost.conversation
         is AnswerPost -> forwardedPost.post?.conversation
-        else -> return null to stringResource(R.string.post_forwarded_from_default)
+        else -> return Triple(null, stringResource(R.string.post_forwarded_from_default), ConversationType.UNKNOWN)
     }
 
     val isFromThread = forwardedPost is IAnswerPost
@@ -150,16 +158,23 @@ private fun resolveConversation(forwardedPost: IBasePost?): Pair<Long?, String> 
     return when (conversation) {
         is OneToOneChat -> {
             val message = if (isFromThread) R.string.post_forwarded_from_a_thread else R.string.post_forwarded_from_a_direct_message
-            conversationId to stringResource(message, stringResource(R.string.post_forwarded_from_a_direct_message))
+           Triple(conversationId, stringResource(message, stringResource(R.string.post_forwarded_from_a_direct_message)), ConversationType.ONE_TO_ONE)
         }
         is GroupChat -> {
             val message = if (isFromThread) R.string.post_forwarded_from_a_thread else R.string.post_forwarded_from_a_group_chat
-            conversationId to stringResource(message, stringResource(R.string.post_forwarded_from_a_group_chat))
+            Triple(conversationId, stringResource(message, stringResource(R.string.post_forwarded_from_a_group_chat)), ConversationType.GROUP)
         }
         else -> {
             val conversationName = conversation?.humanReadableName?.let { "#$it" } ?: stringResource(R.string.post_forwarded_from_default)
-            if (isFromThread) conversationId to stringResource(R.string.post_forwarded_from_a_thread, conversationName)
-            else conversationId to conversationName
+            if (isFromThread) Triple(conversationId, stringResource(R.string.post_forwarded_from_a_thread, conversationName), ConversationType.CHANNEL)
+            else Triple(conversationId, conversationName, ConversationType.CHANNEL)
         }
     }
+}
+
+private enum class ConversationType {
+    ONE_TO_ONE,
+    GROUP,
+    CHANNEL,
+    UNKNOWN
 }
