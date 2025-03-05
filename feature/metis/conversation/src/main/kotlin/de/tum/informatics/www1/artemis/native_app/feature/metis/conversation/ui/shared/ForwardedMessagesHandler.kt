@@ -9,6 +9,13 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.PostingType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 
+/**
+ * Handles forwarded messages and loads their source posts, which are acquired in one common request
+ * and stored in cachedStandardsSourcePosts and cachedAnswerSourcePosts.
+ * Common usage: 1. Extract forwarded messages from a list of posts in [extractForwardedMessages].
+ *               2. Load the forwarded messages for the extracted ids and fetch their source posts in [loadForwardedMessages].
+ *               3. Match the previously loaded source posts to the destination posts in [resolveForwardedMessages].
+ */
 class ForwardedMessagesHandler(
     private val metisService: MetisService,
     private val metisContext: MetisContext,
@@ -20,6 +27,12 @@ class ForwardedMessagesHandler(
     private var cachedStandaloneSourcePosts: Map<Long, List<StandalonePost?>> = mapOf()
     private var cachedAnswerSourcePosts: Map<Long, List<AnswerPost?>> = mapOf()
 
+    /**
+     * A wrapper method to resolve forwarded messages for a given ChatListItem of type PostItem.ThreadItem.
+     * This method is used for the MetisThreadUI only, the logic is handled in [resolveForwardedMessages]
+     *
+     * @param chatListItem The ChatListItem of type PostItem.ThreadItem for which the source posts should be matched.
+     */
     fun resolveForwardedMessagesForThreadPost(chatListItem: ChatListItem.PostItem.ThreadItem): ChatListItem.PostItem.ThreadItem {
         if (chatListItem !is ChatListItem.PostItem.ForwardedMessage) return chatListItem
 
@@ -34,6 +47,12 @@ class ForwardedMessagesHandler(
         }
     }
 
+    /**
+     * A wrapper method to resolve forwarded messages for a given ChatListItem of type PostItem.IndexedItem.
+     * This method is used for the MetisChatList only, the logic is handled in [resolveForwardedMessages]
+     *
+     * @param chatListItem The ChatListItem of type PostItem.IndexedItem for which the source posts should be matched.
+     */
     fun resolveForwardedMessagesForIndexedPost(
         chatListItem: ChatListItem.PostItem.IndexedItem,
     ): ChatListItem.PostItem.IndexedItem {
@@ -42,6 +61,10 @@ class ForwardedMessagesHandler(
         return resolveForwardedMessages(chatListItem as ChatListItem.PostItem.IndexedItem.PostWithForwardedMessage) as ChatListItem.PostItem.IndexedItem.PostWithForwardedMessage
     }
 
+    /**
+     * Matches the previously loaded source posts to a given destination post by comparing the
+     * destination id of the source post with the id of the destination post.
+     */
     private fun resolveForwardedMessages(
         chatListItem: ChatListItem.PostItem
     ): ChatListItem.PostItem.ForwardedMessage {
@@ -56,6 +79,12 @@ class ForwardedMessagesHandler(
         return newChatListItem.copyWithNewForwardedPosts(oldForwardedPosts + forwardedSourcePosts)
     }
 
+    /**
+     * Loads all forwarded messages for the currently available [forwardedPostIds] and fetches the
+     * corresponding source posts by their source ids in [fetchAndCachePosts].
+     *
+     * @param postingType The type of the destination posts for which the forwarded messages should be loaded.
+     */
     suspend fun loadForwardedMessages(postingType: PostingType) {
         metisService.getForwardedMessagesByIds(
             metisContext = metisContext,
@@ -74,6 +103,9 @@ class ForwardedMessagesHandler(
         }
     }
 
+    /**
+     * Extracts all forwarded messages found in loadedPosts and stores their ids in [forwardedPostIds].
+     */
     fun extractForwardedMessages(loadedPosts: List<IBasePost>) {
         loadedPosts.forEach { post ->
             if (post.hasForwardedMessages == true) {
