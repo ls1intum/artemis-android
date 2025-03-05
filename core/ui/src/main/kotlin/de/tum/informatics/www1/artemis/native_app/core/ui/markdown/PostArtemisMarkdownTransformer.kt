@@ -4,11 +4,12 @@ import androidx.annotation.DrawableRes
 import de.tum.informatics.www1.artemis.native_app.core.common.R
 import de.tum.informatics.www1.artemis.native_app.core.common.markdown.ArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.common.markdown.MarkdownUrlUtil
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ArtemisDeeplink
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CommunicationDeeplinks
 
 const val TYPE_ICON_RESOURCE_PATH = "android.resource://de.tum.cit.aet.artemis/"
-const val ATTACHMENTS_ENDPOINT = "/api/files/attachments/"
+val ATTACHMENTS_ENDPOINT = "/${Api.Core.getJointPath()}/files/attachments/"
 
 class PostArtemisMarkdownTransformer(val serverUrl: String, val courseId: Long) : ArtemisMarkdownTransformer() {
 

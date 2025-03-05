@@ -14,6 +14,8 @@ sealed class Api(
     vararg val path: String
 ) {
 
+    fun getJointPath(separator: String = "/"): String = path.joinToString(separator)
+
     // With 8.0.0 API changes:
 
 //    data object Core: Api(api, "core") {
