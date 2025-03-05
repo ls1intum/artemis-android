@@ -167,7 +167,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
         )
     }
 
-    private val forwardedPosts = listOf(
+    val forwardedPosts = listOf(
         posts[2].copy(
             clientPostId = "client-id-forwarded",
             serverPostId = 10101.toLong(),
@@ -234,6 +234,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
         isAbleToPin: Boolean = false,
         isAtLeastTutorInCourse: Boolean = false,
         hasModerationRights: Boolean = false,
+        forwardedPosts: List<IStandalonePost?> = this.forwardedPosts,
         onPinPost: (IStandalonePost) -> Deferred<MetisModificationFailure> = { CompletableDeferred() }
     ) {
         composeTestRule.setContent {
