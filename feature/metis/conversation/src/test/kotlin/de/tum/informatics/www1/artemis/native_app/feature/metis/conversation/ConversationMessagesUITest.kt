@@ -26,6 +26,8 @@ class ConversationMessagesUITest : BaseChatUITest() {
 
     private fun testTagForPost(postId: StandalonePostId?) = "post$postId"
 
+    // ################################# PIN VISIBILITY TESTS #####################################
+
     @Test
     fun `test GIVEN post is not pinned WHEN pinning the post THEN the correct post gets pinned`() {
         var changedPost: IBasePost? = null
@@ -144,6 +146,28 @@ class ConversationMessagesUITest : BaseChatUITest() {
 
         testPinnedLabelVisibility()
     }
+
+    // ########################## FORWARDED POSTS VISIBILITY TESTS ##############################
+
+    @Test
+    fun `test GIVEN the post has a forwarded message THEN the forwarded message is shown below`() {
+        setupChatUi(posts)
+
+    }
+
+    @Test
+    fun `test GIVEN the post has a forwarded message in a thread THEN the forwarded message is shown below`() {
+        setupChatUi(posts)
+
+    }
+
+    @Test
+    fun `test GIVEN the post has a forwarded message with a deleted source post THEN the message deleted indication is shown instead`() {
+        setupChatUi(posts)
+
+    }
+
+    // ##########################################################################################
 
     private fun testPinnedLabelInvisibility() {
         composeTestRule.onNodeWithText(posts[0].content).assertExists()

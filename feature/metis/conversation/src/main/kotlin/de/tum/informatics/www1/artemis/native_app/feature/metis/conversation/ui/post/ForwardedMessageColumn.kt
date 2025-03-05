@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -36,6 +37,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 
+internal const val TEST_TAG_FORWARDED_POST_COLUMN = "TEST_TAG_FORWARDED_POST_COLUMN"
+
+internal fun testTagForForwardedPost(postId: Long?) = "forwarded-post$postId"
+
 @Composable
 fun ForwardedMessageColumn(
     modifier: Modifier,
@@ -45,10 +50,12 @@ fun ForwardedMessageColumn(
     val forwardedPost = chatListItem.forwardedPosts[0]
 
     Column(
-        modifier = modifier,
+        modifier = modifier.testTag(TEST_TAG_FORWARDED_POST_COLUMN),
     ) {
         ForwardedMessageItem(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(testTagForForwardedPost(forwardedPost?.serverPostId)),
             courseId = chatListItem.courseId,
             forwardedPost = forwardedPost,
         )

@@ -163,9 +163,18 @@ abstract class BaseChatUITest : BaseComposeTest() {
             reactions = if (index == 0) reactions else emptyList(),
             displayPriority = DisplayPriority.NONE,
             isSaved = false,
-            hasForwardedMessages = false
+            hasForwardedMessages = index == 1
         )
     }
+
+    private val forwardedPosts = listOf(
+        posts[2].copy(
+            clientPostId = "client-id-forwarded",
+            serverPostId = 10101.toLong(),
+            content = "Post content forwarded",
+            authorName = "author name forwarded"
+        )
+    )
 
     fun setupThreadUi(
         post: IStandalonePost,
@@ -178,6 +187,12 @@ abstract class BaseChatUITest : BaseComposeTest() {
         val threadUseCase = mockk<ConversationThreadUseCase>()
         val testFlow = MutableStateFlow<ChatListItem.PostItem.ThreadItem.Answer?>(null)
         every { threadUseCase.getAnswerChatListItem(any()) } returns testFlow
+
+        val chatListItem = if (post.hasForwardedMessages == true) {
+            ChatListItem.PostItem.ThreadItem.ContextItem.ContextPostWithForwardedMessage(post, forwardedPosts, course.id!!)
+        } else {
+            ChatListItem.PostItem.ThreadItem.ContextItem.ContextPost(post)
+        }
 
         composeTestRule.setContent {
             MetisThreadUi(
@@ -194,7 +209,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                 serverUrl = "",
                 isMarkedAsDeleteList = mutableStateListOf(),
                 emojiService = EmojiServiceStub,
-                chatListContextItem = ChatListItem.PostItem.ThreadItem.ContextItem.ContextPost(post),
+                chatListContextItem = chatListItem,
                 answerChatListItemState = { answer -> threadUseCase.getAnswerChatListItem(answer) },
                 initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
                 onCreatePost = { CompletableDeferred() },
@@ -231,7 +246,18 @@ abstract class BaseChatUITest : BaseComposeTest() {
                     )))
                 }
             ) {
-                val list = posts.map { post -> ChatListItem.PostItem.IndexedItem.Post(post, post.answers.orEmpty()) }.toMutableList()
+                val list = posts.map { post ->
+                    if (post.hasForwardedMessages == true) {
+                        ChatListItem.PostItem.IndexedItem.PostWithForwardedMessage(
+                            post = post,
+                            answers = post.answers.orEmpty(),
+                            forwardedPosts = forwardedPosts,
+                            courseId = course.id!!
+                        )
+                    } else {
+                        ChatListItem.PostItem.IndexedItem.Post(post, post.answers.orEmpty())
+                    }
+                }.toMutableList()
                 MetisChatList(
                     modifier = Modifier.fillMaxSize(),
                     initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
