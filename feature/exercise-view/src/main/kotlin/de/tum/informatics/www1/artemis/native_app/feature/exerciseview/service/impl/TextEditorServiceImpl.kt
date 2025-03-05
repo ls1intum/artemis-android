@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.exerciseview.service.
 
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.ArtemisContextBasedServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
@@ -16,7 +17,7 @@ class TextEditorServiceImpl(
     override suspend fun getParticipation(participationId: Long): NetworkResponse<Participation> {
         return getRequest {
             url {
-                appendPathSegments("api", "text-editor", participationId.toString())
+                appendPathSegments(*Api.Text.path, "text-editor", participationId.toString())
             }
         }
     }

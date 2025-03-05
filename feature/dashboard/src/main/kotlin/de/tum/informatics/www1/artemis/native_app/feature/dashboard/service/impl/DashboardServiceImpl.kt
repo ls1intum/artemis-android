@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.imp
 
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.ArtemisContextBasedServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.model.Dashboard
@@ -19,7 +20,7 @@ internal class DashboardServiceImpl(
     override suspend fun loadDashboard(): NetworkResponse<Dashboard> {
         return getRequest {
             url {
-                appendPathSegments("api", "courses", "for-dashboard")
+                appendPathSegments(*Api.Core.Courses.path, "for-dashboard")
             }
         }
     }

@@ -3,13 +3,13 @@ package de.tum.informatics.www1.artemis.native_app.feature.quiz.service.impl
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.service.QuizExerciseService
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.post
-import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.appendPathSegments
@@ -20,10 +20,6 @@ internal class QuizExerciseServiceImpl(
     private val ktorProvider: KtorProvider
 ) : QuizExerciseService {
 
-    companion object {
-        private val resourcePathSegments = listOf("api", "quiz-exercises")
-    }
-
     override suspend fun findForStudent(
         exerciseId: Long,
         serverUrl: String,
@@ -32,8 +28,7 @@ internal class QuizExerciseServiceImpl(
         return performNetworkCall {
             ktorProvider.ktorClient.get(serverUrl) {
                 url {
-                    appendPathSegments(resourcePathSegments)
-                    appendPathSegments(exerciseId.toString(), "for-student")
+                    appendPathSegments(*Api.Quiz.QuizExercises.path, exerciseId.toString(), "for-student")
                 }
 
                 contentType(ContentType.Application.Json)
@@ -51,8 +46,7 @@ internal class QuizExerciseServiceImpl(
         return performNetworkCall {
             ktorProvider.ktorClient.post(serverUrl) {
                 url {
-                    appendPathSegments(resourcePathSegments)
-                    appendPathSegments(exerciseId.toString(), "join")
+                    appendPathSegments(*Api.Quiz.QuizExercises.path, exerciseId.toString(), "join")
                 }
 
                 setBody(Password(password))

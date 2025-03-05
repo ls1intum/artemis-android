@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.courseregistration.se
 
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.ArtemisContextBasedServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
@@ -17,7 +18,7 @@ internal class CourseRegistrationServiceImpl(
     override suspend fun fetchRegistrableCourses(): NetworkResponse<List<Course>> {
         return getRequest {
             url {
-                appendPathSegments("api", "courses", "for-enrollment")
+                appendPathSegments(*Api.Core.Courses.path, "for-enrollment")
             }
         }
     }
@@ -25,7 +26,7 @@ internal class CourseRegistrationServiceImpl(
     override suspend fun registerInCourse(courseId: Long): NetworkResponse<HttpStatusCode> {
         return postRequest {
             url {
-                appendPathSegments("api", "courses", courseId.toString(), "enroll")
+                appendPathSegments(*Api.Core.Courses.path, courseId.toString(), "enroll")
             }
         }
     }
