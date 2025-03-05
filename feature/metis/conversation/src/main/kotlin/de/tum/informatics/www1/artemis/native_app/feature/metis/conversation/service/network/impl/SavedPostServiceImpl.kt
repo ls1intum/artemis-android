@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.se
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostPostingType
@@ -29,8 +30,7 @@ class SavedPostServiceImpl(
             ktorProvider.ktorClient.get(serverUrl) {
                 url {
                     appendPathSegments(
-                        "api",
-                        "saved-posts",
+                        *Api.Communication.SavedPosts.path,
                         courseId.toString(),
                         status.ordinal.toString()
                     )
@@ -51,8 +51,7 @@ class SavedPostServiceImpl(
             ktorProvider.ktorClient.post(serverUrl) {
                 url {
                     appendPathSegments(
-                        "api",
-                        "saved-posts",
+                        *Api.Communication.SavedPosts.path,
                         postId.toString(),
                         postType.ordinal.toString(),
                     )
@@ -73,8 +72,7 @@ class SavedPostServiceImpl(
             ktorProvider.ktorClient.delete(serverUrl) {
                 url {
                     appendPathSegments(
-                        "api",
-                        "saved-posts",
+                        *Api.Communication.SavedPosts.path,
                         postId.toString(),
                         postType.ordinal.toString(),
                     )
@@ -96,8 +94,7 @@ class SavedPostServiceImpl(
             ktorProvider.ktorClient.put(serverUrl) {
                 url {
                     appendPathSegments(
-                        "api",
-                        "saved-posts",
+                        *Api.Communication.SavedPosts.path,
                         postId.toString(),
                         postType.ordinal.toString()
                     )
