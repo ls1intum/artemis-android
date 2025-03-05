@@ -19,6 +19,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.PostsDataState
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.ConversationThreadUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.MetisThreadUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
@@ -34,8 +35,11 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.P
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.LocalVisibleMetisContextManager
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisiblePostList
 import de.tum.informatics.www1.artemis.native_app.feature.metistest.VisibleMetisContextManagerMock
+import io.mockk.every
+import io.mockk.mockk
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.datetime.Clock
 
 
@@ -131,6 +135,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                 authorName = "author name",
                 authorImageUrl = null,
                 isSaved = false,
+                hasForwardedMessages = false
             ),
             reactions = emptyList(),
             serverPostIdCache = AnswerPostPojo.ServerPostIdCache(
@@ -157,7 +162,8 @@ abstract class BaseChatUITest : BaseComposeTest() {
             answers = if (index == 0) answers else emptyList(),
             reactions = if (index == 0) reactions else emptyList(),
             displayPriority = DisplayPriority.NONE,
-            isSaved = false
+            isSaved = false,
+            hasForwardedMessages = false
         )
     }
 
@@ -169,6 +175,10 @@ abstract class BaseChatUITest : BaseComposeTest() {
         isAtLeastTutorInCourse: Boolean = false,
         hasModerationRights: Boolean = false,
     ) {
+        val threadUseCase = mockk<ConversationThreadUseCase>()
+        val testFlow = MutableStateFlow<ChatListItem.PostItem.ThreadItem.Answer?>(null)
+        every { threadUseCase.getAnswerChatListItem(any()) } returns testFlow
+
         composeTestRule.setContent {
             MetisThreadUi(
                 modifier = Modifier.fillMaxSize(),
@@ -184,6 +194,8 @@ abstract class BaseChatUITest : BaseComposeTest() {
                 serverUrl = "",
                 isMarkedAsDeleteList = mutableStateListOf(),
                 emojiService = EmojiServiceStub,
+                chatListContextItem = ChatListItem.PostItem.ThreadItem.ContextItem.ContextPost(post),
+                answerChatListItemState = { answer -> threadUseCase.getAnswerChatListItem(answer) },
                 initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
                 onCreatePost = { CompletableDeferred() },
                 onEditPost = { _, _ -> CompletableDeferred() },
@@ -219,7 +231,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                     )))
                 }
             ) {
-                val list = posts.map { post -> ChatListItem.IndexedPost(post) }.toMutableList()
+                val list = posts.map { post -> ChatListItem.PostItem.IndexedItem.Post(post, post.answers.orEmpty()) }.toMutableList()
                 MetisChatList(
                     modifier = Modifier.fillMaxSize(),
                     initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
@@ -238,7 +250,9 @@ abstract class BaseChatUITest : BaseComposeTest() {
                     onCreatePost = { CompletableDeferred() },
                     onEditPost = { _, _ -> CompletableDeferred() },
                     onPinPost = onPinPost,
-                    onSavePost = { CompletableDeferred() },onDeletePost = { CompletableDeferred() },onUndoDeletePost = {},
+                    onSavePost = { CompletableDeferred() },
+                    onDeletePost = { CompletableDeferred() },
+                    onUndoDeletePost = {},
                     onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                     onClickViewPost = {},
                     onRequestRetrySend = { _ -> },
