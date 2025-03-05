@@ -16,11 +16,13 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ListAlt
+import androidx.compose.material.icons.filled.AddReaction
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.School
@@ -32,7 +34,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -51,6 +55,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isUnspecified
@@ -60,6 +65,9 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicArtemisTex
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.toPainter
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.emoji.EmojiPicker
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.emoji.LocalEmojiProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.emoji.ProvideEmojis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.LocalReplyAutoCompleteHintProvider
 import kotlinx.coroutines.launch
@@ -85,6 +93,7 @@ internal fun MarkdownTextField(
 ) {
     val text = textFieldValue.text
     var selectedType by remember { mutableStateOf(ViewType.TEXT) }
+    var showEmojiPicker by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier,
@@ -133,7 +142,52 @@ internal fun MarkdownTextField(
             showAutoCompletePopup = showAutoCompletePopup,
             onOpenImagePicker = { filePickerLauncher.launch("image/*") },
             onOpenFilePicker = { filePickerLauncher.launch("*/*") },
+            onOpenEmojiPicker = { showEmojiPicker = true }
         )
+    }
+
+    if (showEmojiPicker) {
+        ModalBottomSheet(
+            modifier = Modifier
+                .statusBarsPadding(),
+            sheetState = rememberModalBottomSheetState(),
+            onDismissRequest = { showEmojiPicker = false },
+        ) {
+            ProvideEmojis {
+                val emojiProvider = LocalEmojiProvider.current
+                val unicodeForEmojiIdMap by emojiProvider.unicodeForEmojiIdMap
+
+                Column {
+//                    BasicSearchTextField(
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .padding(horizontal = 8.dp),
+//                        query = "",
+//                        updateQuery = {},
+//                        hint = "Search emojis"
+//                    )
+
+                    // Scrolling not working, see: https://issuetracker.google.com/issues/301240745
+
+                    EmojiPicker(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp),
+                        onEmojiClicked = {
+                            val emojiAsUnicode = unicodeForEmojiIdMap?.get(it)
+                            showEmojiPicker = false
+                            onTextChanged(TextFieldValue(
+                                text = text + emojiAsUnicode,
+                                selection = TextRange(
+                                    start = textFieldValue.selection.start + 1,
+                                    end = textFieldValue.selection.end + 1
+                                )
+                            ))
+                        }
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -211,7 +265,8 @@ private fun TextFieldOptions(
     showAutoCompletePopup: ((AutoCompleteType) -> Unit)? = null,
     formattingOptionButtons: @Composable () -> Unit = {},
     onOpenFilePicker: () -> Unit = {},
-    onOpenImagePicker: () -> Unit = {}
+    onOpenImagePicker: () -> Unit = {},
+    onOpenEmojiPicker: () -> Unit = {}
 ) {
     var isTextFormattingExpanded by remember { mutableStateOf(false) }
     val textFormattingOptionsOffsetY by animateDpAsState(targetValue = if (isTextFormattingExpanded) 0.dp else textFormattingOptionsHiddenOffsetY)
@@ -233,28 +288,30 @@ private fun TextFieldOptions(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     TextFieldOptionsIconButton(
-                        modifier = Modifier,
                         painter = painterResource(id = R.drawable.image),
                     ) {
                         onOpenImagePicker()
                     }
 
                     TextFieldOptionsIconButton(
-                        modifier = Modifier,
                         painter = painterResource(id = R.drawable.attachment)
                     ) {
                         onOpenFilePicker()
                     }
 
                     TextFieldOptionsIconButton(
-                        modifier = Modifier,
                         painter = painterResource(id = R.drawable.format_text)
                     ) {
                         isTextFormattingExpanded = !isTextFormattingExpanded
                     }
 
                     TextFieldOptionsIconButton(
-                        modifier = Modifier,
+                        painter = Icons.Default.AddReaction.toPainter()
+                    ) {
+                        onOpenEmojiPicker()
+                    }
+
+                    TextFieldOptionsIconButton(
                         painter = painterResource(id = R.drawable.tag)
                     ) {
                         isTaggingDropdownExpanded = !isTaggingDropdownExpanded
@@ -279,7 +336,6 @@ private fun TextFieldOptions(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         TextFieldOptionsIconButton(
-                            modifier = Modifier,
                             imageVector = Icons.Default.Clear
                         ) {
                             isTextFormattingExpanded = false
@@ -294,7 +350,6 @@ private fun TextFieldOptions(
         }
 
         PreviewEditRow(
-            modifier = Modifier,
             selectedType = selectedType,
             isPreviewEnabled = isPreviewEnabled,
             onChangeViewType = onChangeViewType
@@ -304,7 +359,7 @@ private fun TextFieldOptions(
 
 @Composable
 private fun TextFieldOptionsIconButton(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     painter: Painter? = null,
     imageVector: ImageVector? = null,
     onClick: () -> Unit
@@ -416,7 +471,7 @@ private fun TaggingDropDownMenuItem(
 
 @Composable
 private fun PreviewEditRow(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     selectedType: ViewType,
     isPreviewEnabled: Boolean = false,
     onChangeViewType: (ViewType) -> Unit = {}

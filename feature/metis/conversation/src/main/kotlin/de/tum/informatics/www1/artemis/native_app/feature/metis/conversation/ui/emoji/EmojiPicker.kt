@@ -10,7 +10,7 @@ import androidx.emoji2.emojipicker.EmojiPickerView
 
 @Composable
 internal fun EmojiPicker(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     onEmojiClicked: (emojiId: String) -> Unit
 ) {
     val emojiProvider = LocalEmojiProvider.current
