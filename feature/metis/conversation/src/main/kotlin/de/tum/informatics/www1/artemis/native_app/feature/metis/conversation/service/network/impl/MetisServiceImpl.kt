@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.se
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
@@ -162,12 +163,13 @@ internal class MetisServiceImpl(
             runCatching {
                 val response: JsonObject = ktorProvider.ktorClient.get(serverUrl) {
                     url {
-                        appendPathSegments("api", "link-preview")
+                        appendPathSegments(*Api.Communication.path, "link-preview")
                     }
                     parameter("url", url)
                     cookieAuth(authToken)
                 }.body()
 
+                // For some reason, the server sometimes returns an empty response.
                 if (response.jsonObject.isEmpty()) null
                 else json.decodeFromJsonElement(LinkPreview.serializer(), response)
             }.getOrNull()
