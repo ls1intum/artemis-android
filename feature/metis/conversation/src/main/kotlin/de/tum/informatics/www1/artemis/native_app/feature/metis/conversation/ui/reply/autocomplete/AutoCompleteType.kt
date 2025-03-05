@@ -8,4 +8,5 @@ enum class AutoCompleteType(@StringRes val title: Int) {
     CHANNELS(R.string.markdown_textfield_autocomplete_category_channels),
     LECTURES(R.string.markdown_textfield_autocomplete_category_lectures),
     EXERCISES(R.string.markdown_textfield_autocomplete_category_exercises),
+    FAQS(R.string.markdown_textfield_autocomplete_category_faqs),
 }

@@ -22,6 +22,7 @@ import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.Ar
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.toPainter
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.DefaultTab
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseDataStateUi
@@ -166,7 +167,7 @@ private fun BodyWithTabs(
         ) {
             DefaultTab(
                 index =  0,
-                imageVector = Icons.Default.ViewHeadline,
+                iconPainter = Icons.Default.ViewHeadline.toPainter(),
                 textRes = R.string.exercise_view_tab_overview,
                 selectedTabIndex = selectedTabIndex,
                 updateSelectedTabIndex = onUpdateSelectedTabIndex
@@ -174,7 +175,7 @@ private fun BodyWithTabs(
 
             DefaultTab(
                 index = 1,
-                imageVector = Icons.AutoMirrored.Filled.HelpCenter,
+                iconPainter = Icons.AutoMirrored.Filled.HelpCenter.toPainter(),
                 textRes =  R.string.exercise_view_tab_qna,
                 selectedTabIndex =  selectedTabIndex,
                 updateSelectedTabIndex = onUpdateSelectedTabIndex

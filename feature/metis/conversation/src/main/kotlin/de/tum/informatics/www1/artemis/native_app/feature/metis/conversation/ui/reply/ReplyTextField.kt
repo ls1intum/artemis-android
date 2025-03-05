@@ -343,6 +343,7 @@ private fun CreateReplyUi(
                         AutoCompleteType.CHANNELS -> MarkdownStyle.ChannelMention
                         AutoCompleteType.LECTURES -> MarkdownStyle.LectureMention
                         AutoCompleteType.EXERCISES -> MarkdownStyle.ExerciseMention
+                        AutoCompleteType.FAQS -> MarkdownStyle.FaqMention
                     },
                     currentTextFieldValue = currentTextFieldValue,
                 )

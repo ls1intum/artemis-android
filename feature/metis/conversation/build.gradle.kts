@@ -18,6 +18,7 @@ android {
 
 dependencies {
     implementation(project(":core:device"))
+    implementation(project(":feature:faq"))
     testImplementation(project(":core:ui-test"))
 
     implementation(project(":feature:metis:shared"))

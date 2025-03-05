@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.flowOf
 
 internal val LocalReplyAutoCompleteHintProvider: ProvidableCompositionLocal<ReplyAutoCompleteHintProvider> = compositionLocalOf {
     object : ReplyAutoCompleteHintProvider {
+        override val isFaqEnabled: Boolean = false
+
         override val legalTagChars: List<Char> = emptyList()
 
         override fun produceAutoCompleteHints(
@@ -18,6 +20,8 @@ internal val LocalReplyAutoCompleteHintProvider: ProvidableCompositionLocal<Repl
 }
 
 internal interface ReplyAutoCompleteHintProvider {
+
+    val isFaqEnabled: Boolean
 
     val legalTagChars: List<Char>
 

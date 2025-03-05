@@ -13,5 +13,6 @@ internal enum class MarkdownStyle(val startTag: String, val endTag: String) {
     UserMention("@", ""),
     ChannelMention("#", ""),
     LectureMention("#", ""),
-    ExerciseMention("#", "")
+    ExerciseMention("#", ""),
+    FaqMention("#", "")
 }
