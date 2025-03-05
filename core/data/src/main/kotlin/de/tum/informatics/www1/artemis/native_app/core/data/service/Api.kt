@@ -3,6 +3,13 @@ package de.tum.informatics.www1.artemis.native_app.core.data.service
 
 private const val api = "api"
 
+/**
+ * Central location for all API endpoints.
+ *
+ * There were breaking changes introduced to the server API with Artemis 8.0.0 (see
+ * https://github.com/ls1intum/Artemis/pull/10416). To run the app together with a version lower
+ * than 8.0.0, remove the first level (module) of the paths (eg. "core", "communication", etc.).
+ */
 sealed class Api(
     vararg val path: String
 ) {
