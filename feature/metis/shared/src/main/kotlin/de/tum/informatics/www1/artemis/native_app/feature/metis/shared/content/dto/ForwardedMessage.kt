@@ -9,20 +9,10 @@ data class ForwardedMessage(
     override val destinationPostId: Long? = null,
     override val destinationAnswerPostId: Long? = null,
     val id: Long? = null,
-    val content: String? = null,
-    val destinationPost: StandalonePost? = null,
-    val destinationAnswerPost: AnswerPost? = null,
+    val content: String? = null
 ) : IForwardedMessage {
 
-    constructor(forwardedMessage: IForwardedMessage, content: String?, destinationPost: StandalonePost?, destinationAnswerPost: AnswerPost?) : this(
-        forwardedMessage.sourceId,
-        forwardedMessage.sourceType,
-        forwardedMessage.destinationPostId,
-        forwardedMessage.destinationAnswerPostId,
-        content = content,
-        destinationPost = destinationPost,
-        destinationAnswerPost = destinationAnswerPost
-    ) {
+    init {
         if (!validateDestinations()) {
             throw IllegalArgumentException("A forwarded message must have exactly one destination")
         }
