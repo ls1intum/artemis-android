@@ -35,6 +35,7 @@ import androidx.compose.material3.InputChip
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -55,7 +56,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isUnspecified
@@ -65,6 +65,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicArtemisTex
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.toPainter
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.appendAtCursor
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.emoji.EmojiPicker
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.emoji.LocalEmojiProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.emoji.ProvideEmojis
@@ -147,10 +148,19 @@ internal fun MarkdownTextField(
     }
 
     if (showEmojiPicker) {
+        val sheetState = rememberModalBottomSheetState()
+
+        // To minify the impact of the scrolling bug: https://stackoverflow.com/a/78958469/13366254
+        val scrollModifier = if (sheetState.currentValue == SheetValue.Expanded) {
+            Modifier.verticalScroll(rememberScrollState())
+        } else {
+            Modifier
+        }
+
         ModalBottomSheet(
             modifier = Modifier
                 .statusBarsPadding(),
-            sheetState = rememberModalBottomSheetState(),
+            sheetState = sheetState,
             onDismissRequest = { showEmojiPicker = false },
         ) {
             ProvideEmojis {
@@ -170,19 +180,15 @@ internal fun MarkdownTextField(
                     // Scrolling not working, see: https://issuetracker.google.com/issues/301240745
 
                     EmojiPicker(
-                        modifier = Modifier
+                        modifier = scrollModifier
                             .fillMaxWidth()
                             .padding(horizontal = 8.dp),
                         onEmojiClicked = {
                             val emojiAsUnicode = unicodeForEmojiIdMap?.get(it)
+                            onTextChanged(
+                                textFieldValue.appendAtCursor(emojiAsUnicode ?: "")
+                            )
                             showEmojiPicker = false
-                            onTextChanged(TextFieldValue(
-                                text = text + emojiAsUnicode,
-                                selection = TextRange(
-                                    start = textFieldValue.selection.start + 1,
-                                    end = textFieldValue.selection.end + 1
-                                )
-                            ))
                         }
                     )
                 }
