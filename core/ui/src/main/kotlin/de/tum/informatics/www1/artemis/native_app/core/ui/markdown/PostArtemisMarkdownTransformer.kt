@@ -19,7 +19,7 @@ class PostArtemisMarkdownTransformer(val serverUrl: String, val courseId: Long) 
         "[$fileName]($serverUrl$ATTACHMENTS_ENDPOINT$filePath)"
 
     override fun transformExerciseMarkdown(title: String, url: String, type: String): String {
-        val namedLink = "[$title](${ArtemisDeeplink.IN_APP_HOST}$url)"
+        val namedLink = createInAppLinkWithTitle(title, url)
         val typeIcon =  when (type) {
             "text" -> R.drawable.font_link_icon
             "quiz" -> R.drawable.check_double_link_icon
@@ -67,5 +67,14 @@ class PostArtemisMarkdownTransformer(val serverUrl: String, val courseId: Long) 
         filePath: String
     ): String {
         return if (isImage) "![$fileName]($serverUrl$filePath)" else "[$fileName]($serverUrl$filePath)"
+    }
+
+    override fun transformFaqMarkdown(title: String, url: String): String {
+        val namedLink = createInAppLinkWithTitle(title, url)
+        return "${createFileTypeIconMarkdown(R.drawable.faq_link_icon)}  $namedLink"
+    }
+
+    private fun createInAppLinkWithTitle(title: String, url: String): String {
+        return "[$title](${ArtemisDeeplink.IN_APP_HOST}$url)"
     }
 }

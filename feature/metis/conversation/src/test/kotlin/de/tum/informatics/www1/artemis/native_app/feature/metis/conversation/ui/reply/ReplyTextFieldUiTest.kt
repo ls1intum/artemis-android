@@ -54,6 +54,7 @@ class ReplyTextFieldUiTest {
     )
 
     private val hintProviderStub = object : ReplyAutoCompleteHintProvider {
+        override val isFaqEnabled: Boolean = false
         override val legalTagChars: List<Char> = listOf('@')
         override fun produceAutoCompleteHints(tagChar: Char, query: String): Flow<DataState<List<AutoCompleteHintCollection>>> {
             return flowOf(DataState.Success(autoCompleteHints))

@@ -24,7 +24,8 @@ class FaqRemoteServiceImpl(
                         "api",
                         "courses",
                         courseId.toString(),
-                        "faqs"
+                        "faq-state",
+                        "ACCEPTED"          // For now we only want to show accepted FAQs
                     )
                 }
 

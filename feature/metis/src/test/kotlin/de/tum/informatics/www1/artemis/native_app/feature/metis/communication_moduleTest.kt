@@ -12,6 +12,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
+import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.FaqRepository
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.UserIdentifier
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
@@ -50,6 +51,7 @@ internal class communication_moduleTest {
                 CoroutineContext::class,
                 ConversationService::class,
                 CourseService::class,
+                FaqRepository::class,
                 Long::class,
                 Context::class,
                 WorkerParameters::class,
