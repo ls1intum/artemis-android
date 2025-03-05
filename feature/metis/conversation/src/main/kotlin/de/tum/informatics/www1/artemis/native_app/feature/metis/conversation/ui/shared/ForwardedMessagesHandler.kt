@@ -15,7 +15,7 @@ class ForwardedMessagesHandler(
     private val authToken: String,
     private val serverUrl: String
 ) {
-    val forwardedPostIds = mutableListOf<Long>()
+    private val forwardedPostIds = mutableListOf<Long>()
     private var cachedForwardedMessages: List<ForwardedMessage> = emptyList()
     private var cachedStandaloneSourcePosts: Map<Long, List<StandalonePost?>> = mapOf()
     private var cachedAnswerSourcePosts: Map<Long, List<AnswerPost?>> = mapOf()
@@ -71,6 +71,14 @@ class ForwardedMessagesHandler(
                 .let { it.first.mapNotNull { msg -> msg.sourceId } to it.second.mapNotNull { msg -> msg.sourceId } }
 
             fetchAndCachePosts(sourcePostIds, sourceAnswerPostIds)
+        }
+    }
+
+    fun extractForwardedMessages(loadedPosts: List<IBasePost>) {
+        loadedPosts.forEach { post ->
+            if (post.hasForwardedMessages == true) {
+                forwardedPostIds.add(post.serverPostId ?: -1)
+            }
         }
     }
 

@@ -211,15 +211,12 @@ internal class ConversationThreadUseCase(
             val post = postDataState.data
 
             if (post.hasForwardedMessages == true) {
-                forwardedMessagesHandler.forwardedPostIds.add(post.serverPostId ?: -1)
+                forwardedMessagesHandler.extractForwardedMessages(listOf(post))
                 forwardedMessagesHandler.loadForwardedMessages(PostingType.POST)
             }
+
             if (post.answers.orEmpty().isNotEmpty()) {
-                post.answers?.forEach { answerPost ->
-                    if (answerPost.hasForwardedMessages == true) {
-                        forwardedMessagesHandler.forwardedPostIds.add(answerPost.serverPostId ?: -1)
-                    }
-                }
+                forwardedMessagesHandler.extractForwardedMessages(post.answers.orEmpty())
                 forwardedMessagesHandler.loadForwardedMessages(PostingType.ANSWER)
             }
         }

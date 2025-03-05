@@ -31,7 +31,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
@@ -140,25 +139,27 @@ private fun ForwardedMessageItem(
 @Composable
 private fun resolveConversation(forwardedPost: IBasePost?): Pair<Long?, String> {
     val conversation = when (forwardedPost) {
-        is IStandalonePost ->  (forwardedPost as StandalonePost).conversation
-        is IAnswerPost -> (forwardedPost as AnswerPost).post?.conversation
+        is StandalonePost -> forwardedPost.conversation
+        is AnswerPost -> forwardedPost.post?.conversation
         else -> return null to stringResource(R.string.post_forwarded_from_default)
     }
 
-    if (conversation is OneToOneChat) {
-        return conversation.id to stringResource(R.string.post_forwarded_from_a_direct_message)
-    }
-    if (conversation is GroupChat) {
-        return conversation.id to stringResource(R.string.post_forwarded_from_a_group_chat)
-    }
-
-    var conversationName = conversation?.humanReadableName ?: stringResource(R.string.post_forwarded_from_default)
-    if (conversation != null) conversationName = "#$conversationName"
+    val isFromThread = forwardedPost is IAnswerPost
     val conversationId = conversation?.id
 
-    if (forwardedPost is IAnswerPost) {
-        return conversationId to stringResource(R.string.post_forwarded_from_a_thread, conversationName)
+    return when (conversation) {
+        is OneToOneChat -> {
+            val message = if (isFromThread) R.string.post_forwarded_from_a_thread else R.string.post_forwarded_from_a_direct_message
+            conversationId to stringResource(message, stringResource(R.string.post_forwarded_from_a_direct_message))
+        }
+        is GroupChat -> {
+            val message = if (isFromThread) R.string.post_forwarded_from_a_thread else R.string.post_forwarded_from_a_group_chat
+            conversationId to stringResource(message, stringResource(R.string.post_forwarded_from_a_group_chat))
+        }
+        else -> {
+            val conversationName = conversation?.humanReadableName?.let { "#$it" } ?: stringResource(R.string.post_forwarded_from_default)
+            if (isFromThread) conversationId to stringResource(R.string.post_forwarded_from_a_thread, conversationName)
+            else conversationId to conversationName
+        }
     }
-
-    return conversationId to conversationName
 }
