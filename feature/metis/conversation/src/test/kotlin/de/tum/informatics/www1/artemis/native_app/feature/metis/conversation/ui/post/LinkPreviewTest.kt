@@ -40,7 +40,7 @@ class LinkPreviewTest {
         val text = "This link https://example.com/something should be removed."
         val modifiedText = LinkPreviewUtil.removeLinkPreview(text, "https://example.com/something")
 
-        assert(modifiedText == "This link <https://example.com/something> should be removed.")
+        assertEquals(modifiedText, "This link <https://example.com/something> should be removed.")
     }
 
     @Test
@@ -61,6 +61,6 @@ class LinkPreviewTest {
         val text = "This link https://example.com should be removed."
         val modifiedText = LinkPreviewUtil.removeLinkPreview(text, urlToSearchFor)
 
-        assert(modifiedText == "This link <https://example.com> should be removed.")
+        assertEquals(modifiedText, "This link <https://example.com> should be removed.")
     }
 }
