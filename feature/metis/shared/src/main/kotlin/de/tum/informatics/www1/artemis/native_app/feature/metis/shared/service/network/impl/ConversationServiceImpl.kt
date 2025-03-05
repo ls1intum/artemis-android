@@ -577,8 +577,7 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
             ktorProvider.ktorClient.delete(serverUrl) {
                 url {
                     appendPathSegments(
-                        "api",
-                        "courses",
+                        *Api.Communication.Courses.path,
                         courseId.toString(),
                         "channels",
                         conversationId.toString()
