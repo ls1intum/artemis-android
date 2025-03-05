@@ -78,129 +78,7 @@ internal fun PostContextBottomSheet(
 ) {
     var displayAllEmojis by remember { mutableStateOf(false) }
 
-    if (!displayAllEmojis) {
-        ModalBottomSheet(
-            modifier = Modifier
-                .statusBarsPadding()
-                .testTag(TEST_TAG_POST_CONTEXT_BOTTOM_SHEET),
-            contentWindowInsets = { WindowInsets.statusBars },
-            sheetState = rememberModalBottomSheetState(),
-            onDismissRequest = onDismissRequest
-        ) {
-            val actionButtonModifier = Modifier.fillMaxWidth()
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(Spacings.BottomSheetContentPadding)
-            ) {
-                postActions.onClickReaction?.let { onClickReaction ->
-                    EmojiReactionBar(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 16.dp),
-                        presentReactions = post.reactions.orEmpty(),
-                        clientId = clientId,
-                        onReactWithEmoji = { emojiId ->
-                            onDismissRequest()
-                            onClickReaction(emojiId, true)
-                        },
-                        onRequestViewMoreEmojis = {
-                            displayAllEmojis = true
-                        }
-                    )
-                }
-
-                if (postActions.canPerformAnyAction) {
-                    HorizontalDivider()
-                }
-
-                postActions.requestEditPost?.let {
-                    BottomSheetActionButton(
-                        modifier = actionButtonModifier,
-                        icon = Icons.Default.Edit,
-                        text = stringResource(id = R.string.post_edit),
-                        onClick = {
-                            onDismissRequest()
-                            it()
-                        }
-                    )
-                }
-
-                postActions.requestDeletePost?.let {
-                    BottomSheetActionButton(
-                        modifier = actionButtonModifier,
-                        icon = Icons.Default.Delete,
-                        text = stringResource(id = R.string.post_delete),
-                        onClick = {
-                            onDismissRequest()
-                            it()
-                        }
-                    )
-                }
-
-                BottomSheetActionButton(
-                    modifier = actionButtonModifier,
-                    icon = Icons.Default.ContentCopy,
-                    text = stringResource(id = R.string.post_copy_text),
-                    onClick = {
-                        onDismissRequest()
-                        postActions.onCopyText()
-                    }
-                )
-
-                if (postActions.onResolvePost != null && post is IAnswerPost) {
-                    BottomSheetActionButton(
-                        modifier = actionButtonModifier,
-                        icon = if (post.resolvesPost) Icons.Default.Clear else Icons.Default.Check,
-                        text = if (post.resolvesPost) stringResource(id = R.string.post_does_not_resolve) else stringResource(id = R.string.post_resolves),
-                        onClick = {
-                            onDismissRequest()
-                            postActions.onResolvePost.invoke()
-                        }
-                    )
-                }
-
-                if (postActions.onPinPost != null && post is IStandalonePost) {
-                    val isPinned = post.displayPriority == DisplayPriority.PINNED
-                    BottomSheetActionButton(
-                        modifier = actionButtonModifier,
-                        icon = if (isPinned) ImageVector.vectorResource(R.drawable.unpin) else ImageVector.vectorResource(R.drawable.pin),
-                        text = if (isPinned) stringResource(id = R.string.post_unpin) else stringResource(id = R.string.post_pin),
-                        onClick = {
-                            onDismissRequest()
-                            postActions.onPinPost.invoke()
-                        }
-                    )
-                }
-
-                if (postActions.onSavePost != null) {
-                    val isSaved = post.isSaved == true
-                    BottomSheetActionButton(
-                        modifier = actionButtonModifier,
-                        icon = if (isSaved) Icons.Default.BookmarkRemove else Icons.Default.BookmarkAdd,
-                        text = if (isSaved) stringResource(id = R.string.post_unsave) else stringResource(id = R.string.post_save),
-                        onClick = {
-                            onDismissRequest()
-                            postActions.onSavePost.invoke()
-                        }
-                    )
-                }
-
-                postActions.onReplyInThread?.let {
-                    BottomSheetActionButton(
-                        modifier = actionButtonModifier,
-                        icon = Icons.AutoMirrored.Filled.Reply,
-                        text = stringResource(id = R.string.post_reply),
-                        onClick = {
-                            onDismissRequest()
-                            it()
-                        }
-                    )
-                }
-            }
-        }
-    } else {
+    if (displayAllEmojis) {
         postActions.onClickReaction?.let { onClickReaction ->
             EmojiDialog(
                 onDismissRequest = onDismissRequest,
@@ -209,6 +87,137 @@ internal fun PostContextBottomSheet(
                     onClickReaction(emojiId, true)
                 }
             )
+        }
+        return
+    }
+
+    ModalBottomSheet(
+        modifier = Modifier
+            .statusBarsPadding()
+            .testTag(TEST_TAG_POST_CONTEXT_BOTTOM_SHEET),
+        contentWindowInsets = { WindowInsets.statusBars },
+        sheetState = rememberModalBottomSheetState(),
+        onDismissRequest = onDismissRequest
+    ) {
+        val actionButtonModifier = Modifier.fillMaxWidth()
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Spacings.BottomSheetContentPadding)
+        ) {
+            postActions.onClickReaction?.let { onClickReaction ->
+                EmojiReactionBar(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    presentReactions = post.reactions.orEmpty(),
+                    clientId = clientId,
+                    onReactWithEmoji = { emojiId ->
+                        onDismissRequest()
+                        onClickReaction(emojiId, true)
+                    },
+                    onRequestViewMoreEmojis = {
+                        displayAllEmojis = true
+                    }
+                )
+            }
+
+            if (postActions.canPerformAnyAction) {
+                HorizontalDivider()
+            }
+
+            postActions.requestEditPost?.let {
+                BottomSheetActionButton(
+                    modifier = actionButtonModifier,
+                    icon = Icons.Default.Edit,
+                    text = stringResource(id = R.string.post_edit),
+                    onClick = {
+                        onDismissRequest()
+                        it()
+                    }
+                )
+            }
+
+            postActions.requestDeletePost?.let {
+                BottomSheetActionButton(
+                    modifier = actionButtonModifier,
+                    icon = Icons.Default.Delete,
+                    text = stringResource(id = R.string.post_delete),
+                    onClick = {
+                        onDismissRequest()
+                        it()
+                    }
+                )
+            }
+
+            BottomSheetActionButton(
+                modifier = actionButtonModifier,
+                icon = Icons.Default.ContentCopy,
+                text = stringResource(id = R.string.post_copy_text),
+                onClick = {
+                    onDismissRequest()
+                    postActions.onCopyText()
+                }
+            )
+
+            if (postActions.onResolvePost != null && post is IAnswerPost) {
+                BottomSheetActionButton(
+                    modifier = actionButtonModifier,
+                    icon = if (post.resolvesPost) Icons.Default.Clear else Icons.Default.Check,
+                    text = if (post.resolvesPost) stringResource(id = R.string.post_does_not_resolve) else stringResource(
+                        id = R.string.post_resolves
+                    ),
+                    onClick = {
+                        onDismissRequest()
+                        postActions.onResolvePost.invoke()
+                    }
+                )
+            }
+
+            if (postActions.onPinPost != null && post is IStandalonePost) {
+                val isPinned = post.displayPriority == DisplayPriority.PINNED
+                BottomSheetActionButton(
+                    modifier = actionButtonModifier,
+                    icon = if (isPinned) ImageVector.vectorResource(R.drawable.unpin) else ImageVector.vectorResource(
+                        R.drawable.pin
+                    ),
+                    text = if (isPinned) stringResource(id = R.string.post_unpin) else stringResource(
+                        id = R.string.post_pin
+                    ),
+                    onClick = {
+                        onDismissRequest()
+                        postActions.onPinPost.invoke()
+                    }
+                )
+            }
+
+            if (postActions.onSavePost != null) {
+                val isSaved = post.isSaved == true
+                BottomSheetActionButton(
+                    modifier = actionButtonModifier,
+                    icon = if (isSaved) Icons.Default.BookmarkRemove else Icons.Default.BookmarkAdd,
+                    text = if (isSaved) stringResource(id = R.string.post_unsave) else stringResource(
+                        id = R.string.post_save
+                    ),
+                    onClick = {
+                        onDismissRequest()
+                        postActions.onSavePost.invoke()
+                    }
+                )
+            }
+
+            postActions.onReplyInThread?.let {
+                BottomSheetActionButton(
+                    modifier = actionButtonModifier,
+                    icon = Icons.AutoMirrored.Filled.Reply,
+                    text = stringResource(id = R.string.post_reply),
+                    onClick = {
+                        onDismissRequest()
+                        it()
+                    }
+                )
+            }
         }
     }
 }
