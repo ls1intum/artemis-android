@@ -60,7 +60,7 @@ class CourseRegistrationE2eTest : BaseComposeTest() {
      */
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can successfully register in course`() {
-        val viewModel = RegisterForCourseViewModel(get(), get(), get(), get(), UnconfinedTestDispatcher())
+        val viewModel = RegisterForCourseViewModel(get(), get(), UnconfinedTestDispatcher())
 
         var registeredCourseId: Long? = null
 

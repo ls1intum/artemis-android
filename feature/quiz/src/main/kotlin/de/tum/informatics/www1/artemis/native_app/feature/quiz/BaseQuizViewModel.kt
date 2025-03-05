@@ -2,12 +2,12 @@ package de.tum.informatics.www1.artemis.native_app.feature.quiz
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ParticipationService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.performAutoReloadingNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -48,7 +48,7 @@ internal abstract class BaseQuizViewModel<
     private val networkStatusProvider: NetworkStatusProvider,
     serverConfigurationService: ServerConfigurationService,
     accountService: AccountService,
-    private val participationService: ParticipationService,
+    participationService: ParticipationService,
     private val coroutineContext: CoroutineContext
 ) : ViewModel() {
 
@@ -60,13 +60,11 @@ internal abstract class BaseQuizViewModel<
     protected val initialParticipationDataState: StateFlow<DataState<Participation>> =
         when (quizType) {
             QuizType.Live, QuizType.ViewResults ->
-                flatMapLatest(
-                    participationService.onReloadRequired,
-                    retryLoadExercise.onStart { emit(Unit) }
-                ) { _, _ ->
-                    retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                        participationService.findParticipation(exerciseId)
-                    }
+                participationService.performAutoReloadingNetworkCall(
+                    networkStatusProvider = networkStatusProvider,
+                    manualReloadFlow = retryLoadExercise
+                ) {
+                    findParticipation(exerciseId)
                 }
 
             QuizType.Practice, is QuizType.PracticeResults -> emptyFlow()
