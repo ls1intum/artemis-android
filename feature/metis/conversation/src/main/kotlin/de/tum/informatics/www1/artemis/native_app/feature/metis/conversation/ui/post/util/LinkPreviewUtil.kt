@@ -50,13 +50,13 @@ object LinkPreviewUtil {
             val end = match.range.last + 1
 
             if (url == normalizedUrl || normalizedUrl.contains(url)) {
-                modifiedContent = modifiedContent.removeLinkPreviewTags(start, end, url)
+                modifiedContent = modifiedContent.addRemovedLinkPreviewTags(start, end, url)
             }
         }
 
         return modifiedContent
     }
 
-    private fun String.removeLinkPreviewTags(start: Int, end: Int, url: String): String =
+    private fun String.addRemovedLinkPreviewTags(start: Int, end: Int, url: String): String =
         this.substring(0, start) + "$REMOVED_PREVIEW_OPENING_TAG$url$REMOVED_PREVIEW_CLOSING_TAG" + this.substring(end)
 }

@@ -38,9 +38,9 @@ class LinkPreviewTest {
     @Test
     fun `test GIVEN text with a link WHEN removing link preview THEN it correctly removes the preview`() {
         val text = "This link https://example.com/something should be removed."
-        val modifiedText = LinkPreviewUtil.removeLinkPreview(text, "https://example.com")
+        val modifiedText = LinkPreviewUtil.removeLinkPreview(text, "https://example.com/something")
 
-        assertFalse(modifiedText == "<https://example.com/something>")
+        assert(modifiedText == "This link <https://example.com/something> should be removed.")
     }
 
     @Test
@@ -51,5 +51,16 @@ class LinkPreviewTest {
 
         assertEquals(modifiedText, "This is a link that should be removed <https://example.com> while this link" +
                 " should not be removed https://other.com.")
+    }
+
+    @Test
+    fun `test GIVEN text with a url that does not end on a slash WHEN the removing the preview THEN the slash is removed to fit that url`() {
+        // This would be the url that was received from the API and stored in the link preview object
+        // We test if removeLinkPreview correctly removes the '/' at the end of our preview url (urlToSearchFor) to edit the text.
+        val urlToSearchFor = "https://example.com/"
+        val text = "This link https://example.com should be removed."
+        val modifiedText = LinkPreviewUtil.removeLinkPreview(text, urlToSearchFor)
+
+        assert(modifiedText == "This link <https://example.com> should be removed.")
     }
 }
