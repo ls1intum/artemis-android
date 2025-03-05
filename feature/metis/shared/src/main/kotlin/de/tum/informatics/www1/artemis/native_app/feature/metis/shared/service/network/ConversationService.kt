@@ -183,6 +183,13 @@ interface ConversationService {
         serverUrl: String,
         authToken: String
     ): NetworkResponse<Boolean>
+
+    suspend fun deleteChannel(
+        courseId: Long,
+        conversationId: Long,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<Boolean>
 }
 
 suspend fun ConversationService.getConversation(

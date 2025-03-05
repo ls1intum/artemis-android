@@ -27,8 +27,8 @@ data class ChannelChat(
     val isAnnouncementChannel: Boolean = false,
     val isArchived: Boolean = false,
     val isCourseWide: Boolean = false,
-    val hasChannelModerationRights: Boolean = false,
-    val isChannelModerator: Boolean = false,
+    val hasChannelModerationRights: Boolean = false, // A course instructor has channel moderation rights but is not necessarily a moderator of the channel
+    val isChannelModerator: Boolean = false,  // Member of the channel that is also a moderator of the channel
     val tutorialGroupId: Long? = null,
     val tutorialGroupTitle: String? = null
 ) : Conversation() {
