@@ -105,17 +105,17 @@ private fun ForwardedMessageItem(
                 val isConversationPublic = conversationType == ConversationType.CHANNEL
                 val isConversationClickable = isConversationPublic && sourceConversationId != null && forwardedPost != null
                 Text(
-                    modifier = Modifier.apply {
-                        if (isConversationClickable) {
-                            clickable {
-                                linkOpener.openLink(
-                                    CommunicationDeeplinks.ToConversation.inAppLink(
-                                        courseId = courseId,
-                                        conversationId = sourceConversationId ?: return@clickable
-                                    )
+                    modifier = if (isConversationClickable) {
+                        Modifier.clickable {
+                            linkOpener.openLink(
+                                CommunicationDeeplinks.ToConversation.inAppLink(
+                                    courseId = courseId,
+                                    conversationId = sourceConversationId ?: return@clickable
                                 )
-                            }
+                            )
                         }
+                    } else {
+                        Modifier
                     },
                     text = sourceChannelText,
                     color = if (isConversationClickable) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
