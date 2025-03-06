@@ -36,6 +36,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostWithBottomSheet
@@ -55,6 +56,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.Paging
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisiblePostList
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
@@ -114,6 +116,8 @@ internal fun MetisChatList(
             onRequestRetrySend = viewModel::retryCreatePost,
             onUndoDeletePost = viewModel::undoDeletePost,
             conversationName = conversationName,
+            generateLinkPreviews = viewModel::generateLinkPreviews,
+            onRemoveLinkPreview = viewModel::removeLinkPreview,
             onFileSelected = { uri ->
                 viewModel.onFileSelected(uri, context)
             }
@@ -143,6 +147,8 @@ fun MetisChatList(
     onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
     onClickViewPost: (StandalonePostId) -> Unit,
     onUndoDeletePost: (IStandalonePost) -> Unit,
+    generateLinkPreviews: (String) -> StateFlow<List<LinkPreview>>,
+    onRemoveLinkPreview: (LinkPreview, IBasePost, IStandalonePost?) -> Unit,
     onRequestRetrySend: (StandalonePostId) -> Unit,
     conversationName: String,
     onFileSelected: (Uri) -> Unit
@@ -210,6 +216,8 @@ fun MetisChatList(
                             onRequestSave = onSavePostDelegate,
                             onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
                             onRequestRetrySend = onRequestRetrySend,
+                            generateLinkPreviews = generateLinkPreviews,
+                            onRemoveLinkPreview = onRemoveLinkPreview
                         )
                     }
                 }
@@ -245,7 +253,9 @@ private fun ChatList(
     onRequestPin: (IStandalonePost) -> Unit,
     onRequestSave: (IStandalonePost) -> Unit,
     onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Unit,
-    onRequestRetrySend: (StandalonePostId) -> Unit
+    onRequestRetrySend: (StandalonePostId) -> Unit,
+    generateLinkPreviews: (String) -> StateFlow<List<LinkPreview>>,
+    onRemoveLinkPreview: (LinkPreview, IBasePost, IStandalonePost?) -> Unit
 ) {
     LazyColumn(
         modifier = modifier,
@@ -276,6 +286,9 @@ private fun ChatList(
                 is ChatListItem.PostItem? -> {
                     if (chatListItem !is ChatListItem.PostItem.IndexedItem) return@items
                     val post = chatListItem.post as IStandalonePost
+                    val linkPreviews by remember(post.content) {
+                        generateLinkPreviews(post.content.orEmpty())
+                    }.collectAsState()
 
                     val postActions = rememberPostActions(
                         post = post,
@@ -314,6 +327,7 @@ private fun ChatList(
                         isMarkedAsDeleteList = isMarkedAsDeleteList,
                         chatListItem = chatListItem,
                         postActions = postActions,
+                        linkPreviews = linkPreviews,
                         displayHeader = shouldDisplayHeader(
                             index = index,
                             post = post,
@@ -338,6 +352,9 @@ private fun ChatList(
                                     }
                                 }
                             ),
+                        onRemoveLinkPreview = { linkPreview ->
+                            onRemoveLinkPreview(linkPreview, post as IStandalonePost, null)
+                        },
                         onClick = {
                             val standalonePostId = post.standalonePostId
 

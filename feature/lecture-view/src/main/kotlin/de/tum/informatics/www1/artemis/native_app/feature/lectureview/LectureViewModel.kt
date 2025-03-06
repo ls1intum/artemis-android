@@ -2,6 +2,8 @@ package de.tum.informatics.www1.artemis.native_app.feature.lectureview
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
@@ -17,7 +19,6 @@ import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvi
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitExercise
-import de.tum.informatics.www1.artemis.native_app.core.ui.authTokenStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BaseExerciseListViewModel
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
@@ -58,6 +59,7 @@ internal class LectureViewModel(
     private val liveParticipationService: LiveParticipationService,
     private val savedStateHandle: SavedStateHandle,
     private val channelService: ChannelService,
+    private val artemisContextProvider: ArtemisContextProvider,
     serverTimeService: ServerTimeService,
     courseExerciseService: CourseExerciseService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
@@ -87,7 +89,9 @@ internal class LectureViewModel(
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
 
     val serverUrl: StateFlow<String> = serverUrlStateFlow(serverConfigurationService)
-    val authToken: StateFlow<String> = authTokenStateFlow(accountService)
+    val artemisContext: StateFlow<ArtemisContext> = artemisContextProvider.flow
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, ArtemisContext.Empty)
+
 
     /**
      * The lecture with updated participations as they arrive.
@@ -214,7 +218,7 @@ internal class LectureViewModel(
                 is DataState.Success -> {
                     val courseId = lectureDataState.data.course?.id ?: 0L
                     retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                        channelService.getLectureChannel(lectureId, courseId, serverUrl, authToken)
+                        channelService.getLectureChannel(lectureId, courseId)
                     }
                 }
                 else -> flowOf(DataState.Loading())

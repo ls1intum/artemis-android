@@ -95,12 +95,8 @@ class BrowseChannelsE2eTest : ConversationBaseTest() {
     private fun setupUi(onNavigateToConversation: (Long) -> Unit = {}): BrowseChannelsViewModel {
         val viewModel = BrowseChannelsViewModel(
             courseId = course.id!!,
-            accountService = get(),
-            serverConfigurationService = get(),
             channelService = get(),
             networkStatusProvider = get(),
-            accountDataService = get(),
-            courseService = get(),
             coroutineContext = testDispatcher
         )
 

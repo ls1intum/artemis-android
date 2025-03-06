@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.faq.service.remote
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -21,10 +22,10 @@ class FaqRemoteServiceImpl(
             ktorProvider.ktorClient.get(serverUrl) {
                 url {
                     appendPathSegments(
-                        "api",
-                        "courses",
+                        *Api.Communication.Courses.path,
                         courseId.toString(),
-                        "faqs"
+                        "faq-state",
+                        "ACCEPTED"          // For now we only want to show accepted FAQs
                     )
                 }
 
@@ -43,8 +44,7 @@ class FaqRemoteServiceImpl(
             ktorProvider.ktorClient.get(serverUrl) {
                 url {
                     appendPathSegments(
-                        "api",
-                        "courses",
+                        *Api.Communication.Courses.path,
                         courseId.toString(),
                         "faqs",
                         faqId.toString()

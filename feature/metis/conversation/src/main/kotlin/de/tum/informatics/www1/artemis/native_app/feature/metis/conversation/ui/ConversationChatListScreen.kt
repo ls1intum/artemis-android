@@ -135,7 +135,7 @@ internal fun ConversationChatListScreen(
         val isReplyEnabled = isReplyEnabled(conversationDataState = conversationDataState)
 
         if (conversationDataState.isSuccess) {
-            CompositionLocalProvider(LocalReplyAutoCompleteHintProvider provides viewModel) {
+            CompositionLocalProvider(LocalReplyAutoCompleteHintProvider provides viewModel.autoCompletionUseCase) {
                 MetisChatList(
                     modifier = Modifier
                         .fillMaxSize()

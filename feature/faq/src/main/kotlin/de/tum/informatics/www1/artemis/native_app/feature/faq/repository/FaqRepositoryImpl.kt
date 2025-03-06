@@ -19,7 +19,7 @@ class FaqRepositoryImpl(
     private val accountService: AccountService,
 ) : FaqRepository {
 
-    override suspend fun getFaqs(
+    override fun getFaqs(
         courseId: Long,
     ): Flow<DataState<List<Faq>>> {
         return flatMapLatest(
@@ -38,7 +38,7 @@ class FaqRepositoryImpl(
         }
     }
 
-    override suspend fun getFaq(
+    override fun getFaq(
         courseId: Long,
         faqId: Long,
     ): Flow<DataState<Faq>> {

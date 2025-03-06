@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisFilter
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisSortingStrategy
@@ -55,6 +56,15 @@ interface MetisService {
         serverUrl: String,
         authToken: String
     ): NetworkResponse<List<AnswerPost>>
+
+    /**
+     * Request a link preview for a given url.
+     */
+    suspend fun fetchLinkPreview(
+        url: String,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<LinkPreview?>
 
     /**
      * The metis context needed to query standalone posts.

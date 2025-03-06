@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import de.tum.informatics.www1.artemis.native_app.core.data.join
+import de.tum.informatics.www1.artemis.native_app.core.ui.collectAsState
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.ArtemisWebView
@@ -47,8 +48,7 @@ internal fun ViewResultScreen(
             )
         }
     ) { padding ->
-        val serverUrl by viewModel.serverUrl.collectAsState()
-        val authToken by viewModel.authToken.collectAsState()
+        val artemisContext by viewModel.artemisContextProvider.collectAsState()
         val exerciseDataState by viewModel.exerciseDataState.collectAsState()
         val latestResultDataState by viewModel.latestResultDataState.collectAsState()
 
@@ -57,7 +57,7 @@ internal fun ViewResultScreen(
                 val resultTemplateStatus = LocalTemplateStatusProvider.current()
 
                 val webViewState = getFeedbackViewWebViewState(
-                    serverUrl = serverUrl,
+                    serverUrl = artemisContext.serverUrl,
                     courseId = exercise.course?.id ?: return@ProvideDefaultExerciseTemplateStatus,
                     exerciseId = exercise.id ?: 0L,
                     participationId = exercise.getSpecificStudentParticipation(false)?.id ?: return@ProvideDefaultExerciseTemplateStatus,
@@ -76,8 +76,7 @@ internal fun ViewResultScreen(
                         modifier = Modifier.align(Alignment.Center),
                         webViewState = webViewState,
                         webView = webView,
-                        serverUrl = serverUrl,
-                        authToken = authToken,
+                        artemisContext = artemisContext,
                         setWebView = { webView = it }
                     )
                 }

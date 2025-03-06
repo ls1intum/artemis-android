@@ -3,8 +3,11 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversat
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -94,7 +97,8 @@ internal abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest()
 
     protected fun setupUiAndViewModel(
         conversation: Conversation,
-        onConversationLeft: () -> Unit = {}
+        onConversationLeft: () -> Unit = {},
+        onChannelDeleted: () -> Unit = {}
     ): ConversationSettingsViewModel {
         val viewModel = ConversationSettingsViewModel(
             initialCourseId = course.id!!,
@@ -117,7 +121,8 @@ internal abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest()
                 onNavigateBack = { },
                 onRequestAddMembers = { },
                 onRequestViewAllMembers = { },
-                onConversationLeft = onConversationLeft
+                onConversationLeft = onConversationLeft,
+                onChannelDeleted = onChannelDeleted
             )
         }
 
@@ -149,4 +154,34 @@ internal abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest()
             DefaultTimeoutMillis
         )
     }
+
+    protected fun deleteChannelTestImpl() {
+        val deleteButtonText =
+            context.getString(R.string.conversation_settings_section_delete_channel)
+
+        composeTestRule.waitUntilAtLeastOneExists(
+            hasText(deleteButtonText),
+            DefaultTimeoutMillis
+        )
+
+        composeTestRule
+            .onNodeWithText(deleteButtonText)
+            .performScrollTo()
+            .assertIsDisplayed()
+            .performClick()
+
+        composeTestRule
+            .onNode(
+                hasAnyAncestor(isDialog()) and hasText(context.getString(R.string.conversation_settings_section_delete_channel_title))
+            )
+            .assertExists()
+
+        composeTestRule
+            .onNode(
+                hasAnyAncestor(isDialog()) and hasText(context.getString(R.string.conversation_settings_section_delete_channel))
+            )
+            .assertExists()
+            .performClick()
+    }
+
 }

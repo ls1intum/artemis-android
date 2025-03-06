@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.login.service.network
 import android.util.Log
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.network.LoginService
 import io.ktor.client.request.post
@@ -34,7 +35,7 @@ internal class LoginServiceImpl(
 
             val response = ktorProvider.ktorClient.post(serverUrl) {
                 url {
-                    appendPathSegments("api", "public", "authenticate")
+                    appendPathSegments(*Api.Core.Public.path, "authenticate")
                 }
 
                 contentType(ContentType.Application.Json)
@@ -56,7 +57,7 @@ internal class LoginServiceImpl(
         return performNetworkCall {
             ktorProvider.ktorClient.post(serverUrl) {
                 url {
-                    appendPathSegments("api", "public", "saml2")
+                    appendPathSegments(*Api.Core.Public.path, "saml2")
                 }
                 setBody(rememberMe)
                 contentType(ContentType.Application.Json)

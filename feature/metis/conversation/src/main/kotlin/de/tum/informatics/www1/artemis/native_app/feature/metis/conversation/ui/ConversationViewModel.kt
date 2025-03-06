@@ -14,7 +14,6 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.holdLatestLoaded
-import de.tum.informatics.www1.artemis.native_app.core.data.join
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
@@ -24,23 +23,17 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.FileUploadExercise
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ModelingExercise
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExercise
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.UnknownExercise
-import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ExerciseDeeplinks
-import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.LectureDeeplinks
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.getExerciseTypeIconId
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.PostArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
+import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.FaqRepository
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.asMetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.FileValidationConstants.isImage
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.Link
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.SavedPostService
@@ -48,12 +41,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.ReplyTextStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ConversationChatListUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.util.LinkPreviewUtil
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteHint
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteHintCollection
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteIcon
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteType
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.ReplyAutoCompleteHintProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompletionUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.ConversationThreadUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisCrudAction
@@ -79,14 +69,13 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.n
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.subscribeToConversationUpdates
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.MetisViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getChannelIconImageVector
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -95,6 +84,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -125,10 +115,11 @@ internal open class ConversationViewModel(
     private val networkStatusProvider: NetworkStatusProvider,
     private val conversationService: ConversationService,
     private val replyTextStorageService: ReplyTextStorageService,
-    private val courseService: CourseService,
+    courseService: CourseService,
     private val createPostService: CreatePostService,
+    faqRepository: FaqRepository,
     accountDataService: AccountDataService,
-    metisService: MetisService,
+    private val metisService: MetisService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : MetisViewModel(
     courseService,
@@ -137,7 +128,7 @@ internal open class ConversationViewModel(
     websocketProvider,
     coroutineContext,
     courseId
-), InitialReplyTextProvider, ReplyAutoCompleteHintProvider {
+), InitialReplyTextProvider {
 
     private var currentlySavingPost = false
 
@@ -176,6 +167,7 @@ internal open class ConversationViewModel(
         serverConfigurationService = serverConfigurationService,
         accountService = accountService,
         conversation = conversation,
+        coroutineContext = coroutineContext,
         courseId = courseId,
     )
 
@@ -191,6 +183,19 @@ internal open class ConversationViewModel(
         accountService = accountService,
         coroutineContext = coroutineContext,
         courseId = courseId
+    )
+
+    val autoCompletionUseCase = AutoCompletionUseCase(
+        courseId = courseId,
+        metisContext = metisContext,
+        viewModelScope = viewModelScope,
+        conversationService = conversationService,
+        faqRepository = faqRepository,
+        accountService = accountService,
+        serverConfigurationService = serverConfigurationService,
+        networkStatusProvider = networkStatusProvider,
+        course = course,
+        coroutineContext = coroutineContext
     )
 
     /**
@@ -233,18 +238,6 @@ internal open class ConversationViewModel(
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
-    private val conversations: StateFlow<DataState<List<Conversation>>> = flatMapLatest(
-        serverConfigurationService.serverUrl,
-        accountService.authToken,
-        onRequestReload.onStart { emit(Unit) }
-    ) { serverUrl, authToken, _ ->
-        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-            conversationService
-                .getConversations(metisContext.courseId, authToken, serverUrl)
-        }
-    }
-        .stateIn(viewModelScope + coroutineContext, SharingStarted.Lazily)
-
     private val isAbleToPin: StateFlow<Boolean> = conversation
         .map { conversation ->
             conversation.bind {
@@ -278,8 +271,6 @@ internal open class ConversationViewModel(
             isAtLeastTutorInCourse = false
         )
     )
-
-    override val legalTagChars: List<Char> = listOf('@', '#')
 
     override val newMessageText: MutableStateFlow<TextFieldValue> =
         MutableStateFlow(TextFieldValue(""))
@@ -543,143 +534,55 @@ internal open class ConversationViewModel(
         }
     }
 
-    override fun produceAutoCompleteHints(
-        tagChar: Char,
-        query: String
-    ): Flow<DataState<List<AutoCompleteHintCollection>>> = when (tagChar) {
-        '@' -> {
-            produceUserMentionAutoCompleteHints(query)
-        }
-
-        '#' -> {
-            combine(
-                produceExerciseAndLectureAutoCompleteHints(query),
-                produceConversationAutoCompleteHints(query)
-            ) { exerciseAndLectureHints, conversationHints ->
-                (exerciseAndLectureHints join conversationHints)
-                    .bind { (a, b) -> a + b }
+    fun removeLinkPreview(
+        linkPreview: LinkPreview,
+        post: IBasePost,
+        parentPost: IStandalonePost?
+    ): Deferred<MetisModificationFailure?> {
+        val newContent = LinkPreviewUtil.removeLinkPreview(post.content.orEmpty(), linkPreview.url)
+        return when (post) {
+            is IStandalonePost -> editPost(post, newContent)
+            is AnswerPostPojo -> {
+                parentPost?.let { editAnswerPost(it, post, newContent) } ?: throw IllegalArgumentException()
             }
+            else -> throw IllegalArgumentException()
         }
-
-        else -> flowOf(DataState.Success(emptyList()))
     }
-        // Only display categories with at least 1 hint.
-        .map { autoCompleteCategoriesDataState ->
-            autoCompleteCategoriesDataState.bind { autoCompleteCategories ->
-                autoCompleteCategories
-                    .filter { it.items.isNotEmpty() }
-            }
-        }
 
-    private fun produceUserMentionAutoCompleteHints(query: String): Flow<DataState<List<AutoCompleteHintCollection>>> =
-        flatMapLatest(
+    fun generateLinkPreviews(postContent: String): StateFlow<List<LinkPreview>> =
+        combine(
             accountService.authToken,
             serverConfigurationService.serverUrl
         ) { authToken, serverUrl ->
-            retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                conversationService
-                    .searchForCourseMembers(
-                        courseId = metisContext.courseId,
-                        query = query,
-                        authToken = authToken,
-                        serverUrl = serverUrl
-                    )
-                    .bind { users ->
-                        AutoCompleteHintCollection(
-                            type = AutoCompleteType.USERS,
-                            items = users.map {
-                                AutoCompleteHint(
-                                    it.name.orEmpty(),
-                                    replacementText = "[user]${it.name}(${it.username})[/user]",
-                                    id = it.username.orEmpty()
-                                )
-                            }
-                        )
-                            .let(::listOf)
-                    }
+            val links = LinkPreviewUtil.generatePreviewableLinks(postContent)
+                .filter { it.isLinkPreviewRemoved != true }
+                .take(LinkPreviewUtil.MAX_LINK_PREVIEWS_PER_MESSAGE)
+
+            val previews = links.map { link ->
+                viewModelScope.async {
+                    fetchPreview(link, authToken, serverUrl)
+                }
+            }.awaitAll().filterNotNull()
+            previews
+        }.stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, emptyList())
+
+    private suspend fun fetchPreview(
+        link: Link,
+        authToken: String,
+        serverUrl: String
+    ): LinkPreview? {
+        return retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+            metisService.fetchLinkPreview(
+                url = link.value,
+                authToken = authToken,
+                serverUrl = serverUrl
+            ).bind { preview ->
+                preview?.takeIf { it.isValid() }?.apply {
+                    shouldPreviewBeShown = true
+                }
             }
-        }
-
-    private fun produceExerciseAndLectureAutoCompleteHints(query: String): Flow<DataState<List<AutoCompleteHintCollection>>> =
-        course.map { courseDataState ->
-            courseDataState.bind { course ->
-                val exerciseAutoCompleteItems =
-                    course
-                        .exercises
-                        .filter { it.title.orEmpty().contains(query, ignoreCase = true) }
-                        .mapNotNull { exercise ->
-                            val exerciseTag = when (exercise) {
-                                is FileUploadExercise -> "file-upload"
-                                is ModelingExercise -> "modeling"
-                                is ProgrammingExercise -> "programming"
-                                is QuizExercise -> "quiz"
-                                is TextExercise -> "text"
-                                is UnknownExercise -> return@mapNotNull null
-                            }
-
-                            val exerciseTitle = exercise.title ?: return@mapNotNull null
-                            val exerciseId = exercise.id ?: return@mapNotNull null
-                            val link = ExerciseDeeplinks.ToExercise.markdownLink(courseId, exerciseId)
-
-                            AutoCompleteHint(
-                                hint = exerciseTitle,
-                                replacementText = "[$exerciseTag]${exercise.title}($link)[/$exerciseTag]",
-                                id = "Exercise:$exerciseId",
-                                icon = AutoCompleteIcon.DrawableFromId(getExerciseTypeIconId(exercise))
-                            )
-                        }
-
-                val lectureAutoCompleteItems =
-                    course
-                        .lectures
-                        .filter { query in it.title }
-                        .mapNotNull { lecture ->
-                            val lectureId = lecture.id ?: return@mapNotNull null
-                            val link = LectureDeeplinks.ToLecture.markdownLink(courseId, lectureId)
-
-                            AutoCompleteHint(
-                                hint = lecture.title,
-                                replacementText = "[lecture]${lecture.title}($link)[/lecture]",
-                                id = "Lecture:$lectureId"
-                            )
-                        }
-
-                listOf(
-                    AutoCompleteHintCollection(
-                        type = AutoCompleteType.EXERCISES,
-                        items = exerciseAutoCompleteItems
-                    ),
-                    AutoCompleteHintCollection(
-                        type = AutoCompleteType.LECTURES,
-                        items = lectureAutoCompleteItems
-                    )
-                )
-            }
-        }
-
-    private fun produceConversationAutoCompleteHints(query: String): Flow<DataState<List<AutoCompleteHintCollection>>> =
-        conversations.map { conversationsDataState ->
-            conversationsDataState.bind { conversations ->
-                val conversationAutoCompleteItems = conversations
-                    .filterIsInstance<ChannelChat>()
-                    .filter { it.name.contains(query, ignoreCase = true) }
-                    .map { channel ->
-                        AutoCompleteHint(
-                            hint = channel.name,
-                            replacementText = "[channel]${channel.name}(${channel.id})[/channel]",
-                            id = "Channel:${channel.id}",
-                            icon = AutoCompleteIcon.DrawableFromImageVector(getChannelIconImageVector(channel))
-                        )
-                    }
-
-                listOf(
-                    AutoCompleteHintCollection(
-                        type = AutoCompleteType.CHANNELS,
-                        items = conversationAutoCompleteItems
-                    )
-                )
-            }
-        }
+        }.filterSuccess().firstOrNull()
+    }
 
     init {
         // Reload the newMessageText whenever postId changes

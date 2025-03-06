@@ -26,6 +26,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CommunicationDeeplinks
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
@@ -76,19 +77,19 @@ private fun ForwardedMessageItem(
 
     Row(
         modifier = modifier.height(IntrinsicSize.Min),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(Spacings.Post.innerSpacing)
     ) {
         Box(
             modifier = Modifier
                 .clip(shape = CircleShape)
                 .fillMaxHeight()
-                .width(6.dp)
+                .width(Spacings.Post.quoteBorderWidth)
                 .background(color = MaterialTheme.colorScheme.primary)
         )
 
         Column(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(Spacings.Post.innerSpacing)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -101,7 +102,7 @@ private fun ForwardedMessageItem(
                     tint = MaterialTheme.colorScheme.primary,
                 )
 
-                Spacer(Modifier.width(8.dp))
+                Spacer(Modifier.width(Spacings.Post.innerSpacing))
 
                 Text(
                     text = stringResource(R.string.post_forwarded_from),

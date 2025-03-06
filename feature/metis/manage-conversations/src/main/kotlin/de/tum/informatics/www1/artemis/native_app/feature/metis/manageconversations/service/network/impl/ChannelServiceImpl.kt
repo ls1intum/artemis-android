@@ -1,15 +1,16 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.network.impl
 
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
+import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.ArtemisContextBasedServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.network.ChannelService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
-import io.ktor.client.call.body
-import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -18,59 +19,44 @@ import io.ktor.http.appendPathSegments
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 
-class ChannelServiceImpl(private val ktorProvider: KtorProvider) : ChannelService {
+class ChannelServiceImpl(
+    ktorProvider: KtorProvider,
+    artemisContextProvider: ArtemisContextProvider,
+) : ArtemisContextBasedServiceImpl(ktorProvider, artemisContextProvider), ChannelService {
 
-    override suspend fun getChannels(
-        courseId: Long,
-        serverUrl: String,
-        authToken: String
-    ): NetworkResponse<List<ChannelChat>> {
-        return performNetworkCall {
-            ktorProvider.ktorClient.get(serverUrl) {
-                url {
-                    appendPathSegments(
-                        "api",
-                        "courses",
-                        courseId.toString(),
-                        "channels",
-                        "overview"
-                    )
-                }
-
-                cookieAuth(authToken)
-                contentType(ContentType.Application.Json)
-            }.body()
+    override suspend fun getChannels(courseId: Long): NetworkResponse<List<ChannelChat>> {
+        return getRequest {
+            url {
+                appendPathSegments(
+                    *Api.Communication.Courses.path,
+                    courseId.toString(),
+                    "channels",
+                    "overview"
+                )
+            }
         }
     }
 
     override suspend fun getUnresolvedChannels(
         courseId: Long,
         channelIds: List<Long>,
-        serverUrl: String,
-        authToken: String
     ): NetworkResponse<List<Conversation>> {
-        return performNetworkCall {
-            ktorProvider.ktorClient.get(serverUrl) {
-                url {
-                    appendPathSegments(
-                        "api",
-                        "courses",
-                        courseId.toString(),
-                        "messages"
-                    )
-                }
+        return getRequest<List<StandalonePost>> {
+            url {
+                appendPathSegments(
+                    *Api.Communication.Courses.path,
+                    courseId.toString(),
+                    "messages"
+                )
+            }
 
-                parameter("courseWideChannelIds", channelIds.joinToString(","))
-                parameter("postSortCriterion", "CREATION_DATE")
-                parameter("sortingOrder", "DESCENDING")
-                parameter("pagingEnabled", "true")
-                parameter("page", "0")
-                parameter("size", "\\(50)")
-                parameter("filterToUnresolved", "true")
-
-                cookieAuth(authToken)
-                contentType(ContentType.Application.Json)
-            }.body() as List<StandalonePost>
+            parameter("courseWideChannelIds", channelIds.joinToString(","))
+            parameter("postSortCriterion", "CREATION_DATE")
+            parameter("sortingOrder", "DESCENDING")
+            parameter("pagingEnabled", "true")
+            parameter("page", "0")
+            parameter("size", "\\(50)")
+            parameter("filterToUnresolved", "true")
         }.bind {
             it.map { message ->
                 message.conversation ?: error("Conversation is null")
@@ -80,67 +66,47 @@ class ChannelServiceImpl(private val ktorProvider: KtorProvider) : ChannelServic
 
     override suspend fun getExerciseChannel(
         exerciseId: Long,
-        courseId: Long,
-        serverUrl: String,
-        authToken: String
+        courseId: Long
     ): NetworkResponse<ChannelChat> {
-        return performNetworkCall {
-            ktorProvider.ktorClient.get(serverUrl) {
-                url {
-                    appendPathSegments(
-                        "api",
-                        "courses",
-                        courseId.toString(),
-                        "exercises",
-                        exerciseId.toString(),
-                        "channel"
-                    )
-                }
-
-                cookieAuth(authToken)
-                contentType(ContentType.Application.Json)
-            }.body()
+        return getRequest {
+            url {
+                appendPathSegments(
+                    *Api.Communication.Courses.path,
+                    courseId.toString(),
+                    "exercises",
+                    exerciseId.toString(),
+                    "channel"
+                )
+            }
         }
     }
 
     override suspend fun getLectureChannel(
         lectureId: Long,
         courseId: Long,
-        serverUrl: String,
-        authToken: String
     ): NetworkResponse<ChannelChat> {
-        return performNetworkCall {
-            ktorProvider.ktorClient.get(serverUrl) {
-                url {
-                    appendPathSegments(
-                        "api",
-                        "courses",
-                        courseId.toString(),
-                        "lectures",
-                        lectureId.toString(),
-                        "channel"
-                    )
-                }
-
-                cookieAuth(authToken)
-                contentType(ContentType.Application.Json)
-            }.body()
+        return getRequest {
+            url {
+                appendPathSegments(
+                    *Api.Communication.Courses.path,
+                    courseId.toString(),
+                    "lectures",
+                    lectureId.toString(),
+                    "channel"
+                )
+            }
         }
     }
 
     override suspend fun registerInChannel(
         courseId: Long,
         conversationId: Long,
-        username: String,
-        serverUrl: String,
-        authToken: String
     ): NetworkResponse<Boolean> {
         return performNetworkCall {
-            ktorProvider.ktorClient.post(serverUrl) {
+            ktorProvider.ktorClient.post(serverUrl()) {
                 url {
                     appendPathSegments(
-                        "api",
-                        "courses",
+                        *Api.Communication.Courses.path,
                         courseId.toString(),
                         "channels",
                         conversationId.toString(),
@@ -148,10 +114,10 @@ class ChannelServiceImpl(private val ktorProvider: KtorProvider) : ChannelServic
                     )
                 }
 
-                setBody(listOf(username))
+                setBody(listOf(artemisContext().username))
                 contentType(ContentType.Application.Json)
 
-                cookieAuth(authToken)
+                cookieAuth(authToken())
             }
                 .status
                 .isSuccess()
