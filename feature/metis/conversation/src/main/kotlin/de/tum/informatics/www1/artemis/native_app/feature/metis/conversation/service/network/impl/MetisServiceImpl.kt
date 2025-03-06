@@ -180,6 +180,9 @@ internal class MetisServiceImpl(
         }
     }
 
+    // TODO: Use the API object for the following functions once 8.0.0 has been released
+    // See https://github.com/ls1intum/artemis-android/issues/462
+    // The following functions are not compatible with the pre 8.0.0 API structure
     override suspend fun getForwardedMessagesByIds(
         metisContext: MetisContext,
         postIds: List<Long>,
