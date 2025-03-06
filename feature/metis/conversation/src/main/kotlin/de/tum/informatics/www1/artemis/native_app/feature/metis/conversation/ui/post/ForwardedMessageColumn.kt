@@ -51,6 +51,7 @@ fun ForwardedMessageColumn(
     if (chatListItem.forwardedPosts.isEmpty()) return
     val forwardedPost = chatListItem.forwardedPosts[0]
 
+    // Currently, only one forwarded post is supported
     Column(
         modifier = modifier.testTag(TEST_TAG_FORWARDED_POST_COLUMN),
     ) {
@@ -61,8 +62,6 @@ fun ForwardedMessageColumn(
             courseId = chatListItem.courseId,
             forwardedPost = forwardedPost,
         )
-
-        Spacer(modifier = Modifier.height(8.dp))
     }
 }
 
