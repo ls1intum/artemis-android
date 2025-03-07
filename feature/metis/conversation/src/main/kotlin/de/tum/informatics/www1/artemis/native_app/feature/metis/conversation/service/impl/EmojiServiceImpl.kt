@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -25,6 +26,8 @@ import kotlinx.serialization.json.decodeFromStream
  * Loads the emojis from the generated file
  */
 class EmojiServiceImpl(context: Context) : EmojiService {
+
+    private val frameWithAnXUnicode = "\uD83D\uDDBE"
 
     @OptIn(ExperimentalSerializationApi::class, DelicateCoroutinesApi::class)
     private val input: Flow<Input> = flow<Input> {
@@ -44,30 +47,35 @@ class EmojiServiceImpl(context: Context) : EmojiService {
     }
         .shareIn(GlobalScope, started = SharingStarted.Lazily, replay = 1)
 
-
-    override suspend fun emojiIdToUnicode(emojiId: String): String {
-        val map = entries.first()
-        return map[emojiId] ?: "\uD83D\uDDBE"
-    }
-
-    override suspend fun getEmojiToUnicodeMap(): Map<String, String> = entries.first()
-
-    override suspend fun getEmojiCategories(): List<EmojiCategory> {
-        val emojiToUnicodeMap = getEmojiToUnicodeMap()
-        val categoryEntries = input.first().categories
-
-        return categoryEntries.map { categoryEntry ->
+    @OptIn(DelicateCoroutinesApi::class)
+    private val categories: Flow<List<EmojiCategory>> = combine(
+        input,
+        entries
+    ) { input, entries ->
+        input.categories.map { categoryEntry ->
             EmojiCategory(
                 id = EmojiCategory.Id.fromValue(categoryEntry.id),
                 emojis = categoryEntry.emojiIds.map {
                     Emoji(
                         emojiId = it,
-                        unicode = emojiToUnicodeMap[it] ?: "x"
+                        unicode = entries[it] ?: frameWithAnXUnicode
                     )
                 }
             )
         }
     }
+        .shareIn(GlobalScope, started = SharingStarted.Lazily, replay = 1)
+
+
+
+    override suspend fun emojiIdToUnicode(emojiId: String): String {
+        val map = entries.first()
+        return map[emojiId] ?: frameWithAnXUnicode
+    }
+
+    override suspend fun getEmojiToUnicodeMap(): Map<String, String> = entries.first()
+
+    override suspend fun getEmojiCategories(): List<EmojiCategory> = categories.first()
 
     @Serializable
     data class EmojiEntry(

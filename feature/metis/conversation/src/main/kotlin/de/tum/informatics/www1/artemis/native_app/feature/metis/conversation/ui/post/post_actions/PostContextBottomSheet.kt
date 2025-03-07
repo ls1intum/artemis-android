@@ -326,7 +326,7 @@ fun EmojiDialog(
                     .fillMaxWidth()
                     .fillMaxHeight(0.8f)
                     .padding(horizontal = 8.dp),
-                onEmojiClicked = onSelectEmoji
+                onEmojiClicked = { onSelectEmoji(it.emojiId) }
             )
         }
     }

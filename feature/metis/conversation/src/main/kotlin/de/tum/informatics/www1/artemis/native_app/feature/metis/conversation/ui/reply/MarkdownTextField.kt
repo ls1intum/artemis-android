@@ -35,7 +35,6 @@ import androidx.compose.material3.InputChip
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -67,8 +66,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.appendAtCursor
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.emoji.EmojiPicker
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.emoji.LocalEmojiProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.emoji.ProvideEmojis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.LocalReplyAutoCompleteHintProvider
 import kotlinx.coroutines.launch
@@ -148,51 +145,23 @@ internal fun MarkdownTextField(
     }
 
     if (showEmojiPicker) {
-        val sheetState = rememberModalBottomSheetState()
-
-        // To minify the impact of the scrolling bug: https://stackoverflow.com/a/78958469/13366254
-        val scrollModifier = if (sheetState.currentValue == SheetValue.Expanded) {
-            Modifier.verticalScroll(rememberScrollState())
-        } else {
-            Modifier
-        }
-
         ModalBottomSheet(
             modifier = Modifier
                 .statusBarsPadding(),
-            sheetState = sheetState,
+            sheetState = rememberModalBottomSheetState(),
             onDismissRequest = { showEmojiPicker = false },
         ) {
-            ProvideEmojis {
-                val emojiProvider = LocalEmojiProvider.current
-                val unicodeForEmojiIdMap by emojiProvider.unicodeForEmojiIdMap
-
-                Column {
-//                    BasicSearchTextField(
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .padding(horizontal = 8.dp),
-//                        query = "",
-//                        updateQuery = {},
-//                        hint = "Search emojis"
-//                    )
-
-                    // Scrolling not working, see: https://issuetracker.google.com/issues/301240745
-
-                    EmojiPicker(
-                        modifier = scrollModifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp),
-                        onEmojiClicked = {
-                            val emojiAsUnicode = unicodeForEmojiIdMap?.get(it)
-                            onTextChanged(
-                                textFieldValue.appendAtCursor(emojiAsUnicode ?: "")
-                            )
-                            showEmojiPicker = false
-                        }
+            EmojiPicker(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+                onEmojiClicked = {
+                    onTextChanged(
+                        textFieldValue.appendAtCursor(it.unicode)
                     )
+                    showEmojiPicker = false
                 }
-            }
+            )
         }
     }
 }

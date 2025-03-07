@@ -26,7 +26,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.con
 @Composable
 internal fun EmojiPicker(
     modifier: Modifier = Modifier,
-    onEmojiClicked: (emojiId: String) -> Unit,
+    onEmojiClicked: (Emoji) -> Unit,
     searchEnabled: Boolean = false,
 ) {
     val emojiProvider = LocalEmojiProvider.current
@@ -36,9 +36,7 @@ internal fun EmojiPicker(
 
         EmojiCategoryList(
             emojiCategories = emojiCategories ?: emptyList(),
-            onEmojiClicked = {
-                onEmojiClicked(it.emojiId)
-            }
+            onEmojiClicked = onEmojiClicked
         )
     }
 }
