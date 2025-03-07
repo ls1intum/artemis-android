@@ -4,8 +4,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -19,13 +22,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicSearchTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.content.Emoji
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.content.EmojiCategory
@@ -47,16 +54,76 @@ fun EmojiPicker(
 ) {
     val emojiProvider = LocalEmojiServiceProvider.current
     val emojiCategories by emojiProvider.emojiCategoriesFlow.collectAsState(emptyList())
-
     if (emojiCategories.isEmpty()) {
         CircularProgressIndicator()
         return
     }
 
     val coroutineScope = rememberCoroutineScope()
-    val gridState = rememberLazyGridState()
+    var searchQuery by remember { mutableStateOf("") }
+
+    val allEmojis by remember(emojiCategories) {
+        derivedStateOf {
+            emojiCategories
+                .filter { it.id != EmojiCategory.Id.RECENT }
+                .flatMap { it.emojis }
+        }
+    }
+    val filteredEmojis = remember(allEmojis, searchQuery) {
+        allEmojis.filter {
+            it.emojiId.startsWith(searchQuery)
+        }
+    }
 
     Column(modifier = modifier) {
+        BasicSearchTextField(
+            hint = stringResource(R.string.emojis_search_hint),
+            query = searchQuery,
+            updateQuery = {
+                searchQuery = it
+            }
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        if (searchQuery.isNotBlank()) {
+            LazyColumn {
+                items(
+                    count = filteredEmojis.size
+                ) { index ->
+                    EmojiLineItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        emoji = filteredEmojis[index]
+                    )
+                }
+            }
+            return
+        }
+
+        EmojiOverview(
+            emojiCategories = emojiCategories,
+            onEmojiClicked = {
+                coroutineScope.launch {
+                    emojiProvider.storeRecentEmoji(it.emojiId)
+                }
+
+                onEmojiClicked(it)
+            }
+        )
+    }
+}
+
+@Composable
+private fun EmojiOverview(
+    modifier: Modifier = Modifier,
+    emojiCategories: List<EmojiCategory>,
+    onEmojiClicked: (Emoji) -> Unit
+) {
+    val gridState = rememberLazyGridState()
+
+    Column(
+        modifier = modifier
+    ) {
         EmojiCategoryIconsRow(
             emojiCategories = emojiCategories,
             gridState = gridState,
@@ -67,13 +134,7 @@ fun EmojiPicker(
         EmojiCategoryList(
             emojiCategories = emojiCategories,
             gridState = gridState,
-            onEmojiClicked = {
-                coroutineScope.launch {
-                    emojiProvider.storeRecentEmoji(it.emojiId)
-                }
-
-                onEmojiClicked(it)
-            }
+            onEmojiClicked = onEmojiClicked
         )
     }
 }
