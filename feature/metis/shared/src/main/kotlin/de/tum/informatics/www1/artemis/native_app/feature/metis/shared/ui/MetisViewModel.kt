@@ -2,21 +2,23 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.common.withPrevious
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
-import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternetIndefinetly
+import de.tum.informatics.www1.artemis.native_app.core.data.join
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.performAutoReloadingNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
+import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.core.model.account.isAtLeastTutorInCourse
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
@@ -31,8 +33,8 @@ import kotlin.coroutines.CoroutineContext
  */
 abstract class MetisViewModel(
     courseService: CourseService,
-    private val accountDataService: AccountDataService,
-    private val networkStatusProvider: NetworkStatusProvider,
+    accountDataService: AccountDataService,
+    networkStatusProvider: NetworkStatusProvider,
     websocketProvider: WebsocketProvider,
     coroutineContext: CoroutineContext,
     private val courseId: Long
@@ -40,26 +42,30 @@ abstract class MetisViewModel(
 
     protected val onRequestReload = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
-    val course: StateFlow<DataState<Course>> = flatMapLatest(
-        accountDataService.onReloadRequired,
-        onRequestReload.onStart { emit(Unit) }
-    ) { _, _ ->
-        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-            courseService.getCourse(courseId).bind { it.course }
-        }
+    val course: StateFlow<DataState<Course>> = courseService.performAutoReloadingNetworkCall(
+        networkStatusProvider = networkStatusProvider,
+        manualReloadFlow = onRequestReload
+    ) {
+        getCourse(courseId).bind { it.course }
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
-    val isAtLeastTutorInCourse: StateFlow<Boolean> = flatMapLatest(
-        course,
-        accountDataService.onReloadRequired,
-        onRequestReload.onStart { emit(Unit) }
-    ) { course, _, _ ->
-        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-            accountDataService.getAccountData()
-                .bind { it.isAtLeastTutorInCourse(course = course.orThrow()) }
+    private val accountDataStateFlow: Flow<DataState<Account>> = accountDataService
+        .performAutoReloadingNetworkCall(
+            networkStatusProvider = networkStatusProvider,
+            manualReloadFlow = onRequestReload
+        ) {
+            getAccountData()
         }
-            .map { it.orElse(false) }
+
+    val isAtLeastTutorInCourse: StateFlow<Boolean> = combine(
+        accountDataStateFlow,
+        course,
+    ) { accountDataState, courseDataState ->
+        accountDataState.join(courseDataState).bind { (account, course) ->
+            account.isAtLeastTutorInCourse(course = course)
+        }
+            .orElse(false)
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
@@ -77,15 +83,11 @@ abstract class MetisViewModel(
         .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 0)
         .onStart { emit(Unit) }
 
-    val clientId: StateFlow<DataState<Long>> = flatMapLatest(
-        accountDataService.onReloadRequired,
-        onRequestReload.onStart { emit(Unit) }
-    ) { _, _ ->
-        retryOnInternetIndefinetly(
-            networkStatusProvider.currentNetworkStatus
-        ) {
-            accountDataService.getAccountData().bind { it.id }
-        }
+    val clientId: StateFlow<DataState<Long>> = accountDataService.performAutoReloadingNetworkCall(
+        networkStatusProvider = networkStatusProvider,
+        manualReloadFlow = onRequestReload
+    ) {
+        getAccountData().bind { it.id }
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Lazily, DataState.Loading())
 

@@ -84,7 +84,7 @@ class ConversationOverviewViewModel(
     websocketProvider: WebsocketProvider,
     networkStatusProvider: NetworkStatusProvider,
     accountDataService: AccountDataService,
-    private val courseService: CourseService,
+    courseService: CourseService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : MetisViewModel(
     courseService,
@@ -211,9 +211,7 @@ class ConversationOverviewViewModel(
                     retryOnInternet(networkStatusProvider.currentNetworkStatus) {
                         channelService.getUnresolvedChannels(
                             courseId,
-                            channelIds,
-                            serverConfigurationService.serverUrl.first(),
-                            accountService.authToken.first()
+                            channelIds
                         )
                     }
                 }
@@ -259,6 +257,7 @@ class ConversationOverviewViewModel(
     private val isFiltering: StateFlow<Boolean> = query
         .map { it.isNotBlank() }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
+
 
     private val conversationsAsCollections: StateFlow<DataState<ConversationCollections>> =
         combine(

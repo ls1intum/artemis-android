@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.PostColors
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.EmojiSelection
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostContextBottomSheet
@@ -36,9 +37,11 @@ internal fun PostWithBottomSheet(
     postItemViewType: PostItemViewType,
     isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     postActions: PostActions,
+    linkPreviews: List<LinkPreview>,
     clientId: Long,
     displayHeader: Boolean,
     joinedItemType: PostItemViewJoinedType,
+    onRemoveLinkPreview: (LinkPreview) -> Unit,
     onClick: () -> Unit
 ) {
     var displayBottomSheet by remember(post, postItemViewType) { mutableStateOf(false) }
@@ -85,7 +88,7 @@ internal fun PostWithBottomSheet(
         }
 
     val cardModifier = applyPaddingToModifier(modifier, 4.dp)
-    val innerModifier = applyPaddingToModifier(modifier, Spacings.Post.innerSpacing)
+    val innerModifier = applyPaddingToModifier(Modifier, Spacings.Post.innerSpacing)
 
     Card(
         modifier = cardModifier,
@@ -101,6 +104,8 @@ internal fun PostWithBottomSheet(
             postItemViewJoinedType = joinedItemType,
             isMarkedAsDeleteList = isMarkedAsDeleteList,
             postActions = postActions,
+            linkPreviews = linkPreviews,
+            onRemoveLinkPreview = onRemoveLinkPreview,
             onClick = onClick,
             onLongClick = {
                 displayBottomSheet = true

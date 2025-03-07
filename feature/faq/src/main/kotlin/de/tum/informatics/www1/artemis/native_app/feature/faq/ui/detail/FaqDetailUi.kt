@@ -33,6 +33,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
+import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.FaqDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.LocalMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
@@ -62,7 +63,9 @@ fun NavController.navigateToFaqDetail(
 fun NavGraphBuilder.faqDetail(
     onNavigateBack: () -> Unit,
 ) {
-    animatedComposable<FaqDetailUi> { backStackEntry ->
+    animatedComposable<FaqDetailUi>(
+        deepLinks = FaqDeeplinks.ToFaq.generateLinks(),
+    ) { backStackEntry ->
         val route: FaqDetailUi = backStackEntry.toRoute()
 
         val courseId = route.courseId

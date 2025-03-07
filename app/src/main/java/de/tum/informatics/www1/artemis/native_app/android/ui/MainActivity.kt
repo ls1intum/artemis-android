@@ -165,9 +165,7 @@ class MainActivity : AppCompatActivity(),
                             onPressPositiveButton = {
                                 lifecycleScope.launch {
                                     if (data != null) {
-                                        unsubscribeFromNotifications(
-                                            serverConfigurationService, accountService, get(), get()
-                                        )
+                                        unsubscribeFromNotifications(get(), get())
                                         accountService.logout()
 
                                         val newUrl = data.scheme + "://" + data.host.orEmpty()

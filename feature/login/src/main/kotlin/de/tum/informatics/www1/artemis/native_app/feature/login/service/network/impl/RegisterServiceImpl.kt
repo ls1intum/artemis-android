@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.login.service.network
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.network.RegisterService
@@ -23,7 +24,7 @@ internal class RegisterServiceImpl(
         return performNetworkCall {
             ktorProvider.ktorClient.post(serverUrl) {
                 url {
-                    appendPathSegments("api", "public", "register")
+                    appendPathSegments(*Api.Core.Public.path, "register")
                 }
 
                 setBody(account)

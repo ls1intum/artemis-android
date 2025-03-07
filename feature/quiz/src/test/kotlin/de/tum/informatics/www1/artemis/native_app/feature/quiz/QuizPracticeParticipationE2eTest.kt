@@ -4,6 +4,7 @@ import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTi
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.ktorProvider
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import io.ktor.client.request.put
@@ -26,7 +27,7 @@ internal class QuizPracticeParticipationE2eTest : QuizParticipationBaseE2eTest(Q
 
         ktorProvider.ktorClient.put(testServerUrl) {
             url {
-                appendPathSegments("api", "quiz-exercises", quiz.id.toString(), "end-now")
+                appendPathSegments(*Api.Quiz.QuizExercises.path, quiz.id.toString(), "end-now")
             }
 
             cookieAuth(getAdminAccessToken())
@@ -35,7 +36,7 @@ internal class QuizPracticeParticipationE2eTest : QuizParticipationBaseE2eTest(Q
 
         ktorProvider.ktorClient.put(testServerUrl) {
             url {
-                appendPathSegments("api", "quiz-exercises", quiz.id.toString(), "open-for-practice")
+                appendPathSegments(*Api.Quiz.QuizExercises.path, quiz.id.toString(), "open-for-practice")
             }
 
             cookieAuth(getAdminAccessToken())

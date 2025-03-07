@@ -74,6 +74,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.PostColors
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.getUnicodeForEmojiId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.EmojiDialog
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.EmojiSelection
@@ -121,6 +122,8 @@ internal fun PostItem(
     postItemViewJoinedType: PostItemViewJoinedType,
     isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     postActions: PostActions,
+    linkPreviews: List<LinkPreview>,
+    onRemoveLinkPreview: (LinkPreview) -> Unit,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     onRequestRetrySend: () -> Unit,
@@ -168,10 +171,13 @@ internal fun PostItem(
             .padding(horizontal = Spacings.Post.innerSpacing),
         post = post,
         isExpanded = isExpanded,
+        isAuthor = post?.authorId == clientId,
         isPlaceholder = isPlaceholder,
         isDeleting = isDeleting,
         postStatus = postStatus,
         displayHeader = displayHeader,
+        linkPreviews = linkPreviews,
+        onRemoveLinkPreview = onRemoveLinkPreview,
         onClick = onClick,
         onLongClick = onLongClick,
         onUndoDelete = { postActions.requestUndoDeletePost?.invoke() },
@@ -263,8 +269,11 @@ fun PostItemMainContent(
     isExpanded: Boolean = true,
     isPlaceholder: Boolean = false,
     isDeleting: Boolean = false,
+    isAuthor: Boolean = false,
     postStatus: CreatePostService.Status = CreatePostService.Status.FINISHED,
     displayHeader: Boolean = true,
+    linkPreviews: List<LinkPreview> = emptyList(),
+    onRemoveLinkPreview: (LinkPreview) -> Unit = {},
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     onUndoDelete: () -> Unit = {},
@@ -324,6 +333,17 @@ fun PostItemMainContent(
                         text = stringResource(id = R.string.post_edited_hint, updateTime),
                         style = MaterialTheme.typography.bodySmall,
                         color = PostColors.editedHintText
+                    )
+                }
+
+                if (linkPreviews.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(Spacings.Post.innerSpacing))
+
+                    LinkPreviewColumn(
+                        modifier = Modifier.fillMaxWidth(),
+                        linkPreviews = linkPreviews,
+                        isAuthor = isAuthor,
+                        onRemoveLinkPreview = onRemoveLinkPreview
                     )
                 }
 

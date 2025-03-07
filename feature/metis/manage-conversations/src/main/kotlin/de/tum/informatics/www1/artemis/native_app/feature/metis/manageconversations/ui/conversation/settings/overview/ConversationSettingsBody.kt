@@ -39,7 +39,8 @@ internal fun ConversationSettingsBody(
     viewModel: ConversationSettingsViewModel,
     onRequestAddMembers: () -> Unit,
     onRequestViewAllMembers: () -> Unit,
-    onConversationLeft: () -> Unit
+    onConversationLeft: () -> Unit,
+    onChannelDeleted: () -> Unit
 ) {
     val conversationDataState by viewModel.conversation.collectAsState()
     val usernameDataState by viewModel.clientUsername.collectAsState()
@@ -63,6 +64,7 @@ internal fun ConversationSettingsBody(
     var savingJob: Deferred<Boolean>? by remember { mutableStateOf(null) }
     var leaveConversationJob: Deferred<Boolean>? by remember { mutableStateOf(null) }
     var archiveChannelJob: Deferred<Boolean>? by remember { mutableStateOf(null) }
+    var deleteChannelJob: Deferred<Boolean>? by remember { mutableStateOf(null) }
 
     var displaySaveFailedDialog by remember { mutableStateOf(false) }
 
@@ -100,6 +102,19 @@ internal fun ConversationSettingsBody(
             archiveChannelJob = null
 
             onSaveResult(successful)
+        }
+    )
+
+    AwaitDeferredCompletion(
+        job = deleteChannelJob,
+        onComplete = { successful ->
+            deleteChannelJob = null
+
+            onSaveResult(successful)
+
+            if (successful) {
+                onChannelDeleted()
+            }
         }
     )
 
@@ -183,6 +198,9 @@ internal fun ConversationSettingsBody(
                 },
                 onToggleChannelArchivation = {
                     archiveChannelJob = viewModel.toggleChannelArchivation()
+                },
+                onDeleteChannel = {
+                    deleteChannelJob = viewModel.deleteConversation()
                 }
             )
         }

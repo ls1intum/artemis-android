@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.core.data.service.network.imp
 
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.ArtemisContextBasedServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseExerciseService
@@ -18,7 +19,7 @@ internal class CourseExerciseServiceImpl(
     ): NetworkResponse<Participation> {
         return postRequest {
             url {
-                appendPathSegments("api", "exercises", exerciseId.toString(), "participations")
+                appendPathSegments(*Api.Exercise.Exercises.path, exerciseId.toString(), "participations")
             }
         }
     }
