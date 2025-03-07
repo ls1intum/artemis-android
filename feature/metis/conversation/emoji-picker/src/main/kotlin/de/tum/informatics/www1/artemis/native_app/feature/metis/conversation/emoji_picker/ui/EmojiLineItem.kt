@@ -26,7 +26,7 @@ fun EmojiLineItem(
         )
 
         Text(
-            text = ":${emoji.emojiId}:",
+            text = emoji.emojiId,
             style = MaterialTheme.typography.bodyMedium
         )
     }
