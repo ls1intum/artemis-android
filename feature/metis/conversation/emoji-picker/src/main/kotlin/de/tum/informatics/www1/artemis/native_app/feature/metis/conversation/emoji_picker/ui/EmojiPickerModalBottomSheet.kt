@@ -38,7 +38,7 @@ fun EmojiPickerModalBottomSheet(
                 // There seems to be an internal call after the keyboard animation that causes the
                 // sheet to go to the partially expanded state. This delay is a workaround to ensure
                 // the sheet is fully expanded after the keyboard animation.
-                // This here might be related: https://stackoverflow.com/questions/79082438/jetpack-compose-layout-jumps-when-ime-opens
+                // This here might be related: https://github.com/ls1intum/artemis-android/issues/368
                 delay(200.milliseconds)
                 sheetState.expand()
             }
