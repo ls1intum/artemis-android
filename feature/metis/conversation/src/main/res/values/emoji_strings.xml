@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="emoji_category_people">People</string>
+    <string name="emoji_category_nature">Nature</string>
+    <string name="emoji_category_foods">Foods</string>
+    <string name="emoji_category_activity">Activity</string>
+    <string name="emoji_category_places">Places</string>
+    <string name="emoji_category_objects">Objects</string>
+    <string name="emoji_category_symbols">Symbols</string>
+    <string name="emoji_category_flags">Flags</string>
+</resources>

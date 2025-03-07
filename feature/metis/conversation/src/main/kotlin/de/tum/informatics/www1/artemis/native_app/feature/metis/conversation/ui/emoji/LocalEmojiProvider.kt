@@ -11,6 +11,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalInspectionMode
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.emoji.EmojiCategory
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.EmojiServiceStub
 import org.koin.compose.koinInject
@@ -20,7 +21,8 @@ internal val LocalEmojiProvider: ProvidableCompositionLocal<EmojiProvider> =
 
 internal data class EmojiProvider(
     val unicodeForEmojiIdMap: MutableState<Map<String, String>?>,
-    val unicodeToEmojiIdMap: MutableState<Map<String, String>?>
+    val unicodeToEmojiIdMap: MutableState<Map<String, String>?>,
+    val emojiCategories: MutableState<List<EmojiCategory>?>
 )
 
 /**
@@ -34,19 +36,22 @@ fun ProvideEmojis(
 ) {
     val unicodeForEmojiIdMap: MutableState<Map<String, String>?> = remember { mutableStateOf(null) }
     val unicodeToEmojiIdMap: MutableState<Map<String, String>?> = remember { mutableStateOf(null) }
+    val emojiCategories: MutableState<List<EmojiCategory>?> = remember { mutableStateOf(null) }
 
     LaunchedEffect(Unit) {
         if (unicodeForEmojiIdMap.value == null) {
             val emojiToUnicodeMap = emojiService.getEmojiToUnicodeMap()
             unicodeForEmojiIdMap.value = emojiToUnicodeMap
             unicodeToEmojiIdMap.value = emojiToUnicodeMap.map { it.value to it.key }.toMap()
+            emojiCategories.value = emojiService.getEmojiCategories()
         }
     }
 
     CompositionLocalProvider(
         LocalEmojiProvider provides EmojiProvider(
             unicodeForEmojiIdMap = unicodeForEmojiIdMap,
-            unicodeToEmojiIdMap = unicodeToEmojiIdMap
+            unicodeToEmojiIdMap = unicodeToEmojiIdMap,
+            emojiCategories = emojiCategories
         ),
         content = content
     )

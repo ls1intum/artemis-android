@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.se
 
 import android.content.Context
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.emoji.Emoji
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.emoji.EmojiCategory
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -52,7 +53,20 @@ class EmojiServiceImpl(context: Context) : EmojiService {
     override suspend fun getEmojiToUnicodeMap(): Map<String, String> = entries.first()
 
     override suspend fun getEmojiCategories(): List<EmojiCategory> {
-        return input.first().categories
+        val emojiToUnicodeMap = getEmojiToUnicodeMap()
+        val categoryEntries = input.first().categories
+
+        return categoryEntries.map { categoryEntry ->
+            EmojiCategory(
+                id = EmojiCategory.Id.fromValue(categoryEntry.id),
+                emojis = categoryEntry.emojiIds.map {
+                    Emoji(
+                        emojiId = it,
+                        unicode = emojiToUnicodeMap[it] ?: "x"
+                    )
+                }
+            )
+        }
     }
 
     @Serializable
@@ -64,8 +78,15 @@ class EmojiServiceImpl(context: Context) : EmojiService {
     )
 
     @Serializable
+    data class EmojiCategoryEntry(
+        val id: String,
+        @SerialName("emojis")
+        val emojiIds: List<String>
+    )
+
+    @Serializable
     data class Input(
-        val categories: List<EmojiCategory>,
+        val categories: List<EmojiCategoryEntry>,
         val entries: List<EmojiEntry>
     )
 }
