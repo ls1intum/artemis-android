@@ -8,6 +8,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalInspectionMode
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.EmojiService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.UNKNOWN_EMOJI_REPLACEMENT
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.impl.EmojiServiceStub
 import org.koin.compose.koinInject
 
@@ -27,6 +28,8 @@ fun ProvideEmojis(
 
 @Composable
 fun getUnicodeForEmojiId(emojiId: String): String {
-    val unicode by LocalEmojiServiceProvider.current.emojiIdToUnicode(emojiId).collectAsState("")
+    val unicode by LocalEmojiServiceProvider.current.emojiIdToUnicode(emojiId).collectAsState(
+        initial = UNKNOWN_EMOJI_REPLACEMENT
+    )
     return unicode
 }

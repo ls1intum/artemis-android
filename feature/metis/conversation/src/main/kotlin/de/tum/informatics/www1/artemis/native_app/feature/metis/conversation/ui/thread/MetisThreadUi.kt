@@ -189,9 +189,7 @@ internal fun MetisThreadUi(
     val context = LocalContext.current
     val conversationName by rememberDerivedConversationName(conversationDataState)
 
-    ProvideEmojis(
-        emojiService
-    ) {
+    ProvideEmojis(emojiService) {
         MetisReplyHandler(
             initialReplyTextProvider = initialReplyTextProvider,
             onCreatePost = onCreatePost,
@@ -259,7 +257,8 @@ internal fun MetisThreadUi(
                             conversationName = conversationName,
                             onFileSelected = { uri, ->
                                 onFileSelect(uri, context)
-                            }
+                            },
+                            emojiService = emojiService
                         )
                     }
                 }

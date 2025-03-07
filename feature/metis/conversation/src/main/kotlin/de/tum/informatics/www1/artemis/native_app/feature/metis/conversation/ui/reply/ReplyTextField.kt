@@ -62,6 +62,9 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getString
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.EmojiService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.impl.EmojiServiceStub
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.ProvideEmojis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.FileValidationConstants
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteType
@@ -87,12 +90,13 @@ internal fun ReplyTextField(
     replyMode: ReplyMode,
     onFileSelected: (Uri) -> Unit,
     updateFailureState: (MetisModificationFailure?) -> Unit,
-    conversationName: String
+    conversationName: String,
+    emojiService: EmojiService,
 ) {
     val replyState: ReplyState = rememberReplyState(replyMode, updateFailureState)
     val requestedAutoCompleteType = remember { mutableStateOf<AutoCompleteType?>(null) }
 
-    de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.ProvideEmojis {
+    ProvideEmojis(emojiService) {
         Surface(
             modifier = modifier,
             border = BorderStroke(
@@ -478,7 +482,8 @@ private fun ReplyTextFieldPreview() {
             },
             updateFailureState = {},
             conversationName = "PreviewChat",
-            onFileSelected = { _ -> }
+            onFileSelected = { _ -> },
+            emojiService = EmojiServiceStub
         )
     }
 }

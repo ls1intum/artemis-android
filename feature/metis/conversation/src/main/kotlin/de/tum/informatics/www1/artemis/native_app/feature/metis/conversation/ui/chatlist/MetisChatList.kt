@@ -231,7 +231,8 @@ fun MetisChatList(
                     replyMode = replyMode,
                     updateFailureState = updateFailureStateDelegate,
                     conversationName = conversationName,
-                    onFileSelected = onFileSelected
+                    onFileSelected = onFileSelected,
+                    emojiService = emojiService
                 )
             }
         }

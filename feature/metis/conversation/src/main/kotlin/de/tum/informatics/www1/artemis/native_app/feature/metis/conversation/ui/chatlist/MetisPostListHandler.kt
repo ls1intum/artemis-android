@@ -72,9 +72,7 @@ internal fun <T : Any> MetisPostListHandler(
     ) {
         val markdownTransformer = rememberPostArtemisMarkdownTransformer(serverUrl, courseId)
 
-        ProvideEmojis(
-            emojiService
-        ) {
+        ProvideEmojis(emojiService) {
             CompositionLocalProvider(LocalMarkdownTransformer provides markdownTransformer) {
                 content()
             }
