@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.common.app_version.AppVersionProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.performAutoReloadingNetworkCall
@@ -72,14 +73,13 @@ import org.koin.compose.koinInject
 @Composable
 internal fun SettingsScreen(
     modifier: Modifier,
-    versionCode: Int,
-    versionName: String,
     onNavigateUp: () -> Unit,
     onDisplayThirdPartyLicenses: () -> Unit,
     onRequestOpenNotificationSettings: () -> Unit
 ) {
     val linkOpener = LocalLinkOpener.current
 
+    val appVersion = koinInject<AppVersionProvider>().appVersion
     val pushNotificationJobService: PushNotificationJobService = koinInject()
     val pushNotificationConfigurationService: PushNotificationConfigurationService = koinInject()
 
@@ -162,8 +162,8 @@ internal fun SettingsScreen(
 
             BuildInformationSection(
                 modifier = Modifier.fillMaxWidth(),
-                versionCode = versionCode,
-                versionName = versionName
+                versionCode = appVersion.versionCode,
+                versionName = appVersion.fullVersionName
             )
         }
     }

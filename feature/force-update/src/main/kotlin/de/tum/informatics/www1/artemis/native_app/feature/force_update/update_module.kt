@@ -9,11 +9,11 @@ import org.koin.dsl.module
 val updateModule = module {
         single<UpdateService> { UpdateServiceImpl(get()) }
 
-        single { (version: String) ->
+        single<UpdateRepository> {
             UpdateRepository(
                 context = androidContext(),
                 updateService = get(),
-                version = version,
+                get(),
                 get()
             )
         }

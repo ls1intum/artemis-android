@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push.service.network.impl
 
 import android.util.Base64
+import de.tum.informatics.www1.artemis.native_app.core.common.app_version.NormalizedAppVersion
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
@@ -64,7 +65,8 @@ internal class NotificationSettingsServiceImpl(private val ktorProvider: KtorPro
     override suspend fun uploadPushNotificationDeviceConfigurationsToServer(
         serverUrl: String,
         authToken: String,
-        firebaseToken: String
+        firebaseToken: String,
+        appVersion: NormalizedAppVersion
     ): NetworkResponse<SecretKey> {
         return performNetworkCall {
             val response: RegisterResponseBody = ktorProvider.ktorClient.post(serverUrl) {
@@ -75,7 +77,10 @@ internal class NotificationSettingsServiceImpl(private val ktorProvider: KtorPro
                 cookieAuth(authToken)
 
                 contentType(ContentType.Application.Json)
-                setBody(RegisterRequestBody(token = firebaseToken))
+                setBody(RegisterRequestBody(
+                    token = firebaseToken,
+                    versionCode = appVersion.toString()
+                ))
             }.body()
 
             val keyBytes = Base64.decode(
@@ -108,6 +113,7 @@ internal class NotificationSettingsServiceImpl(private val ktorProvider: KtorPro
     @Serializable
     private data class RegisterRequestBody(
         val token: String,
+        val versionCode: String,
         val deviceType: String = "FIREBASE"
     )
 

@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.google.firebase.messaging.FirebaseMessaging
+import de.tum.informatics.www1.artemis.native_app.core.common.app_version.AppVersionProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -19,7 +20,8 @@ internal class UploadPushNotificationDeviceConfigurationWorker(
     private val notificationConfigurationService: PushNotificationConfigurationService,
     private val notificationSettingsService: NotificationSettingsService,
     private val serverConfigurationService: ServerConfigurationService,
-    private val accountService: AccountService
+    private val accountService: AccountService,
+    private val appVersionProvider: AppVersionProvider,
 ) : CoroutineWorker(appContext, params) {
 
     companion object {
@@ -49,7 +51,8 @@ internal class UploadPushNotificationDeviceConfigurationWorker(
             .uploadPushNotificationDeviceConfigurationsToServer(
                 serverUrl = serverConfigurationService.serverUrl.first(),
                 authToken = authToken,
-                firebaseToken = token
+                firebaseToken = token,
+                appVersion = appVersionProvider.appVersion.normalized
             )
 
         return when (secretKeyResponse) {

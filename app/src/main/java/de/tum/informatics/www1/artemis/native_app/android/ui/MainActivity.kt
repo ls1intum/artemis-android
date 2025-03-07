@@ -27,6 +27,9 @@ import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import de.tum.informatics.www1.artemis.native_app.android.BuildConfig
 import de.tum.informatics.www1.artemis.native_app.android.R
 import de.tum.informatics.www1.artemis.native_app.android.ui.theme.AppTheme
+import de.tum.informatics.www1.artemis.native_app.core.common.app_version.AppVersion
+import de.tum.informatics.www1.artemis.native_app.core.common.app_version.AppVersionProvider
+import de.tum.informatics.www1.artemis.native_app.core.common.app_version.AppVersionProviderImpl
 import de.tum.informatics.www1.artemis.native_app.core.common.withPrevious
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -57,7 +60,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
 import org.koin.compose.koinInject
-import org.koin.core.parameter.parametersOf
 
 /**
  * Main and only activity used in the android app.
@@ -86,6 +88,12 @@ class MainActivity : AppCompatActivity(),
                 AccountService.AuthenticationData.NotLoggedIn -> LoginScreen(null)
             }
         }
+
+        val appVersionProvider = get<AppVersionProvider>() as AppVersionProviderImpl
+        appVersionProvider.appVersion = AppVersion(
+            versionCode = BuildConfig.VERSION_CODE,
+            fullVersionName = BuildConfig.VERSION_NAME
+        )
 
         val visibleMetisContextManager = object :
             VisibleMetisContextManager {
@@ -216,7 +224,7 @@ class MainActivity : AppCompatActivity(),
             LocalMarkdownLinkResolver provides koinInject()
         ) {
 
-            val updateRepository = koinInject<UpdateRepository> { parametersOf(BuildConfig.VERSION_NAME) }
+            val updateRepository = koinInject<UpdateRepository>()
 
             LaunchedEffect(Unit) {
                 updateRepository.updateResultFlow.collect { updateResult ->
