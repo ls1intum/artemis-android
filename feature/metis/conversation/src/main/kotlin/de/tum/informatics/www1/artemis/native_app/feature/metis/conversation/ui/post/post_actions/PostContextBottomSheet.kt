@@ -28,8 +28,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -49,6 +47,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.PostColors
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.EmojiPickerModalBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
@@ -243,8 +242,6 @@ private fun EmojiReactionBar(
                     text = de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.getUnicodeForEmojiId(
                         emojiId = emojiId
                     ),
-                    color = if (alreadyExists) LocalContentColor.current.copy(alpha = 0.38f)
-                    else LocalContentColor.current
                 )
             }
         }
@@ -272,7 +269,10 @@ private fun EmojiButton(
     Box(
         modifier = modifier
             .clip(CircleShape)
-            .background(color = MaterialTheme.colorScheme.secondaryContainer, shape = CircleShape)
+            .background(
+                color = if (!disabled) PostColors.EmojiChipColors.background else PostColors.EmojiChipColors.selectedBackgound,
+                shape = CircleShape
+            )
             .let {
                 if (!disabled) {
                     it.clickable(onClick = onClick)
