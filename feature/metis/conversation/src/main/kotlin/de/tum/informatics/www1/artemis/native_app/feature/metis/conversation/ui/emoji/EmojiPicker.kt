@@ -4,19 +4,28 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.emoji.Emoji
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.emoji.EmojiCategory
+import kotlinx.coroutines.launch
 
 // Implementing our own custom emoji picker, because the one provided by emoji2 had two issues:
 // - The picker was not scrollable when placed inside a ModalBottomSheet, and the issue persists for
@@ -32,29 +41,78 @@ internal fun EmojiPicker(
     val emojiProvider = LocalEmojiProvider.current
     val emojiCategories by emojiProvider.emojiCategories
 
+    val listState = rememberLazyListState()
+
     Column(modifier = modifier) {
+        EmojiCategoryIconsRow(
+            emojiCategories = emojiCategories ?: emptyList(),
+            listState = listState
+        )
+
+        HorizontalDivider()
 
         EmojiCategoryList(
             emojiCategories = emojiCategories ?: emptyList(),
+            listState = listState,
             onEmojiClicked = onEmojiClicked
         )
     }
 }
 
+
 @Composable
-fun EmojiCategoryList(
+private fun EmojiCategoryIconsRow(
     emojiCategories: List<EmojiCategory>,
+    listState: LazyListState
+) {
+    val coroutineScope = rememberCoroutineScope()
+    Row(
+        modifier = Modifier
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        emojiCategories.forEachIndexed { index, category ->
+            val headerIndex = index * 2
+            val emojiListIndex = headerIndex + 1
+
+            val isSelected = listState.firstVisibleItemIndex == headerIndex ||
+                    listState.firstVisibleItemIndex == emojiListIndex
+            Icon(
+                modifier = Modifier
+                    .padding(4.dp)
+                    .clip(CircleShape)
+                    .clickable {
+                        coroutineScope.launch {
+                            listState.animateScrollToItem(headerIndex)
+                        }
+                    }
+                    .padding(8.dp),
+                imageVector = category.id.icon,
+                tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                contentDescription = null,
+            )
+        }
+    }
+}
+
+
+@Composable
+private fun EmojiCategoryList(
+    emojiCategories: List<EmojiCategory>,
+    listState: LazyListState,
     onEmojiClicked: (Emoji) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
+        state = listState,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         emojiCategories.forEach { category ->
             item {
                 EmojiCategoryHeader(
-                    categoryId = category.id
+                    category = category
                 )
             }
             item {
@@ -70,19 +128,9 @@ fun EmojiCategoryList(
 @Composable
 private fun EmojiCategoryHeader(
     modifier: Modifier = Modifier,
-    categoryId: EmojiCategory.Id
+    category: EmojiCategory
 ) {
-    val stringRes = when (categoryId) {
-        EmojiCategory.Id.PEOPLE -> R.string.emoji_category_people
-        EmojiCategory.Id.NATURE -> R.string.emoji_category_nature
-        EmojiCategory.Id.FOODS -> R.string.emoji_category_foods
-        EmojiCategory.Id.ACTIVITY -> R.string.emoji_category_activity
-        EmojiCategory.Id.PLACES -> R.string.emoji_category_places
-        EmojiCategory.Id.OBJECTS -> R.string.emoji_category_objects
-        EmojiCategory.Id.SYMBOLS -> R.string.emoji_category_symbols
-        EmojiCategory.Id.FLAGS -> R.string.emoji_category_flags
-    }
-    val text = stringResource(id = stringRes)
+    val text = stringResource(id = category.id.uiTextStringRes)
 
     Text(
         modifier = modifier
@@ -100,8 +148,7 @@ private fun EmojiGrid(
     onEmojiClicked: (Emoji) -> Unit
 ) {
     FlowRow(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+        modifier = modifier,
     ) {
         emojis.forEach { emoji ->
             EmojiItem(
