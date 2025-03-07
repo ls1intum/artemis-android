@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui
+package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.extensions
 
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridItemScope

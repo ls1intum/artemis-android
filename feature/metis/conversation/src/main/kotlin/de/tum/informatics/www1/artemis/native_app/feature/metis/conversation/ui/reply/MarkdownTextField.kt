@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -34,9 +33,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -65,6 +62,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.compose.toPainter
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.appendAtCursor
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.EmojiPickerModalBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.LocalReplyAutoCompleteHintProvider
 import kotlinx.coroutines.launch
@@ -144,24 +142,15 @@ internal fun MarkdownTextField(
     }
 
     if (showEmojiPicker) {
-        ModalBottomSheet(
-            modifier = Modifier
-                .statusBarsPadding(),
-            sheetState = rememberModalBottomSheetState(),
-            onDismissRequest = { showEmojiPicker = false },
-        ) {
-            de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.EmojiPicker(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
-                onEmojiClicked = {
-                    onTextChanged(
-                        textFieldValue.appendAtCursor(it.unicode)
-                    )
-                    showEmojiPicker = false
-                }
-            )
-        }
+        EmojiPickerModalBottomSheet(
+            onEmojiClicked = {
+                onTextChanged(
+                    textFieldValue.appendAtCursor(it.unicode)
+                )
+                showEmojiPicker = false
+            },
+            onDismiss = { showEmojiPicker = false }
+        )
     }
 }
 

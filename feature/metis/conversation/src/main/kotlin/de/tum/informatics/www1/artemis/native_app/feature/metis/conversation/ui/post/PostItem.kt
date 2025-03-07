@@ -73,9 +73,9 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.PostColors
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.EmojiPickerModalBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.LinkPreview
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.EmojiDialog
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.EmojiSelection
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.getTestTagForEmojiId
@@ -576,10 +576,10 @@ private fun StandalonePostFooter(
     var showEmojiDialog by remember { mutableStateOf(false) }
 
     if (showEmojiDialog) {
-        EmojiDialog(
-            onDismissRequest = { showEmojiDialog = false },
-            onSelectEmoji = { emojiId ->
-                postActions.onClickReaction?.invoke(emojiId, true)
+        EmojiPickerModalBottomSheet(
+            onDismiss = { showEmojiDialog = false },
+            onEmojiClicked = {
+                postActions.onClickReaction?.invoke(it.emojiId, true)
                 showEmojiDialog = false
             }
         )

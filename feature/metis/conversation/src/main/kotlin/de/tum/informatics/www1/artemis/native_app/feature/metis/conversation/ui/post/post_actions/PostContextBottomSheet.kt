@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -32,7 +31,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -50,10 +48,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
-import androidx.compose.ui.window.Dialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.EmojiPicker
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.EmojiPickerModalBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
@@ -75,11 +72,11 @@ internal fun PostContextBottomSheet(
 
     if (displayAllEmojis) {
         postActions.onClickReaction?.let { onClickReaction ->
-            EmojiDialog(
-                onDismissRequest = onDismissRequest,
-                onSelectEmoji = { emojiId ->
+            EmojiPickerModalBottomSheet(
+                onDismiss = onDismissRequest,
+                onEmojiClicked = {
                     onDismissRequest()
-                    onClickReaction(emojiId, true)
+                    onClickReaction(it.emojiId, true)
                 }
             )
         }
@@ -308,27 +305,5 @@ fun BottomSheetActionButton(
             modifier = Modifier.weight(1f),
             text = text
         )
-    }
-}
-
-@Composable
-fun EmojiDialog(
-    onDismissRequest: () -> Unit,
-    onSelectEmoji: (emojiId: String) -> Unit
-) {
-    Dialog(onDismissRequest = onDismissRequest) {
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(MaterialTheme.shapes.large)
-        ) {
-            EmojiPicker(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(0.8f)
-                    .padding(horizontal = 8.dp),
-                onEmojiClicked = { onSelectEmoji(it.emojiId) }
-            )
-        }
     }
 }

@@ -1,17 +1,18 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -19,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,6 +29,9 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.content.Emoji
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.content.EmojiCategory
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.extensions.header
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.extensions.icon
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.extensions.uiText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.util.EmojiCategoryListUtil
 import kotlinx.coroutines.launch
 
@@ -39,10 +44,14 @@ import kotlinx.coroutines.launch
 fun EmojiPicker(
     modifier: Modifier = Modifier,
     onEmojiClicked: (Emoji) -> Unit,
-    searchEnabled: Boolean = false,
 ) {
     val emojiProvider = LocalEmojiServiceProvider.current
     val emojiCategories by emojiProvider.emojiCategoriesFlow.collectAsState(emptyList())
+
+    if (emojiCategories.isEmpty()) {
+        CircularProgressIndicator()
+        return
+    }
 
     val coroutineScope = rememberCoroutineScope()
     val gridState = rememberLazyGridState()
@@ -76,12 +85,14 @@ private fun EmojiCategoryIconsRow(
     gridState: LazyGridState
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val headerIndices = EmojiCategoryListUtil.getHeaderIndices(emojiCategories)
+    val headerIndices = remember(emojiCategories) {
+        EmojiCategoryListUtil.getHeaderIndices(emojiCategories)
+    }
 
     Row(
         modifier = Modifier
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
     ) {
         emojiCategories.forEachIndexed { index, category ->
             val headerIndex = headerIndices[index]
@@ -91,7 +102,7 @@ private fun EmojiCategoryIconsRow(
 
             Icon(
                 modifier = Modifier
-                    .padding(4.dp)
+                    .padding(2.dp)
                     .clip(CircleShape)
                     .clickable {
                         coroutineScope.launch {
@@ -165,30 +176,8 @@ private fun EmojiCategoryHeader(
     )
 }
 
-private fun LazyGridScope.EmojiGrid(
-    modifier: Modifier = Modifier,
-    emojis: List<Emoji>,
-    emptyText: String? = null,
-    onEmojiClicked: (Emoji) -> Unit
-) {
-    if (emojis.isEmpty()) {
-        emptyText?.let {
-            header {
-                Text(
-                    modifier = modifier,
-                    text = it,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-        }
-        return
-    }
-
-
-}
-
 @Composable
-fun EmojiItem(
+private fun EmojiItem(
     emoji: Emoji,
     onClick: () -> Unit
 ) {
