@@ -38,7 +38,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.emoji.getUnicodeForEmojiId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IReaction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
@@ -177,7 +176,9 @@ private fun Chip(
     ) {
         Text(
             color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onBackground,
-            text = if (emojiSelection is EmojiSelection.SINGLE) getUnicodeForEmojiId(emojiId = text) else text,
+            text = if (emojiSelection is EmojiSelection.SINGLE) de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.getUnicodeForEmojiId(
+                emojiId = text
+            ) else text,
             fontSize = if (emojiSelection is EmojiSelection.SINGLE) 20.sp else 14.sp,
         )
     }
@@ -196,7 +197,10 @@ private fun ReactionAuthorListItem(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text(text = getUnicodeForEmojiId(reaction.emojiId))
+        Text(text = de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.getUnicodeForEmojiId(
+            reaction.emojiId
+        )
+        )
 
         Text(text = reaction.username)
     }

@@ -53,8 +53,7 @@ import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.window.Dialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.emoji.EmojiPicker
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.emoji.getUnicodeForEmojiId
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.EmojiPicker
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
@@ -244,7 +243,9 @@ private fun EmojiReactionBar(
             ) {
                 Text(
                     modifier = Modifier.padding(4.dp),
-                    text = getUnicodeForEmojiId(emojiId = emojiId),
+                    text = de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.getUnicodeForEmojiId(
+                        emojiId = emojiId
+                    ),
                     color = if (alreadyExists) LocalContentColor.current.copy(alpha = 0.38f)
                     else LocalContentColor.current
                 )

@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.emoji
+package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,9 +23,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.emoji.Emoji
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.emoji.EmojiCategory
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.content.Emoji
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.content.EmojiCategory
 import kotlinx.coroutines.launch
 
 // Implementing our own custom emoji picker, because the one provided by emoji2 had two issues:
@@ -34,7 +34,7 @@ import kotlinx.coroutines.launch
 // - In Artemis, we do not support emoji variations, like eg skin tone. This was not toggleable with
 //   the emoji2 picker.
 @Composable
-internal fun EmojiPicker(
+fun EmojiPicker(
     modifier: Modifier = Modifier,
     onEmojiClicked: (Emoji) -> Unit,
     searchEnabled: Boolean = false,

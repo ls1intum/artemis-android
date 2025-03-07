@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.emoji
+package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.content
 
 import android.util.Log
 

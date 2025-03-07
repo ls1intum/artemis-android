@@ -23,8 +23,6 @@ import androidx.compose.ui.Modifier
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.LocalMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.rememberPostArtemisMarkdownTransformer
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.emoji.ProvideEmojis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -44,7 +42,7 @@ internal fun <T : Any> MetisPostListHandler(
     itemCount: Int,
     bottomItem: T?,
     order: DisplayPostOrder,
-    emojiService: EmojiService,
+    emojiService: de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.EmojiService,
     content: @Composable BoxScope.() -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -71,7 +69,9 @@ internal fun <T : Any> MetisPostListHandler(
     ) {
         val markdownTransformer = rememberPostArtemisMarkdownTransformer(serverUrl, courseId)
 
-        ProvideEmojis(emojiService) {
+        de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.ProvideEmojis(
+            emojiService
+        ) {
             CompositionLocalProvider(LocalMarkdownTransformer provides markdownTransformer) {
                 content()
             }

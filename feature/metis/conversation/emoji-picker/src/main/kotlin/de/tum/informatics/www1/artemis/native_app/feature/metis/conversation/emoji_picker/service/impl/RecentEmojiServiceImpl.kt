@@ -1,7 +1,6 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl
+package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.impl
 
 import android.content.Context
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.RecentEmojiService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -10,7 +9,7 @@ import kotlinx.serialization.json.Json
 
 class RecentEmojiServiceImpl(
     context: Context,
-) : RecentEmojiService {
+) : de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.RecentEmojiService {
 
     private val MAX_RECENT_EMOJI_COUNT = 50
 

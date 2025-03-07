@@ -65,7 +65,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.compose.toPainter
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.appendAtCursor
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.emoji.EmojiPicker
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.LocalReplyAutoCompleteHintProvider
 import kotlinx.coroutines.launch
@@ -151,7 +150,7 @@ internal fun MarkdownTextField(
             sheetState = rememberModalBottomSheetState(),
             onDismissRequest = { showEmojiPicker = false },
         ) {
-            EmojiPicker(
+            de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.EmojiPicker(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp),

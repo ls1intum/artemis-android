@@ -34,7 +34,6 @@ import androidx.paging.compose.LazyPagingItems
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationViewModel
@@ -137,7 +136,7 @@ fun MetisChatList(
     serverUrl: String,
     courseId: Long,
     state: LazyListState,
-    emojiService: EmojiService = koinInject(),
+    emojiService: de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.EmojiService = koinInject(),
     isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     isReplyEnabled: Boolean,
     onCreatePost: () -> Deferred<MetisModificationFailure?>,
