@@ -2,6 +2,11 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.em
 
 import android.content.Context
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.content.Emoji
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.content.EmojiCategory
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.EmojiService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.RecentEmojiService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.UNKNOWN_EMOJI_REPLACEMENT
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -24,8 +29,8 @@ import kotlinx.serialization.json.decodeFromStream
  */
 class EmojiServiceImpl(
     context: Context,
-    private val recentEmojiService: de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.RecentEmojiService,
-) : de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.EmojiService {
+    private val recentEmojiService: RecentEmojiService,
+) : EmojiService {
 
     @OptIn(ExperimentalSerializationApi::class, DelicateCoroutinesApi::class)
     private val input: Flow<Input> = flow<Input> {
@@ -46,19 +51,19 @@ class EmojiServiceImpl(
         .shareIn(GlobalScope, started = SharingStarted.Lazily, replay = 1)
 
     @OptIn(DelicateCoroutinesApi::class)
-    private val defaultCategories: Flow<List<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.content.EmojiCategory>> = combine(
+    private val defaultCategories: Flow<List<EmojiCategory>> = combine(
         input,
         entries
     ) { input, entries ->
         input.categories.map { categoryEntry ->
-            de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.content.EmojiCategory(
-                id = de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.content.EmojiCategory.Id.fromValue(
+            EmojiCategory(
+                id = EmojiCategory.Id.fromValue(
                     categoryEntry.id
                 ),
                 emojis = categoryEntry.emojiIds.map {
-                    de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.content.Emoji(
+                    Emoji(
                         emojiId = it,
-                        unicode = entries[it] ?: de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.UNKNOWN_EMOJI_REPLACEMENT
+                        unicode = entries[it] ?: UNKNOWN_EMOJI_REPLACEMENT
                     )
                 }
             )
@@ -66,11 +71,11 @@ class EmojiServiceImpl(
     }
         .shareIn(GlobalScope, started = SharingStarted.Lazily, replay = 1)
 
-    private val recentEmojiCategory: Flow<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.content.EmojiCategory> = recentEmojiService.recentEmojiIdsFlow.map { recentEmojiIds ->
-        de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.content.EmojiCategory(
-            id = de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.content.EmojiCategory.Id.RECENT,
+    private val recentEmojiCategory: Flow<EmojiCategory> = recentEmojiService.recentEmojiIdsFlow.map { recentEmojiIds ->
+        EmojiCategory(
+            id = EmojiCategory.Id.RECENT,
             emojis = recentEmojiIds.map {
-                de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.content.Emoji(
+                Emoji(
                     emojiId = it,
                     unicode = emojiIdToUnicode(it).first()
                 )
@@ -79,9 +84,9 @@ class EmojiServiceImpl(
     }
 
 
-    override fun emojiIdToUnicode(emojiId: String): Flow<String> = entries.map { it[emojiId] ?: de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.UNKNOWN_EMOJI_REPLACEMENT }
+    override fun emojiIdToUnicode(emojiId: String): Flow<String> = entries.map { it[emojiId] ?: UNKNOWN_EMOJI_REPLACEMENT }
 
-    override val emojiCategoriesFlow: Flow<List<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.content.EmojiCategory>> = combine(
+    override val emojiCategoriesFlow: Flow<List<EmojiCategory>> = combine(
         defaultCategories,
         recentEmojiCategory
     ) { defaultCategories, recentEmojiCategory ->

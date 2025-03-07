@@ -33,6 +33,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.EmojiService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.ProvideEmojis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationViewModel
@@ -166,7 +168,7 @@ internal fun MetisThreadUi(
     postActionFlags: PostActionFlags,
     serverUrl: String,
     isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
-    emojiService: de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.EmojiService,
+    emojiService: EmojiService,
     initialReplyTextProvider: InitialReplyTextProvider,
     generateLinkPreviews: (String) -> StateFlow<List<LinkPreview>>,
     onRemoveLinkPreview: (LinkPreview, IBasePost, IStandalonePost?) -> Unit,
@@ -187,7 +189,7 @@ internal fun MetisThreadUi(
     val context = LocalContext.current
     val conversationName by rememberDerivedConversationName(conversationDataState)
 
-    de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.ProvideEmojis(
+    ProvideEmojis(
         emojiService
     ) {
         MetisReplyHandler(

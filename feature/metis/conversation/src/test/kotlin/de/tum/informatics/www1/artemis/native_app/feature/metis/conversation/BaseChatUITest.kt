@@ -13,6 +13,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.test.ArtemisImageProviderStub
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.impl.EmojiServiceStub
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
@@ -198,7 +199,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                 onRemoveLinkPreview = { _, _, _ -> CompletableDeferred<MetisModificationFailure>() },
                 serverUrl = "",
                 isMarkedAsDeleteList = mutableStateListOf(),
-                emojiService = de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.impl.EmojiServiceStub,
+                emojiService = EmojiServiceStub,
                 initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
                 onCreatePost = { CompletableDeferred() },
                 onEditPost = { _, _ -> CompletableDeferred() },
@@ -247,7 +248,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                     serverUrl = "",
                     courseId = course.id!!,
                     state = rememberLazyListState(),
-                    emojiService = de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.impl.EmojiServiceStub,isMarkedAsDeleteList = mutableStateListOf(),
+                    emojiService = EmojiServiceStub,isMarkedAsDeleteList = mutableStateListOf(),
                     bottomItem = null,
                     isReplyEnabled = true,
                     generateLinkPreviews = { _ -> linkPreviewStateFlow },

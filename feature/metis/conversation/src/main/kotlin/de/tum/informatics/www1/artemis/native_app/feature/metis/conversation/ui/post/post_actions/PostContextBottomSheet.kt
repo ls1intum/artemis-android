@@ -50,6 +50,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.PostColors
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.EmojiPickerModalBottomSheet
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.getUnicodeForEmojiId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
@@ -239,9 +240,7 @@ private fun EmojiReactionBar(
             ) {
                 Text(
                     modifier = Modifier.padding(4.dp),
-                    text = de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.getUnicodeForEmojiId(
-                        emojiId = emojiId
-                    ),
+                    text = getUnicodeForEmojiId(emojiId = emojiId),
                 )
             }
         }
