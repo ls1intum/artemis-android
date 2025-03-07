@@ -18,6 +18,11 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.emoji.Emoji
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.emoji.EmojiCategory
 
+// Implementing our own custom emoji picker, because the one provided by emoji2 had two issues:
+// - The picker was not scrollable when placed inside a ModalBottomSheet, and the issue persists for
+//   almost 1.5 years now, see https://issuetracker.google.com/issues/301240745
+// - In Artemis, we do not support emoji variations, like eg skin tone. This was not toggleable with
+//   the emoji2 picker.
 @Composable
 internal fun EmojiPicker(
     modifier: Modifier = Modifier,
