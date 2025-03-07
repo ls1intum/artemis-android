@@ -5,6 +5,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.emoji.Emoji
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.emoji.EmojiCategory
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.RecentEmojiService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.UNKNOWN_EMOJI_REPLACEMENT
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -25,9 +27,10 @@ import kotlinx.serialization.json.decodeFromStream
 /**
  * Loads the emojis from the generated file
  */
-class EmojiServiceImpl(context: Context) : EmojiService {
-
-    private val frameWithAnXUnicode = "\uD83D\uDDBE"
+class EmojiServiceImpl(
+    context: Context,
+    private val recentEmojiService: RecentEmojiService,
+) : EmojiService {
 
     @OptIn(ExperimentalSerializationApi::class, DelicateCoroutinesApi::class)
     private val input: Flow<Input> = flow<Input> {
@@ -48,7 +51,7 @@ class EmojiServiceImpl(context: Context) : EmojiService {
         .shareIn(GlobalScope, started = SharingStarted.Lazily, replay = 1)
 
     @OptIn(DelicateCoroutinesApi::class)
-    private val categories: Flow<List<EmojiCategory>> = combine(
+    private val defaultCategories: Flow<List<EmojiCategory>> = combine(
         input,
         entries
     ) { input, entries ->
@@ -58,7 +61,7 @@ class EmojiServiceImpl(context: Context) : EmojiService {
                 emojis = categoryEntry.emojiIds.map {
                     Emoji(
                         emojiId = it,
-                        unicode = entries[it] ?: frameWithAnXUnicode
+                        unicode = entries[it] ?: UNKNOWN_EMOJI_REPLACEMENT
                     )
                 }
             )
@@ -66,16 +69,31 @@ class EmojiServiceImpl(context: Context) : EmojiService {
     }
         .shareIn(GlobalScope, started = SharingStarted.Lazily, replay = 1)
 
-
-
-    override suspend fun emojiIdToUnicode(emojiId: String): String {
-        val map = entries.first()
-        return map[emojiId] ?: frameWithAnXUnicode
+    private val recentEmojiCategory: Flow<EmojiCategory> = recentEmojiService.recentEmojiIdsFlow.map { recentEmojiIds ->
+        EmojiCategory(
+            id = EmojiCategory.Id.RECENT,
+            emojis = recentEmojiIds.map {
+                Emoji(
+                    emojiId = it,
+                    unicode = emojiIdToUnicode(it).first()
+                )
+            }
+        )
     }
 
-    override suspend fun getEmojiToUnicodeMap(): Map<String, String> = entries.first()
 
-    override suspend fun getEmojiCategories(): List<EmojiCategory> = categories.first()
+    override fun emojiIdToUnicode(emojiId: String): Flow<String> = entries.map { it[emojiId] ?: UNKNOWN_EMOJI_REPLACEMENT }
+
+    override val emojiCategoriesFlow: Flow<List<EmojiCategory>> = combine(
+        defaultCategories,
+        recentEmojiCategory
+    ) { defaultCategories, recentEmojiCategory ->
+        listOf(recentEmojiCategory) + defaultCategories
+    }
+
+    override suspend fun storeRecentEmoji(emojiId: String) {
+        recentEmojiService.addRecentEmojiId(emojiId)
+    }
 
     @Serializable
     data class EmojiEntry(

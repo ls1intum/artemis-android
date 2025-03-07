@@ -2,8 +2,10 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation
 
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.RecentEmojiService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.CreatePostServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.EmojiServiceImpl
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.RecentEmojiServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.SavedPostService
@@ -27,7 +29,8 @@ val conversationModule = module {
     single<MetisService> { MetisServiceImpl(get()) }
     single<MetisModificationService> { MetisModificationServiceImpl(get()) }
     single<SavedPostService> { SavedPostServiceImpl(get()) }
-    single<EmojiService> { EmojiServiceImpl(androidContext()) }
+    single<RecentEmojiService> { RecentEmojiServiceImpl(androidContext()) }
+    single<EmojiService> { EmojiServiceImpl(androidContext(), get()) }
 
     single<MetisStorageService> { MetisStorageServiceImpl(get()) }
     single<ReplyTextStorageService> { ReplyTextStorageServiceImpl(androidContext()) }

@@ -1,11 +1,14 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service
 
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.emoji.EmojiCategory
+import kotlinx.coroutines.flow.Flow
+
+const val UNKNOWN_EMOJI_REPLACEMENT = "?"
 
 interface EmojiService {
-    suspend fun emojiIdToUnicode(emojiId: String): String
+    fun emojiIdToUnicode(emojiId: String): Flow<String>
 
-    suspend fun getEmojiToUnicodeMap(): Map<String, String>
+    val emojiCategoriesFlow: Flow<List<EmojiCategory>>
 
-    suspend fun getEmojiCategories(): List<EmojiCategory>
+    suspend fun storeRecentEmoji(emojiId: String)
 }

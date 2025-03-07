@@ -16,13 +16,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.emoji.Emoji
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.emoji.EmojiCategory
 import kotlinx.coroutines.launch
@@ -38,23 +39,30 @@ internal fun EmojiPicker(
     onEmojiClicked: (Emoji) -> Unit,
     searchEnabled: Boolean = false,
 ) {
-    val emojiProvider = LocalEmojiProvider.current
-    val emojiCategories by emojiProvider.emojiCategories
+    val emojiProvider = LocalEmojiServiceProvider.current
+    val emojiCategories by emojiProvider.emojiCategoriesFlow.collectAsState(emptyList())
 
+    val coroutineScope = rememberCoroutineScope()
     val listState = rememberLazyListState()
 
     Column(modifier = modifier) {
         EmojiCategoryIconsRow(
-            emojiCategories = emojiCategories ?: emptyList(),
+            emojiCategories = emojiCategories,
             listState = listState
         )
 
         HorizontalDivider()
 
         EmojiCategoryList(
-            emojiCategories = emojiCategories ?: emptyList(),
+            emojiCategories = emojiCategories,
             listState = listState,
-            onEmojiClicked = onEmojiClicked
+            onEmojiClicked = {
+                coroutineScope.launch {
+                    emojiProvider.storeRecentEmoji(it.emojiId)
+                }
+
+                onEmojiClicked(it)
+            }
         )
     }
 }
@@ -107,7 +115,7 @@ private fun EmojiCategoryList(
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
         state = listState,
-        horizontalAlignment = Alignment.CenterHorizontally
+//        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         emojiCategories.forEach { category ->
             item {
@@ -118,6 +126,7 @@ private fun EmojiCategoryList(
             item {
                 EmojiGrid(
                     emojis = category.emojis,
+                    emptyText = if (category.id == EmojiCategory.Id.RECENT) stringResource(R.string.no_recent_emojis) else null,
                     onEmojiClicked = onEmojiClicked
                 )
             }
@@ -130,7 +139,7 @@ private fun EmojiCategoryHeader(
     modifier: Modifier = Modifier,
     category: EmojiCategory
 ) {
-    val text = stringResource(id = category.id.uiTextStringRes)
+    val text = category.id.uiText()
 
     Text(
         modifier = modifier
@@ -145,8 +154,20 @@ private fun EmojiCategoryHeader(
 private fun EmojiGrid(
     modifier: Modifier = Modifier,
     emojis: List<Emoji>,
+    emptyText: String? = null,
     onEmojiClicked: (Emoji) -> Unit
 ) {
+    if (emojis.isEmpty()) {
+        emptyText?.let {
+            Text(
+                modifier = modifier,
+                text = it,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+        return
+    }
+
     FlowRow(
         modifier = modifier,
     ) {
