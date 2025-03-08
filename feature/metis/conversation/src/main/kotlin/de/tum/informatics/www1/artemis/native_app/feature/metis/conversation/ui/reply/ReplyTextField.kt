@@ -60,6 +60,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getString
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.OnTrueLaunchedEffect
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.FileValidationConstants
@@ -187,19 +188,15 @@ private fun AutoCompletionDialog(
         requestDismissAutoCompletePopup = false
     }
 
-    LaunchedEffect(requestDismissAutoCompletePopup) {
-        if (requestDismissAutoCompletePopup) {
-            delay(100)
-            mayShowAutoCompletePopup = false
-            resetRequestedAutoCompleteType()
-        }
+    OnTrueLaunchedEffect(requestDismissAutoCompletePopup) {
+        delay(100)
+        mayShowAutoCompletePopup = false
+        resetRequestedAutoCompleteType()
     }
 
     val areHintsEmpty = autoCompleteHints.orEmpty().flatMap { it.items }.isEmpty()
-    LaunchedEffect(areHintsEmpty) {
-        if (areHintsEmpty) {
-            resetRequestedAutoCompleteType()
-        }
+    OnTrueLaunchedEffect(areHintsEmpty) {
+        resetRequestedAutoCompleteType()
     }
 
     val showAutoCompletePopup = mayShowAutoCompletePopup && !areHintsEmpty
@@ -300,11 +297,9 @@ private fun CreateReplyUi(
         prevReplyContent = currentTextFieldValue.text
     }
 
-    LaunchedEffect(requestFocus) {
-        if (requestFocus) {
-            focusRequester.requestFocus()
-            requestFocus = false
-        }
+    OnTrueLaunchedEffect(requestFocus) {
+        focusRequester.requestFocus()
+        requestFocus = false
     }
 
     Box(modifier.fillMaxWidth()) {
