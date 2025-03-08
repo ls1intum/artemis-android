@@ -37,7 +37,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CourseDeepli
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ExerciseDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
-import de.tum.informatics.www1.artemis.native_app.feature.courseview.GroupedByWeek
+import de.tum.informatics.www1.artemis.native_app.feature.courseview.TimeFrame
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.CourseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.LectureListUi
@@ -157,8 +157,8 @@ fun CourseUiScreen(
     onNavigateBack: () -> Unit
 ) {
     val courseDataState by viewModel.course.collectAsState()
-    val weeklyExercisesDataState by viewModel.exercisesGroupedByWeek.collectAsState()
-    val weeklyLecturesDataState by viewModel.lecturesGroupedByWeek.collectAsState()
+    val exercisesTimeFrameDataState by viewModel.exercisesTimeFrame.collectAsState()
+    val lecturesTimeFrameDataState by viewModel.lecturesTimeFrame.collectAsState()
 
     val collapsingContentState = remember { CollapsingContentState() }
 
@@ -189,14 +189,14 @@ fun CourseUiScreen(
         exerciseSearchConfiguration = exerciseSearchConfiguration,
         collapsingContentState = collapsingContentState,
         onNavigateBack = onNavigateBack,
-        weeklyExercisesDataState = weeklyExercisesDataState,
+        exercisesTimeFrameDataState = exercisesTimeFrameDataState,
         onNavigateToExercise = onNavigateToExercise,
         onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
         onParticipateInQuiz = onParticipateInQuiz,
         onNavigateToExerciseResultView = onNavigateToExerciseResultView,
         onClickViewQuizResults = onClickViewQuizResults,
         courseId = courseId,
-        weeklyLecturesDataState = weeklyLecturesDataState,
+        lecturesTimeFrameDataState = lecturesTimeFrameDataState,
         onNavigateToLecture = onNavigateToLecture,
         onNavigateToFaq = onNavigateToFaq,
         postId = postId,
@@ -224,8 +224,8 @@ internal fun CourseUiScreen(
     collapsingContentState: CollapsingContentState,
     exerciseSearchConfiguration: CourseSearchConfiguration,
     courseDataState: DataState<Course>,
-    weeklyExercisesDataState: DataState<List<GroupedByWeek<Exercise>>>,
-    weeklyLecturesDataState: DataState<List<GroupedByWeek<Lecture>>>,
+    exercisesTimeFrameDataState: DataState<List<TimeFrame<Exercise>>>,
+    lecturesTimeFrameDataState: DataState<List<TimeFrame<Lecture>>>,
     onNavigateToExercise: (exerciseId: Long) -> Unit,
     onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
     onParticipateInQuiz: (exerciseId: Long, isPractice: Boolean) -> Unit,
@@ -286,10 +286,10 @@ internal fun CourseUiScreen(
     ) {
         composable<CourseTab.Exercises> {
             scaffold(exerciseSearchConfiguration) {
-                EmptyDataStateUi(dataState = weeklyExercisesDataState) { weeklyExercises ->
+                EmptyDataStateUi(dataState = exercisesTimeFrameDataState) { exercises ->
                     ExerciseListUi(
                         modifier = Modifier.fillMaxSize(),
-                        weeklyExercises = weeklyExercises,
+                        exercises = exercises,
                         query = if (exerciseSearchConfiguration is CourseSearchConfiguration.Search) exerciseSearchConfiguration.query else "",
                         collapsingContentState = collapsingContentState,
                         onClickExercise = onNavigateToExercise,
@@ -320,10 +320,10 @@ internal fun CourseUiScreen(
 
         composable<CourseTab.Lectures> {
             scaffold(lectureSearchConfiguration) {
-                EmptyDataStateUi(dataState = weeklyLecturesDataState) { weeklyLectures ->
+                EmptyDataStateUi(dataState = lecturesTimeFrameDataState) { lectures ->
                     LectureListUi(
                         modifier = Modifier.fillMaxSize(),
-                        lectures = weeklyLectures,
+                        lectures = lectures,
                         collapsingContentState = collapsingContentState,
                         query = if (lectureSearchConfiguration is CourseSearchConfiguration.Search) lectureSearchConfiguration.query else "",
                         onClickLecture = { onNavigateToLecture(it.id ?: 0L) }
