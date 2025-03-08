@@ -38,9 +38,9 @@ internal class MembersDataSource(
         ) {
             is NetworkResponse.Response -> {
                 LoadResult.Page(
-                    membersNetworkResponse.data,
-                    null,
-                    if (membersNetworkResponse.data.size >= pageSize) pageNum + 1 else null
+                    data = membersNetworkResponse.data,
+                    prevKey = if (pageNum > 0) pageNum - 1 else null,
+                    nextKey = if (membersNetworkResponse.data.size >= pageSize) pageNum + 1 else null
                 )
             }
 
