@@ -209,6 +209,7 @@ interface MetisDao {
             p.creation_date,
             p.updated_date,
             p.is_saved,
+            p.has_forwarded_messages,
             sp.context,
             sp.title,
             sp.resolved,
@@ -230,6 +231,7 @@ interface MetisDao {
     )
     fun queryStandalonePost(clientPostId: String): Flow<PostPojo?>
 
+    @Transaction
     @Query("""
         select
                 mpc.client_post_id,
@@ -238,6 +240,7 @@ interface MetisDao {
                 p.creation_date,
                 p.updated_date,
                 p.is_saved,
+                p.has_forwarded_messages,
                 sp.context,
                 sp.title,
                 sp.resolved,
@@ -268,6 +271,7 @@ interface MetisDao {
         conversationId: Long
     ): PagingSource<Int, PostPojo>
 
+    @Transaction
     @Query("""
         select
                 mpc.client_post_id,
@@ -276,6 +280,7 @@ interface MetisDao {
                 p.creation_date,
                 p.updated_date,
                 p.is_saved,
+                p.has_forwarded_messages,
                 sp.context,
                 sp.title,
                 sp.resolved,

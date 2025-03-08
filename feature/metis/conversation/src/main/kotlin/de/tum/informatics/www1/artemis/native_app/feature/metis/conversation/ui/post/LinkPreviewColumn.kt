@@ -27,6 +27,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.LinkPreview
 
 @Composable
@@ -68,24 +69,24 @@ private fun LinkPreviewItem(
 
     Row(
         modifier = modifier.height(IntrinsicSize.Min),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(Spacings.Post.innerSpacing)
     ) {
         Box(
             modifier = Modifier
                 .clip(shape = MaterialTheme.shapes.large)
                 .fillMaxHeight()
-                .width(6.dp)
+                .width(Spacings.Post.quoteBorderWidth)
                 .background(color = MaterialTheme.colorScheme.primary)
         )
 
         Column(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(Spacings.Post.innerSpacing)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(Spacings.Post.innerSpacing)
             ){
                 Text(
                     modifier = Modifier.weight(1f),
@@ -94,7 +95,7 @@ private fun LinkPreviewItem(
                 )
 
                 if (isAuthor) {
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(Spacings.Post.innerSpacing))
 
                     IconButton(
                         modifier = Modifier.size(24.dp),

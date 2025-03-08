@@ -18,7 +18,10 @@ data class SavedPost(
     override val referencePostId: Long,
     override val authorRole: UserRole? = null,
     override val reactions: List<Reaction>? = null,
+    override val hasForwardedMessages: Boolean? = null
 ) : BasePost(), ISavedPost {
 
+    override val key: Any
+        get() = "$serverPostId|$postingType"
 
 }

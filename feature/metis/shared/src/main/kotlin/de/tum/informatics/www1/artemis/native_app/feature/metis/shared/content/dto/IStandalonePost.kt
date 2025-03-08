@@ -11,11 +11,6 @@ interface IStandalonePost : IBasePost {
     val resolved: Boolean?
     val displayPriority: DisplayPriority?
 
-    /**
-     * A unique key which can be used to reference this post uniquely
-     */
-    val key: Any
-
     val standalonePostId: StandalonePostId?
 
     val orderedAnswerPostings: List<IAnswerPost>
