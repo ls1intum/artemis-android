@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,8 +24,8 @@ import androidx.compose.ui.Modifier
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.LocalMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.rememberPostArtemisMarkdownTransformer
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ProvideEmojis
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.EmojiService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.ProvideEmojis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -93,6 +94,7 @@ internal fun <T : Any> MetisPostListHandler(
     }
 }
 
+@SuppressLint("ComposableNaming")
 @Composable
 private fun <T: Any>manageScrollToNewPost(
     state: LazyListState,

@@ -48,6 +48,7 @@ include(":feature:metis")
 include(":feature:metis:shared")
 include(":feature:metis:code-of-conduct")
 include(":feature:metis:conversation")
+include(":feature:metis:conversation:emoji-picker")
 include(":feature:metis:manage-conversations")
 include(":feature:metis-test")
 

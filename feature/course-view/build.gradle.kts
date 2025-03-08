@@ -13,6 +13,7 @@ dependencies {
     implementation(project(":core:data"))
     implementation(project(":core:device"))
     implementation(project(":feature:metis"))
+    implementation(project(":feature:metis:conversation:emoji-picker"))
     implementation(project(":feature:faq"))
 
     implementation(libs.kotlinx.datetime)
