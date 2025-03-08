@@ -32,7 +32,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -61,6 +60,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getString
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.OnTrueLaunchedEffect
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.FileValidationConstants
@@ -90,7 +90,7 @@ internal fun ReplyTextField(
     conversationName: String
 ) {
     val replyState: ReplyState = rememberReplyState(replyMode, updateFailureState)
-    val requestedAutoCompleteType = remember { mutableStateOf<AutoCompleteType?>(null) }
+    var requestedAutoCompleteType by remember { mutableStateOf<AutoCompleteType?>(null) }
 
     Surface(
         modifier = modifier,
@@ -117,6 +117,7 @@ internal fun ReplyTextField(
             AutoCompletionDialog(
                 replyMode = replyMode,
                 requestedAutoCompleteType = requestedAutoCompleteType,
+                resetRequestedAutoCompleteType = { requestedAutoCompleteType = null }
             )
 
             AnimatedContent(
@@ -137,7 +138,7 @@ internal fun ReplyTextField(
                             onReply = { targetReplyState.onCreateReply() },
                             conversationName = conversationName,
                             onFileSelected = { uri -> onFileSelected(uri) },
-                            onRequestAutocompleteType = { requestedAutoCompleteType.value = it }
+                            onRequestAutocompleteType = { requestedAutoCompleteType = it }
                         )
                     }
 
@@ -168,7 +169,8 @@ internal fun ReplyTextField(
 @Composable
 private fun AutoCompletionDialog(
     replyMode: ReplyMode,
-    requestedAutoCompleteType: MutableState<AutoCompleteType?>,
+    requestedAutoCompleteType: AutoCompleteType?,
+    resetRequestedAutoCompleteType: () -> Unit
 ) {
     val currentTextFieldValue by replyMode.currentText
 
@@ -179,24 +181,25 @@ private fun AutoCompletionDialog(
     var requestDismissAutoCompletePopup by remember { mutableStateOf(false) }
 
     val tagChars = LocalReplyAutoCompleteHintProvider.current.legalTagChars
-    val autoCompleteHints = manageAutoCompleteHints(currentTextFieldValue, requestedAutoCompleteType.value)
+    val autoCompleteHints = manageAutoCompleteHints(currentTextFieldValue, requestedAutoCompleteType)
 
-    LaunchedEffect( currentTextFieldValue) {
+    LaunchedEffect(currentTextFieldValue) {
         mayShowAutoCompletePopup = true
         requestDismissAutoCompletePopup = false
     }
 
-    LaunchedEffect(requestDismissAutoCompletePopup) {
-        if (requestDismissAutoCompletePopup) {
-            delay(100)
-            mayShowAutoCompletePopup = false
-            requestedAutoCompleteType.value = null
-        }
+    OnTrueLaunchedEffect(requestDismissAutoCompletePopup) {
+        delay(100)
+        mayShowAutoCompletePopup = false
+        resetRequestedAutoCompleteType()
     }
 
-    val showAutoCompletePopup = mayShowAutoCompletePopup
-            && autoCompleteHints.orEmpty().flatMap { it.items }.isNotEmpty()
+    val areHintsEmpty = autoCompleteHints.orEmpty().flatMap { it.items }.isEmpty()
+    OnTrueLaunchedEffect(areHintsEmpty) {
+        resetRequestedAutoCompleteType()
+    }
 
+    val showAutoCompletePopup = mayShowAutoCompletePopup && !areHintsEmpty
     if (!showAutoCompletePopup) {
         return
     }
@@ -294,11 +297,9 @@ private fun CreateReplyUi(
         prevReplyContent = currentTextFieldValue.text
     }
 
-    LaunchedEffect(requestFocus) {
-        if (requestFocus) {
-            focusRequester.requestFocus()
-            requestFocus = false
-        }
+    OnTrueLaunchedEffect(requestFocus) {
+        focusRequester.requestFocus()
+        requestFocus = false
     }
 
     Box(modifier.fillMaxWidth()) {
