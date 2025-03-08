@@ -194,9 +194,14 @@ private fun AutoCompletionDialog(
         }
     }
 
-    val showAutoCompletePopup = mayShowAutoCompletePopup
-            && autoCompleteHints.orEmpty().flatMap { it.items }.isNotEmpty()
+    val areHintsEmpty = autoCompleteHints.orEmpty().flatMap { it.items }.isEmpty()
+    LaunchedEffect(areHintsEmpty) {
+        if (areHintsEmpty) {
+            requestedAutoCompleteType.value = null
+        }
+    }
 
+    val showAutoCompletePopup = mayShowAutoCompletePopup && !areHintsEmpty
     if (!showAutoCompletePopup) {
         return
     }
