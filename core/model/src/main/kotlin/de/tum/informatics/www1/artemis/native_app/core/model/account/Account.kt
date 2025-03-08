@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 open class Account(
     override val activated: Boolean = false,
-    override val authorities: List<String> = emptyList(),
+    override val authorities: List<AccountAuthority> = emptyList(),
     @SerialName("login")
     override val username: String? = null,
     override val email: String? = null,
@@ -21,19 +21,19 @@ open class Account(
     val groups: List<String> = emptyList()
 ) : BaseAccount
 
-private const val AuthorityAdmin = "ROLE_ADMIN"
-
 fun Account.isAtLeastTutorInCourse(course: Course): Boolean {
     return hasGroup(course.instructorGroupName) ||
             hasGroup(course.editorGroupName) ||
             hasGroup(course.teachingAssistantGroupName) ||
-            hasAnyAuthorityDirect(listOf(AuthorityAdmin))
+            hasAnyAuthorityDirect(listOf(AccountAuthority.ROLE_INSTRUCTOR))
 }
 
 private fun Account.hasGroup(groupName: String): Boolean {
     return groupName in groups
 }
 
-private fun Account.hasAnyAuthorityDirect(authorities: List<String>): Boolean {
+private fun Account.hasAnyAuthorityDirect(authorities: List<AccountAuthority>): Boolean {
     return this.authorities.any { it in authorities }
 }
+
+private fun Account.highestAuthority() = authorities.maxOrNull()

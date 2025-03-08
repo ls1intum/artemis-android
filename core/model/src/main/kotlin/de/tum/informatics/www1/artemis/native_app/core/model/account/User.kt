@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 class User(
     override val activated: Boolean = false,
-    override val authorities: List<String> = emptyList(),
+    override val authorities: List<AccountAuthority> = emptyList(),
     @SerialName("login")
     override val username: String? = null,
     override val email: String? = null,
