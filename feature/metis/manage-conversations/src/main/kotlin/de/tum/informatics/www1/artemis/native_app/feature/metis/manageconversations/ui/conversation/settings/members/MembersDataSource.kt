@@ -39,7 +39,7 @@ internal class MembersDataSource(
             is NetworkResponse.Response -> {
                 LoadResult.Page(
                     membersNetworkResponse.data,
-                    null,
+                    if (pageNum > 0) pageNum - 1 else null,
                     if (membersNetworkResponse.data.size >= pageSize) pageNum + 1 else null
                 )
             }

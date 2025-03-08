@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
@@ -157,6 +158,7 @@ private fun ConversationMembersList(
         is LoadState.NotLoading -> {
             LazyColumn(
                 modifier = modifier
+                    .navigationBarsPadding()
                     .nestedScroll(collapsingContentState.nestedScrollConnection)
                     .testTag(TEST_TAG_MEMBERS_LIST)
             ) {
