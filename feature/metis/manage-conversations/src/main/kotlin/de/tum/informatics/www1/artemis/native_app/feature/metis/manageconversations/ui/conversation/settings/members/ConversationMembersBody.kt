@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -162,8 +163,15 @@ private fun ConversationMembersList(
                 modifier = modifier
                     .nestedScroll(collapsingContentState.nestedScrollConnection)
                     .testTag(TEST_TAG_MEMBERS_LIST),
-                contentPadding = WindowInsets.navigationBars.asPaddingValues()
+                contentPadding = WindowInsets.navigationBars.asPaddingValues(),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                if (members.loadState.prepend is LoadState.Loading) {
+                    item {
+                        CircularProgressIndicator()
+                    }
+                }
+
                 items(
                     count = members.itemCount,
                     key = members.itemKey(key = { it.id })
@@ -185,9 +193,7 @@ private fun ConversationMembersList(
                 when (members.loadState.append) {
                     LoadState.Loading -> {
                         item {
-                            LinearProgressIndicator(
-                                modifier = Modifier.fillMaxWidth(),
-                            )
+                            CircularProgressIndicator()
                         }
                     }
 
