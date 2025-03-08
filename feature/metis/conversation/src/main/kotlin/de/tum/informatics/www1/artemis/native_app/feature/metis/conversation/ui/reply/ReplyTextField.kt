@@ -32,7 +32,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -90,7 +89,7 @@ internal fun ReplyTextField(
     conversationName: String
 ) {
     val replyState: ReplyState = rememberReplyState(replyMode, updateFailureState)
-    val requestedAutoCompleteType = remember { mutableStateOf<AutoCompleteType?>(null) }
+    var requestedAutoCompleteType by remember { mutableStateOf<AutoCompleteType?>(null) }
 
     Surface(
         modifier = modifier,
@@ -117,6 +116,7 @@ internal fun ReplyTextField(
             AutoCompletionDialog(
                 replyMode = replyMode,
                 requestedAutoCompleteType = requestedAutoCompleteType,
+                resetRequestedAutoCompleteType = { requestedAutoCompleteType = null }
             )
 
             AnimatedContent(
@@ -137,7 +137,7 @@ internal fun ReplyTextField(
                             onReply = { targetReplyState.onCreateReply() },
                             conversationName = conversationName,
                             onFileSelected = { uri -> onFileSelected(uri) },
-                            onRequestAutocompleteType = { requestedAutoCompleteType.value = it }
+                            onRequestAutocompleteType = { requestedAutoCompleteType = it }
                         )
                     }
 
@@ -168,7 +168,8 @@ internal fun ReplyTextField(
 @Composable
 private fun AutoCompletionDialog(
     replyMode: ReplyMode,
-    requestedAutoCompleteType: MutableState<AutoCompleteType?>,
+    requestedAutoCompleteType: AutoCompleteType?,
+    resetRequestedAutoCompleteType: () -> Unit
 ) {
     val currentTextFieldValue by replyMode.currentText
 
@@ -179,9 +180,9 @@ private fun AutoCompletionDialog(
     var requestDismissAutoCompletePopup by remember { mutableStateOf(false) }
 
     val tagChars = LocalReplyAutoCompleteHintProvider.current.legalTagChars
-    val autoCompleteHints = manageAutoCompleteHints(currentTextFieldValue, requestedAutoCompleteType.value)
+    val autoCompleteHints = manageAutoCompleteHints(currentTextFieldValue, requestedAutoCompleteType)
 
-    LaunchedEffect( currentTextFieldValue) {
+    LaunchedEffect(currentTextFieldValue) {
         mayShowAutoCompletePopup = true
         requestDismissAutoCompletePopup = false
     }
@@ -190,14 +191,14 @@ private fun AutoCompletionDialog(
         if (requestDismissAutoCompletePopup) {
             delay(100)
             mayShowAutoCompletePopup = false
-            requestedAutoCompleteType.value = null
+            resetRequestedAutoCompleteType()
         }
     }
 
     val areHintsEmpty = autoCompleteHints.orEmpty().flatMap { it.items }.isEmpty()
     LaunchedEffect(areHintsEmpty) {
         if (areHintsEmpty) {
-            requestedAutoCompleteType.value = null
+            resetRequestedAutoCompleteType()
         }
     }
 
