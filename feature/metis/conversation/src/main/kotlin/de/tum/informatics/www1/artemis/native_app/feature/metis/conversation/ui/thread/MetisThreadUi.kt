@@ -50,6 +50,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.rememberPostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.shouldDisplayHeader
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.util.ForwardMessageUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MetisReplyHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
@@ -80,6 +81,7 @@ internal fun MetisThreadUi(
     viewModel: ConversationViewModel
 ) {
     val postDataState: DataState<IStandalonePost> by viewModel.threadUseCase.post.collectAsState()
+    val forwardMessageUseCase = viewModel.forwardMessageUseCase
     val chatListContextItem by viewModel.threadUseCase.chatListItem.collectAsState()
     val answerChatListItemState: (IAnswerPost) -> StateFlow<ChatListItem.PostItem.ThreadItem.Answer?> =
         { viewModel.threadUseCase.getAnswerChatListItem(it) }
@@ -112,6 +114,7 @@ internal fun MetisThreadUi(
             postDataState = postDataState,
             chatListContextItem = chatListContextItem,
             postActionFlags = postActionFlags,
+            forwardMessageUseCase = forwardMessageUseCase,
             serverUrl = serverUrl,
             emojiService = koinInject(),
             isMarkedAsDeleteList = viewModel.isMarkedAsDeleteList,
@@ -174,6 +177,7 @@ internal fun MetisThreadUi(
     conversationDataState: DataState<Conversation>,
     chatListContextItem: ChatListItem.PostItem.ThreadItem?,
     postActionFlags: PostActionFlags,
+    forwardMessageUseCase: ForwardMessageUseCase,
     serverUrl: String,
     isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     emojiService: EmojiService,
@@ -240,6 +244,7 @@ internal fun MetisThreadUi(
                                 post = post,
                                 chatListContextItem = chatListContextItem,
                                 postActionFlags = postActionFlags,
+                                forwardMessageUseCase = forwardMessageUseCase,
                                 clientId = clientId,
                                 answerChatListItemState = answerChatListItemState,
                                 isMarkedAsDeleteList = isMarkedAsDeleteList,
@@ -284,6 +289,7 @@ private fun PostAndRepliesList(
     post: IStandalonePost,
     chatListContextItem: ChatListItem.PostItem.ThreadItem?,
     postActionFlags: PostActionFlags,
+    forwardMessageUseCase: ForwardMessageUseCase,
     isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     clientId: Long,
     answerChatListItemState: (IAnswerPost) -> StateFlow<ChatListItem.PostItem.ThreadItem.Answer?>,
@@ -316,7 +322,7 @@ private fun PostAndRepliesList(
             onReplyInThread = null,
             onResolvePost = { onRequestResolve(affectedPost) },
             onPinPost = { onRequestPin(affectedPost) },
-            onForwardPost = {  },
+            onForwardPost = null, // Set in PostWithBottomSheet
             onSavePost = { onRequestSave(affectedPost) },
             onRequestRetrySend = {
                 onRequestRetrySend(
@@ -349,6 +355,7 @@ private fun PostAndRepliesList(
                     chatListItem = chatListContextItem ?: ChatListItem.PostItem.ThreadItem.ContextItem.ContextPost(post),
                     postActions = postActions,
                     linkPreviews = linkPreviews,
+                    forwardMessageUseCase = forwardMessageUseCase,
                     onRemoveLinkPreview = { linkPreview ->
                         onRemoveLinkPreview(linkPreview, post, null)
                     },
@@ -388,6 +395,7 @@ private fun PostAndRepliesList(
                 post = answerPost,
                 postActions = postActions,
                 linkPreviews = answerPostLinkPreviews,
+                forwardMessageUseCase = forwardMessageUseCase,
                 onRemoveLinkPreview = { linkPreview ->
                     onRemoveLinkPreview(linkPreview, answerPost, post as? IStandalonePost)
                 },

@@ -23,7 +23,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversati
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_personal_conversation.testTagForPotentialRecipient
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.MemberSelectionBaseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.testTagForSelectedRecipient
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.util.getTestTagForRecipient
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.add_members.ConversationAddMembersScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.add_members.ConversationAddMembersViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.add_members.TEST_TAG_ADD_MEMBERS_BUTTON
@@ -107,7 +107,7 @@ class ConversationAddMemberSettingsE2eTest : ConversationBaseTest() {
         }
 
         newUsers.forEach { username ->
-            composeTestRule.onNodeWithTag(testTagForSelectedRecipient(username))
+            composeTestRule.onNodeWithTag(getTestTagForRecipient(username))
                 .performScrollTo()
                 .assertExists()
         }

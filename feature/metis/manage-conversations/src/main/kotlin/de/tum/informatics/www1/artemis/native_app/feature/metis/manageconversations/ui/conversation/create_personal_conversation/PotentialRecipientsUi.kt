@@ -36,6 +36,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.common.CourseUserListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.MemberSelectionBaseViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.util.MemberSelectionItem
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.util.toMemberSelectionItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseUser
 
 internal fun testTagForPotentialRecipient(username: String) = "potentialRecipient$username"
@@ -46,7 +48,7 @@ internal fun PotentialRecipientsUi(
     potentialRecipientsDataState: DataState<List<CourseUser>>,
     isQueryTooShort: Boolean,
     inclusionList: InclusionList,
-    addRecipient: (CourseUser) -> Unit,
+    onAddMemberItem: (MemberSelectionItem) -> Unit,
     updateInclusionList: (InclusionList) -> Unit,
     retryLoadPotentialRecipients: () -> Unit
 ) {
@@ -73,7 +75,7 @@ internal fun PotentialRecipientsUi(
                     .fillMaxSize()
                     .imePadding(),
                 recipients = potentialRecipients,
-                addRecipient = addRecipient,
+                onAddMemberItem = onAddMemberItem,
                 isQueryTooShort = isQueryTooShort
             )
         }
@@ -123,7 +125,7 @@ private fun InclusionListUi(
 private fun PotentialRecipientsList(
     modifier: Modifier,
     recipients: List<CourseUser>,
-    addRecipient: (CourseUser) -> Unit,
+    onAddMemberItem: (MemberSelectionItem) -> Unit,
     isQueryTooShort: Boolean
 ) {
     if (recipients.isNotEmpty()) {
@@ -146,7 +148,7 @@ private fun PotentialRecipientsList(
                                     .clip(CircleShape)
                                     .size(32.dp)
                                     .background(MaterialTheme.colorScheme.surfaceContainer),
-                                onClick = { addRecipient(user) }
+                                onClick = { onAddMemberItem(user.toMemberSelectionItem()) }
                             ) {
                                 Icon(
                                     modifier = Modifier.size(24.dp),

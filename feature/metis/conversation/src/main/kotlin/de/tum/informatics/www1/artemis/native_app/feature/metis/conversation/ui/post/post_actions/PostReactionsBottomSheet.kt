@@ -70,7 +70,7 @@ fun PostReactionBottomSheet(
             .statusBarsPadding()
             .testTag(TEST_TAG_POST_REACTIONS_BOTTOM_SHEET),
         contentWindowInsets = { WindowInsets.statusBars },
-        sheetState = rememberModalBottomSheetState(),
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         onDismissRequest = onDismissRequest
     ) {
         var currentEmojiSelection: EmojiSelection by remember { mutableStateOf(emojiSelection) }

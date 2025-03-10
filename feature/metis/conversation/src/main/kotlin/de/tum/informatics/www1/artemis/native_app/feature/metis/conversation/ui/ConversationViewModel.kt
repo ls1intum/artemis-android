@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.core.content.ContextCompat.getString
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -41,6 +42,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.ReplyTextStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ConversationChatListUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.util.ForwardMessageUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.util.LinkPreviewUtil
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompletionUseCase
@@ -195,6 +197,16 @@ internal open class ConversationViewModel(
         serverConfigurationService = serverConfigurationService,
         networkStatusProvider = networkStatusProvider,
         course = course,
+        coroutineContext = coroutineContext
+    )
+
+    val forwardMessageUseCase = ForwardMessageUseCase(
+        courseId = courseId,
+        conversationService = conversationService,
+        accountService = accountService,
+        serverConfigurationService = serverConfigurationService,
+        networkStatusProvider = networkStatusProvider,
+        savedStateHandle = SavedStateHandle(),
         coroutineContext = coroutineContext
     )
 

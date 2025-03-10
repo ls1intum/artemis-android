@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Tag
+import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
@@ -167,7 +167,7 @@ internal fun BrowseChannelsScreen(
             EmptyListHint(
                 modifier = Modifier.align(Alignment.Center),
                 hint = stringResource(id = R.string.browse_channel_list_empty),
-                imageVector = Icons.Default.Tag
+                imageVector = Icons.Default.Numbers
             )
         }
 

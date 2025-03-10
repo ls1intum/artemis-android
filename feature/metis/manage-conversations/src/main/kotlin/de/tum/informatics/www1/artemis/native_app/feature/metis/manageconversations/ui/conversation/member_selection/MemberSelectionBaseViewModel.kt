@@ -13,7 +13,11 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_personal_conversation.InclusionList
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.util.MemberSelectionItem
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.util.toMemberSelectionItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseUser
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import kotlinx.coroutines.flow.Flow
@@ -22,6 +26,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.flattenMerge
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
@@ -31,7 +36,7 @@ import kotlinx.parcelize.Parcelize
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.milliseconds
 
-internal abstract class MemberSelectionBaseViewModel(
+abstract class MemberSelectionBaseViewModel(
     protected val courseId: Long,
     protected val conversationService: ConversationService,
     protected val accountService: AccountService,
@@ -44,7 +49,7 @@ internal abstract class MemberSelectionBaseViewModel(
     companion object {
         private const val KEY_QUERY = "query"
         private const val KEY_INCLUSION_LIST = "inclusion_list"
-        private const val KEY_RECIPIENTS = "recipients"
+        private const val KEY_MEMBER_ITEMS= "member_items"
 
         val QUERY_DEBOUNCE_TIME = 200.milliseconds
 
@@ -63,11 +68,19 @@ internal abstract class MemberSelectionBaseViewModel(
     val inclusionList: StateFlow<InclusionList> =
         savedStateHandle.getStateFlow(KEY_INCLUSION_LIST, InclusionList())
 
-    private val _recipients =
-        savedStateHandle.getStateFlow(KEY_RECIPIENTS, RecipientsList(emptyList()))
+    private val _memberItems =
+        savedStateHandle.getStateFlow(KEY_MEMBER_ITEMS, MemberItemsList(emptyList(), emptyList()))
 
-    val recipients: StateFlow<List<Recipient>> = _recipients
+    val recipients: StateFlow<List<MemberSelectionItem.Recipient>> = _memberItems
         .map { it.recipients }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, emptyList())
+
+    val conversations: StateFlow<List<MemberSelectionItem.Conversation>> = _memberItems
+        .map { it.conversations }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, emptyList())
+
+    val memberItems: StateFlow<List<MemberSelectionItem>> = _memberItems
+        .map { it.conversations + it.recipients }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, emptyList())
 
     private val recipientsFromServer: Flow<DataState<List<CourseUser>>> = flatMapLatest(
@@ -108,25 +121,74 @@ internal abstract class MemberSelectionBaseViewModel(
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
+    private val potentialConversations: StateFlow<DataState<List<Conversation>>> = combine(
+        query,
+        accountService.authToken,
+        serverConfigurationService.serverUrl,
+        onRequestReloadPotentialRecipients.onStart { emit(Unit) }
+    ) { query, authToken, serverUrl, _ ->
+        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+            conversationService.getConversations(courseId, authToken, serverUrl).bind { conversations ->
+                conversations.filter {
+                    it.humanReadableName.contains(query, ignoreCase = true) && it !is OneToOneChat
+                }
+            }
+        }
+    }
+        .flattenMerge()
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
+
+    fun suggestions(isConversationSelectionEnabled: Boolean): StateFlow<List<MemberSelectionItem>> = combine(
+        potentialConversations,
+        potentialRecipients
+    ) { potentialConversationsDataState, potentialRecipientsDataState ->
+        val conversations = potentialConversationsDataState.bind { conversations ->
+            conversations.map { it.toMemberSelectionItem() }
+        }.orElse(emptyList())
+
+        val recipients = potentialRecipientsDataState.bind { courseUsers ->
+            courseUsers.map { it.toMemberSelectionItem() }
+        }.orElse(emptyList())
+
+        if (isConversationSelectionEnabled) {
+            conversations + recipients
+        } else {
+            recipients
+        }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
     fun updateQuery(query: String) {
         savedStateHandle[KEY_QUERY] = query
     }
 
-    fun addRecipient(recipient: CourseUser) {
-        savedStateHandle[KEY_RECIPIENTS] = RecipientsList(
-            recipients.value + Recipient(
-                recipient.username ?: return,
-                recipient.humanReadableName,
-                recipient.imageUrl ?: "",
-                recipient.id
-            )
-        )
+    fun addMemberItem(item: MemberSelectionItem) {
+        when (item) {
+            is MemberSelectionItem.Recipient -> {
+                savedStateHandle[KEY_MEMBER_ITEMS] = MemberItemsList(
+                    conversations.value, recipients.value + item
+                )
+            }
+            is MemberSelectionItem.Conversation -> {
+                savedStateHandle[KEY_MEMBER_ITEMS] = MemberItemsList(
+                    conversations.value + item, recipients.value
+                )
+            }
+        }
     }
 
-    fun removeRecipient(recipient: Recipient) {
-        savedStateHandle[KEY_RECIPIENTS] = RecipientsList(
-            recipients.value - recipient
-        )
+    fun removeMemberItem(item: MemberSelectionItem) {
+        when (item) {
+            is MemberSelectionItem.Conversation -> {
+                savedStateHandle[KEY_MEMBER_ITEMS] = MemberItemsList(
+                    conversations.value - item, recipients.value
+                )
+            }
+            is MemberSelectionItem.Recipient -> {
+                savedStateHandle[KEY_MEMBER_ITEMS] = MemberItemsList(
+                    conversations.value, recipients.value - item
+                )
+            }
+        }
     }
 
     fun updateInclusionList(inclusionList: InclusionList) {
@@ -138,11 +200,14 @@ internal abstract class MemberSelectionBaseViewModel(
     }
 
     protected fun reset() {
-        savedStateHandle[KEY_RECIPIENTS] = RecipientsList(emptyList())
+        savedStateHandle[KEY_MEMBER_ITEMS] = MemberItemsList(
+            emptyList(),
+            emptyList()
+        )
         savedStateHandle[KEY_INCLUSION_LIST] = InclusionList()
         savedStateHandle[KEY_QUERY] = ""
     }
 
     @Parcelize
-    private data class RecipientsList(val recipients: List<Recipient>) : Parcelable
+    private data class MemberItemsList(val conversations: List<MemberSelectionItem.Conversation>, val recipients: List<MemberSelectionItem.Recipient>) : Parcelable
 }

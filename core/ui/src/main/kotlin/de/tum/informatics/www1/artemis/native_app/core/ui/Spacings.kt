@@ -34,10 +34,14 @@ object Spacings {
         val addEmojiIconSize = 18.sp
     }
 
-    object AutoCompletePopup {
+    object Popup {
+        val maxHeight = 270.dp
+
         val HintHorizontalPadding = 16.dp
         val ContentVerticalPadding = 8.dp
+
     }
+
 
     object CourseItem {
         val height = 250.dp

@@ -22,6 +22,7 @@ dependencies {
     testImplementation(project(":core:ui-test"))
 
     implementation(project(":feature:metis:shared"))
+    implementation(project(":feature:metis:manage-conversations"))
     testImplementation(project(":feature:metis-test"))
 
     implementation(libs.androidx.paging.runtime)

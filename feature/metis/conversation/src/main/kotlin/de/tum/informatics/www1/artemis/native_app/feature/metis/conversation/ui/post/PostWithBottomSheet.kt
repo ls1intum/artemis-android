@@ -22,7 +22,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.EmojiSelection
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostContextBottomSheet
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostForwardBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostReactionBottomSheet
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.util.ForwardMessageUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
@@ -39,6 +41,7 @@ internal fun PostWithBottomSheet(
     isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     postActions: PostActions,
     linkPreviews: List<LinkPreview>,
+    forwardMessageUseCase: ForwardMessageUseCase,
     clientId: Long,
     displayHeader: Boolean,
     joinedItemType: PostItemViewJoinedType,
@@ -47,6 +50,7 @@ internal fun PostWithBottomSheet(
 ) {
     var displayBottomSheet by remember(post, chatListItem) { mutableStateOf(false) }
     var displayReactionBottomSheet by remember(post, chatListItem) { mutableStateOf(false) }
+    var displayForwardBottomSheet by remember(post, chatListItem) { mutableStateOf(false) }
     var emojiSelection: EmojiSelection by remember { mutableStateOf(EmojiSelection.ALL) }
 
     val isPinned = post is IStandalonePost && post.displayPriority == DisplayPriority.PINNED
@@ -121,7 +125,9 @@ internal fun PostWithBottomSheet(
 
     if (displayBottomSheet && post != null) {
         PostContextBottomSheet(
-            postActions = postActions,
+            postActions = postActions.copy(onForwardPost = {
+                displayForwardBottomSheet = true
+            }),
             post = post,
             clientId = clientId,
             onDismissRequest = {
@@ -136,6 +142,16 @@ internal fun PostWithBottomSheet(
             emojiSelection = emojiSelection,
             onDismissRequest = {
                 displayReactionBottomSheet = false
+            }
+        )
+    }
+
+    if (displayForwardBottomSheet && post != null) {
+        PostForwardBottomSheet(
+            post = post,
+            forwardMessageUseCase = forwardMessageUseCase,
+            onDismissRequest = {
+                displayForwardBottomSheet = false
             }
         )
     }

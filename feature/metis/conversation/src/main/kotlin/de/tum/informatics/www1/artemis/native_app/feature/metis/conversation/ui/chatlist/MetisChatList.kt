@@ -44,6 +44,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.rememberPostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.shouldDisplayHeader
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.util.ForwardMessageUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MetisReplyHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
@@ -82,6 +83,7 @@ internal fun MetisChatList(
 
     val clientId: Long by viewModel.clientIdOrDefault.collectAsState()
     val postActionFlags by viewModel.postActionFlags.collectAsState()
+    val forwardMessageUseCase = viewModel.forwardMessageUseCase
 
     val serverUrl by viewModel.serverUrl.collectAsState()
 
@@ -105,6 +107,7 @@ internal fun MetisChatList(
             state = state,
             isMarkedAsDeleteList = viewModel.isMarkedAsDeleteList,
             bottomItem = bottomItem,
+            forwardMessageUseCase = forwardMessageUseCase,
             isReplyEnabled = isReplyEnabled,
             onCreatePost = viewModel::createPost,
             onEditPost = viewModel::editPost,
@@ -133,6 +136,7 @@ fun MetisChatList(
     bottomItem: PostPojo?,
     clientId: Long,
     postActionFlags: PostActionFlags,
+    forwardMessageUseCase: ForwardMessageUseCase = koinInject(),
     serverUrl: String,
     courseId: Long,
     state: LazyListState,
@@ -209,6 +213,7 @@ fun MetisChatList(
                             isMarkedAsDeleteList = isMarkedAsDeleteList,
                             onClickViewPost = onClickViewPost,
                             postActionFlags = postActionFlags,
+                            forwardMessageUseCase = forwardMessageUseCase,
                             onRequestEdit = onEditPostDelegate,
                             onRequestDelete = onDeletePostDelegate,
                             onRequestUndoDelete = onUndoDeletePost,
@@ -243,6 +248,7 @@ private fun ChatList(
     state: LazyListState,
     posts: PostsDataState.Loaded,
     postActionFlags: PostActionFlags,
+    forwardMessageUseCase: ForwardMessageUseCase,
     isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     clientId: Long,
     displayUnreadIndicator: Boolean = false,        // See https://github.com/ls1intum/artemis-android/pull/375#issuecomment-2656030353
@@ -309,7 +315,7 @@ private fun ChatList(
                         },
                         onResolvePost = null,
                         onPinPost = { onRequestPin(post) },
-                        onForwardPost = {  },
+                        onForwardPost = null, // Set in PostWithBottomSheet
                         onSavePost = { onRequestSave(post) },
                         onRequestRetrySend = {
                             onRequestRetrySend(
@@ -329,6 +335,7 @@ private fun ChatList(
                         chatListItem = chatListItem,
                         postActions = postActions,
                         linkPreviews = linkPreviews,
+                        forwardMessageUseCase = forwardMessageUseCase,
                         displayHeader = shouldDisplayHeader(
                             index = index,
                             post = post,

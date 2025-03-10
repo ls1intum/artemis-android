@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,27 +30,41 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicSearchTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_personal_conversation.PotentialRecipientsUi
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.util.MemberSelectionItem
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.util.MemberSelectionMode
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureData
 
 internal const val TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD = "TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD"
 internal const val TEST_TAG_RECIPIENTS_LIST = "TEST_TAG_RECIPIENTS_LIST"
-internal fun testTagForSelectedRecipient(username: String) = "selectedRecipient$username"
 
+/**
+ * Provides a member selection UI for selecting users or conversations.
+ * By default only members can be selected.
+ * If [isConversationSelectionEnabled] is set to true, conversations can be selected as well.
+ * When selecting from conversations AND members, the [memberSelectionMode] must be set to
+ * [MemberSelectionMode.MemberSelectionDropdown].
+ */
 @Composable
-internal fun MemberSelection(
+fun MemberSelection(
     modifier: Modifier,
     viewModel: MemberSelectionBaseViewModel,
+    memberSelectionMode: MemberSelectionMode = MemberSelectionMode.MemberSelectionList,
+    isConversationSelectionEnabled: Boolean = false,
     onUpdateSelectedUserCount: (Int) -> Unit
 ) {
-    val recipients by viewModel.recipients.collectAsState()
+    val invalidRequirements = isConversationSelectionEnabled && memberSelectionMode is MemberSelectionMode.MemberSelectionList
+    require(!invalidRequirements) { "Conversation selection is only enabled for the MemberSelectionDropdown mode" }
+
+    val memberSelectionItems by viewModel.memberItems.collectAsState()
     val query by viewModel.query.collectAsState()
     val isQueryTooShort by viewModel.isQueryTooShort.collectAsState()
     val potentialRecipientsDataState by viewModel.potentialRecipients.collectAsState()
+    val suggestions by viewModel.suggestions(isConversationSelectionEnabled).collectAsState()
     val inclusionList by viewModel.inclusionList.collectAsState()
 
-    LaunchedEffect(recipients) {
-        onUpdateSelectedUserCount(recipients.size)
+    LaunchedEffect(memberSelectionItems) {
+        onUpdateSelectedUserCount(memberSelectionItems.size)
     }
 
     Column(
@@ -59,33 +74,43 @@ internal fun MemberSelection(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 4.dp),
-            recipients = recipients,
+            memberSelectionActiveItems = memberSelectionItems,
+            memberSelectionMode = memberSelectionMode,
+            suggestions = suggestions,
             query = query,
             onUpdateQuery = viewModel::updateQuery,
-            onRemoveRecipient = viewModel::removeRecipient
+            onRemoveMemberItem = viewModel::removeMemberItem,
+            onAddMemberItem = viewModel::addMemberItem,
         )
 
-        PotentialRecipientsUi(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
-            potentialRecipientsDataState = potentialRecipientsDataState,
-            isQueryTooShort = isQueryTooShort,
-            inclusionList = inclusionList,
-            addRecipient = viewModel::addRecipient,
-            updateInclusionList = viewModel::updateInclusionList,
-            retryLoadPotentialRecipients = viewModel::retryLoadPotentialRecipients
-        )
+        // Currently, conversation selection is only enabled for the MemberSelectionDropdown mode
+        if (memberSelectionMode is MemberSelectionMode.MemberSelectionList) {
+            PotentialRecipientsUi(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                potentialRecipientsDataState = potentialRecipientsDataState,
+                isQueryTooShort = isQueryTooShort,
+                inclusionList = inclusionList,
+                onAddMemberItem = viewModel::addMemberItem,
+                updateInclusionList = viewModel::updateInclusionList,
+                retryLoadPotentialRecipients = viewModel::retryLoadPotentialRecipients
+            )
+            return
+        }
     }
 }
 
 @Composable
 private fun RecipientsTextField(
     modifier: Modifier,
-    recipients: List<Recipient>,
+    memberSelectionActiveItems: List<MemberSelectionItem>,
+    memberSelectionMode: MemberSelectionMode,
+    suggestions: List<MemberSelectionItem>,
     query: String,
     onUpdateQuery: (String) -> Unit,
-    onRemoveRecipient: (Recipient) -> Unit
+    onRemoveMemberItem: (MemberSelectionItem) -> Unit,
+    onAddMemberItem: (MemberSelectionItem) -> Unit
 ) {
     val focusRequester = remember { FocusRequester() }
 
@@ -97,7 +122,7 @@ private fun RecipientsTextField(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        AnimatedVisibility(visible = recipients.isNotEmpty()) {
+        AnimatedVisibility(visible = memberSelectionActiveItems.isNotEmpty()) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -111,12 +136,12 @@ private fun RecipientsTextField(
                             .testTag(TEST_TAG_RECIPIENTS_LIST),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        recipients.forEach { recipient ->
+                        memberSelectionActiveItems.forEach { item ->
                             Box {
-                                RecipientChip(
+                                MemberSelectionItemChip(
                                     modifier = Modifier,
-                                    recipient = recipient,
-                                    onClickRemove = { onRemoveRecipient(recipient) }
+                                    memberSelectionItem = item,
+                                    onClickRemove = { onRemoveMemberItem(item) }
                                 )
                             }
                         }
@@ -125,22 +150,34 @@ private fun RecipientsTextField(
             }
         }
 
-        BasicSearchTextField (
-            modifier = Modifier
-                .fillMaxWidth(),
+        if(memberSelectionMode is MemberSelectionMode.MemberSelectionList){
+            BasicSearchTextField(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                query = query,
+                updateQuery = onUpdateQuery,
+                hint = stringResource(id = R.string.conversation_member_selection_address_hint),
+                testTag = TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD,
+                focusRequester = focusRequester
+            )
+            return
+        }
+
+        MemberSelectionDropdownPopup(
+            modifier = Modifier,
             query = query,
-            updateQuery = onUpdateQuery,
-            hint = stringResource(id = R.string.conversation_member_selection_address_hint),
-            testTag = TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD,
-            focusRequester = focusRequester
+            suggestions = suggestions,
+            focusRequester = focusRequester,
+            onUpdateQuery = onUpdateQuery,
+            onAddMemberItem = onAddMemberItem
         )
     }
 }
 
 @Composable
-private fun RecipientChip(
+private fun MemberSelectionItemChip(
     modifier: Modifier,
-    recipient: Recipient,
+    memberSelectionItem: MemberSelectionItem,
     onClickRemove: () -> Unit
 ) {
     Box(
@@ -148,25 +185,33 @@ private fun RecipientChip(
             .clip(MaterialTheme.shapes.small)
             .background(MaterialTheme.colorScheme.primaryContainer)
             .clickable(onClick = onClickRemove)
-            .testTag(testTagForSelectedRecipient(recipient.username))
+            .testTag(memberSelectionItem.getTestTag())
     ) {
         Row(
             modifier = Modifier.padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            ProfilePicture(
-                modifier = Modifier.size(24.dp),
-                profilePictureData = ProfilePictureData.create(
-                    imageUrl = recipient.imageUrl,
-                    username = recipient.humanReadableName,
-                    userId = recipient.userId
+            if (memberSelectionItem is MemberSelectionItem.Recipient) {
+                ProfilePicture(
+                    modifier = Modifier.size(24.dp),
+                    profilePictureData = ProfilePictureData.create(
+                        imageUrl = memberSelectionItem.imageUrl,
+                        username = memberSelectionItem.humanReadableName,
+                        userId = memberSelectionItem.userId
+                    )
                 )
-            )
+            } else if (memberSelectionItem is MemberSelectionItem.Conversation) {
+                Icon(
+                    imageVector = memberSelectionItem.imageVector,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
 
             Text(
                 modifier = Modifier.padding(start = 8.dp),
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
-                text = recipient.humanReadableName
+                text = memberSelectionItem.humanReadableName
             )
         }
     }

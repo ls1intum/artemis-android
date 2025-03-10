@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Cancel
@@ -106,7 +107,11 @@ internal fun ReplyTextField(
             )
         ),
         color = MaterialTheme.colorScheme.background,
-        shape = MaterialTheme.shapes.large
+        shape = MaterialTheme.shapes.large.copy(
+            bottomEnd = CornerSize(0.dp),
+            bottomStart = CornerSize(0.dp)
+        ),
+        shadowElevation = Spacings.AppBarElevation
     ) {
         Box(
             modifier = Modifier

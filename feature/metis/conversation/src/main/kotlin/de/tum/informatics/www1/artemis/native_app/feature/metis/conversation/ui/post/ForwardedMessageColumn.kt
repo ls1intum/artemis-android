@@ -64,6 +64,7 @@ private fun ForwardedMessageItem(
     modifier: Modifier,
     courseId: Long,
     forwardedPost: IBasePost?,
+    isPreview: Boolean = false,
 ) {
     QuotedMessageContainer(
         modifier = modifier
@@ -72,11 +73,13 @@ private fun ForwardedMessageItem(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(Spacings.Post.innerSpacing)
         ) {
-            ForwardedMessageHeader(
-                modifier = Modifier,
-                forwardedPost = forwardedPost,
-                courseId = courseId,
-            )
+            if (!isPreview) {
+                ForwardedMessageHeader(
+                    modifier = Modifier,
+                    forwardedPost = forwardedPost,
+                    courseId = courseId,
+                )
+            }
 
             if (forwardedPost == null) {
                 Text(
@@ -146,6 +149,19 @@ private fun ForwardedMessageHeader(
             style = MaterialTheme.typography.bodySmall,
         )
     }
+}
+
+@Composable
+fun ForwardedMessagePreview(
+    modifier: Modifier,
+    forwardedPost: IBasePost?
+) {
+    ForwardedMessageItem(
+        modifier = modifier,
+        courseId = -1,
+        forwardedPost = forwardedPost,
+        isPreview = true
+    )
 }
 
 @Composable

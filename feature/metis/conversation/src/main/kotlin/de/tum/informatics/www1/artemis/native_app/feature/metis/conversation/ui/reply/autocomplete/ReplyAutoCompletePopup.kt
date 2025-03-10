@@ -42,8 +42,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profil
 
 const val TEST_TAG_REPLY_AUTO_COMPLETE_POPUP_LIST = "TEST_TAG_REPLY_AUTO_COMPLETE_POPUP_LIST"
 
-private val AutoCompletionDialogMaxHeight = 270.dp
-
 @Composable
 internal fun ReplyAutoCompletePopup(
     popupPositionProvider: PopupPositionProvider,
@@ -58,11 +56,12 @@ internal fun ReplyAutoCompletePopup(
         properties = PopupProperties(dismissOnClickOutside = true),
         onDismissRequest = onDismissRequest
     ) {
-        val maxHeight = min(maxHeightFromScreen, AutoCompletionDialogMaxHeight)
-        val verticalPadding = Spacings.AutoCompletePopup.ContentVerticalPadding
+        val maxHeight = min(maxHeightFromScreen, Spacings.Popup.maxHeight)
+        val verticalPadding = Spacings.Popup.ContentVerticalPadding
         ReplyAutoCompletePopupBody(
             modifier = Modifier
-                .padding(vertical = verticalPadding)
+                .padding(vertical = verticalPadding, horizontal = 8.dp)
+                .dropShadowBelow()
                 .heightIn(max = maxHeight - verticalPadding * 2)
                 .width(targetWidth),
             autoCompleteCategories = autoCompleteCategories,
@@ -79,8 +78,8 @@ private fun ReplyAutoCompletePopupBody(
 ) {
     LazyColumn(
         modifier = modifier
-            .dropShadowBelow()
             .clip(MaterialTheme.shapes.large)
+            .dropShadowBelow()
             .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
             .padding(8.dp)
             .testTag(TEST_TAG_REPLY_AUTO_COMPLETE_POPUP_LIST)
@@ -128,7 +127,7 @@ private fun AutoCompleteCategoryComposable(modifier: Modifier, name: String) {
             modifier = Modifier
                 .fillMaxWidth()
                 .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
-                .padding(horizontal = Spacings.AutoCompletePopup.HintHorizontalPadding, vertical = 4.dp),
+                .padding(horizontal = Spacings.Popup.HintHorizontalPadding, vertical = 4.dp),
             text = name,
             color = MaterialTheme.colorScheme.primary,
             style = MaterialTheme.typography.labelLarge,
@@ -143,7 +142,7 @@ private fun AutoCompleteHintComposable(
     hint: AutoCompleteHint,
     onClick: () -> Unit
 ) {
-    val horizontalPadding = Spacings.AutoCompletePopup.HintHorizontalPadding
+    val horizontalPadding = Spacings.Popup.HintHorizontalPadding
 
     Row(
         modifier = modifier
