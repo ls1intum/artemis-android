@@ -10,7 +10,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ForwardedMessage
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.PostingType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
-import kotlinx.serialization.Serializable
 
 interface MetisService {
 
@@ -76,11 +75,5 @@ interface MetisService {
         val query: String?,
         val sortingStrategy: MetisSortingStrategy = MetisSortingStrategy.DATE_DESCENDING,
         val courseWideContext: CourseWideContext? = null
-    )
-
-    @Serializable
-    data class ForwardedMessagesResponse(
-        val id: Long,
-        val messages: List<ForwardedMessage>
     )
 }

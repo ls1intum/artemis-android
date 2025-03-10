@@ -20,6 +20,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.http.appendPathSegments
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -202,7 +203,7 @@ internal class MetisServiceImpl(
             }
 
             // We are only interested in the actual forwarded messages.
-            val messageWrapper: List<MetisService.ForwardedMessagesResponse> = Json.decodeFromJsonElement(ListSerializer(MetisService.ForwardedMessagesResponse.serializer()), response.body())
+            val messageWrapper: List<ForwardedMessagesResponse> = Json.decodeFromJsonElement(ListSerializer(ForwardedMessagesResponse.serializer()), response.body())
             messageWrapper.flatMap { it.messages }
         }
     }
@@ -254,4 +255,10 @@ internal class MetisServiceImpl(
             }.getOrElse { emptyList() }
         }
     }
+
+    @Serializable
+    private data class ForwardedMessagesResponse(
+        val id: Long,
+        val messages: List<ForwardedMessage>
+    )
 }

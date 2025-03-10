@@ -1,26 +1,20 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -71,65 +65,18 @@ private fun ForwardedMessageItem(
     courseId: Long,
     forwardedPost: IBasePost?,
 ) {
-    val linkOpener = LocalLinkOpener.current
-    val (sourceConversationId, sourceChannelText, conversationType) = resolveConversation(forwardedPost)
-
-    Row(
-        modifier = modifier.height(IntrinsicSize.Min),
-        horizontalArrangement = Arrangement.spacedBy(Spacings.Post.innerSpacing)
+    QuotedMessageContainer(
+        modifier = modifier
     ) {
-        Box(
-            modifier = Modifier
-                .clip(shape = CircleShape)
-                .fillMaxHeight()
-                .width(Spacings.Post.quoteBorderWidth)
-                .background(color = MaterialTheme.colorScheme.primary)
-        )
-
         Column(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(Spacings.Post.innerSpacing)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Icon(
-                    modifier = Modifier.height(14.dp),
-                    painter = painterResource(id = R.drawable.forward),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                )
-
-                Spacer(Modifier.width(Spacings.Post.innerSpacing))
-
-                Text(
-                    text = stringResource(R.string.post_forwarded_from),
-                    style = MaterialTheme.typography.bodySmall,
-                )
-
-                Spacer(Modifier.width(2.dp))
-
-                val isConversationPublic = conversationType == ConversationType.CHANNEL
-                val isConversationClickable = isConversationPublic && sourceConversationId != null && forwardedPost != null
-                Text(
-                    modifier = if (isConversationClickable) {
-                        Modifier.clickable {
-                            linkOpener.openLink(
-                                CommunicationDeeplinks.ToConversation.inAppLink(
-                                    courseId = courseId,
-                                    conversationId = sourceConversationId ?: return@clickable
-                                )
-                            )
-                        }
-                    } else {
-                        Modifier
-                    },
-                    text = sourceChannelText,
-                    color = if (isConversationClickable) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
+            ForwardedMessageHeader(
+                modifier = Modifier,
+                forwardedPost = forwardedPost,
+                courseId = courseId,
+            )
 
             if (forwardedPost == null) {
                 Text(
@@ -140,7 +87,7 @@ private fun ForwardedMessageItem(
                     color = MaterialTheme.colorScheme.secondary,
                     style = MaterialTheme.typography.bodyMedium,
                 )
-                return
+                return@Column
             }
 
             PostItemMainContent(
@@ -151,6 +98,53 @@ private fun ForwardedMessageItem(
                 onLongClick = {},
             )
         }
+    }
+}
+
+@Composable
+private fun ForwardedMessageHeader(
+    modifier: Modifier,
+    forwardedPost: IBasePost?,
+    courseId: Long,
+) {
+    val linkOpener = LocalLinkOpener.current
+    val (sourceConversationId, sourceChannelText, conversationType) = resolveConversation(forwardedPost)
+
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            modifier = Modifier.height(14.dp),
+            painter = painterResource(id = R.drawable.forward),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+        )
+
+        Spacer(Modifier.width(Spacings.Post.innerSpacing))
+
+        Text(
+            text = stringResource(R.string.post_forwarded_from),
+            style = MaterialTheme.typography.bodySmall,
+        )
+
+        Spacer(Modifier.width(2.dp))
+
+        val isConversationPublic = conversationType == ConversationType.CHANNEL
+        val isConversationClickable = isConversationPublic && sourceConversationId != null && forwardedPost != null
+        Text(
+            modifier = Modifier.clickable(enabled = isConversationClickable) {
+                linkOpener.openLink(
+                    CommunicationDeeplinks.ToConversation.inAppLink(
+                        courseId = courseId,
+                        conversationId = sourceConversationId ?: return@clickable
+                    )
+                )
+            },
+            text = sourceChannelText,
+            color = if (isConversationClickable) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.bodySmall,
+        )
     }
 }
 

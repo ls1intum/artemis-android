@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
@@ -67,18 +69,9 @@ private fun LinkPreviewItem(
 ) {
     val context = LocalContext.current
 
-    Row(
-        modifier = modifier.height(IntrinsicSize.Min),
-        horizontalArrangement = Arrangement.spacedBy(Spacings.Post.innerSpacing)
+    QuotedMessageContainer(
+        modifier = modifier
     ) {
-        Box(
-            modifier = Modifier
-                .clip(shape = MaterialTheme.shapes.large)
-                .fillMaxHeight()
-                .width(Spacings.Post.quoteBorderWidth)
-                .background(color = MaterialTheme.colorScheme.primary)
-        )
-
         Column(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(Spacings.Post.innerSpacing)
@@ -133,5 +126,30 @@ private fun LinkPreviewItem(
                 )
             }
         }
+    }
+}
+
+@Composable
+fun QuotedMessageContainer(
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Row(
+        modifier = modifier.height(IntrinsicSize.Min),
+        horizontalArrangement = Arrangement.spacedBy(Spacings.Post.innerSpacing)
+    ) {
+        Box(
+            modifier = Modifier
+                .clip(CircleShape)
+                .fillMaxHeight()
+                .width(Spacings.Post.quoteBorderWidth)
+                .background(MaterialTheme.colorScheme.primary)
+        )
+
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(Spacings.Post.innerSpacing),
+            content = content
+        )
     }
 }

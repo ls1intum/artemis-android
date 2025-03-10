@@ -28,6 +28,41 @@ class ForwardedMessagesHandler(
     private var cachedAnswerSourcePosts: Map<Long, List<AnswerPost?>> = mapOf()
 
     /**
+     * Extracts all forwarded messages found in loadedPosts and stores their ids in [forwardedPostIds].
+     */
+    fun extractForwardedMessages(loadedPosts: List<IBasePost>) {
+        loadedPosts.forEach { post ->
+            if (post.hasForwardedMessages == true) {
+                forwardedPostIds.add(post.serverPostId ?: -1)
+            }
+        }
+    }
+
+    /**
+     * Loads all forwarded messages for the currently available [forwardedPostIds] and fetches the
+     * corresponding source posts by their source ids in [fetchAndCachePosts].
+     *
+     * @param postingType The type of the destination posts for which the forwarded messages should be loaded.
+     */
+    suspend fun loadForwardedMessages(postingType: PostingType) {
+        metisService.getForwardedMessagesByIds(
+            metisContext = metisContext,
+            postIds = forwardedPostIds,
+            postType = postingType,
+            serverUrl = serverUrl,
+            authToken = authToken
+        ).bind { forwardedMessages ->
+            cachedForwardedMessages =
+                (cachedForwardedMessages + forwardedMessages).distinctBy { it.id }
+
+            val (sourcePostIds, sourceAnswerPostIds) = forwardedMessages.partition { it.sourceType == PostingType.POST }
+                .let { it.first.mapNotNull { msg -> msg.sourceId } to it.second.mapNotNull { msg -> msg.sourceId } }
+
+            fetchAndCachePosts(sourcePostIds, sourceAnswerPostIds)
+        }
+    }
+
+    /**
      * A wrapper method to resolve forwarded messages for a given ChatListItem of type PostItem.ThreadItem.
      * This method is used for the MetisThreadUI only, the logic is handled in [resolveForwardedMessages]
      *
@@ -68,50 +103,15 @@ class ForwardedMessagesHandler(
     private fun resolveForwardedMessages(
         chatListItem: ChatListItem.PostItem
     ): ChatListItem.PostItem.ForwardedMessage {
-        var forwardedSourcePosts = listOf<IBasePost?>()
+        val forwardedSourcePosts = mutableListOf<IBasePost?>()
         val id =
             cachedForwardedMessages.find { it.destinationPostId == chatListItem.post.serverPostId }?.sourceId
-        forwardedSourcePosts = forwardedSourcePosts + (cachedStandaloneSourcePosts[id] ?: emptyList())
-        forwardedSourcePosts = forwardedSourcePosts + (cachedAnswerSourcePosts[id] ?: emptyList())
+        cachedStandaloneSourcePosts[id]?.let { forwardedSourcePosts += it }
+        cachedAnswerSourcePosts[id]?.let { forwardedSourcePosts += it }
 
         val newChatListItem = chatListItem.copy() as ChatListItem.PostItem.ForwardedMessage
         val oldForwardedPosts = newChatListItem.forwardedPosts
         return newChatListItem.copyWithNewForwardedPosts(oldForwardedPosts + forwardedSourcePosts)
-    }
-
-    /**
-     * Loads all forwarded messages for the currently available [forwardedPostIds] and fetches the
-     * corresponding source posts by their source ids in [fetchAndCachePosts].
-     *
-     * @param postingType The type of the destination posts for which the forwarded messages should be loaded.
-     */
-    suspend fun loadForwardedMessages(postingType: PostingType) {
-        metisService.getForwardedMessagesByIds(
-            metisContext = metisContext,
-            postIds = forwardedPostIds,
-            postType = postingType,
-            serverUrl = serverUrl,
-            authToken = authToken
-        ).bind { forwardedMessages ->
-            cachedForwardedMessages =
-                (cachedForwardedMessages + forwardedMessages).distinctBy { it.id }
-
-            val (sourcePostIds, sourceAnswerPostIds) = forwardedMessages.partition { it.sourceType == PostingType.POST }
-                .let { it.first.mapNotNull { msg -> msg.sourceId } to it.second.mapNotNull { msg -> msg.sourceId } }
-
-            fetchAndCachePosts(sourcePostIds, sourceAnswerPostIds)
-        }
-    }
-
-    /**
-     * Extracts all forwarded messages found in loadedPosts and stores their ids in [forwardedPostIds].
-     */
-    fun extractForwardedMessages(loadedPosts: List<IBasePost>) {
-        loadedPosts.forEach { post ->
-            if (post.hasForwardedMessages == true) {
-                forwardedPostIds.add(post.serverPostId ?: -1)
-            }
-        }
     }
 
     private suspend fun fetchAndCachePosts(

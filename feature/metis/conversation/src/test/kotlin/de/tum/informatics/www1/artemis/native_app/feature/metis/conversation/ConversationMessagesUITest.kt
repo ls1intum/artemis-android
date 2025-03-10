@@ -187,7 +187,7 @@ class ConversationMessagesUITest : BaseChatUITest() {
         modifiedPosts[1] = modifiedPosts[1].copy(hasForwardedMessages = false)
         setupChatUi(modifiedPosts)
 
-        testForwardedMessageInVisibility()
+        testForwardedMessageInvisibility()
     }
 
     @Test
@@ -210,7 +210,7 @@ class ConversationMessagesUITest : BaseChatUITest() {
 
     // ##########################################################################################
 
-    private fun testForwardedMessageInVisibility() {
+    private fun testForwardedMessageInvisibility() {
         composeTestRule.onNodeWithTag(TEST_TAG_FORWARDED_POST_COLUMN, useUnmergedTree = true)
             .assertDoesNotExist()
         composeTestRule.onNodeWithTag(testTagForForwardedPost(forwardedPosts[0].serverPostId), useUnmergedTree = true)
