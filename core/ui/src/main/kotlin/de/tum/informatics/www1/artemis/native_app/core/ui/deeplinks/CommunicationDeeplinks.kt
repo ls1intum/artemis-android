@@ -37,4 +37,13 @@ object CommunicationDeeplinks {
             return "$IN_APP_HOST/courses/$courseId/$conversationId/$postId"
         }
     }
+
+    object ToConversationCourseAgnostic : ArtemisDeeplink() {
+        override val path = "messages?conversationId={conversationId}"
+        override val type = Type.ONLY_IN_APP
+
+        fun inAppLink(conversationId: Long): String {
+            return "$IN_APP_HOST/messages?conversationId=$conversationId"
+        }
+    }
 }
