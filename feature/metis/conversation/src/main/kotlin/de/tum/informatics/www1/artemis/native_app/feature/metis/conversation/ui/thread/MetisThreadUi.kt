@@ -316,6 +316,7 @@ private fun PostAndRepliesList(
             onReplyInThread = null,
             onResolvePost = { onRequestResolve(affectedPost) },
             onPinPost = { onRequestPin(affectedPost) },
+            onForwardPost = {  },
             onSavePost = { onRequestSave(affectedPost) },
             onRequestRetrySend = {
                 onRequestRetrySend(

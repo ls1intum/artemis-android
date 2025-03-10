@@ -309,6 +309,7 @@ private fun ChatList(
                         },
                         onResolvePost = null,
                         onPinPost = { onRequestPin(post) },
+                        onForwardPost = {  },
                         onSavePost = { onRequestSave(post) },
                         onRequestRetrySend = {
                             onRequestRetrySend(
