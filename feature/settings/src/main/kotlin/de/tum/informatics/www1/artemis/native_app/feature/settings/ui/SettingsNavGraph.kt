@@ -26,13 +26,8 @@ fun NavController.navigateToSettings(builder: NavOptionsBuilder.() -> Unit) {
     navigate(Settings, builder)
 }
 
-/**
- * version information has to be supplied externally, as they come from the app module
- */
 fun NavGraphBuilder.settingsNavGraph(
     navController: NavController,
-    versionCode: Int,
-    versionName: String,
     onDisplayThirdPartyLicenses: () -> Unit
 ) {
     navigation<Settings>(
@@ -49,8 +44,6 @@ fun NavGraphBuilder.settingsNavGraph(
         ) {
             SettingsScreen(
                 modifier = Modifier.fillMaxSize(),
-                versionCode = versionCode,
-                versionName = versionName,
                 onNavigateUp = navController::navigateUp,
                 onDisplayThirdPartyLicenses = onDisplayThirdPartyLicenses
             ) {

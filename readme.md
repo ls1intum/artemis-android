@@ -6,8 +6,6 @@
 The native android client for Artemis, an interactive learning platform with individual feedback. 
 It is available on the [Google PlayStore](https://play.google.com/store/apps/details?id=de.tum.cit.aet.artemis).
 
-For the iOS app, check [this repository](https://github.com/ls1intum/artemis-ios)
-
 ## Screenshots
 <p float="left">
   <img src="playStoreScreenshots/smartphone/dashboard.png" width="250"/>
@@ -64,6 +62,10 @@ For AndroidStudio, there are also preconfigured run configurations available.
 ## Play store screenshots
 Screenshots can be generated using preview-composables in the `debug` source sets. They are annotated with `@PlayStoreScreenshots`. To get the screenshots, right click the rendered preview
 in AndroidStudio and select copy-image.
+
+## Related repositories
+- [Native iOS app](https://github.com/ls1intum/artemis-ios)
+- [Backend and Webapp](https://github.com/ls1intum/artemis)
 
 ## License
 By building the dockerfile or using its derived images, you accept the terms in the following license agreements:
