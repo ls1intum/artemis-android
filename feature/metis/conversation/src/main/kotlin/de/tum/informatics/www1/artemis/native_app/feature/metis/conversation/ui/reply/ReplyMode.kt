@@ -16,7 +16,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 
-internal sealed class ReplyMode() {
+sealed class ReplyMode() {
     abstract val currentText: State<TextFieldValue>
 
     abstract fun onUpdate(new: TextFieldValue)

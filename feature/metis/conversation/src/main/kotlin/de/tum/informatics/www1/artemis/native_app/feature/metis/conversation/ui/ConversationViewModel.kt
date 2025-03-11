@@ -207,7 +207,8 @@ internal open class ConversationViewModel(
         serverConfigurationService = serverConfigurationService,
         networkStatusProvider = networkStatusProvider,
         savedStateHandle = SavedStateHandle(),
-        coroutineContext = coroutineContext
+        coroutineContext = coroutineContext,
+        onFileSelected = ::onFileSelected
     )
 
     /**

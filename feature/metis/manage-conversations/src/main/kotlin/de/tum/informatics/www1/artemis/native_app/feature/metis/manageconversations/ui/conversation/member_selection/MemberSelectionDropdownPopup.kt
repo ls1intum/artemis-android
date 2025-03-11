@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PersonOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -37,6 +39,7 @@ import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicSearchTextField
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.dropShadowBelow
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.util.MemberSelectionItem
@@ -52,7 +55,7 @@ fun MemberSelectionDropdownPopup(
     onUpdateQuery: (String) -> Unit,
     onAddMemberItem: (MemberSelectionItem) -> Unit
 ) {
-    var expanded by remember { mutableStateOf(true) }
+    var isPopupExpanded by remember { mutableStateOf(true) }
     val conversations = suggestions.filterIsInstance<MemberSelectionItem.Conversation>()
     val recipients = suggestions.filterIsInstance<MemberSelectionItem.Recipient>()
 
@@ -60,19 +63,22 @@ fun MemberSelectionDropdownPopup(
         modifier = Modifier
             .fillMaxWidth()
             .onFocusChanged { focusState ->
-                expanded = focusState.isFocused && suggestions.isNotEmpty()
+                isPopupExpanded = focusState.isFocused && suggestions.isNotEmpty()
             },
         query = query,
         updateQuery = {
             onUpdateQuery(it)
-            expanded = it.isNotBlank() && suggestions.isNotEmpty()
+            val newExpanded = query.isNotBlank() && suggestions.isNotEmpty()
+            // Only update when it actually changes to avoid unnecessary recompositions and popup shaking
+            if (isPopupExpanded != newExpanded) {
+                isPopupExpanded = newExpanded
+            }
         },
         hint = stringResource(id = R.string.conversation_member_or_conversation_selection_address_hint),
-        testTag = TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD,
         focusRequester = focusRequester
     )
 
-    if (expanded && suggestions.isNotEmpty()) {
+    if (isPopupExpanded && suggestions.isNotEmpty()) {
         val screenHeight = LocalConfiguration.current.screenHeightDp.dp
         val maxHeightFromScreen = screenHeight * 0.4f
         val maxHeight = min(maxHeightFromScreen, Spacings.Popup.maxHeight)
@@ -87,7 +93,7 @@ fun MemberSelectionDropdownPopup(
                 ): IntOffset = anchorBounds.bottomLeft + IntOffset(0, 8)
             },
             properties = PopupProperties(dismissOnClickOutside = true),
-            onDismissRequest = { expanded = false }
+            onDismissRequest = { isPopupExpanded = false }
         ) {
             LazyColumn(
                 modifier = Modifier
@@ -112,7 +118,10 @@ fun MemberSelectionDropdownPopup(
                             modifier = Modifier.fillMaxWidth(),
                             item = item,
                             onAddMemberItem = onAddMemberItem,
-                            onDismissRequest = { expanded = false }
+                            onDismissRequest = {
+                                isPopupExpanded = false
+                                onUpdateQuery("")
+                            }
                         )
                     }
                 }
@@ -124,14 +133,27 @@ fun MemberSelectionDropdownPopup(
                     )
                 }
 
-                recipients.forEach { item ->
+                if (recipients.isEmpty()) {
                     item {
-                        PopupItem(
+                        EmptyListHint(
                             modifier = Modifier.fillMaxWidth(),
-                            item = item,
-                            onAddMemberItem = onAddMemberItem,
-                            onDismissRequest = { expanded = false }
+                            imageVector = Icons.Default.PersonOff,
+                            hint = stringResource(id = R.string.conversation_member_selection_query_too_short, MemberSelectionBaseViewModel.MINIMUM_QUERY_LENGTH)
                         )
+                    }
+                } else {
+                    recipients.forEach { item ->
+                        item {
+                            PopupItem(
+                                modifier = Modifier.fillMaxWidth(),
+                                item = item,
+                                onAddMemberItem = onAddMemberItem,
+                                onDismissRequest = {
+                                    isPopupExpanded = false
+                                    onUpdateQuery("")
+                                }
+                            )
+                        }
                     }
                 }
             }

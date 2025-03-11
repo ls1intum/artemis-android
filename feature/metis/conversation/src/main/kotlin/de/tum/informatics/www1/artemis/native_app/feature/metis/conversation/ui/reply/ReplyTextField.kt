@@ -171,7 +171,7 @@ internal fun ReplyTextField(
 }
 
 @Composable
-private fun AutoCompletionDialog(
+fun AutoCompletionDialog(
     replyMode: ReplyMode,
     requestedAutoCompleteType: MutableState<AutoCompleteType?>,
 ) {
@@ -210,7 +210,6 @@ private fun AutoCompletionDialog(
         modifier = Modifier
             .onSizeChanged {
                 boxWidth = it.width
-                println("boxWidth: $boxWidth")
             }
             .onGloballyPositioned { coordinates ->
                 val boxRootTopLeft = coordinates.localToRoot(Offset.Zero)
@@ -329,6 +328,7 @@ private fun CreateReplyUi(
                 .testTag(TEST_TAG_REPLY_TEXT_FIELD),
             textFieldValue = currentTextFieldValue,
             hintText = hintText,
+            backgroundColor = MaterialTheme.colorScheme.background,
             filePickerLauncher = filePickerLauncher,
             onTextChanged = { newValue ->
                 val finalValue = continueListIfApplicable(prevReplyContent, newValue)
@@ -384,7 +384,7 @@ private fun CreateReplyUi(
 }
 
 @Composable
-private fun rememberFilePickerLauncher(
+fun rememberFilePickerLauncher(
     context: Context,
     onFileSelected: (Uri) -> Unit
 ) = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->

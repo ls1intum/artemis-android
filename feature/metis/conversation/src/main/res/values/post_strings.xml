@@ -9,7 +9,6 @@
     <string name="post_pin">Pin Post</string>
     <string name="post_unpin">Unpin Post</string>
     <string name="post_forward">Forward Post</string>
-    <string name="post_forward_title">Forward this Post</string>
     <string name="post_save">Save Post</string>
     <string name="post_unsave">Remove Bookmark</string>
     <string name="post_is_resolved">Resolved</string>
@@ -36,6 +35,10 @@
     <string name="post_forwarded_from_a_group_chat">a group message</string>
     <string name="post_forwarded_from_default">a conversation</string>
     <string name="post_forwarded_deleted">This message has been deleted</string>
+
+    <string name="post_forward_title">Forward this Post</string>
+    <string name="post_forward_hint">Add a message, if you\'d like</string>
+    <string name="post_forward_send">Send</string>
 
     <string name="post_sending_failed">Sending post failed. Click to try again.</string>
 </resources>
