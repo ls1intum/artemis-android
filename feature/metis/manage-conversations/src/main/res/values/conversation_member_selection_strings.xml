@@ -16,6 +16,7 @@
 
     <string name="conversation_member_selection_recipients_empty">No users matching your input has been found.</string>
     <string name="conversation_member_selection_query_too_short">Please enter at least %1$d characters to start your search.</string>
+    <string name="conversation_member_selection_query_too_short_popup">Please enter at least %1$d characters to include users in your search.</string>
 
     <string name="conversation_member_selection_content_description_add_recipient">Add recipient or member</string>
 </resources>

@@ -8,6 +8,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.util.ForwardedSourcePostContent
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
@@ -36,6 +37,8 @@ class CreateClientSidePostWorker(
         clientSidePostId: String,
         content: String,
         postType: PostType,
+        hasForwardedMessage: Boolean,
+        forwardedSourcePostList: List<ForwardedSourcePostContent>?,
         parentPostId: Long?
     ): Result {
         val authorAccount = accountDataService.getCachedAccountData()
@@ -60,6 +63,7 @@ class CreateClientSidePostWorker(
                         title = null,
                         tags = null,
                         author = author,
+                        hasForwardedMessages = hasForwardedMessage,
                         authorRole = null, // We do not know the role of the user here!
                         content = content,
                         creationDate = Clock.System.now()
@@ -77,6 +81,7 @@ class CreateClientSidePostWorker(
                         content = content,
                         author = author,
                         authorRole = null,
+                        hasForwardedMessages = hasForwardedMessage,
                         post = StandalonePost(id = parentPostId),
                         creationDate = Clock.System.now()
                     ),

@@ -148,7 +148,7 @@ internal fun PostWithBottomSheet(
 
     if (displayForwardBottomSheet && post != null) {
         PostForwardBottomSheet(
-            post = post,
+            chatListItem = chatListItem,
             forwardMessageUseCase = forwardMessageUseCase,
             onDismissRequest = {
                 displayForwardBottomSheet = false

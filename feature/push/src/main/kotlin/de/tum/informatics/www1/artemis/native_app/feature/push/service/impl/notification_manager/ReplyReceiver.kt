@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.RemoteInput
-import androidx.room.Update
 import androidx.room.withTransaction
 import androidx.work.OneTimeWorkRequestBuilder
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
@@ -67,6 +66,7 @@ class ReplyReceiver : BroadcastReceiver(), KoinComponent {
                                     metisContext.conversationId,
                                     clientSidePostId,
                                     response,
+                                    hasForwardedMessage = false,
                                     postType = BaseCreatePostWorker.PostType.ANSWER_POST,
                                     parentPostId = postId
                                 )

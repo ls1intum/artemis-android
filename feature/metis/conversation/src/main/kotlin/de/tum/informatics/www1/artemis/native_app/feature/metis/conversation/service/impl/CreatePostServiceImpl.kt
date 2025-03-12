@@ -9,6 +9,7 @@ import androidx.work.WorkManager
 import de.tum.informatics.www1.artemis.native_app.core.common.defaultInternetWorkRequest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostConfigurationBlock
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.util.ForwardedSourcePostContent
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.work.BaseCreatePostWorker
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.work.CreateClientSidePostWorker
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.work.SendConversationPostWorker
@@ -22,6 +23,8 @@ internal class CreatePostServiceImpl(private val context: Context) : CreatePostS
         courseId: Long,
         conversationId: Long,
         content: String,
+        hasForwardedMessage: Boolean,
+        forwardedSourcePostList: List<ForwardedSourcePostContent>?,
         configure: CreatePostConfigurationBlock
     ) {
         scheduleCreatePostWork(
@@ -30,6 +33,8 @@ internal class CreatePostServiceImpl(private val context: Context) : CreatePostS
             content = content,
             postType = BaseCreatePostWorker.PostType.POST,
             parentPostId = null,
+            hasForwardedMessage = hasForwardedMessage,
+            forwardedSourcePostList = forwardedSourcePostList,
             clientSidePostId = null,
             configure = configure
         )
@@ -40,6 +45,8 @@ internal class CreatePostServiceImpl(private val context: Context) : CreatePostS
         conversationId: Long,
         parentPostId: Long,
         content: String,
+        hasForwardedMessage: Boolean,
+        forwardedSourcePostList: List<ForwardedSourcePostContent>?,
         configure: CreatePostConfigurationBlock
     ) {
         scheduleCreatePostWork(
@@ -48,6 +55,8 @@ internal class CreatePostServiceImpl(private val context: Context) : CreatePostS
             content = content,
             postType = BaseCreatePostWorker.PostType.ANSWER_POST,
             parentPostId = parentPostId,
+            hasForwardedMessage = hasForwardedMessage,
+            forwardedSourcePostList = forwardedSourcePostList,
             clientSidePostId = null,
             configure = configure
         )
@@ -58,6 +67,8 @@ internal class CreatePostServiceImpl(private val context: Context) : CreatePostS
         conversationId: Long,
         clientSidePostId: String,
         content: String,
+        hasForwardedMessage: Boolean,
+        forwardedSourcePostList: List<ForwardedSourcePostContent>?,
         configure: CreatePostConfigurationBlock
     ) {
         scheduleCreatePostWork(
@@ -66,6 +77,8 @@ internal class CreatePostServiceImpl(private val context: Context) : CreatePostS
             content = content,
             postType = BaseCreatePostWorker.PostType.POST,
             parentPostId = null,
+            hasForwardedMessage = hasForwardedMessage,
+            forwardedSourcePostList = forwardedSourcePostList,
             clientSidePostId = clientSidePostId,
             configure = configure
         )
@@ -77,6 +90,8 @@ internal class CreatePostServiceImpl(private val context: Context) : CreatePostS
         parentPostId: Long,
         clientSidePostId: String,
         content: String,
+        hasForwardedMessage: Boolean,
+        forwardedSourcePostList: List<ForwardedSourcePostContent>?,
         configure: CreatePostConfigurationBlock
     ) {
         scheduleCreatePostWork(
@@ -86,6 +101,8 @@ internal class CreatePostServiceImpl(private val context: Context) : CreatePostS
             postType = BaseCreatePostWorker.PostType.POST,
             parentPostId = parentPostId,
             clientSidePostId = clientSidePostId,
+            hasForwardedMessage = hasForwardedMessage,
+            forwardedSourcePostList = forwardedSourcePostList,
             configure = configure
         )
     }
@@ -113,6 +130,8 @@ internal class CreatePostServiceImpl(private val context: Context) : CreatePostS
         content: String,
         postType: BaseCreatePostWorker.PostType,
         parentPostId: Long?,
+        hasForwardedMessage: Boolean,
+        forwardedSourcePostList: List<ForwardedSourcePostContent>?,
         clientSidePostId: String?,
         configure: CreatePostConfigurationBlock
     ) {
@@ -124,6 +143,8 @@ internal class CreatePostServiceImpl(private val context: Context) : CreatePostS
             clientSidePostId = postId,
             content = content,
             postType = postType,
+            hasForwardedMessage = hasForwardedMessage,
+            forwardedSourcePostList = forwardedSourcePostList,
             parentPostId = parentPostId
         )
 

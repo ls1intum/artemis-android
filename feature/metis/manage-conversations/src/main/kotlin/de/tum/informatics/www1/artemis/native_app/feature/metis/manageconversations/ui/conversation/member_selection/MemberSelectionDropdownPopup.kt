@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PersonOff
+import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -140,8 +140,8 @@ fun MemberSelectionDropdownPopup(
                     item {
                         EmptyListHint(
                             modifier = Modifier.fillMaxWidth(),
-                            imageVector = Icons.Default.PersonOff,
-                            hint = stringResource(id = R.string.conversation_member_selection_query_too_short, MemberSelectionBaseViewModel.MINIMUM_QUERY_LENGTH)
+                            imageVector = Icons.Default.Keyboard,
+                            hint = stringResource(id = R.string.conversation_member_selection_query_too_short_popup, MemberSelectionBaseViewModel.MINIMUM_QUERY_LENGTH)
                         )
                     }
                 } else {

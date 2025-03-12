@@ -5,9 +5,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -22,21 +25,26 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.pagePadding
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.ForwardedMessagePreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.util.ForwardMessageUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ForwardMessageReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.MemberSelection
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.util.MemberSelectionMode
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import kotlinx.coroutines.CompletableDeferred
 
 @Composable
 fun PostForwardBottomSheet(
-    post: IBasePost,
+    chatListItem: ChatListItem.PostItem,
     forwardMessageUseCase: ForwardMessageUseCase,
     onDismissRequest: () -> Unit
 ) {
     val context = LocalContext.current
+    val onSendMessage = forwardMessageUseCase::forwardPost
+    val post = chatListItem.post
+    val postToForward =
+        if (chatListItem is ChatListItem.PostItem.ForwardedMessage) chatListItem.forwardedPosts.firstOrNull()
+            ?: post else post
 
     ModalBottomSheet(
         modifier = Modifier.statusBarsPadding(),
@@ -46,6 +54,8 @@ fun PostForwardBottomSheet(
     ) {
         Column(
             modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .pagePadding(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -62,7 +72,9 @@ fun PostForwardBottomSheet(
                 Spacer(Modifier.weight(1f))
 
                 Button(
-                    onClick = { },
+                    onClick = {
+                        onSendMessage(postToForward)
+                    },
                     modifier = Modifier
                 ) {
                     Text(
@@ -84,7 +96,7 @@ fun PostForwardBottomSheet(
             HorizontalDivider()
 
             ForwardMessageReplyTextField(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.weight(1f),
                 initialReplyTextProvider = forwardMessageUseCase,
                 hintText = stringResource(R.string.post_forward_hint),
                 onFileSelected = { uri, ->
@@ -96,7 +108,7 @@ fun PostForwardBottomSheet(
                 textOptionsTopContent = {
                     ForwardedMessagePreview(
                         modifier = Modifier.fillMaxWidth(),
-                        forwardedPost = post
+                        forwardedPost = postToForward
                     )
                 }
             )
