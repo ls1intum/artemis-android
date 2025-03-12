@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -52,6 +53,7 @@ fun MemberSelectionDropdownPopup(
     query: String,
     focusRequester: FocusRequester,
     suggestions: List<MemberSelectionItem>,
+    searchBarBackground: Color,
     onUpdateQuery: (String) -> Unit,
     onAddMemberItem: (MemberSelectionItem) -> Unit
 ) {
@@ -60,12 +62,13 @@ fun MemberSelectionDropdownPopup(
     val recipients = suggestions.filterIsInstance<MemberSelectionItem.Recipient>()
 
     BasicSearchTextField(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .onFocusChanged { focusState ->
                 isPopupExpanded = focusState.isFocused && suggestions.isNotEmpty()
             },
         query = query,
+        backgroundColor = searchBarBackground,
         updateQuery = {
             onUpdateQuery(it)
             val newExpanded = query.isNotBlank() && suggestions.isNotEmpty()

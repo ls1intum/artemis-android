@@ -368,8 +368,9 @@ private fun CreateReplyUi(
                     )
                 }
             },
-            formattingOptionButtons = {
+            formattingOptionButtons = { containerColor ->
                 FormattingOptions(
+                    containerColor = containerColor,
                     applyMarkdownStyle = {
                         val newTextFieldValue = MarkdownStyleUtil.apply(
                             style = it,

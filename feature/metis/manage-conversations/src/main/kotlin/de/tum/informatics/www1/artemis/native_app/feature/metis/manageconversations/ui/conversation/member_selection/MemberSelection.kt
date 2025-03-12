@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -51,6 +52,7 @@ fun MemberSelection(
     viewModel: MemberSelectionBaseViewModel,
     memberSelectionMode: MemberSelectionMode = MemberSelectionMode.MemberSelectionList,
     isConversationSelectionEnabled: Boolean = false,
+    searchBarBackground: Color = MaterialTheme.colorScheme.surfaceContainer,
     onUpdateSelectedUserCount: (Int) -> Unit
 ) {
     val invalidRequirements = isConversationSelectionEnabled && memberSelectionMode is MemberSelectionMode.MemberSelectionList
@@ -78,6 +80,7 @@ fun MemberSelection(
             memberSelectionMode = memberSelectionMode,
             suggestions = suggestions,
             query = query,
+            searchBarBackground = searchBarBackground,
             onUpdateQuery = viewModel::updateQuery,
             onRemoveMemberItem = viewModel::removeMemberItem,
             onAddMemberItem = viewModel::addMemberItem,
@@ -108,6 +111,7 @@ private fun RecipientsTextField(
     memberSelectionMode: MemberSelectionMode,
     suggestions: List<MemberSelectionItem>,
     query: String,
+    searchBarBackground: Color,
     onUpdateQuery: (String) -> Unit,
     onRemoveMemberItem: (MemberSelectionItem) -> Unit,
     onAddMemberItem: (MemberSelectionItem) -> Unit
@@ -155,6 +159,7 @@ private fun RecipientsTextField(
                 modifier = Modifier
                     .fillMaxWidth(),
                 query = query,
+                backgroundColor = searchBarBackground,
                 updateQuery = onUpdateQuery,
                 hint = stringResource(id = R.string.conversation_member_selection_address_hint),
                 testTag = TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD,
@@ -168,6 +173,7 @@ private fun RecipientsTextField(
             query = query,
             suggestions = suggestions,
             focusRequester = focusRequester,
+            searchBarBackground = searchBarBackground,
             onUpdateQuery = onUpdateQuery,
             onAddMemberItem = onAddMemberItem
         )

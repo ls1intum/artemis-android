@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
 import android.net.Uri
 import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -78,7 +79,9 @@ internal fun MarkdownTextField(
     textFieldValue: TextFieldValue,
     hintText: AnnotatedString,
     alignOptionsAtBottom: Boolean = false,
+    isTextOptionsInitiallyVisible: Boolean = true,
     backgroundColor: Color,
+    textOptionsColor: Color = MaterialTheme.colorScheme.surfaceContainer,
     filePickerLauncher: ManagedActivityResultLauncher<String, Uri?>,
     focusRequester: FocusRequester = remember { FocusRequester() },
     textFieldTrailingContent: @Composable RowScope.() -> Unit = {},
@@ -87,10 +90,11 @@ internal fun MarkdownTextField(
     onFocusLost: () -> Unit = {},
     onTextChanged: (TextFieldValue) -> Unit,
     showAutoCompletePopup: ((AutoCompleteType) -> Unit)? = null,
-    formattingOptionButtons: @Composable () -> Unit = {},
+    formattingOptionButtons: @Composable (Color) -> Unit = {},
 ) {
     val text = textFieldValue.text
     var selectedType by remember { mutableStateOf(ViewType.TEXT) }
+    var isTextOptionsVisible by remember { mutableStateOf(isTextOptionsInitiallyVisible) }
         // weight(1f) is needed for the row to ensure that the TextFieldOptions stay visible when the BasicMarkdownTextField grows.
         // fill has to be disabled for the UI tests to work properly.
     val content: @Composable ColumnScope.() -> Unit = {
@@ -110,8 +114,14 @@ internal fun MarkdownTextField(
                         hintText = hintText,
                         backgroundColor = backgroundColor,
                         focusRequester = focusRequester,
-                        onFocusAcquired = onFocusAcquired,
-                        onFocusLost = onFocusLost
+                        onFocusAcquired = {
+                            onFocusAcquired()
+                            isTextOptionsVisible = true
+                        },
+                        onFocusLost = {
+                            onFocusLost()
+                            isTextOptionsVisible = false
+                        }
                     )
                 }
 
@@ -132,6 +142,7 @@ internal fun MarkdownTextField(
             selectedType = selectedType,
             isPreviewEnabled = text.isNotBlank(),
             backgroundColor = backgroundColor,
+            containerColor = textOptionsColor,
             showFormattingOptions = selectedType == ViewType.TEXT,
             onChangeViewType = { selectedType = it },
             formattingOptionButtons = formattingOptionButtons,
@@ -158,7 +169,9 @@ internal fun MarkdownTextField(
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
             ) {
-                options()
+                AnimatedVisibility(isTextOptionsVisible) {
+                    options()
+                }
             }
         }
     } else {
@@ -168,7 +181,9 @@ internal fun MarkdownTextField(
         ) {
             content()
             textOptionsTopContent()
-            options()
+            AnimatedVisibility(isTextOptionsVisible) {
+                options()
+            }
         }
     }
 }
@@ -244,16 +259,21 @@ private fun TextFieldOptions(
     selectedType: ViewType,
     isPreviewEnabled: Boolean,
     backgroundColor: Color,
+    containerColor: Color,
     showFormattingOptions: Boolean,
     onChangeViewType: (ViewType) -> Unit,
     showAutoCompletePopup: ((AutoCompleteType) -> Unit)? = null,
-    formattingOptionButtons: @Composable () -> Unit = {},
+    formattingOptionButtons: @Composable (Color) -> Unit = {},
     onOpenFilePicker: () -> Unit = {},
     onOpenImagePicker: () -> Unit = {}
 ) {
     var isTextFormattingExpanded by remember { mutableStateOf(false) }
     val textFormattingOptionsOffsetY by animateDpAsState(targetValue = if (isTextFormattingExpanded) 0.dp else textFormattingOptionsHiddenOffsetY)
     var isTaggingDropdownExpanded by remember { mutableStateOf(false) }
+
+    val textOptionsFieldOptionsModifier = Modifier
+        .clip(CircleShape)
+        .background(containerColor)
 
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -271,29 +291,33 @@ private fun TextFieldOptions(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     TextFieldOptionsIconButton(
-                        modifier = Modifier,
+                        modifier = textOptionsFieldOptionsModifier,
                         painter = painterResource(id = R.drawable.image),
+                        containerColor = containerColor
                     ) {
                         onOpenImagePicker()
                     }
 
                     TextFieldOptionsIconButton(
-                        modifier = Modifier,
-                        painter = painterResource(id = R.drawable.attachment)
+                        modifier = textOptionsFieldOptionsModifier,
+                        painter = painterResource(id = R.drawable.attachment),
+                        containerColor = containerColor
                     ) {
                         onOpenFilePicker()
                     }
 
                     TextFieldOptionsIconButton(
-                        modifier = Modifier,
-                        painter = painterResource(id = R.drawable.format_text)
+                        modifier = textOptionsFieldOptionsModifier,
+                        painter = painterResource(id = R.drawable.format_text),
+                        containerColor = containerColor
                     ) {
                         isTextFormattingExpanded = !isTextFormattingExpanded
                     }
 
                     TextFieldOptionsIconButton(
                         modifier = Modifier,
-                        painter = painterResource(id = R.drawable.tag)
+                        painter = painterResource(id = R.drawable.tag),
+                        containerColor = containerColor
                     ) {
                         isTaggingDropdownExpanded = !isTaggingDropdownExpanded
                     }
@@ -318,12 +342,13 @@ private fun TextFieldOptions(
                     ) {
                         TextFieldOptionsIconButton(
                             modifier = Modifier,
-                            imageVector = Icons.Default.Clear
+                            imageVector = Icons.Default.Clear,
+                            containerColor = containerColor
                         ) {
                             isTextFormattingExpanded = false
                         }
 
-                        formattingOptionButtons()
+                        formattingOptionButtons(containerColor)
                     }
                 }
             }
@@ -345,6 +370,7 @@ private fun TextFieldOptionsIconButton(
     modifier: Modifier,
     painter: Painter? = null,
     imageVector: ImageVector? = null,
+    containerColor: Color,
     onClick: () -> Unit
 ) {
     require(painter != null || imageVector != null)
@@ -353,7 +379,7 @@ private fun TextFieldOptionsIconButton(
         modifier = modifier
             .clip(CircleShape)
             .size(32.dp)
-            .background(MaterialTheme.colorScheme.surfaceContainer),
+            .background(containerColor),
         onClick = onClick
     ) {
         painter?.let {

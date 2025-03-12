@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -15,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
@@ -34,6 +36,8 @@ fun ForwardMessageReplyTextField(
     initialReplyTextProvider: InitialReplyTextProvider,
     hintText: String,
     onFileSelected: (Uri) -> Unit,
+    textOptionsColor: Color = MaterialTheme.colorScheme.surfaceContainer,
+    backgroundColor: Color = BottomSheetDefaults.ContainerColor,
     sendButton: @Composable RowScope.() -> Unit,
     textOptionsTopContent: @Composable ColumnScope.() -> Unit,
     onCreateForwardedMessage: () -> Deferred<MetisModificationFailure?>,
@@ -68,11 +72,13 @@ fun ForwardMessageReplyTextField(
             textFieldValue = currentTextFieldValue,
             hintText = AnnotatedString(hintText),
             filePickerLauncher = filePickerLauncher,
-            backgroundColor = BottomSheetDefaults.ContainerColor,
+            backgroundColor = backgroundColor,
+            textOptionsColor = textOptionsColor,
             onTextChanged = { newValue ->
                 val finalValue = continueListIfApplicable(prevReplyContent, newValue)
                 replyMode.onUpdate(finalValue)
             },
+            isTextOptionsInitiallyVisible = false,
             focusRequester = focusRequester,
             alignOptionsAtBottom = true,
             showAutoCompletePopup = {
@@ -93,6 +99,7 @@ fun ForwardMessageReplyTextField(
             textOptionsTopContent = textOptionsTopContent,
             formattingOptionButtons = {
                 FormattingOptions(
+                    textOptionsColor,
                     applyMarkdownStyle = {
                         val newTextFieldValue = MarkdownStyleUtil.apply(
                             style = it,

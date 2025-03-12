@@ -72,13 +72,12 @@ fun PostForwardBottomSheet(
                 }
             }
 
-            HorizontalDivider()
-
             MemberSelection(
                 modifier = Modifier.fillMaxWidth(),
                 viewModel = forwardMessageUseCase,
                 isConversationSelectionEnabled = true,
                 memberSelectionMode = MemberSelectionMode.MemberSelectionDropdown,
+                searchBarBackground = MaterialTheme.colorScheme.surfaceContainerHigh,
                 onUpdateSelectedUserCount = { }
             )
 
@@ -92,6 +91,7 @@ fun PostForwardBottomSheet(
                     forwardMessageUseCase.onFileSelected(uri, context)
                 },
                 sendButton = { },
+                textOptionsColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                 onCreateForwardedMessage = { CompletableDeferred() },
                 textOptionsTopContent = {
                     ForwardedMessagePreview(
