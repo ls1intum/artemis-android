@@ -1,6 +1,7 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.util
+package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.post.util
 
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.Link
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.model.Link
+
 
 object LinkPreviewUtil {
     private val urlRegex = """https?:\/\/[^\s<>()\[\]]+""".toRegex()

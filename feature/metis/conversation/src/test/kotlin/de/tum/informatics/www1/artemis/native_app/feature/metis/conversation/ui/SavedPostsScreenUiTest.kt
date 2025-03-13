@@ -11,7 +11,6 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.SavedPostsTestUtil
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
@@ -104,8 +103,8 @@ class SavedPostsScreenUiTest : BaseComposeTest() {
     private fun setupUi(
         forStatus: SavedPostStatus = SavedPostStatus.IN_PROGRESS,
         savedPost: ISavedPost = createSavedPost(),
-        onChangeStatus: (ISavedPost, SavedPostStatus) -> Deferred<MetisModificationFailure?> = { _, _ -> CompletableDeferred() },
-        onRemoveFromSavedPosts: (ISavedPost) -> Deferred<MetisModificationFailure?> = { CompletableDeferred() }
+        onChangeStatus: (ISavedPost, SavedPostStatus) -> Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?> = { _, _ -> CompletableDeferred() },
+        onRemoveFromSavedPosts: (ISavedPost) -> Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?> = { CompletableDeferred() }
     ) {
         composeTestRule.setContent {
             de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.ui.SavedPostsScreen(

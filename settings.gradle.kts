@@ -49,6 +49,7 @@ include(":feature:metis:shared")
 include(":feature:metis:code-of-conduct")
 include(":feature:metis:conversation")
 include(":feature:metis:conversation:saved-posts")
+include(":feature:metis:conversation:shared")
 include(":feature:metis:manage-conversations")
 include(":feature:metis-test")
 

@@ -38,7 +38,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.LocalMarkdown
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.rememberPostArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getIcon

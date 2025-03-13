@@ -13,9 +13,8 @@ import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.test.ArtemisImageProviderStub
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.EmojiServiceStub
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.LinkPreview
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.PostsDataState
@@ -177,8 +176,8 @@ abstract class BaseChatUITest : BaseComposeTest() {
 
     fun setupThreadUi(
         post: IStandalonePost,
-        onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure>)? = { CompletableDeferred() },
-        onPinPost: ((IBasePost) -> Deferred<MetisModificationFailure>)? = { CompletableDeferred() },
+        onResolvePost: ((IBasePost) -> Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure>)? = { CompletableDeferred() },
+        onPinPost: ((IBasePost) -> Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure>)? = { CompletableDeferred() },
         isAbleToPin: Boolean = false,
         isAtLeastTutorInCourse: Boolean = false,
         hasModerationRights: Boolean = false,
@@ -196,7 +195,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                     hasModerationRights = hasModerationRights,
                 ),
                 generateLinkPreviews = { _ -> linkPreviewStateFlow },
-                onRemoveLinkPreview = { _, _, _ -> CompletableDeferred<MetisModificationFailure>() },
+                onRemoveLinkPreview = { _, _, _ -> CompletableDeferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure>() },
                 serverUrl = "",
                 isMarkedAsDeleteList = mutableStateListOf(),
                 emojiService = EmojiServiceStub,
@@ -223,7 +222,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
         isAbleToPin: Boolean = false,
         isAtLeastTutorInCourse: Boolean = false,
         hasModerationRights: Boolean = false,
-        onPinPost: (IStandalonePost) -> Deferred<MetisModificationFailure> = { CompletableDeferred() }
+        onPinPost: (IStandalonePost) -> Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure> = { CompletableDeferred() }
     ) {
         composeTestRule.setContent {
             CompositionLocalProvider(
@@ -252,7 +251,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                     bottomItem = null,
                     isReplyEnabled = true,
                     generateLinkPreviews = { _ -> linkPreviewStateFlow },
-                    onRemoveLinkPreview = { _, _, _ -> CompletableDeferred<MetisModificationFailure>() },
+                    onRemoveLinkPreview = { _, _, _ -> CompletableDeferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure>() },
                     onCreatePost = { CompletableDeferred() },
                     onEditPost = { _, _ -> CompletableDeferred() },
                     onPinPost = onPinPost,

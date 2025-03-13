@@ -31,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.post.PostItemMainContent
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostPostingType

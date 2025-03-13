@@ -26,9 +26,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.BottomSheetActionButton
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.MetisModificationTaskHandler
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.BottomSheetActionButton
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.MetisModificationTaskHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getIcon

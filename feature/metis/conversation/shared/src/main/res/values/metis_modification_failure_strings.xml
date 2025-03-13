@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="metis_modification_failure_dialog_title">Failure</string>
+    <string name="metis_modification_failure_dialog_confirm_button">@android:string/ok</string>
+    <string name="metis_modification_failure_dialog_message_create_reaction">Could not create reaction.</string>
+    <string name="metis_modification_failure_dialog_message_delete_reaction">Could not delete reaction.</string>
+    <string name="metis_modification_failure_dialog_message_create_post">Could not create post.</string>
+    <string name="metis_modification_failure_dialog_message_delete_post">Could not delete post.</string>
+    <string name="metis_modification_failure_dialog_message_update_post">Could not update post.</string>
+    <string name="metis_modification_failure_dialog_message_change_saved_post_status">Could change the saved post\'s status.</string>
+</resources>

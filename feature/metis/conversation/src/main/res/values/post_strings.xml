@@ -14,13 +14,6 @@
     <string name="post_is_pinned">Pinned</string>
     <string name="post_is_saved">Saved for later</string>
 
-    <string name="post_undo_delete">Undo delete</string>
-    <plurals name="post_is_being_deleted">
-        <item quantity="one">Post is being deleted in %d second.</item>
-        <item quantity="other">Post is being deleted in %d seconds.</item>
-    </plurals>
-    <string name="post_edited_hint">Edited (%1$s)</string>
-
     <string name="post_replies_count">%d Replies</string>
     <plurals name="post_replies_count">
         <item quantity="one">%d Reply</item>
@@ -28,5 +21,4 @@
     </plurals>
     <string name="post_reactions_show_all">All (%d)</string>
 
-    <string name="post_sending_failed">Sending post failed. Click to try again.</string>
 </resources>

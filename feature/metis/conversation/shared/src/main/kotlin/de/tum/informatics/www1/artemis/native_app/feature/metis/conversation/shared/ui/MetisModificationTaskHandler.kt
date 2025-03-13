@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared
+package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
@@ -12,8 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
 import kotlinx.coroutines.Deferred
 
 internal const val TEST_TAG_METIS_MODIFICATION_FAILURE_DIALOG = "TEST_TAG_METIS_MODIFICATION_FAILURE_DIALOG"

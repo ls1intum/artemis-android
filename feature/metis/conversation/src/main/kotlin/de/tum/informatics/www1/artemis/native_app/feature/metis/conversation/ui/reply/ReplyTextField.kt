@@ -62,7 +62,6 @@ import androidx.core.content.ContextCompat.getString
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.OnTrueLaunchedEffect
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.FileValidationConstants
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.LocalReplyAutoCompleteHintProvider
@@ -86,7 +85,7 @@ internal fun ReplyTextField(
     modifier: Modifier,
     replyMode: ReplyMode,
     onFileSelected: (Uri) -> Unit,
-    updateFailureState: (MetisModificationFailure?) -> Unit,
+    updateFailureState: (de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?) -> Unit,
     conversationName: String
 ) {
     val replyState: ReplyState = rememberReplyState(replyMode, updateFailureState)

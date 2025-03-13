@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="post_edited_hint">Edited (%1$s)</string>
+    <string name="post_sending_failed">Sending post failed. Click to try again.</string>
+
+    <plurals name="post_is_being_deleted">
+        <item quantity="one">Post is being deleted in %d second.</item>
+        <item quantity="other">Post is being deleted in %d seconds.</item>
+    </plurals>
+    <string name="post_undo_delete">Undo delete</string>
+
+</resources>

@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post
+package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.post
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -27,7 +27,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.LinkPreview
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.model.LinkPreview
 
 @Composable
 fun LinkPreviewColumn(

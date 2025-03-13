@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Reply
@@ -35,7 +33,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -57,6 +54,7 @@ import androidx.core.view.ViewCompat
 import androidx.emoji2.emojipicker.EmojiPickerView
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.BottomSheetActionButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.LocalEmojiProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.getUnicodeForEmojiId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
@@ -278,31 +276,6 @@ private fun EmojiButton(
         contentAlignment = Alignment.Center,
         content = content
     )
-}
-
-@Composable
-fun BottomSheetActionButton(
-    modifier: Modifier,
-    icon: ImageVector,
-    text: String,
-    onClick: () -> Unit
-) {
-    TextButton(
-        modifier = modifier,
-        onClick = onClick
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null
-        )
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        Text(
-            modifier = Modifier.weight(1f),
-            text = text
-        )
-    }
 }
 
 @Composable
