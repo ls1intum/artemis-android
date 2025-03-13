@@ -26,12 +26,10 @@ object EmojiSearchUtil {
 
         companion object {
             fun fromQuery(emoji: Emoji, query: String): EmojiSearchResult {
-                val emojiId = emoji.emojiId
-                val keywords = emojiId.split("_")
-                val firstMatchingKeywordIndex = keywords.indexOfFirst {
+                val firstMatchingKeywordIndex = emoji.keywords.indexOfFirst {
                     it.startsWith(query, ignoreCase = true)
                 }
-                val score = query.length.toFloat() / emojiId.length     // Matches where only a part of the keyword is matched should be ranked lower
+                val score = query.length.toFloat() / emoji.emojiId.length     // Matches where only a part of the keyword is matched should be ranked lower
                 return EmojiSearchResult(emoji, firstMatchingKeywordIndex, score)
             }
         }

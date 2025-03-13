@@ -3,4 +3,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.em
 data class Emoji(
     val emojiId: String,
     val unicode: String
-)
+) {
+    val keywords: List<String> by lazy { emojiId.split("_") }
+}
