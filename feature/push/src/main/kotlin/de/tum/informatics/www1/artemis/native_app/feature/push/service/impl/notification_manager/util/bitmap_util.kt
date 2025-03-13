@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager
+package de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.util
 
 import android.graphics.Bitmap
 import android.graphics.Canvas

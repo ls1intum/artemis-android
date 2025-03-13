@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager
+package de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.reply
 
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
@@ -12,6 +12,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.wor
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.push.PushCommunicationDatabaseProvider
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.util.NotificationTargetManager
 import kotlinx.coroutines.runBlocking
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get

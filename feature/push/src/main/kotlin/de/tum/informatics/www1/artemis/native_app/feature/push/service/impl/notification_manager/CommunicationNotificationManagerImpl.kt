@@ -29,6 +29,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.notification_mode
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ReplyPostCommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.parentId
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.delete.DeleteNotificationReceiver
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.reply.ReplyReceiver
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.util.NotificationTargetManager
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.util.toCircleShape
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
