@@ -1,7 +1,9 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui
 
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -49,6 +51,7 @@ fun EmojiPickerModalBottomSheet(
 
     ModalBottomSheet(
         modifier = modifier.statusBarsPadding(),
+        contentWindowInsets = { WindowInsets.statusBars },
         onDismissRequest = onDismiss,
         sheetState = sheetState,
     ) {

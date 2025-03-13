@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicSearchTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.content.Emoji
@@ -79,6 +80,7 @@ fun EmojiPicker(
     Column(modifier = modifier) {
         BasicSearchTextField(
             hint = stringResource(R.string.emojis_search_hint),
+            backgroundColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             query = searchQuery,
             updateQuery = {
                 searchQuery = it
@@ -91,7 +93,8 @@ fun EmojiPicker(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 8.dp)
+                    .padding(horizontal = 8.dp),
+                contentPadding = Spacings.calculateEndOfPagePaddingValues()
             ) {
                 items(
                     count = filteredEmojis.size
@@ -195,6 +198,7 @@ private fun EmojiCategoryList(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
+        contentPadding = Spacings.calculateEndOfPagePaddingValues(),
         state = gridState,
         columns = GridCells.Adaptive(minSize = 32.dp)
     ) {
