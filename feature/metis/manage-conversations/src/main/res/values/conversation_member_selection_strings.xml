@@ -14,9 +14,15 @@
     <string name="conversation_member_selection_load_recipients_failure">Something went wrong while loading the users.</string>
     <string name="conversation_member_selection_load_recipients_try_again">Try again</string>
 
-    <string name="conversation_member_selection_recipients_empty">No users matching your input has been found.</string>
+    <string name="conversation_member_selection_recipients_empty">No users matching your input have been found.</string>
     <string name="conversation_member_selection_query_too_short">Please enter at least %1$d characters to start your search.</string>
     <string name="conversation_member_selection_query_too_short_popup">Please enter at least %1$d characters to include users in your search.</string>
+
+    <string name="conversation_member_selection_channels_no_search_results_title">No channels found</string>
+    <string name="conversation_member_selection_channels_no_search_results_details">\"%s\" did not match any channels.</string>
+
+    <string name="conversation_member_selection_recipients_no_search_results_title">No users found</string>
+    <string name="conversation_member_selection_recipients_no_search_results_details">\"%s\" did not match any users.</string>
 
     <string name="conversation_member_selection_content_description_add_recipient">Add recipient or member</string>
 </resources>

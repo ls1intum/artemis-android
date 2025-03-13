@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Keyboard
@@ -17,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -26,7 +28,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
@@ -41,6 +45,7 @@ import androidx.compose.ui.window.PopupProperties
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicSearchTextField
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.NoSearchResults
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.dropShadowBelow
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.util.MemberSelectionItem
@@ -61,12 +66,17 @@ fun MemberSelectionDropdownPopup(
     val conversations = suggestions.filterIsInstance<MemberSelectionItem.Conversation>()
     val recipients = suggestions.filterIsInstance<MemberSelectionItem.Recipient>()
 
+    var popUpTargetWidth by remember { mutableIntStateOf(0) }
+
     BasicSearchTextField(
         modifier = modifier
-            .fillMaxWidth()
+            .onGloballyPositioned {
+                popUpTargetWidth = it.size.width
+            }
             .onFocusChanged { focusState ->
                 isPopupExpanded = focusState.isFocused && suggestions.isNotEmpty()
-            },
+            }
+            .fillMaxWidth(),
         query = query,
         backgroundColor = searchBarBackground,
         updateQuery = {
@@ -100,9 +110,9 @@ fun MemberSelectionDropdownPopup(
         ) {
             LazyColumn(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                     .heightIn(max = maxHeight)
+                    .width(with(LocalDensity.current) { popUpTargetWidth.toDp() })
                     .dropShadowBelow()
                     .clip(MaterialTheme.shapes.large)
                     .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
@@ -115,17 +125,31 @@ fun MemberSelectionDropdownPopup(
                     )
                 }
 
-                conversations.forEach { item ->
+                if (conversations.isEmpty()) {
                     item {
-                        PopupItem(
+                        NoSearchResults(
                             modifier = Modifier.fillMaxWidth(),
-                            item = item,
-                            onAddMemberItem = onAddMemberItem,
-                            onDismissRequest = {
-                                isPopupExpanded = false
-                                onUpdateQuery("")
-                            }
+                            title = stringResource(id = R.string.conversation_member_selection_channels_no_search_results_title),
+                            details = stringResource(
+                                id = R.string.conversation_member_selection_channels_no_search_results_details,
+                                query
+                            ),
+                            showIcon = false
                         )
+                    }
+                } else {
+                    conversations.forEach { item ->
+                        item {
+                            PopupItem(
+                                modifier = Modifier.fillMaxWidth(),
+                                item = item,
+                                onAddMemberItem = onAddMemberItem,
+                                onDismissRequest = {
+                                    isPopupExpanded = false
+                                    onUpdateQuery("")
+                                }
+                            )
+                        }
                     }
                 }
 
@@ -136,12 +160,21 @@ fun MemberSelectionDropdownPopup(
                     )
                 }
 
-                if (recipients.isEmpty()) {
+                if (recipients.isEmpty() && query.length < MemberSelectionBaseViewModel.MINIMUM_QUERY_LENGTH) {
                     item {
                         EmptyListHint(
                             modifier = Modifier.fillMaxWidth(),
                             imageVector = Icons.Default.Keyboard,
                             hint = stringResource(id = R.string.conversation_member_selection_query_too_short_popup, MemberSelectionBaseViewModel.MINIMUM_QUERY_LENGTH)
+                        )
+                    }
+                } else if (recipients.isEmpty()) {
+                    item {
+                        NoSearchResults(
+                            modifier = Modifier.fillMaxWidth(),
+                            title = stringResource(id = R.string.conversation_member_selection_recipients_no_search_results_title),
+                            details = stringResource(id = R.string.conversation_member_selection_recipients_no_search_results_details, query),
+                            showIcon = false
                         )
                     }
                 } else {
