@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation
+package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts
 
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
