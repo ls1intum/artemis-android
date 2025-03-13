@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.saved_posts
+package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.combinedClickable
@@ -30,8 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostItemMainContent
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostPostingType

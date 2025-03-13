@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.impl
+package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.service
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
@@ -18,7 +18,7 @@ import io.ktor.http.appendPathSegments
 
 class SavedPostServiceImpl(
     private val ktorProvider: KtorProvider
-) : de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.SavedPostService {
+) : SavedPostService {
 
     override suspend fun getSavedPosts(
         status: SavedPostStatus,

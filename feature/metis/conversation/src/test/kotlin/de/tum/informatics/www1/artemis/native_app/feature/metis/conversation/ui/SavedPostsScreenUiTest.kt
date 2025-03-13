@@ -108,13 +108,13 @@ class SavedPostsScreenUiTest : BaseComposeTest() {
         onRemoveFromSavedPosts: (ISavedPost) -> Deferred<MetisModificationFailure?> = { CompletableDeferred() }
     ) {
         composeTestRule.setContent {
-            SavedPostsScreen(
+            de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.ui.SavedPostsScreen(
                 modifier = Modifier,
                 status = forStatus,
                 savedPostsDataState = DataState.Success(listOf(savedPost)),
                 onRequestReload = {},
                 onNavigateBack = {},
-                onNavigateToPost = { _ ->},
+                onNavigateToPost = { _ -> },
                 onChangeStatus = onChangeStatus,
                 onRemoveFromSavedPosts = onRemoveFromSavedPosts
             )
