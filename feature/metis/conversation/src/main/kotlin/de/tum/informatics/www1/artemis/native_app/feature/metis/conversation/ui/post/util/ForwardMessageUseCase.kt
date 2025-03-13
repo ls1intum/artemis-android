@@ -69,7 +69,7 @@ class ForwardMessageUseCase(
         )
     }
 
-    fun forwardPost(post: IBasePost) {
+    fun forwardPost(post: IBasePost, onComplete: (Boolean) -> Unit) {
         viewModelScope.launch(coroutineContext) {
             combine(
                 recipients,
@@ -90,11 +90,15 @@ class ForwardMessageUseCase(
                     )
                 )
 
+                // We don't expect errors to happen when forwarding to conversations, since the sending
+                // can be scheduled in the background.
                 if (conversations.isNotEmpty()) forwardPostToConversations(
                     conversations,
                     forwardedSourcePostList
                 )
-                forwardPostToRecipients(recipients, forwardedSourcePostList, serverData)
+                // The creation of conversations is more sensitive, so we need to handle errors here.
+                val success = forwardPostToRecipients(recipients, forwardedSourcePostList, serverData)
+                onComplete(success)
             }
         }
     }
@@ -112,7 +116,7 @@ class ForwardMessageUseCase(
         recipients: List<MemberSelectionItem.Recipient>,
         forwardedSourcePostList: List<ForwardedSourcePostContent>,
         serverData: Pair<String, String>
-    ) {
+    ): Boolean {
         val (serverUrl, authToken) = serverData
         if (recipients.isNotEmpty()) {
             if (recipients.size == 1) {
@@ -123,8 +127,10 @@ class ForwardMessageUseCase(
                     serverUrl
                 ).onSuccess { conversation ->
                     createPost(conversation.id, forwardedSourcePostList = forwardedSourcePostList)
+                    return true
                 }.onFailure {
                     forwardingMessageError.value = ForwardingMessageError.DM_CREATION_ERROR
+                    return false
                 }
             } else {
                 conversationService.createGroupChat(
@@ -134,11 +140,14 @@ class ForwardMessageUseCase(
                     serverUrl
                 ).onSuccess { conversation ->
                     createPost(conversation.id, forwardedSourcePostList = forwardedSourcePostList)
+                    return true
                 }.onFailure {
                     forwardingMessageError.value = ForwardingMessageError.GROUP_CHAT_CREATION_ERROR
+                    return false
                 }
             }
         }
+        return true
     }
 }
 

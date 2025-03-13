@@ -42,6 +42,7 @@
     <string name="post_forward_too_many_recipients">The number of selected users cannot be greater than 9.</string>
     <string name="post_forward_error_DM_creation">Failed to create a direct chat with selected user.</string>
     <string name="post_forward_error_group_creation">Failed to create a group chat with selected users.</string>
+    <string name="post_forward_success">Post has been forwarded successfully.</string>
 
     <string name="post_sending_failed">Sending post failed. Click to try again.</string>
 </resources>

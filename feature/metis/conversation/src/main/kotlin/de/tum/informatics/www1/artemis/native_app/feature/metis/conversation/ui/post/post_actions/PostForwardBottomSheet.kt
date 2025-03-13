@@ -102,10 +102,11 @@ fun PostForwardBottomSheet(
 
                 Button(
                     onClick = {
-                        onSendMessage(postToForward)
-//                        if (forwardingMessageError == ForwardingMessageError.NO_ERROR) {
-//                            onDismissRequest()
-//                        }
+                        onSendMessage(postToForward) { success ->
+                            if (success) {
+                                onDismissRequest()
+                            }
+                        }
                     },
                     enabled = isSendButtonEnabled,
                     modifier = Modifier
