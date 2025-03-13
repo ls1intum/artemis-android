@@ -95,8 +95,8 @@ internal fun MarkdownTextField(
     val text = textFieldValue.text
     var selectedType by remember { mutableStateOf(ViewType.TEXT) }
     var isTextOptionsVisible by remember { mutableStateOf(isTextOptionsInitiallyVisible) }
-        // weight(1f) is needed for the row to ensure that the TextFieldOptions stay visible when the BasicMarkdownTextField grows.
-        // fill has to be disabled for the UI tests to work properly.
+    // weight(1f) is needed for the row to ensure that the TextFieldOptions stay visible when the BasicMarkdownTextField grows.
+    // fill has to be disabled for the UI tests to work properly.
     val content: @Composable ColumnScope.() -> Unit = {
         Row(
             modifier = Modifier
@@ -174,16 +174,17 @@ internal fun MarkdownTextField(
                 }
             }
         }
-    } else {
-        Column(
-            modifier = modifier,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            content()
-            textOptionsTopContent()
-            AnimatedVisibility(isTextOptionsVisible) {
-                options()
-            }
+        return
+    }
+
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        content()
+        textOptionsTopContent()
+        AnimatedVisibility(isTextOptionsVisible) {
+            options()
         }
     }
 }
