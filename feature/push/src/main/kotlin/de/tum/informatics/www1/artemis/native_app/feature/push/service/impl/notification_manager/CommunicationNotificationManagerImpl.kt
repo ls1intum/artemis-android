@@ -94,6 +94,7 @@ internal class CommunicationNotificationManagerImpl(
 
     override suspend fun addSelfMessage(
         parentId: Long,
+        authorLoginName: String,
         authorName: String,
         authorImageUrl: String?,
         body: String,
@@ -101,6 +102,7 @@ internal class CommunicationNotificationManagerImpl(
     ) {
         dbProvider.pushCommunicationDao.insertSelfMessage(
             parentId = parentId,
+            authorLoginName = authorLoginName,
             authorName = authorName,
             authorImageUrl = authorImageUrl,
             body = body,

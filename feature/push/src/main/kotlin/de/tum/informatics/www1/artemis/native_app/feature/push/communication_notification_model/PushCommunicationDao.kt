@@ -91,6 +91,7 @@ interface PushCommunicationDao {
     @Transaction
     suspend fun insertSelfMessage(
         parentId: Long,
+        authorLoginName: String,
         authorName: String,
         authorImageUrl: String?,
         body: String,
@@ -101,7 +102,7 @@ interface PushCommunicationDao {
                 CommunicationMessageEntity(
                     communicationParentId = parentId,
                     text = body,
-                    authorId = "self",      // TODO
+                    authorId = authorLoginName,
                     authorName = authorName,
                     authorImageUrl = authorImageUrl,
                     date = date

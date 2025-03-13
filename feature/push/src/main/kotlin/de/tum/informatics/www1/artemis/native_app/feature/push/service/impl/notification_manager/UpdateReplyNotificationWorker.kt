@@ -33,6 +33,7 @@ class UpdateReplyNotificationWorker(
 
                 communicationNotificationManager.addSelfMessage(
                     parentId = conversationId,
+                    authorLoginName = account.username ?: "self",
                     authorName = account.humanReadableName,
                     authorImageUrl = account.imageUrl,
                     body = content,
