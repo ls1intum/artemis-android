@@ -148,7 +148,7 @@ internal class CommunicationNotificationManagerImpl(
             ArtemisNotificationChannel.CommunicationNotificationChannel
 
         val metisTarget =
-            NotificationTargetManager.getCommunicationNotificationTarget(communication.target)
+            NotificationTargetManager.getCommunicationNotificationTarget(communication.targetString)
 
         val notification = NotificationCompat.Builder(context, notificationChannel.id)
             .setStyle(buildMessagingStyle(communication, messages))

@@ -8,6 +8,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.work.BaseCreatePostWorker
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.PushCommunicationEntity
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.BaseCommunicationNotificationReceiver
 import kotlinx.coroutines.runBlocking
 import org.koin.core.component.get
@@ -23,25 +24,25 @@ class ReplyReceiver : BaseCommunicationNotificationReceiver() {
     }
 
     @SuppressLint("EnqueueWork")
-    override fun onReceive(parentId: Long, context: Context, intent: Intent) {
+    override fun onReceive(
+        communicationEntity: PushCommunicationEntity,
+        context: Context,
+        intent: Intent
+    ) {
         val remoteInput = RemoteInput.getResultsFromIntent(intent) ?: return
         val response = remoteInput.getCharSequence(REPLY_INTENT_KEY).toString()
 
-        val (metisContext: MetisContext.Conversation, postId: Long) = runBlocking {
-            getMetisContextAndPostId(parentId)
-        }
-
         if (response.isNotBlank()) {
             createReplyPost(
-                metisContext = metisContext,
-                parentPostId = postId,
+                metisContext = communicationEntity.target.metisContext,
+                parentPostId = communicationEntity.target.postId,
                 response = response
             )
         }
 
         // Repop the notification to tell the OS we handled the notification
         runBlocking {
-            communicationNotificationManager.repopNotification(parentId = parentId)
+            communicationNotificationManager.repopNotification(parentId = communicationEntity.parentId)
         }
     }
 

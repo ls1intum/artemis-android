@@ -8,6 +8,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.PushCommunicationEntity
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.BaseCommunicationNotificationReceiver
 import kotlinx.coroutines.runBlocking
@@ -19,10 +20,16 @@ import org.koin.core.component.get
  */
 class MarkAsReadReceiver : BaseCommunicationNotificationReceiver() {
 
-    override fun onReceive(parentId: Long, context: Context, intent: Intent) {
-        val metisContext = runBlocking { getMetisContext(parentId) }
-        enqueueWorker(metisContext, context)
-        deleteNotification(parentId)
+    override fun onReceive(
+        communicationEntity: PushCommunicationEntity,
+        context: Context,
+        intent: Intent
+    ) {
+        enqueueWorker(
+            metisContext = communicationEntity.target.metisContext,
+            context = context
+        )
+        deleteNotification(communicationEntity.parentId)
     }
 
     private fun enqueueWorker(

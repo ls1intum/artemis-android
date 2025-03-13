@@ -65,7 +65,7 @@ interface PushCommunicationDao {
                     notificationTypeString = artemisNotification.type.toString(),
                     courseTitle = content.courseName,
                     containerTitle = content.channelName,
-                    target = artemisNotification.target,
+                    targetString = artemisNotification.target,
                     conversationTypeString = content.conversationType?.rawValue
                 )
 

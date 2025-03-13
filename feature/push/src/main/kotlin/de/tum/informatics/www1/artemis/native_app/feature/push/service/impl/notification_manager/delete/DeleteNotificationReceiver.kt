@@ -2,14 +2,19 @@ package de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.not
 
 import android.content.Context
 import android.content.Intent
+import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.PushCommunicationEntity
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.BaseCommunicationNotificationReceiver
 import kotlinx.coroutines.runBlocking
 
 class DeleteNotificationReceiver : BaseCommunicationNotificationReceiver() {
 
-    override fun onReceive(parentId: Long, context: Context, intent: Intent) {
+    override fun onReceive(
+        communicationEntity: PushCommunicationEntity,
+        context: Context,
+        intent: Intent
+    ) {
         runBlocking {
-            communicationNotificationManager.deleteCommunication(parentId)
+            communicationNotificationManager.deleteCommunication(communicationEntity.parentId)
         }
     }
 }
