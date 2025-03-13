@@ -42,6 +42,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.extensions.icon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.extensions.uiText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.util.EmojiCategoryListUtil
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.util.EmojiSearchUtil
 import kotlinx.coroutines.launch
 
 // Implementing our own custom emoji picker, because the one provided by emoji2 had two issues:
@@ -72,9 +73,10 @@ fun EmojiPicker(
         }
     }
     val filteredEmojis = remember(allEmojis, searchQuery) {
-        allEmojis.filter {
-            it.emojiId.startsWith(searchQuery)
-        }
+        EmojiSearchUtil.filterAndSortEmojis(
+            emojis = allEmojis,
+            query = searchQuery
+        )
     }
 
     Column(modifier = modifier) {
