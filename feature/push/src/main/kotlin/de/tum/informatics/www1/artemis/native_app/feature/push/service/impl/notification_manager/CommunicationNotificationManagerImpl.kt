@@ -52,6 +52,11 @@ internal class CommunicationNotificationManagerImpl(
     private val accountDataService: AccountDataService,
 ) : CommunicationNotificationManager, BaseNotificationManager {
 
+    val mutableFlags: Int
+        get() = if (Build.VERSION.SDK_INT >= 31) {
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+        } else PendingIntent.FLAG_UPDATE_CURRENT
+
     override suspend fun popNotification(
         artemisNotification: ArtemisNotification<CommunicationNotificationType>
     ) {
@@ -172,7 +177,6 @@ internal class CommunicationNotificationManagerImpl(
                 buildMarkAsReadAction(
                     context = context,
                     communication = communication,
-                    notificationId = communication.notificationId
                 )
             )
             .build()
@@ -272,9 +276,8 @@ internal class CommunicationNotificationManagerImpl(
         parentId: Long
     ): PendingIntent = PendingIntent.getBroadcast(
         context,
-        (parentId % Int.MAX_VALUE).toInt(),
-        Intent(context, DeleteNotificationReceiver::class.java)
-            .putExtra(DeleteNotificationReceiver.PARENT_ID, parentId),
+        parentId.asRequestCode(),
+        buildIntentWithParentId<DeleteNotificationReceiver>(parentId),
         PendingIntent.FLAG_IMMUTABLE
     )
 
@@ -289,30 +292,19 @@ internal class CommunicationNotificationManagerImpl(
             .setLabel(replyText)
             .build()
 
-        val resultIntent =
-            Intent(context, ReplyReceiver::class.java).apply {
-                putExtra(
-                    ReplyReceiver.PARENT_ID,
-                    communication.parentId
-                )
-            }
-
-        val flags = if (Build.VERSION.SDK_INT >= 31) {
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
-        } else PendingIntent.FLAG_UPDATE_CURRENT
-
-        val replyPendingIntent: PendingIntent =
+        val resultIntent = buildIntentWithParentId<ReplyReceiver>(communication.parentId)
+        val pendingIntent: PendingIntent =
             PendingIntent.getBroadcast(
                 context,
                 notificationId, // Set request code to notification id.
                 resultIntent,
-                flags
+                mutableFlags
             )
 
         return NotificationCompat.Action.Builder(
             R.drawable.reply,
             replyText,
-            replyPendingIntent
+            pendingIntent
         )
             .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_REPLY)
             .addRemoteInput(remoteInput)
@@ -322,34 +314,30 @@ internal class CommunicationNotificationManagerImpl(
     private fun buildMarkAsReadAction(
         context: Context,
         communication: PushCommunicationEntity,
-        notificationId: Int,
     ): NotificationCompat.Action {
-        val resultIntent =
-            Intent(context, MarkAsReadReceiver::class.java).apply {
-                putExtra(
-                    MarkAsReadReceiver.PARENT_ID,
-                    communication.parentId
-                )
-            }
-
-        val flags = if (Build.VERSION.SDK_INT >= 31) {
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
-        } else PendingIntent.FLAG_UPDATE_CURRENT
-
-        val replyPendingIntent: PendingIntent =
+        val parentId = communication.parentId
+        val resultIntent = buildIntentWithParentId<MarkAsReadReceiver>(parentId)
+        val pendingIntent: PendingIntent =
             PendingIntent.getBroadcast(
                 context,
-                notificationId, // Set request code to notification id.
+                parentId.asRequestCode(),
                 resultIntent,
-                flags
+                mutableFlags
             )
 
         return NotificationCompat.Action.Builder(
             R.drawable.baseline_mark_chat_read_24,
             context.getString(R.string.push_notification_action_mark_as_read),
-            replyPendingIntent
+            pendingIntent
         )
             .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_MARK_AS_READ)
             .build()
     }
+
+    private inline fun <reified T: BaseCommunicationNotificationReceiver>buildIntentWithParentId(
+        parentId: Long
+    ) = Intent(context, T::class.java)
+        .putExtra(BaseCommunicationNotificationReceiver.PARENT_ID, parentId)
+
+    private fun Long.asRequestCode() = (this % Int.MAX_VALUE).toInt()
 }
