@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.RemoteInput
-import androidx.room.Update
 import androidx.room.withTransaction
 import androidx.work.OneTimeWorkRequestBuilder
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
@@ -30,58 +29,72 @@ class ReplyReceiver : BroadcastReceiver(), KoinComponent {
 
     @SuppressLint("EnqueueWork")
     override fun onReceive(context: Context, intent: Intent) {
-        RemoteInput.getResultsFromIntent(intent)?.let { remoteInput ->
-            val response =
-                remoteInput.getCharSequence(REPLY_INTENT_KEY)
-                    .toString()
+        val remoteInput = RemoteInput.getResultsFromIntent(intent) ?: return
 
-            val parentId = intent.getLongExtra(PARENT_ID, 0)
+        val response = remoteInput.getCharSequence(REPLY_INTENT_KEY).toString()
+        val parentId = intent.getLongExtra(PARENT_ID, 0)
 
-            val pushCommunicationDatabaseProvider: PushCommunicationDatabaseProvider = get()
+        val (metisContext: MetisContext.Conversation, postId: Long) = runBlocking {
+            getMetisContextAndPostId(parentId)
+        }
 
-            val (metisContext: MetisContext, postId: Long) = runBlocking {
-                pushCommunicationDatabaseProvider.database.withTransaction {
-                    val communication =
-                        pushCommunicationDatabaseProvider.pushCommunicationDao.getCommunication(parentId)
+        if (response.isNotBlank()) {
+            createReplyPost(
+                metisContext = metisContext,
+                parentPostId = postId,
+                response = response
+            )
+        }
 
-                    val metisTarget = NotificationTargetManager.getCommunicationNotificationTarget(
-                        communication.target
+        val communicationNotificationManager: CommunicationNotificationManager = get()
+
+        // Repop the notification to tell the OS we handled the notification
+        runBlocking {
+            communicationNotificationManager.repopNotification(parentId = parentId)
+        }
+    }
+
+    @SuppressLint("EnqueueWork")        // This is already done in CreatePostServiceImpl.scheduleCreatePostWork
+    private fun createReplyPost(
+        metisContext: MetisContext.Conversation,
+        parentPostId: Long,
+        response: String
+    ) {
+        val createPostService: CreatePostService = get()
+        createPostService.createAnswerPost(
+            courseId = metisContext.courseId,
+            conversationId = metisContext.conversationId,
+            parentPostId = parentPostId,
+            content = response
+        ) { clientSidePostId ->
+            then(
+                OneTimeWorkRequestBuilder<UpdateReplyNotificationWorker>()
+                    .setInputData(
+                        BaseCreatePostWorker.createWorkInput(
+                            metisContext.courseId,
+                            metisContext.conversationId,
+                            clientSidePostId,
+                            response,
+                            postType = BaseCreatePostWorker.PostType.ANSWER_POST,
+                            parentPostId = parentPostId
+                        )
                     )
-                    metisTarget.metisContext to metisTarget.postId
-                }
-            }
+                    .build()
+            )
+        }
+    }
 
-            if (response.isNotBlank() && metisContext is MetisContext.Conversation) {
-                val createPostService: CreatePostService = get()
-                createPostService.createAnswerPost(
-                    metisContext.courseId,
-                    metisContext.conversationId,
-                    postId,
-                    response
-                ) { clientSidePostId ->
-                    then(
-                        OneTimeWorkRequestBuilder<UpdateReplyNotificationWorker>()
-                            .setInputData(
-                                BaseCreatePostWorker.createWorkInput(
-                                    metisContext.courseId,
-                                    metisContext.conversationId,
-                                    clientSidePostId,
-                                    response,
-                                    postType = BaseCreatePostWorker.PostType.ANSWER_POST,
-                                    parentPostId = postId
-                                )
-                            )
-                            .build()
-                    )
-                }
-            }
+    private suspend fun getMetisContextAndPostId(parentId: Long): Pair<MetisContext.Conversation, Long> {
+        val pushCommunicationDatabaseProvider: PushCommunicationDatabaseProvider = get()
 
-            val communicationNotificationManager: CommunicationNotificationManager = get()
+        return pushCommunicationDatabaseProvider.database.withTransaction {
+            val communication = pushCommunicationDatabaseProvider.pushCommunicationDao.getCommunication(parentId)
 
-            // Repop the notification to tell the OS we handled the notification
-            runBlocking {
-                communicationNotificationManager.repopNotification(parentId = parentId)
-            }
+            val metisTarget = NotificationTargetManager.getCommunicationNotificationTarget(
+                communication.target
+            )
+
+            metisTarget.metisContext to metisTarget.postId
         }
     }
 }
