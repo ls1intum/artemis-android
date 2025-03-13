@@ -12,4 +12,6 @@ dependencies {
 
     implementation(project(":feature:metis:shared"))
     implementation(project(":feature:metis:conversation:shared"))
+
+    testImplementation(project(":feature:metis-test"))
 }

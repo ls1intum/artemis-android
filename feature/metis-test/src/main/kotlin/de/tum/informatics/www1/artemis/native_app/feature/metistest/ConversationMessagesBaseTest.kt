@@ -1,17 +1,13 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation
+package de.tum.informatics.www1.artemis.native_app.feature.metistest
 
-import androidx.compose.ui.test.hasAnyAncestor
-import androidx.compose.ui.test.hasSetTextAction
-import androidx.compose.ui.test.hasTestTag
+
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Username
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.TEST_TAG_REPLY_TEXT_FIELD
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
-import de.tum.informatics.www1.artemis.native_app.feature.metistest.ConversationBaseTest
 import kotlinx.datetime.Clock
 import org.junit.Before
 import org.koin.test.get
@@ -19,9 +15,6 @@ import org.koin.test.get
 abstract class ConversationMessagesBaseTest : ConversationBaseTest() {
 
     protected val metisModificationService: MetisModificationService get() = get()
-
-    protected val replyTextFieldMatcher =
-        hasAnyAncestor(hasTestTag(TEST_TAG_REPLY_TEXT_FIELD)) and hasSetTextAction()
 
     protected lateinit var conversation: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
     protected lateinit var metisContext: MetisContext

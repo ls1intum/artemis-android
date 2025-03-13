@@ -1,11 +1,11 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.impl
+package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts
 
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ConversationMessagesBaseTest
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.SavedPostsTestUtil
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.service.SavedPostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
+import de.tum.informatics.www1.artemis.native_app.feature.metistest.ConversationMessagesBaseTest
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
@@ -21,7 +21,7 @@ import kotlin.time.Duration.Companion.milliseconds
 @Category(EndToEndTest::class)
 class SavedPostServiceImplTest : ConversationMessagesBaseTest() {
 
-    private val sut: de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.service.SavedPostService get() = get()
+    private val sut: SavedPostService get() = get()
 
     @Test
     fun `test GIVEN the SavedPostService WHEN saving a post THEN calling getSavedPosts with status InProgress returns this saved post`() {
@@ -94,7 +94,7 @@ class SavedPostServiceImplTest : ConversationMessagesBaseTest() {
                 .orThrow("Could not save post")
 
             sut.changeSavedPostStatus(
-                post = de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.SavedPostsTestUtil.fromStandalonePost(post),
+                post = SavedPostsTestUtil.fromStandalonePost(post),
                 status = SavedPostStatus.COMPLETED,
                 authToken = accessToken,
                 serverUrl = testServerUrl
