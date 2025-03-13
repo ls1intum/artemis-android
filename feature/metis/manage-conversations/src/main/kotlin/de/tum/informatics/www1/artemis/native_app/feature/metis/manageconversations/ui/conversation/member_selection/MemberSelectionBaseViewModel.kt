@@ -16,8 +16,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversati
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.util.MemberSelectionItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.util.toMemberSelectionItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseUser
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import kotlinx.coroutines.flow.Flow
@@ -121,7 +121,7 @@ abstract class MemberSelectionBaseViewModel(
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
-    private val potentialConversations: StateFlow<DataState<List<Conversation>>> = combine(
+    private val conversationsFromServer: StateFlow<DataState<List<Conversation>>> = combine(
         query,
         accountService.authToken,
         serverConfigurationService.serverUrl,
@@ -130,7 +130,7 @@ abstract class MemberSelectionBaseViewModel(
         retryOnInternet(networkStatusProvider.currentNetworkStatus) {
             conversationService.getConversations(courseId, authToken, serverUrl).bind { conversations ->
                 conversations.filter {
-                    it.humanReadableName.contains(query, ignoreCase = true) && it !is OneToOneChat
+                    it.humanReadableName.contains(query, ignoreCase = true) && it is ChannelChat && !it.isAnnouncementChannel
                 }
             }
         }
@@ -138,19 +138,31 @@ abstract class MemberSelectionBaseViewModel(
         .flattenMerge()
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
+    private val potentialConversations: StateFlow<DataState<List<Conversation>>> = combine(
+        conversationsFromServer,
+        conversations
+    ) { conversationsFromServerDataState, conversations ->
+        val conversationIds = conversations.map { it.id }
+
+        conversationsFromServerDataState.bind { conversationsFromServer ->
+            conversationsFromServer.filter { it.id !in conversationIds }
+        }
+    }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
+
     fun suggestions(isConversationSelectionEnabled: Boolean): StateFlow<List<MemberSelectionItem>> = combine(
         potentialConversations,
         potentialRecipients
     ) { potentialConversationsDataState, potentialRecipientsDataState ->
-        val conversations = potentialConversationsDataState.bind { conversations ->
-            conversations.map { it.toMemberSelectionItem() }
-        }.orElse(emptyList())
-
         val recipients = potentialRecipientsDataState.bind { courseUsers ->
             courseUsers.map { it.toMemberSelectionItem() }
         }.orElse(emptyList())
 
         if (isConversationSelectionEnabled) {
+            val conversations = potentialConversationsDataState.bind { conversations ->
+                conversations.map { it.toMemberSelectionItem() }
+            }.orElse(emptyList())
+
             conversations + recipients
         } else {
             recipients

@@ -204,7 +204,6 @@ internal open class ConversationViewModel(
         courseId = courseId,
         conversationService = conversationService,
         accountService = accountService,
-        metisService = metisService,
         createPostService = createPostService,
         serverConfigurationService = serverConfigurationService,
         networkStatusProvider = networkStatusProvider,
