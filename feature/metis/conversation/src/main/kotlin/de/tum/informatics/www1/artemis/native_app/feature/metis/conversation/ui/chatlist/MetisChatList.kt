@@ -35,6 +35,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
@@ -139,12 +140,12 @@ fun MetisChatList(
     emojiService: EmojiService = koinInject(),
     isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     isReplyEnabled: Boolean,
-    onCreatePost: () -> Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?>,
-    onEditPost: (IStandalonePost, String) -> Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?>,
-    onDeletePost: (IStandalonePost) -> Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?>,
-    onPinPost: (IStandalonePost) -> Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?>,
-    onSavePost: (IStandalonePost) -> Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?>,
-    onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?>,
+    onCreatePost: () -> Deferred<MetisModificationFailure?>,
+    onEditPost: (IStandalonePost, String) -> Deferred<MetisModificationFailure?>,
+    onDeletePost: (IStandalonePost) -> Deferred<MetisModificationFailure?>,
+    onPinPost: (IStandalonePost) -> Deferred<MetisModificationFailure?>,
+    onSavePost: (IStandalonePost) -> Deferred<MetisModificationFailure?>,
+    onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
     onClickViewPost: (StandalonePostId) -> Unit,
     onUndoDeletePost: (IStandalonePost) -> Unit,
     generateLinkPreviews: (String) -> StateFlow<List<LinkPreview>>,

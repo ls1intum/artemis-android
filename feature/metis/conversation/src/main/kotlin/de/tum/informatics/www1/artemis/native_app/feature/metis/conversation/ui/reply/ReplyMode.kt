@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.TextFieldValue
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
@@ -22,19 +23,19 @@ internal sealed class ReplyMode() {
     data class NewMessage(
         override val currentText: State<TextFieldValue>,
         private val onUpdateTextUpstream: (TextFieldValue) -> Unit,
-        private val onCreateNewMessageUpstream: () -> Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?>,
+        private val onCreateNewMessageUpstream: () -> Deferred<MetisModificationFailure?>,
     ) : ReplyMode() {
 
         override fun onUpdate(new: TextFieldValue) {
             onUpdateTextUpstream(new)
         }
 
-        fun onCreateNewMessage(): Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?> = onCreateNewMessageUpstream()
+        fun onCreateNewMessage(): Deferred<MetisModificationFailure?> = onCreateNewMessageUpstream()
     }
 
     data class EditMessage(
         val post: IBasePost,
-        private val onEditMessage: (String) -> Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?>,
+        private val onEditMessage: (String) -> Deferred<MetisModificationFailure?>,
         val onCancelEditMessage: () -> Unit
     ) : ReplyMode() {
         override val currentText = mutableStateOf(TextFieldValue(post.content ?: ""))
@@ -43,7 +44,7 @@ internal sealed class ReplyMode() {
             currentText.value = new
         }
 
-        fun onEditMessage(): Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?> = onEditMessage(currentText.value.text)
+        fun onEditMessage(): Deferred<MetisModificationFailure?> = onEditMessage(currentText.value.text)
     }
 }
 
@@ -52,8 +53,8 @@ private fun <T : IBasePost> rememberReplyMode(
     initialReplyTextProvider: InitialReplyTextProvider,
     editingPost: T?,
     onClearEditingPost: () -> Unit,
-    onCreatePost: () -> Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?>,
-    onEditPost: (T, String) -> Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?>
+    onCreatePost: () -> Deferred<MetisModificationFailure?>,
+    onEditPost: (T, String) -> Deferred<MetisModificationFailure?>
 ): ReplyMode {
     val newMessageText = initialReplyTextProvider.newMessageText.collectAsState(initial = TextFieldValue())
 
@@ -65,7 +66,7 @@ private fun <T : IBasePost> rememberReplyMode(
                 onCreateNewMessageUpstream = onCreatePost
             )
         }
-    var editingPostJob: Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?>? by remember() { mutableStateOf(null) }
+    var editingPostJob: Deferred<MetisModificationFailure?>? by remember() { mutableStateOf(null) }
 
     AwaitDeferredCompletion(job = editingPostJob) {
         onClearEditingPost()
@@ -101,13 +102,13 @@ private fun <T : IBasePost> rememberReplyMode(
 @Composable
 internal fun <T : IBasePost> MetisReplyHandler(
     initialReplyTextProvider: InitialReplyTextProvider,
-    onCreatePost: () -> Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?>,
-    onEditPost: (T, String) -> Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?>,
-    onResolvePost: ((T) -> Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?>)?,
-    onPinPost: ((T) -> Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?>)?,
-    onSavePost: ((T) -> Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?>)?,
-    onDeletePost: (T) -> Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?>,
-    onRequestReactWithEmoji: (T, emojiId: String, create: Boolean) -> Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?>,
+    onCreatePost: () -> Deferred<MetisModificationFailure?>,
+    onEditPost: (T, String) -> Deferred<MetisModificationFailure?>,
+    onResolvePost: ((T) -> Deferred<MetisModificationFailure?>)?,
+    onPinPost: ((T) -> Deferred<MetisModificationFailure?>)?,
+    onSavePost: ((T) -> Deferred<MetisModificationFailure?>)?,
+    onDeletePost: (T) -> Deferred<MetisModificationFailure?>,
+    onRequestReactWithEmoji: (T, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
     content: @Composable (
         replyMode: ReplyMode,
         onRequestEditPostDelegate: (T) -> Unit,
@@ -116,10 +117,10 @@ internal fun <T : IBasePost> MetisReplyHandler(
         onDeletePostDelegate: (T) -> Unit,
         onPinPostDelegate: (T) -> Unit,
         onSavedPostDelegate: (T) -> Unit,
-        updateFailureStateDelegate: (de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?) -> Unit
+        updateFailureStateDelegate: (MetisModificationFailure?) -> Unit
     ) -> Unit
 ) {
-    var metisModificationTask: Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?>? by remember {
+    var metisModificationTask: Deferred<MetisModificationFailure?>? by remember {
         mutableStateOf(null)
     }
     de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.MetisModificationTaskHandler(

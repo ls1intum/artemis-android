@@ -34,6 +34,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateU
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ProvideEmojis
@@ -116,7 +117,7 @@ internal fun MetisThreadUi(
                 when (post) {
                     is AnswerPostPojo -> {
                         if (parentPost == null) CompletableDeferred(
-                            de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure.UPDATE_POST
+                            MetisModificationFailure.UPDATE_POST
                         ) else viewModel.editAnswerPost(parentPost, post, newText)
                     }
 
@@ -129,7 +130,7 @@ internal fun MetisThreadUi(
 
                 if (post is AnswerPostPojo) {
                     if (parentPost == null) CompletableDeferred(
-                        de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure.UPDATE_POST
+                        MetisModificationFailure.UPDATE_POST
                     ) else viewModel.toggleResolvePost(parentPost, post)
                 } else {
                     throw NotImplementedError()
@@ -171,14 +172,14 @@ internal fun MetisThreadUi(
     initialReplyTextProvider: InitialReplyTextProvider,
     generateLinkPreviews: (String) -> StateFlow<List<LinkPreview>>,
     onRemoveLinkPreview: (LinkPreview, IBasePost, IStandalonePost?) -> Unit,
-    onCreatePost: () -> Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?>,
-    onEditPost: (IBasePost, String) -> Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?>,
-    onResolvePost: ((IBasePost) -> Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?>)?,
-    onPinPost: ((IBasePost) -> Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?>)?,
-    onSavePost: ((IBasePost) -> Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?>)?,
-    onDeletePost: (IBasePost) -> Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?>,
+    onCreatePost: () -> Deferred<MetisModificationFailure?>,
+    onEditPost: (IBasePost, String) -> Deferred<MetisModificationFailure?>,
+    onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure?>)?,
+    onPinPost: ((IBasePost) -> Deferred<MetisModificationFailure?>)?,
+    onSavePost: ((IBasePost) -> Deferred<MetisModificationFailure?>)?,
+    onDeletePost: (IBasePost) -> Deferred<MetisModificationFailure?>,
     onUndoDeletePost: (IBasePost) -> Unit,
-    onRequestReactWithEmoji: (IBasePost, emojiId: String, create: Boolean) -> Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?>,
+    onRequestReactWithEmoji: (IBasePost, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
     onRequestReload: () -> Unit,
     onRequestRetrySend: (clientSidePostId: String, content: String) -> Unit,
     onFileSelect: (Uri, Context) -> Unit

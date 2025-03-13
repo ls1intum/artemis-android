@@ -35,6 +35,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.ReplyTextStorageService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.asMetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.model.Link
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.model.LinkPreview
@@ -310,17 +311,17 @@ internal open class ConversationViewModel(
         post: IBasePost,
         emojiId: String,
         create: Boolean
-    ): Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?> {
+    ): Deferred<MetisModificationFailure?> {
         return viewModelScope.async(coroutineContext) {
             if (create) {
                 createReactionImpl(
                     emojiId,
                     post.getAsAffectedPost()
-                        ?: return@async de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure.DELETE_REACTION
+                        ?: return@async MetisModificationFailure.DELETE_REACTION
                 )
             } else {
                 val clientId = clientId.value.orNull()
-                    ?: return@async de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure.DELETE_REACTION
+                    ?: return@async MetisModificationFailure.DELETE_REACTION
 
                 val exitingReactionId = post
                     .reactions
@@ -328,7 +329,7 @@ internal open class ConversationViewModel(
                     .filter { it.emojiId == emojiId }
                     .firstOrNull { it.creatorId == clientId }
                     ?.id
-                    ?: return@async de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure.DELETE_REACTION
+                    ?: return@async MetisModificationFailure.DELETE_REACTION
 
                 deleteReactionImpl(exitingReactionId)
             }
@@ -338,7 +339,7 @@ internal open class ConversationViewModel(
     private suspend fun createReactionImpl(
         emojiId: String,
         post: MetisModificationService.AffectedPost
-    ): de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure? {
+    ): MetisModificationFailure? {
         val networkResponse: NetworkResponse<Reaction> = metisModificationService.createReaction(
             context = metisContext,
             post = post,
@@ -347,11 +348,11 @@ internal open class ConversationViewModel(
             authToken = accountService.authToken.first()
         )
 
-        return networkResponse.bind<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?> { null }
-            .or(de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure.CREATE_REACTION)
+        return networkResponse.bind<MetisModificationFailure?> { null }
+            .or(MetisModificationFailure.CREATE_REACTION)
     }
 
-    private suspend fun deleteReactionImpl(reactionId: Long): de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure? {
+    private suspend fun deleteReactionImpl(reactionId: Long): MetisModificationFailure? {
         val success = metisModificationService.deleteReaction(
             context = metisContext,
             reactionId = reactionId,
@@ -359,7 +360,7 @@ internal open class ConversationViewModel(
             authToken = accountService.authToken.first()
         ).or(false)
 
-        return if (success) null else de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure.DELETE_REACTION
+        return if (success) null else MetisModificationFailure.DELETE_REACTION
     }
 
     /**
@@ -369,10 +370,10 @@ internal open class ConversationViewModel(
     fun toggleResolvePost(
         parentPost: IStandalonePost,
         post: AnswerPostPojo
-    ): Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?> {
+    ): Deferred<MetisModificationFailure?> {
         return viewModelScope.async(coroutineContext) {
             val conversation =
-                loadConversation() ?: return@async de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure.UPDATE_POST
+                loadConversation() ?: return@async MetisModificationFailure.UPDATE_POST
 
             val resolved = !post.resolvesPost
             val serializedParentPost = StandalonePost(parentPost, conversation)
@@ -384,14 +385,14 @@ internal open class ConversationViewModel(
                 serverUrl = serverConfigurationService.serverUrl.first(),
                 authToken = accountService.authToken.first()
             )
-                .asMetisModificationFailure(de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure.UPDATE_POST)
+                .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
         }
     }
 
-    fun togglePinPost(post: IStandalonePost): Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?> {
+    fun togglePinPost(post: IStandalonePost): Deferred<MetisModificationFailure?> {
         return viewModelScope.async(coroutineContext) {
             val conversation =
-                loadConversation() ?: return@async de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure.UPDATE_POST
+                loadConversation() ?: return@async MetisModificationFailure.UPDATE_POST
 
             val newDisplayPriority = if (post.displayPriority == DisplayPriority.PINNED) {
                 DisplayPriority.NONE
@@ -415,11 +416,11 @@ internal open class ConversationViewModel(
                 serverUrl = serverConfigurationService.serverUrl.first(),
                 authToken = accountService.authToken.first(),
             )
-                .asMetisModificationFailure(de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure.UPDATE_POST)
+                .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
         }
     }
 
-    fun toggleSavePost(post: IBasePost): Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?> {
+    fun toggleSavePost(post: IBasePost): Deferred<MetisModificationFailure?> {
         // TODO: this is a quick fix to prevent multiple save requests.
         //      https://github.com/ls1intum/artemis-android/issues/307
         if (currentlySavingPost) return CompletableDeferred(null)
@@ -442,12 +443,12 @@ internal open class ConversationViewModel(
 
             currentlySavingPost = false
             response.bind { requestReload() }   // Currently changing save status does not trigger a websocket update
-                .asMetisModificationFailure(de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure.UPDATE_POST)
+                .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
 
         }
     }
 
-    fun deletePost(post: IBasePost): Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?> {
+    fun deletePost(post: IBasePost): Deferred<MetisModificationFailure?> {
         isMarkedAsDeleteList.add(post)
         deleteJobs[post]?.cancel()
 
@@ -458,13 +459,13 @@ internal open class ConversationViewModel(
                 if (isMarkedAsDeleteList.contains(post)) {
                     metisModificationService.deletePost(
                         metisContext,
-                        post.getAsAffectedPost() ?: return@async de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure.DELETE_POST,
+                        post.getAsAffectedPost() ?: return@async MetisModificationFailure.DELETE_POST,
                         serverConfigurationService.serverUrl.first(),
                         accountService.authToken.first()
                     )
-                        .bind { if (it) null else de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure.DELETE_POST }
-                        .or(de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure.DELETE_POST)
-                        .also { if (it != de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure.DELETE_POST && post is IStandalonePost) onCloseThread?.invoke() }
+                        .bind { if (it) null else MetisModificationFailure.DELETE_POST }
+                        .or(MetisModificationFailure.DELETE_POST)
+                        .also { if (it != MetisModificationFailure.DELETE_POST && post is IStandalonePost) onCloseThread?.invoke() }
                 } else {
                     null
                 }
@@ -484,10 +485,10 @@ internal open class ConversationViewModel(
         isMarkedAsDeleteList.remove(post)
     }
 
-    fun editPost(post: IStandalonePost, newText: String): Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?> {
+    fun editPost(post: IStandalonePost, newText: String): Deferred<MetisModificationFailure?> {
         return viewModelScope.async(coroutineContext) {
             val conversation =
-                loadConversation() ?: return@async de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure.UPDATE_POST
+                loadConversation() ?: return@async MetisModificationFailure.UPDATE_POST
 
             val newPost = when (post) {
                 is StandalonePost -> post.copy(content = newText)
@@ -505,7 +506,7 @@ internal open class ConversationViewModel(
                 serverUrl = serverConfigurationService.serverUrl.first(),
                 authToken = accountService.authToken.first()
             )
-                .asMetisModificationFailure(de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure.UPDATE_POST)
+                .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
         }
     }
 
@@ -513,10 +514,10 @@ internal open class ConversationViewModel(
         parentPost: IStandalonePost,
         post: AnswerPostPojo,
         newText: String
-    ): Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?> {
+    ): Deferred<MetisModificationFailure?> {
         return viewModelScope.async(coroutineContext) {
             val conversation =
-                loadConversation() ?: return@async de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure.UPDATE_POST
+                loadConversation() ?: return@async MetisModificationFailure.UPDATE_POST
 
             val serializedParentPost = StandalonePost(parentPost, conversation)
             val newPost = AnswerPost(post, serializedParentPost).copy(content = newText)
@@ -527,7 +528,7 @@ internal open class ConversationViewModel(
                 serverUrl = serverConfigurationService.serverUrl.first(),
                 authToken = accountService.authToken.first()
             )
-                .asMetisModificationFailure(de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure.UPDATE_POST)
+                .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
         }
     }
 
@@ -535,7 +536,7 @@ internal open class ConversationViewModel(
         linkPreview: LinkPreview,
         post: IBasePost,
         parentPost: IStandalonePost?
-    ): Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?> {
+    ): Deferred<MetisModificationFailure?> {
         val newContent = LinkPreviewUtil.removeLinkPreview(post.content.orEmpty(), linkPreview.url)
         return when (post) {
             is IStandalonePost -> editPost(post, newContent)
@@ -671,7 +672,7 @@ internal open class ConversationViewModel(
             null -> null
         }
 
-    fun createPost(): Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?> {
+    fun createPost(): Deferred<MetisModificationFailure?> {
         createPostService.createPost(courseId, conversationId, newMessageText.value.text)
 
         return CompletableDeferred(value = null)
@@ -700,10 +701,10 @@ internal open class ConversationViewModel(
         }
     }
 
-    fun createReply(): Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure?> {
+    fun createReply(): Deferred<MetisModificationFailure?> {
         return viewModelScope.async(coroutineContext) {
             val serverSideParentPostId =
-                getPostId() ?: return@async de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure.CREATE_POST
+                getPostId() ?: return@async MetisModificationFailure.CREATE_POST
 
             createPostService.createAnswerPost(
                 courseId,
