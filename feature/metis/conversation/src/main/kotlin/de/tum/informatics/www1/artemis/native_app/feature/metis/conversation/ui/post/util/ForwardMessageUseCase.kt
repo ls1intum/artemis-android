@@ -23,6 +23,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
@@ -85,35 +86,35 @@ class ForwardMessageUseCase(
      */
     fun forwardPost(post: IBasePost, onComplete: (Boolean) -> Unit) {
         viewModelScope.launch(coroutineContext) {
-            combine(
+            val (recipients, conversations, serverData) = combine(
                 recipients,
                 conversations,
                 serverConfigurationService.serverUrl,
                 accountService.authToken
             ) { recipients, conversations, serverUrl, authToken ->
                 Triple(recipients, conversations, serverUrl to authToken)
-            }.collect { (recipients, conversations, serverData) ->
-                val forwardedSourcePostList = listOf(
-                    ForwardedSourcePostContent(
-                        sourcePostId = post.serverPostId ?: -1,
-                        sourcePostType = when (post) {
-                            is IStandalonePost -> PostingType.POST
-                            is IAnswerPost -> PostingType.ANSWER
-                            else -> PostingType.POST
-                        }
-                    )
-                )
+            }.first()
 
-                // We don't expect errors to happen when forwarding to conversations, since the sending
-                // can be scheduled in the background.
-                if (conversations.isNotEmpty()) forwardPostToConversations(
-                    conversations,
-                    forwardedSourcePostList
+            val forwardedSourcePostList = listOf(
+                ForwardedSourcePostContent(
+                    sourcePostId = post.serverPostId ?: -1,
+                    sourcePostType = when (post) {
+                        is IStandalonePost -> PostingType.POST
+                        is IAnswerPost -> PostingType.ANSWER
+                        else -> PostingType.POST
+                    }
                 )
-                // The creation of conversations is more sensitive, so we need to handle errors here.
-                val success = forwardPostToRecipients(recipients, forwardedSourcePostList, serverData)
-                onComplete(success)
-            }
+            )
+
+            // We don't expect errors to happen when forwarding to conversations, since the sending
+            // can be scheduled in the background.
+            if (conversations.isNotEmpty()) forwardPostToConversations(
+                conversations,
+                forwardedSourcePostList
+            )
+            // The creation of conversations is more sensitive, so we need to handle errors here.
+            val success = forwardPostToRecipients(recipients, forwardedSourcePostList, serverData)
+            onComplete(success)
         }
     }
 
