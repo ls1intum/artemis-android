@@ -20,6 +20,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.PostsDataState
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.util.ForwardMessageUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.ConversationThreadUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.MetisThreadUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
@@ -198,6 +199,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
         hasModerationRights: Boolean = false,
     ) {
         val threadUseCase = mockk<ConversationThreadUseCase>()
+        val forwardMessageUseCaseMock = mockk<ForwardMessageUseCase>()
         val testFlow = MutableStateFlow<ChatListItem.PostItem.ThreadItem.Answer?>(null)
         every { threadUseCase.getAnswerChatListItem(any()) } returns testFlow
 
@@ -222,6 +224,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                 generateLinkPreviews = { _ -> linkPreviewStateFlow },
                 onRemoveLinkPreview = { _, _, _ -> CompletableDeferred<MetisModificationFailure>() },
                 serverUrl = "",
+                forwardMessageUseCase = forwardMessageUseCaseMock,
                 isMarkedAsDeleteList = mutableStateListOf(),
                 emojiService = EmojiServiceStub,
                 chatListContextItem = chatListItem,
@@ -274,6 +277,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                         ChatListItem.PostItem.IndexedItem.Post(post, post.answers.orEmpty())
                     }
                 }.toMutableList()
+                val forwardMessageUseCaseMock = mockk<ForwardMessageUseCase>()
                 MetisChatList(
                     modifier = Modifier.fillMaxSize(),
                     initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
@@ -284,6 +288,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                         isAtLeastTutorInCourse = isAtLeastTutorInCourse,
                         hasModerationRights = hasModerationRights,),
                     serverUrl = "",
+                    forwardMessageUseCase = forwardMessageUseCaseMock,
                     courseId = course.id!!,
                     state = rememberLazyListState(),
                     emojiService = EmojiServiceStub,isMarkedAsDeleteList = mutableStateListOf(),

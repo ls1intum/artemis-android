@@ -51,6 +51,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atTime
 import kotlinx.datetime.toInstant
+import org.koin.compose.koinInject
 import kotlin.time.Duration.Companion.minutes
 
 private val sharedConversation = ChannelChat(
@@ -244,6 +245,7 @@ fun `Metis - Conversation Channel`() {
                     ),
                     serverUrl = "",
                     courseId = 0,
+                    forwardMessageUseCase = koinInject(), // This is a only a workaround
                     state = rememberLazyListState(),
                     isReplyEnabled = true,
                     isMarkedAsDeleteList = mutableStateListOf(),

@@ -137,7 +137,7 @@ fun MetisChatList(
     bottomItem: PostPojo?,
     clientId: Long,
     postActionFlags: PostActionFlags,
-    forwardMessageUseCase: ForwardMessageUseCase = koinInject(),
+    forwardMessageUseCase: ForwardMessageUseCase,
     serverUrl: String,
     courseId: Long,
     state: LazyListState,
