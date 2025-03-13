@@ -129,6 +129,7 @@ abstract class MemberSelectionBaseViewModel(
     ) { query, authToken, serverUrl, _ ->
         retryOnInternet(networkStatusProvider.currentNetworkStatus) {
             conversationService.getConversations(courseId, authToken, serverUrl).bind { conversations ->
+                // For forwarding a post we currently only allow channels
                 conversations.filter {
                     it.humanReadableName.contains(query, ignoreCase = true) && it is ChannelChat && !it.isAnnouncementChannel
                 }

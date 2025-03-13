@@ -77,7 +77,7 @@ fun MemberSelectionDropdownPopup(
                 isPopupExpanded = newExpanded
             }
         },
-        hint = stringResource(id = R.string.conversation_member_or_conversation_selection_address_hint),
+        hint = stringResource(id = R.string.conversation_member_or_channel_selection_address_hint),
         focusRequester = focusRequester
     )
 
@@ -111,7 +111,7 @@ fun MemberSelectionDropdownPopup(
                 stickyHeader {
                     PopupHeader(
                         modifier = Modifier.fillMaxWidth(),
-                        title = stringResource(id = R.string.conversation_member_selection_conversations)
+                        title = stringResource(id = R.string.conversation_member_selection_channels)
                     )
                 }
 

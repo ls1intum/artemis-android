@@ -59,6 +59,11 @@ class ForwardMessageUseCase(
         forwardingMessageError.value = ForwardingMessageError.NO_ERROR
     }
 
+    /**
+     * Passes the information to the worker, which creates or schedules the post.
+     * @param targetConversationId the id of the conversation to create the post in
+     * @param forwardedSourcePostList a list of posts that are forwarded in the new post
+     */
     fun createPost(targetConversationId: Long, forwardedSourcePostList: List<ForwardedSourcePostContent>) {
         createPostService.createPost(
             courseId,
@@ -69,6 +74,15 @@ class ForwardMessageUseCase(
         )
     }
 
+    /**
+     * Forwards a post to the selected recipients and conversations.
+     * If the post is forwarded to a single recipient, a direct message is created.
+     * If the post is forwarded to multiple recipients, a group chat is created.
+     * @param post the post to forward
+     * @param onComplete callback that is called when the forwarding is completed
+     * Note: This function was inspired by the Artemis web app to ensure equal functionality
+     * https://github.com/ls1intum/Artemis/blob/develop/src/main/webapp/app/shared/metis/posting-reactions-bar/posting-reactions-bar.component.ts
+     */
     fun forwardPost(post: IBasePost, onComplete: (Boolean) -> Unit) {
         viewModelScope.launch(coroutineContext) {
             combine(

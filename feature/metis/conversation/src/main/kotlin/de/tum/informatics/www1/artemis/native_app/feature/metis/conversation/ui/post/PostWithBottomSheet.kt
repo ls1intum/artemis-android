@@ -7,6 +7,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,17 +46,18 @@ internal fun PostWithBottomSheet(
     postActions: PostActions,
     linkPreviews: List<LinkPreview>,
     forwardMessageUseCase: ForwardMessageUseCase,
+    displayForwardBottomSheet: MutableState<Boolean>,
     clientId: Long,
     displayHeader: Boolean,
     joinedItemType: PostItemViewJoinedType,
     onRemoveLinkPreview: (LinkPreview) -> Unit,
+    dismissForwardBottomSheet: () -> Unit,
     onClick: () -> Unit
 ) {
     val context = LocalContext.current
 
     var displayBottomSheet by remember(post, chatListItem) { mutableStateOf(false) }
     var displayReactionBottomSheet by remember(post, chatListItem) { mutableStateOf(false) }
-    var displayForwardBottomSheet by remember(post, chatListItem) { mutableStateOf(false) }
     var emojiSelection: EmojiSelection by remember { mutableStateOf(EmojiSelection.ALL) }
 
     val isPinned = post is IStandalonePost && post.displayPriority == DisplayPriority.PINNED
@@ -130,9 +132,7 @@ internal fun PostWithBottomSheet(
 
     if (displayBottomSheet && post != null) {
         PostContextBottomSheet(
-            postActions = postActions.copy(onForwardPost = {
-                displayForwardBottomSheet = true
-            }),
+            postActions = postActions,
             post = post,
             clientId = clientId,
             onDismissRequest = {
@@ -151,13 +151,15 @@ internal fun PostWithBottomSheet(
         )
     }
 
-    if (displayForwardBottomSheet && post != null) {
+    if (displayForwardBottomSheet.value && post != null) {
         PostForwardBottomSheet(
             chatListItem = chatListItem,
             forwardMessageUseCase = forwardMessageUseCase,
-            onDismissRequest = {
-                displayForwardBottomSheet = false
-                Toast.makeText(context, R.string.post_forward_success, Toast.LENGTH_SHORT).show()
+            onDismissRequest = { success ->
+                dismissForwardBottomSheet()
+                if (success){
+                    Toast.makeText(context, R.string.post_forward_success, Toast.LENGTH_SHORT).show()
+                }
             }
         )
     }

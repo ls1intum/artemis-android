@@ -46,7 +46,7 @@ private const val MAX_NUMBER_OF_RECIPIENTS = 9
 fun PostForwardBottomSheet(
     chatListItem: ChatListItem.PostItem,
     forwardMessageUseCase: ForwardMessageUseCase,
-    onDismissRequest: () -> Unit
+    onDismissRequest: (Boolean) -> Unit
 ) {
     val context = LocalContext.current
 
@@ -78,7 +78,7 @@ fun PostForwardBottomSheet(
     ModalBottomSheet(
         modifier = Modifier.statusBarsPadding(),
         contentWindowInsets = { WindowInsets.statusBars },
-        onDismissRequest = onDismissRequest,
+        onDismissRequest = { onDismissRequest(false) },
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ) {
         Column(
@@ -104,7 +104,7 @@ fun PostForwardBottomSheet(
                     onClick = {
                         onSendMessage(postToForward) { success ->
                             if (success) {
-                                onDismissRequest()
+                                onDismissRequest(true)
                             }
                         }
                     },

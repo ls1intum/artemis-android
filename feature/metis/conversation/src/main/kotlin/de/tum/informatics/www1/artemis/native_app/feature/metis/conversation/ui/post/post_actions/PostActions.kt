@@ -4,8 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 
 data class PostActions(
     val requestEditPost: (() -> Unit)? = null,
@@ -25,7 +25,7 @@ data class PostActions(
 
 @Composable
 fun rememberPostActions(
-    post: IBasePost?,
+    chatListItem: ChatListItem.PostItem,
     postActionFlags: PostActionFlags,
     clientId: Long,
     onRequestEdit: () -> Unit,
@@ -42,7 +42,7 @@ fun rememberPostActions(
     val clipboardManager = LocalClipboardManager.current
 
     return remember(
-        post,
+        chatListItem,
         postActionFlags,
         clientId,
         onRequestEdit,
@@ -57,9 +57,10 @@ fun rememberPostActions(
         onRequestRetrySend,
         clipboardManager
     ) {
-        if (post == null) {
-            return@remember PostActions()
-        }
+        val post = chatListItem.post
+
+        val hasDeletedSourcePost = chatListItem is ChatListItem.PostItem.ForwardedMessage
+                && chatListItem.forwardedPosts[0] == null
 
         val doesPostExistOnServer = post.serverPostId != null
         val isPostAuthor = post.authorId == clientId
@@ -68,6 +69,7 @@ fun rememberPostActions(
             postActionFlags.isAtLeastTutorInCourse || isParentPostAuthor
         val hasPinPostRights = postActionFlags.isAbleToPin
         val hasDeletePostRights = isPostAuthor || postActionFlags.hasModerationRights
+        val canForwardPost = (post.content.orEmpty().isEmpty() && hasDeletedSourcePost).not()
 
         PostActions(
             requestEditPost = if (doesPostExistOnServer && isPostAuthor) onRequestEdit else null,
@@ -80,7 +82,7 @@ fun rememberPostActions(
             onReplyInThread = if (doesPostExistOnServer) onReplyInThread else null,
             onResolvePost = if (hasResolvePostRights) onResolvePost else null,
             onPinPost = if (hasPinPostRights) onPinPost else null,
-            onForwardPost = onForwardPost,
+            onForwardPost = if (canForwardPost) onForwardPost else null,
             onSavePost = if (doesPostExistOnServer) onSavePost else null,
             onRequestRetrySend = onRequestRetrySend,
         )

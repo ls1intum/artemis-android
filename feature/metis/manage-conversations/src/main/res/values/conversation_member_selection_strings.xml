@@ -2,8 +2,8 @@
 <resources>
     <string name="conversation_member_selection_address_label">Members:</string>
     <string name="conversation_member_selection_address_hint">Search for users</string>
-    <string name="conversation_member_or_conversation_selection_address_hint">Search for users or conversations</string>
-    <string name="conversation_member_selection_conversations">Conversations</string>
+    <string name="conversation_member_or_channel_selection_address_hint">Search for users or channels</string>
+    <string name="conversation_member_selection_channels">Channels</string>
     <string name="conversation_member_selection_users">Users</string>
 
     <string name="conversation_member_selection_include_students">Students</string>

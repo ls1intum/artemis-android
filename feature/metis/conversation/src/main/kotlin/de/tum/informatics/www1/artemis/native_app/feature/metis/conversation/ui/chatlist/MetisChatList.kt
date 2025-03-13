@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
@@ -295,9 +296,10 @@ private fun ChatList(
                     val linkPreviews by remember(post.content) {
                         generateLinkPreviews(post.content.orEmpty())
                     }.collectAsState()
+                    var displayForwardPostBottomSheet = remember(post) { mutableStateOf(false) }
 
                     val postActions = rememberPostActions(
-                        post = post,
+                        chatListItem = chatListItem,
                         postActionFlags = postActionFlags,
                         clientId = clientId,
                         onRequestEdit = { onRequestEdit(post) },
@@ -315,7 +317,7 @@ private fun ChatList(
                         },
                         onResolvePost = null,
                         onPinPost = { onRequestPin(post) },
-                        onForwardPost = null, // Set in PostWithBottomSheet
+                        onForwardPost = { displayForwardPostBottomSheet.value = true },
                         onSavePost = { onRequestSave(post) },
                         onRequestRetrySend = {
                             onRequestRetrySend(
@@ -336,6 +338,7 @@ private fun ChatList(
                         postActions = postActions,
                         linkPreviews = linkPreviews,
                         forwardMessageUseCase = forwardMessageUseCase,
+                        displayForwardBottomSheet = displayForwardPostBottomSheet,
                         displayHeader = shouldDisplayHeader(
                             index = index,
                             post = post,
@@ -369,7 +372,8 @@ private fun ChatList(
                             if (post.serverPostId != null && standalonePostId != null) {
                                 onClickViewPost(standalonePostId)
                             }
-                        }
+                        },
+                        dismissForwardBottomSheet = { displayForwardPostBottomSheet.value = false }
                     )
                 }
 
