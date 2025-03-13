@@ -19,14 +19,8 @@ import org.koin.core.component.get
  */
 class MarkAsReadReceiver : BaseCommunicationNotificationReceiver() {
 
-    companion object {
-        const val PARENT_ID = "parent_id"
-    }
-
-    override fun onReceive(context: Context, intent: Intent) {
-        val parentId = intent.getLongExtra(PARENT_ID, 0)
-        val (metisContext, _) = runBlocking { getMetisContextAndPostId(parentId) }
-
+    override fun onReceive(parentId: Long, context: Context, intent: Intent) {
+        val metisContext = runBlocking { getMetisContext(parentId) }
         enqueueWorker(metisContext, context)
         deleteNotification(parentId)
     }
