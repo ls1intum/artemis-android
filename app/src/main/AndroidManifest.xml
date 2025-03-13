@@ -79,6 +79,7 @@
             android:resource="@string/asset_statements" />
 
         <receiver android:name="de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.reply.ReplyReceiver" />
+        <receiver android:name="de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.mark_as_read.MarkAsReadReceiver" />
         <receiver android:name="de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.delete.DeleteNotificationReceiver" />
     </application>
 </manifest>

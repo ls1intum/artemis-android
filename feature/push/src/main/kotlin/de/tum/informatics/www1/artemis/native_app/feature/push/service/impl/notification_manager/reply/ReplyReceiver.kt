@@ -1,27 +1,23 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.reply
 
 import android.annotation.SuppressLint
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.RemoteInput
-import androidx.room.withTransaction
 import androidx.work.OneTimeWorkRequestBuilder
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.work.BaseCreatePostWorker
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.push.PushCommunicationDatabaseProvider
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
-import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.util.NotificationTargetManager
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.BaseCommunicationNotificationReceiver
 import kotlinx.coroutines.runBlocking
-import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 
 /**
  * onReceive will be called by the reply action of the notification.
  * This receiver schedules a reply job to upload the reply.
  */
-class ReplyReceiver : BroadcastReceiver(), KoinComponent {
+class ReplyReceiver : BaseCommunicationNotificationReceiver() {
 
     companion object {
         const val REPLY_INTENT_KEY = "reply_text_key"
@@ -82,20 +78,6 @@ class ReplyReceiver : BroadcastReceiver(), KoinComponent {
                     )
                     .build()
             )
-        }
-    }
-
-    private suspend fun getMetisContextAndPostId(parentId: Long): Pair<MetisContext.Conversation, Long> {
-        val pushCommunicationDatabaseProvider: PushCommunicationDatabaseProvider = get()
-
-        return pushCommunicationDatabaseProvider.database.withTransaction {
-            val communication = pushCommunicationDatabaseProvider.pushCommunicationDao.getCommunication(parentId)
-
-            val metisTarget = NotificationTargetManager.getCommunicationNotificationTarget(
-                communication.target
-            )
-
-            metisTarget.metisContext to metisTarget.postId
         }
     }
 }

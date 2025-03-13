@@ -30,6 +30,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.notification_mode
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.parentId
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.delete.DeleteNotificationReceiver
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.mark_as_read.MarkAsReadReceiver
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.reply.ReplyReceiver
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.util.NotificationTargetManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.util.toCircleShape
@@ -167,7 +168,13 @@ internal class CommunicationNotificationManagerImpl(
                     notificationId = communication.notificationId
                 )
             )
-            .addAction(buildMarkAsReadAction(context = context, communication = communication))
+            .addAction(
+                buildMarkAsReadAction(
+                    context = context,
+                    communication = communication,
+                    notificationId = communication.notificationId
+                )
+            )
             .build()
 
         popNotification(context, notification, communication.notificationId)
@@ -314,12 +321,33 @@ internal class CommunicationNotificationManagerImpl(
 
     private fun buildMarkAsReadAction(
         context: Context,
-        communication: PushCommunicationEntity
+        communication: PushCommunicationEntity,
+        notificationId: Int,
     ): NotificationCompat.Action {
+        val resultIntent =
+            Intent(context, MarkAsReadReceiver::class.java).apply {
+                putExtra(
+                    MarkAsReadReceiver.PARENT_ID,
+                    communication.parentId
+                )
+            }
+
+        val flags = if (Build.VERSION.SDK_INT >= 31) {
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+        } else PendingIntent.FLAG_UPDATE_CURRENT
+
+        val replyPendingIntent: PendingIntent =
+            PendingIntent.getBroadcast(
+                context,
+                notificationId, // Set request code to notification id.
+                resultIntent,
+                flags
+            )
+
         return NotificationCompat.Action.Builder(
             R.drawable.baseline_mark_chat_read_24,
             context.getString(R.string.push_notification_action_mark_as_read),
-            constructDeletionIntent(context, communication.parentId)
+            replyPendingIntent
         )
             .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_MARK_AS_READ)
             .build()
