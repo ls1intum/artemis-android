@@ -81,7 +81,7 @@ internal fun MetisThreadUi(
     val postDataState: DataState<IStandalonePost> by viewModel.threadUseCase.post.collectAsState()
     val clientId: Long by viewModel.clientIdOrDefault.collectAsState()
 
-    val serverUrl by viewModel.serverUrl.collectAsState() +1dafks
+    val serverUrl by viewModel.serverUrl.collectAsState()
 
     val postActionFlags by viewModel.postActionFlags.collectAsState()
 
