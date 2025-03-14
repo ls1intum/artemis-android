@@ -57,6 +57,8 @@ private fun User.asConversationUser(isRequestingUser: Boolean = false): Conversa
 abstract class BaseChatUITest : BaseComposeTest() {
 
     val clientId = 20L
+    val simplePostId = 1L
+    val simpleAnswerPostId = 2L
 
     private val course: Course = Course(id = 1)
 
@@ -101,7 +103,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
         postAuthor: User,
         isSaved: Boolean = false
     ): StandalonePost = StandalonePost(
-        id = 1,
+        id = simplePostId,
         author = postAuthor,
         content = simplePostContent,
         isSaved = isSaved
@@ -113,7 +115,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
     ): StandalonePost {
         val basePost = simplePost(postAuthor)
         val answerPost = AnswerPost(
-            id = 2,
+            id = simpleAnswerPostId,
             author = answerAuthor,
             content = simpleAnswerContent,
             post = basePost
