@@ -21,10 +21,4 @@
     </plurals>
     <string name="post_reactions_show_all">All (%d)</string>
 
-    <string name="post_forwarded_from">Forwarded from</string>
-    <string name="post_forwarded_from_a_thread">a thread in %s</string>
-    <string name="post_forwarded_from_a_direct_message">a direct message</string>
-    <string name="post_forwarded_from_a_group_chat">a group message</string>
-    <string name="post_forwarded_from_default">a conversation</string>
-    <string name="post_forwarded_deleted">This message has been deleted</string>
 </resources>

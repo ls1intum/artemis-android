@@ -7,9 +7,9 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performSemanticsAction
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.TEST_TAG_DELETED_FORWARDED_POST
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.TEST_TAG_FORWARDED_POST_COLUMN
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.testTagForForwardedPost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.post.TEST_TAG_DELETED_FORWARDED_POST
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.post.TEST_TAG_FORWARDED_POST_COLUMN
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.post.testTagForForwardedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost

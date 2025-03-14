@@ -48,6 +48,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.PostCo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.CreatePostStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.model.LinkPreview
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
@@ -62,7 +63,6 @@ import java.time.Duration
 
 private const val PLACEHOLDER_POST_CONTENT = "WWWWWWW"
 
-
 @Composable
 fun PostItemMainContent(
     modifier: Modifier = Modifier,
@@ -70,8 +70,10 @@ fun PostItemMainContent(
     isExpanded: Boolean = true,
     isPlaceholder: Boolean = false,
     isDeleting: Boolean = false,
+    isRoleBadgeVisible: Boolean = true,
     isAuthor: Boolean = false,
     postStatus: CreatePostStatus = CreatePostStatus.FINISHED,
+    chatListItem: ChatListItem.PostItem? = null, // TODO: ADD support for eg. saved posts (https://github.com/ls1intum/artemis-android/issues/459)
     displayHeader: Boolean = true,
     linkPreviews: List<LinkPreview> = emptyList(),
     onRemoveLinkPreview: (LinkPreview) -> Unit = {},
@@ -96,6 +98,7 @@ fun PostItemMainContent(
             creationDate = post?.creationDate,
             expanded = isExpanded,
             isAnswerPost = post is IAnswerPost,
+            isRoleBadgeVisible = isRoleBadgeVisible,
             displayHeader = displayHeader,
             isDeleting = isDeleting
         ) {
@@ -110,20 +113,22 @@ fun PostItemMainContent(
                     return@PostHeadline
                 }
 
-                MarkdownText(
-                    markdown = remember(post?.content, isPlaceholder) {
-                        if (isPlaceholder) {
-                            PLACEHOLDER_POST_CONTENT
-                        } else post?.content.orEmpty()
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .placeholder(visible = isPlaceholder),
-                    style = MaterialTheme.typography.bodyMedium,
-                    onClick = onClick,
-                    onLongClick = onLongClick,
-                    color = if (post?.serverPostId == null) PostColors.unsentMessageText else Color.Unspecified
-                )
+                if (post?.content?.isNotEmpty() == true) {
+                    MarkdownText(
+                        markdown = remember(post.content, isPlaceholder) {
+                            if (isPlaceholder) {
+                                PLACEHOLDER_POST_CONTENT
+                            } else post.content.orEmpty()
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .placeholder(visible = isPlaceholder),
+                        style = MaterialTheme.typography.bodyMedium,
+                        onClick = onClick,
+                        onLongClick = onLongClick,
+                        color = if (post.serverPostId == null) PostColors.unsentMessageText else Color.Unspecified
+                    )
+                }
 
                 val instant = post?.updatedDate
                 if (instant != null) {
@@ -148,6 +153,15 @@ fun PostItemMainContent(
                     )
                 }
 
+                if (chatListItem is ChatListItem.PostItem.ForwardedMessage) {
+                    Spacer(modifier = Modifier.height(Spacings.Post.innerSpacing))
+
+                    ForwardedMessageColumn(
+                        modifier = Modifier.fillMaxWidth(),
+                        chatListItem = chatListItem
+                    )
+                }
+
                 trailingContent()
             }
         }
@@ -163,6 +177,7 @@ private fun PostHeadline(
     authorImageUrl: String?,
     creationDate: Instant?,
     postStatus: CreatePostStatus,
+    isRoleBadgeVisible: Boolean,
     expanded: Boolean = false,
     isAnswerPost: Boolean,
     displayHeader: Boolean = true,
@@ -207,6 +222,7 @@ private fun PostHeadline(
                 authorName = authorName,
                 authorRole = authorRole,
                 creationDate = creationDate,
+                isRoleBadgeVisible = isRoleBadgeVisible,
                 expanded = expanded,
                 isAnswerPost = isAnswerPost,
                 isGrayscale = isDeleting
@@ -226,28 +242,50 @@ private fun HeadlineAuthorInfo(
     creationDate: Instant?,
     expanded: Boolean,
     isAnswerPost: Boolean,
-    isGrayscale: Boolean
+    isGrayscale: Boolean,
+    isRoleBadgeVisible: Boolean
 ) {
     Column(modifier = modifier) {
-        AuthorRoleAndTimeRow(
-            expanded = expanded,
-            authorRole = authorRole,
-            creationDate = creationDate,
-            isAnswerPost = isAnswerPost,
-            isGrayscale = isGrayscale
-        )
+        if (isRoleBadgeVisible) {
+            AuthorRoleAndTimeRow(
+                expanded = expanded,
+                authorRole = authorRole,
+                creationDate = creationDate,
+                isAnswerPost = isAnswerPost,
+                isGrayscale = isGrayscale
+            )
 
-        Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.weight(1f))
+        }
 
-        Text(
-            modifier = Modifier,
-            text = remember(authorName) { authorName ?: "Placeholder" },
-            maxLines = 1,
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Bold
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                modifier = Modifier,
+                text = remember(authorName) { authorName ?: "Placeholder" },
+                maxLines = 1,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold
+            )
+
+            if (!isRoleBadgeVisible) {
+                Text("-")
+
+                CreationDateContent(
+                    modifier = Modifier,
+                    creationDate = creationDate,
+                    expanded = false,
+                    showDateOnly = true,
+                    isAnswerPost = false
+                )
+            }
+        }
     }
 }
+
 
 @Composable
 private fun AuthorRoleAndTimeRow(
@@ -261,25 +299,6 @@ private fun AuthorRoleAndTimeRow(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val relativeTimeTo = remember(creationDate) {
-            creationDate ?: Clock.System.now()
-        }
-
-        val creationDateContent: @Composable () -> Unit = {
-
-            val relativeTime = if (expanded || isAnswerPost) {
-                getRelativeTime(to = relativeTimeTo, showDateAndTime = true)
-            } else {
-                getRelativeTime(to = relativeTimeTo, showDate = false)
-            }
-
-            Text(
-                modifier = Modifier,
-                text = relativeTime.toString(),
-                style = MaterialTheme.typography.bodySmall
-            )
-        }
-
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
@@ -294,10 +313,44 @@ private fun AuthorRoleAndTimeRow(
                 modifier = Modifier.applyGrayscale(isGrayscale),
                 userRole = initialAuthorRole
             )
+
             Spacer(modifier = Modifier.weight(1f))
-            creationDateContent()
+
+            CreationDateContent(
+                modifier = Modifier,
+                creationDate = creationDate,
+                expanded = expanded,
+                isAnswerPost = isAnswerPost
+            )
         }
     }
+}
+
+@Composable
+private fun CreationDateContent(
+    modifier: Modifier,
+    creationDate: Instant?,
+    expanded: Boolean,
+    isAnswerPost: Boolean,
+    showDateOnly: Boolean = false,
+) {
+    val relativeTimeTo = remember(creationDate) {
+        creationDate ?: Clock.System.now()
+    }
+
+    val relativeTime = if (expanded || isAnswerPost) {
+        getRelativeTime(to = relativeTimeTo, showDateAndTime = true)
+    } else if (showDateOnly) {
+        getRelativeTime(to = relativeTimeTo, showDate = true)
+    } else {
+        getRelativeTime(to = relativeTimeTo, showDate = false)
+    }
+
+    Text(
+        modifier = modifier,
+        text = relativeTime.toString(),
+        style = MaterialTheme.typography.bodySmall
+    )
 }
 
 @Composable

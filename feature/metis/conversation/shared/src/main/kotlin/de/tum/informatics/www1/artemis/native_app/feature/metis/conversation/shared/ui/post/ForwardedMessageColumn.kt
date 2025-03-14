@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post
+package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.post
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,8 +22,8 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CommunicationDeeplinks
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
@@ -153,7 +153,9 @@ private fun resolveConversation(forwardedPost: IBasePost?): Triple<Long?, String
     val conversation = when (forwardedPost) {
         is StandalonePost -> forwardedPost.conversation
         is AnswerPost -> forwardedPost.post?.conversation
-        else -> return Triple(null, stringResource(R.string.post_forwarded_from_default), ConversationType.UNKNOWN)
+        else -> return Triple(null, stringResource(R.string.post_forwarded_from_default),
+            ConversationType.UNKNOWN
+        )
     }
 
     val isFromThread = forwardedPost is IAnswerPost
@@ -162,15 +164,22 @@ private fun resolveConversation(forwardedPost: IBasePost?): Triple<Long?, String
     return when (conversation) {
         is OneToOneChat -> {
             val message = if (isFromThread) R.string.post_forwarded_from_a_thread else R.string.post_forwarded_from_a_direct_message
-           Triple(conversationId, stringResource(message, stringResource(R.string.post_forwarded_from_a_direct_message)), ConversationType.ONE_TO_ONE)
+           Triple(conversationId, stringResource(message, stringResource(R.string.post_forwarded_from_a_direct_message)),
+               ConversationType.ONE_TO_ONE
+           )
         }
         is GroupChat -> {
             val message = if (isFromThread) R.string.post_forwarded_from_a_thread else R.string.post_forwarded_from_a_group_chat
-            Triple(conversationId, stringResource(message, stringResource(R.string.post_forwarded_from_a_group_chat)), ConversationType.GROUP)
+            Triple(conversationId, stringResource(message, stringResource(R.string.post_forwarded_from_a_group_chat)),
+                ConversationType.GROUP
+            )
         }
         else -> {
-            val conversationName = conversation?.humanReadableName?.let { "#$it" } ?: stringResource(R.string.post_forwarded_from_default)
-            if (isFromThread) Triple(conversationId, stringResource(R.string.post_forwarded_from_a_thread, conversationName), ConversationType.CHANNEL)
+            val conversationName = conversation?.humanReadableName?.let { "#$it" } ?: stringResource(
+                R.string.post_forwarded_from_default)
+            if (isFromThread) Triple(conversationId, stringResource(R.string.post_forwarded_from_a_thread, conversationName),
+                ConversationType.CHANNEL
+            )
             else Triple(conversationId, conversationName, ConversationType.CHANNEL)
         }
     }
