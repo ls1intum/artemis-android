@@ -160,13 +160,14 @@ internal fun ConversationList(
     onToggleMuted: (conversationId: Long, muted: Boolean) -> Unit,
     trailingContent: LazyListScope.() -> Unit
 ) {
-    val listWithHeader: LazyListScope.(ConversationSectionState, String, String, Int, Int?, () -> Unit, @Composable () -> Unit) -> Unit =
-        { items, key, suffix, textRes, count, onClick, icon ->
+    val listWithHeader: LazyListScope.(ConversationSectionState, String, String, Int, Int?, Long, () -> Unit, @Composable () -> Unit) -> Unit =
+        { items, key, suffix, textRes, count, unreadCount, onClick, icon ->
             conversationSectionHeader(
                 key = key,
                 text = textRes,
                 isExpanded = items.isExpanded,
                 conversationCount = count,
+                unreadCount = unreadCount,
                 onClick = onClick,
                 icon = icon
             )
@@ -195,6 +196,7 @@ internal fun ConversationList(
                 KEY_SUFFIX_FAVORITES,
                 R.string.conversation_overview_section_favorites,
                 conversationCollections.favorites.conversations.size,
+                conversationCollections.favorites.conversations.sumOf { it.unreadMessagesCount ?: 0 },
                 toggleFavoritesExpanded,
                 { Icon(imageVector = Icons.Default.Favorite, contentDescription = null) }
             )
@@ -207,6 +209,7 @@ internal fun ConversationList(
                 KEY_SUFFIX_CHANNELS,
                 R.string.conversation_overview_section_general_channels,
                 conversationCollections.channels.conversations.size,
+                conversationCollections.channels.conversations.sumOf { it.unreadMessagesCount ?: 0 },
                 toggleGeneralsExpanded
             ) { Icon(imageVector = Icons.Default.ChatBubble, contentDescription = null) }
         }
@@ -218,6 +221,7 @@ internal fun ConversationList(
                 KEY_SUFFIX_EXERCISES,
                 R.string.conversation_overview_section_exercise_channels,
                 conversationCollections.exerciseChannels.conversations.size,
+                conversationCollections.exerciseChannels.conversations.sumOf { it.unreadMessagesCount ?: 0 },
                 toggleExercisesExpanded
             ) { Icon(imageVector = Icons.AutoMirrored.Filled.List, contentDescription = null) }
         }
@@ -229,6 +233,7 @@ internal fun ConversationList(
                 KEY_SUFFIX_LECTURES,
                 R.string.conversation_overview_section_lecture_channels,
                 conversationCollections.lectureChannels.conversations.size,
+                conversationCollections.lectureChannels.conversations.sumOf { it.unreadMessagesCount ?: 0 },
                 toggleLecturesExpanded
             ) { Icon(imageVector = Icons.AutoMirrored.Filled.InsertDriveFile, contentDescription = null) }
         }
@@ -240,6 +245,7 @@ internal fun ConversationList(
                 KEY_SUFFIX_EXAMS,
                 R.string.conversation_overview_section_exam_channels,
                 conversationCollections.examChannels.conversations.size,
+                conversationCollections.examChannels.conversations.sumOf { it.unreadMessagesCount ?: 0 },
                 toggleExamsExpanded
             ) { Icon(imageVector = Icons.Default.School, contentDescription = null) }
         }
@@ -251,6 +257,7 @@ internal fun ConversationList(
                 KEY_SUFFIX_GROUPS,
                 R.string.conversation_overview_section_groups,
                 conversationCollections.groupChats.conversations.size,
+                conversationCollections.groupChats.conversations.sumOf { it.unreadMessagesCount ?: 0 },
                 toggleGroupChatsExpanded
             ) { Icon(imageVector = Icons.Default.Forum, contentDescription = null) }
         }
@@ -262,6 +269,7 @@ internal fun ConversationList(
                 KEY_SUFFIX_PERSONAL,
                 R.string.conversation_overview_section_direct_messages,
                 conversationCollections.directChats.conversations.size,
+                conversationCollections.directChats.conversations.sumOf { it.unreadMessagesCount ?: 0 },
                 togglePersonalConversationsExpanded
             ) { Icon(imageVector = Icons.AutoMirrored.Filled.Message, contentDescription = null) }
         }
@@ -273,6 +281,7 @@ internal fun ConversationList(
                 KEY_SUFFIX_HIDDEN,
                 R.string.conversation_overview_section_hidden,
                 conversationCollections.hidden.conversations.size,
+                conversationCollections.hidden.conversations.sumOf { it.unreadMessagesCount ?: 0 },
                 toggleHiddenExpanded
             ) { Icon(imageVector = Icons.Default.Archive, contentDescription = null) }
         }
@@ -283,6 +292,7 @@ internal fun ConversationList(
             KEY_SUFFIX_SAVED_MESSAGES,
             R.string.conversation_overview_section_saved_posts,
             null,
+            0,
             toggleSavedPostsExpanded
         ) { Icon(imageVector = Icons.Default.Bookmark, contentDescription = null) }
 
@@ -295,6 +305,7 @@ private fun LazyListScope.conversationSectionHeader(
     @StringRes text: Int,
     isExpanded: Boolean,
     conversationCount: Int? = null,
+    unreadCount: Long,
     onClick: () -> Unit,
     icon: @Composable () -> Unit
 ) {
@@ -322,6 +333,8 @@ private fun LazyListScope.conversationSectionHeader(
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                 )
             }
+
+            if (!isExpanded) UnreadMessages(unreadMessagesCount = unreadCount)
 
             IconButton(
                 modifier = Modifier.testTag(TEST_TAG_HEADER_EXPAND_ICON),
@@ -667,6 +680,7 @@ private fun UnreadMessages(modifier: Modifier = Modifier, unreadMessagesCount: L
         ) {
             Text(
                 text = unreadMessagesCount.toString(),
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
