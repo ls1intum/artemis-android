@@ -34,7 +34,7 @@ import androidx.paging.compose.LazyPagingItems
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.EmojiService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationViewModel
@@ -230,7 +230,8 @@ fun MetisChatList(
                     replyMode = replyMode,
                     updateFailureState = updateFailureStateDelegate,
                     conversationName = conversationName,
-                    onFileSelected = onFileSelected
+                    onFileSelected = onFileSelected,
+                    emojiService = emojiService
                 )
             }
         }

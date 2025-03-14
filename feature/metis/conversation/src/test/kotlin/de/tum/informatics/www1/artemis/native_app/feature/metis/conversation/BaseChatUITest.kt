@@ -13,8 +13,8 @@ import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.test.ArtemisImageProviderStub
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.impl.EmojiServiceStub
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.EmojiServiceStub
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
@@ -286,7 +286,8 @@ abstract class BaseChatUITest : BaseComposeTest() {
                     serverUrl = "",
                     courseId = course.id!!,
                     state = rememberLazyListState(),
-                    emojiService = EmojiServiceStub,isMarkedAsDeleteList = mutableStateListOf(),
+                    emojiService = EmojiServiceStub,
+                    isMarkedAsDeleteList = mutableStateListOf(),
                     bottomItem = null,
                     isReplyEnabled = true,
                     generateLinkPreviews = { _ -> linkPreviewStateFlow },
