@@ -14,33 +14,10 @@ permissions:
   checks: write
 
 jobs:
-  compile:
-    name: Compile
-    runs-on: [self-hosted, ase-large-android-sdk-35]
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Gradle Wrapper Verification
-        uses: gradle/wrapper-validation-action@v1
-
-      - name: JDK setup
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: 17
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Assemble
-        run: ./gradlew assemble
-
-
   end-to-end-tests:
     name: E2E Tests
     runs-on: [self-hosted, ase-large-android-sdk-35]
     timeout-minutes: 60
-    needs: compile
 
     steps:
       - uses: actions/checkout@v4
