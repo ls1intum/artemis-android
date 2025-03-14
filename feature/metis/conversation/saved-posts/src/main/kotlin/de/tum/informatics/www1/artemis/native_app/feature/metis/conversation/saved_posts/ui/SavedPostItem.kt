@@ -144,7 +144,7 @@ private fun ConversationContextInfoHeader(
     isThreadReply: Boolean,
 ) {
     val contextText = when (conversation.type) {
-        ISavedPost.SimpleConversationInfo.ConversationType.CHANNEL -> conversation.title
+        ISavedPost.SimpleConversationInfo.ConversationType.CHANNEL -> conversation.title ?: stringResource(id = R.string.saved_posts_context_channel)
         ISavedPost.SimpleConversationInfo.ConversationType.DIRECT -> stringResource(id = R.string.saved_posts_context_private_chat)
     }
 
