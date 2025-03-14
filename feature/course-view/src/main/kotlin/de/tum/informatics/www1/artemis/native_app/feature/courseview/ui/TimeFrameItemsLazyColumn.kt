@@ -60,6 +60,7 @@ internal fun <T> TimeFrameItemsLazyColumn(
         contentPadding = Spacings.calculateContentPaddingValues()
     ) {
         timeFrameGroup.forEachIndexed { index, group ->
+            val isExpanded = timeFrameGroupExpandedState[group.key] == true
             item {
                 TimeFrameItemsSectionHeader(
                     modifier = Modifier
@@ -70,7 +71,7 @@ internal fun <T> TimeFrameItemsLazyColumn(
                         }
                         .padding(horizontal = Spacings.ScreenHorizontalSpacing),
                     group = group,
-                    expanded = timeFrameGroupExpandedState[group.key] == true,
+                    expanded = isExpanded,
                 )
             }
 
@@ -91,28 +92,20 @@ internal fun <T> TimeFrameItemsLazyColumn(
  */
 @Composable
 private fun <T> TimeFrameItemsSectionHeader(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     group: TimeFrame<T>,
     expanded: Boolean
 ) {
     val size = group.items.size
-    val groupTitle = when (group) {
-        is TimeFrame.Past<*> -> {
-            "Past (${size})"
-        }
-        is TimeFrame.Current<*> -> {
-            "Current (${size})"
-        }
-        is TimeFrame.Future -> {
-            "Future (${size})"
-        }
-        is TimeFrame.NoDate -> {
-            "No date (${size})"
-        }
-        is TimeFrame.DueSoon -> {
-            "Due soon (${size})"
-        }
+    var groupTitle = when (group) {
+        is TimeFrame.Past<*> -> stringResource(R.string.course_ui_list_time_frame_past)
+        is TimeFrame.Current<*> -> stringResource(R.string.course_ui_list_time_frame_current)
+        is TimeFrame.Future -> stringResource(R.string.course_ui_list_time_frame_future)
+        is TimeFrame.NoDate -> stringResource(R.string.course_ui_list_time_frame_no_date)
+        is TimeFrame.DueSoon -> stringResource(R.string.course_ui_list_time_frame_due_soon)
     }
+
+    groupTitle += " ($size)"
 
     Row(
         modifier = modifier.padding(vertical = Spacings.TimeFrameItems.small),
