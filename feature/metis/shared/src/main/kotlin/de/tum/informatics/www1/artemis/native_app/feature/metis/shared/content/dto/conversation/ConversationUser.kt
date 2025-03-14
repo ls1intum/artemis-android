@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation
 
+import de.tum.informatics.www1.artemis.native_app.core.model.account.AccountAuthority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.ICourseUser
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -7,7 +8,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ConversationUser(
     override val activated: Boolean = false,
-    override val authorities: List<String> = emptyList(),
+    override val authorities: List<AccountAuthority> = emptyList(),
     @SerialName("login")
     override val username: String? = null,
     override val email: String? = null,
