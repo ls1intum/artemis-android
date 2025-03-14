@@ -17,6 +17,7 @@ internal fun PotentiallyIllegalTextField(
     isIllegal: Boolean,
     @StringRes illegalStateExplanation: Int,
     @StringRes requiredSupportText: Int?,
+    leadingIcon: (@Composable () -> Unit)? = null,
     readOnly: Boolean
 ) {
     PotentiallyIllegalTextField(
@@ -27,6 +28,7 @@ internal fun PotentiallyIllegalTextField(
         updateValue = updateValue,
         isIllegal = isIllegal,
         illegalStateExplanation = stringResource(illegalStateExplanation),
+        leadingIcon = leadingIcon,
         requiredSupportText = requiredSupportText?.let { stringResource(requiredSupportText) },
         readOnly = readOnly
     )
@@ -42,6 +44,7 @@ internal fun PotentiallyIllegalTextField(
     isIllegal: Boolean,
     illegalStateExplanation: String,
     requiredSupportText: String?,
+    leadingIcon: (@Composable () -> Unit)? = null,
     readOnly: Boolean = false
 ) {
     OutlinedTextField(
@@ -57,6 +60,7 @@ internal fun PotentiallyIllegalTextField(
                 Text(text = requiredSupportText)
             }
         },
+        leadingIcon = leadingIcon,
         isError = isIllegal,
         readOnly = readOnly,
         singleLine = true,

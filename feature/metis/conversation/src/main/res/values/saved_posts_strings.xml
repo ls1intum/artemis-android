@@ -10,6 +10,7 @@
     <string name="saved_posts_empty_state_title">No saved messages with status \'%1$s\'</string>
 
     <string name="saved_posts_context_private_chat">Chat</string>
+    <string name="saved_posts_context_channel">Channel</string>
     <string name="saved_posts_context_thread">Thread</string>
 
     <string name="saved_posts_action_change_status">Mark as \'%1$s\'</string>
