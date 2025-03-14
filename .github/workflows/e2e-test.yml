@@ -1,12 +1,9 @@
 name: E2E Tests
 
 on:
-  push:
-    branches:
-      - main
-      - develop
-  pull_request:
-  workflow_dispatch:
+  workflow_run:
+    workflows: ["Compile Only"]
+    types: [completed]
 
 permissions:
   id-token: write
@@ -20,10 +17,13 @@ jobs:
     timeout-minutes: 60
 
     steps:
+      - name: Download compiled artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: compiled-app
+
       - name: Set Android Sdk Env
         run: export ANDROID_HOME=/usr/lib/android-sdk
-
-      - uses: actions/checkout@v4
 
       - name: Set local.properties
         run: echo "sdk.dir=/usr/lib/android-sdk" > local.properties
@@ -60,8 +60,8 @@ jobs:
           distribution: 'zulu'
           java-version: 17
 
-      - name: run tests
-        run: ./gradlew test --max-workers=4 -Dskip.unit-tests=true -Dskip.e2e=false -Dskip.debugVariants=true -Dskip.flavor.unrestricted=true -Dskip.flavor.beta=true
+      - name: Run tests
+        run: ./gradlew -x assemble test --max-workers=4 -Dskip.unit-tests=true -Dskip.e2e=false -Dskip.debugVariants=true -Dskip.flavor.unrestricted=true -Dskip.flavor.beta=true
         continue-on-error: true
 
       - name: Test Report
