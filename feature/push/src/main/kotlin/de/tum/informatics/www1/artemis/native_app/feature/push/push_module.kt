@@ -33,7 +33,7 @@ val pushModule = module {
     }
 
     single<PushNotificationConfigurationService> {
-        PushNotificationConfigurationServiceImpl(androidContext(), get())
+        PushNotificationConfigurationServiceImpl(androidContext(), get(), get())
     }
 
     single<NotificationManager> { NotificationManagerImpl(get(), get()) }
@@ -58,5 +58,5 @@ val pushModule = module {
             get()
         )
     }
-    viewModel { PushNotificationSettingsViewModel(get(), get(), get(), get(), get()) }
+    viewModel { PushNotificationSettingsViewModel(get(), get(), get(), get(), get(), get()) }
 }

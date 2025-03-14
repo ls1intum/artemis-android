@@ -27,6 +27,7 @@ object Spacings {
         val innerSpacing = 8.dp
 
         val postHeadlineHeight = 36.dp
+        val quoteBorderWidth = 5.dp
         val emojiHeight = 27.dp
         val emojiTextSize = 12.sp
         // The size of the emoji icon to open the emoji picker (measured in sp to support font scaling)

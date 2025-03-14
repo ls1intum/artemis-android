@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.test
 
+import de.tum.informatics.www1.artemis.native_app.core.common.commonModule
 import de.tum.informatics.www1.artemis.native_app.core.data.dataModule
 import de.tum.informatics.www1.artemis.native_app.core.data.test.testDataModule
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -11,6 +12,7 @@ import de.tum.informatics.www1.artemis.native_app.device.test.deviceTestModule
 import org.koin.dsl.module
 
 val coreTestModules = listOf(
+    commonModule,
     dataModule,
     testDataModule,
     datastoreModule,

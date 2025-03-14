@@ -74,7 +74,7 @@ fun PushNotificationSettingsUi(
         AnimatedVisibility(visible = arePushNotificationEnabled) {
             PushNotificationSettingCategoriesListUi(
                 modifier = Modifier.fillMaxWidth(),
-                settingsByGroupDataStore = settingsByGroupDataStore,
+                settingsByGroupDataState = settingsByGroupDataStore,
                 onUpdate = { setting, webapp, email, push ->
                     viewModel.updateSettingsEntry(
                         setting.settingId,

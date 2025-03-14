@@ -39,7 +39,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostWithBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.determinePostItemViewJoinedType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
@@ -285,35 +284,36 @@ private fun ChatList(
                     )
                 }
 
-                is ChatListItem.IndexedPost? -> {
-                    val post = chatListItem?.post
-                    val linkPreviews by remember(post?.content) {
-                        generateLinkPreviews(post?.content.orEmpty())
+                is ChatListItem.PostItem? -> {
+                    if (chatListItem !is ChatListItem.PostItem.IndexedItem) return@items
+                    val post = chatListItem.post as IStandalonePost
+                    val linkPreviews by remember(post.content) {
+                        generateLinkPreviews(post.content.orEmpty())
                     }.collectAsState()
 
                     val postActions = rememberPostActions(
                         post = post,
                         postActionFlags = postActionFlags,
                         clientId = clientId,
-                        onRequestEdit = { onRequestEdit(post ?: return@rememberPostActions) },
+                        onRequestEdit = { onRequestEdit(post) },
                         onRequestDelete = {
-                            onRequestDelete(post ?: return@rememberPostActions)
+                            onRequestDelete(post)
                         },
                         onRequestUndoDelete = {
-                            onRequestUndoDelete(post ?: return@rememberPostActions)
+                            onRequestUndoDelete(post)
                         },
                         onClickReaction = { id, create ->
-                            onRequestReactWithEmoji(post ?: return@rememberPostActions, id, create)
+                            onRequestReactWithEmoji(post, id, create)
                         },
                         onReplyInThread = {
-                            onClickViewPost(post?.standalonePostId ?: return@rememberPostActions)
+                            onClickViewPost(post.standalonePostId ?: return@rememberPostActions)
                         },
                         onResolvePost = null,
-                        onPinPost = { onRequestPin(post ?: return@rememberPostActions) },
-                        onSavePost = { onRequestSave(post ?: return@rememberPostActions) },
+                        onPinPost = { onRequestPin(post) },
+                        onSavePost = { onRequestSave(post) },
                         onRequestRetrySend = {
                             onRequestRetrySend(
-                                post?.standalonePostId ?: return@rememberPostActions
+                                post.standalonePostId ?: return@rememberPostActions
                             )
                         }
                     )
@@ -322,17 +322,11 @@ private fun ChatList(
                         modifier = Modifier
                             .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                             .fillMaxWidth()
-                            .let {
-                                if (post != null) {
-                                    it.testTag(testTagForPost(post.standalonePostId))
-                                } else it
-                            },
+                            .testTag(testTagForPost(post.standalonePostId)),
                         post = post,
                         clientId = clientId,
                         isMarkedAsDeleteList = isMarkedAsDeleteList,
-                        postItemViewType = remember(post?.answers) {
-                            PostItemViewType.ChatListItem(post?.answers.orEmpty())
-                        },
+                        chatListItem = chatListItem,
                         postActions = postActions,
                         linkPreviews = linkPreviews,
                         displayHeader = shouldDisplayHeader(
@@ -342,7 +336,7 @@ private fun ChatList(
                             order = DisplayPostOrder.REVERSED,
                             getPost = { getPostIndex ->
                                 when (val entry = posts.peek(getPostIndex)) {
-                                    is ChatListItem.IndexedPost -> entry.post
+                                    is ChatListItem.PostItem.IndexedItem -> entry.post
                                     else -> null
                                 }
                             }
@@ -354,7 +348,7 @@ private fun ChatList(
                                 order = DisplayPostOrder.REVERSED,
                                 getPost = { getPostIndex ->
                                     when (val entry = posts.peek(getPostIndex)) {
-                                        is ChatListItem.IndexedPost -> entry.post
+                                        is ChatListItem.PostItem.IndexedItem -> entry.post
                                         else -> null
                                     }
                                 }
@@ -363,9 +357,9 @@ private fun ChatList(
                             onRemoveLinkPreview(linkPreview, post as IStandalonePost, null)
                         },
                         onClick = {
-                            val standalonePostId = post?.standalonePostId
+                            val standalonePostId = post.standalonePostId
 
-                            if (post?.serverPostId != null && standalonePostId != null) {
+                            if (post.serverPostId != null && standalonePostId != null) {
                                 onClickViewPost(standalonePostId)
                             }
                         }

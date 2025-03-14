@@ -4,6 +4,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import de.tum.informatics.www1.artemis.native_app.core.common.app_version.NormalizedAppVersion
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -12,8 +13,11 @@ private data class UpdateScreenRoute(
     val minVersion: String
 )
 
-fun NavController.navigateToUpdateScreen(currentVersion: String, minVersion: String) {
-    navigate(UpdateScreenRoute(currentVersion, minVersion)) {
+fun NavController.navigateToUpdateScreen(
+    currentVersion: NormalizedAppVersion,
+    minVersion: NormalizedAppVersion
+) {
+    navigate(UpdateScreenRoute(currentVersion.toString(), minVersion.toString())) {
         popUpTo(graph.startDestinationId) { inclusive = true }
     }
 }
@@ -23,11 +27,13 @@ fun NavGraphBuilder.updateNavGraph(
 ) {
     composable<UpdateScreenRoute> { backStackEntry ->
         val route: UpdateScreenRoute = backStackEntry.toRoute()
+        val currentVersion = NormalizedAppVersion(route.currentVersion)
+        val minVersion = NormalizedAppVersion(route.minVersion)
 
         UpdateScreen(
             onDownloadClick = onOpenPlayStore,
-            currentVersion = route.currentVersion,
-            minVersion = route.minVersion
+            currentVersion = currentVersion,
+            minVersion = minVersion
         )
     }
 }
