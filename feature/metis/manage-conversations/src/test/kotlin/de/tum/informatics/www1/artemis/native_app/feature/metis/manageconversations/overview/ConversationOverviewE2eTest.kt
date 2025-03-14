@@ -32,6 +32,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversati
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.KEY_SUFFIX_GROUPS
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.KEY_SUFFIX_HIDDEN
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.KEY_SUFFIX_PERSONAL
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.SECTION_CHANNELS_KEY
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.SECTION_HIDDEN_KEY
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.TEST_TAG_CONVERSATION_LIST
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.TEST_TAG_HEADER_EXPAND_ICON
@@ -424,7 +425,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
         }
 
         composeTestRule.waitUntilAtLeastOneExists(
-            hasText(context.getString(R.string.conversation_overview_section_general_channels)),
+            hasTestTag(SECTION_CHANNELS_KEY),
             DefaultTimeoutMillis
         )
 
