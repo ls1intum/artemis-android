@@ -57,12 +57,13 @@ import androidx.compose.ui.unit.sp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.PostColors
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.EmojiPickerModalBottomSheet
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.getUnicodeForEmojiId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.CreatePostStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.post.PostItemMainContent
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.getUnicodeForEmojiId
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.EmojiDialog
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.EmojiSelection
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.getTestTagForEmojiId
@@ -73,17 +74,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import org.koin.compose.koinInject
 
-sealed class PostItemViewType {
-
-    data class ChatListItem(
-        val answerPosts: List<IAnswerPost>
-    ) : PostItemViewType()
-
-    data object ThreadContextPostItem : PostItemViewType()
-
-    data object ThreadAnswerItem : PostItemViewType()
-}
-
 /**
  * Displays a post item or a placeholder for it.
  */
@@ -91,7 +81,7 @@ sealed class PostItemViewType {
 internal fun PostItem(
     modifier: Modifier,
     post: IBasePost?,
-    postItemViewType: PostItemViewType,
+    chatListItem: ChatListItem.PostItem,
     clientId: Long,
     displayHeader: Boolean,
     postItemViewJoinedType: PostItemViewJoinedType,
@@ -105,10 +95,7 @@ internal fun PostItem(
     onShowReactionsBottomSheet: (EmojiSelection) -> Unit
 ) {
     val isPlaceholder = post == null
-    val isExpanded = when (postItemViewType) {
-        PostItemViewType.ThreadContextPostItem -> true
-        else -> false
-    }
+    val isExpanded = chatListItem.isThreadContextItem()
     val isDeleting by remember(post) { derivedStateOf { isMarkedAsDeleteList.contains(post) } }
 
     val isPinned = post is IStandalonePost && post.displayPriority == DisplayPriority.PINNED
@@ -150,6 +137,7 @@ internal fun PostItem(
         isPlaceholder = isPlaceholder,
         isDeleting = isDeleting,
         postStatus = postStatus,
+        chatListItem = chatListItem,
         displayHeader = displayHeader,
         linkPreviews = linkPreviews,
         onRemoveLinkPreview = onRemoveLinkPreview,
@@ -229,7 +217,7 @@ internal fun PostItem(
                     },
                 clientId = clientId,
                 reactions = remember(post?.reactions) { post?.reactions.orEmpty() },
-                postItemViewType = postItemViewType,
+                chatListItem = chatListItem,
                 postActions = postActions,
                 onShowReactionsBottomSheet = onShowReactionsBottomSheet
             )
@@ -271,7 +259,7 @@ private fun StandalonePostFooter(
     modifier: Modifier,
     clientId: Long,
     reactions: List<IReaction>,
-    postItemViewType: PostItemViewType,
+    chatListItem: ChatListItem.PostItem,
     postActions: PostActions,
     onShowReactionsBottomSheet: (EmojiSelection) -> Unit
 ) {
@@ -286,10 +274,10 @@ private fun StandalonePostFooter(
     var showEmojiDialog by remember { mutableStateOf(false) }
 
     if (showEmojiDialog) {
-        EmojiDialog(
-            onDismissRequest = { showEmojiDialog = false },
-            onSelectEmoji = { emojiId ->
-                postActions.onClickReaction?.invoke(emojiId, true)
+        EmojiPickerModalBottomSheet(
+            onDismiss = { showEmojiDialog = false },
+            onEmojiClicked = {
+                postActions.onClickReaction?.invoke(it.emojiId, true)
                 showEmojiDialog = false
             }
         )
@@ -316,13 +304,16 @@ private fun StandalonePostFooter(
                     onLongClick = onShowReactionsBottomSheet
                 )
             }
-            if (reactionCount.isNotEmpty() || postItemViewType is PostItemViewType.ThreadContextPostItem) {
+            if (reactionCount.isNotEmpty() || chatListItem.isThreadContextItem()) {
                 Box(
                     modifier = modifier
                         .background(color = PostColors.EmojiChipColors.background, CircleShape)
                         .clip(CircleShape)
-                        .sizeIn(minHeight = Spacings.Post.emojiHeight, minWidth = Spacings.Post.emojiHeight)
-                        .padding(with(LocalDensity.current) { 5.sp.toDp() } )
+                        .sizeIn(
+                            minHeight = Spacings.Post.emojiHeight,
+                            minWidth = Spacings.Post.emojiHeight
+                        )
+                        .padding(with(LocalDensity.current) { 5.sp.toDp() })
                         .clickable(onClick = {
                             showEmojiDialog = true
                         })
@@ -330,7 +321,7 @@ private fun StandalonePostFooter(
                     Icon(
                         modifier = Modifier
                             .align(Alignment.Center)
-                            .size(with(LocalDensity.current) { Spacings.Post.addEmojiIconSize.toDp() } ),
+                            .size(with(LocalDensity.current) { Spacings.Post.addEmojiIconSize.toDp() }),
                         imageVector = Icons.Default.InsertEmoticon,
                         contentDescription = null,
                     )
@@ -338,8 +329,8 @@ private fun StandalonePostFooter(
             }
         }
 
-        if (postItemViewType is PostItemViewType.ChatListItem) {
-            val replyCount = postItemViewType.answerPosts.size
+        if (chatListItem is ChatListItem.PostItem.IndexedItem) {
+            val replyCount = chatListItem.answers.size
 
             if (replyCount > 0) {
                 Row(

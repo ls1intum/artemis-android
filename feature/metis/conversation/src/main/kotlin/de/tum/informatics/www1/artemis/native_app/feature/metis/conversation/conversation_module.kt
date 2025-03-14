@@ -1,10 +1,9 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation
 
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.saved_posts_module
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.emojiPickerModule
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.CreatePostServiceImpl
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.EmojiServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.impl.MetisModificationServiceImpl
@@ -22,11 +21,10 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val conversationModule = module {
-    includes(saved_posts_module)
+    includes(emojiPickerModule, saved_posts_module)
 
     single<MetisService> { MetisServiceImpl(get()) }
     single<MetisModificationService> { MetisModificationServiceImpl(get()) }
-    single<EmojiService> { EmojiServiceImpl(androidContext()) }
 
     single<MetisStorageService> { MetisStorageServiceImpl(get()) }
     single<ReplyTextStorageService> { ReplyTextStorageServiceImpl(androidContext()) }

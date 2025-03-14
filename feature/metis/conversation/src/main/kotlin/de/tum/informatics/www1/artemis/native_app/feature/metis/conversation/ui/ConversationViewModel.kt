@@ -167,7 +167,8 @@ internal open class ConversationViewModel(
         serverConfigurationService = serverConfigurationService,
         accountService = accountService,
         conversation = conversation,
-        coroutineContext = coroutineContext
+        coroutineContext = coroutineContext,
+        courseId = courseId,
     )
 
     val threadUseCase = ConversationThreadUseCase(
@@ -180,7 +181,8 @@ internal open class ConversationViewModel(
         networkStatusProvider = networkStatusProvider,
         serverConfigurationService = serverConfigurationService,
         accountService = accountService,
-        coroutineContext = coroutineContext
+        coroutineContext = coroutineContext,
+        courseId = courseId
     )
 
     val autoCompletionUseCase = AutoCompletionUseCase(

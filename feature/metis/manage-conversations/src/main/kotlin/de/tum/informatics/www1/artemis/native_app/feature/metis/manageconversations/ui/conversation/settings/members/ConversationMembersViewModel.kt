@@ -51,7 +51,7 @@ internal class ConversationMembersViewModel(
     companion object {
         private const val KEY_QUERY = "query"
 
-        private const val PAGE_SIZE = 10
+        private const val PAGE_SIZE = 15
         // Given by the server, see `ConversationResource.searchMembersOfConversation()`
         private const val MAX_REQUEST_SIZE = 20
 

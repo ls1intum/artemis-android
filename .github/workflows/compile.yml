@@ -1,0 +1,37 @@
+name: Compile
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set local.properties
+        run: echo \"sdk.dir=/usr/lib/android-sdk\" \> local.properties
+
+      - name: Gradle Wrapper Verification
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: JDK setup
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 17
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Compile sources
+        run: ./gradlew compileProductionUnrestrictedReleaseSources
+
+      - name: Compile test sources
+        run: ./gradlew compileProductionUnrestrictedReleaseUnitTestSources

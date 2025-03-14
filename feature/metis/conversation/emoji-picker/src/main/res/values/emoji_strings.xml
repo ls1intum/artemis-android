@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="emoji_category_recent">Recent</string>
+    <string name="emoji_category_people">People</string>
+    <string name="emoji_category_nature">Nature</string>
+    <string name="emoji_category_foods">Foods</string>
+    <string name="emoji_category_activity">Activity</string>
+    <string name="emoji_category_places">Places</string>
+    <string name="emoji_category_objects">Objects</string>
+    <string name="emoji_category_symbols">Symbols</string>
+    <string name="emoji_category_flags">Flags</string>
+    <string name="emoji_category_unknown">Unknown</string>
+    <string name="no_recent_emojis">No recent emojis</string>
+    <string name="emojis_search_hint">Search emojis</string>
+</resources>
