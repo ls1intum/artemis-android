@@ -22,6 +22,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -67,7 +68,7 @@ internal fun <T> TimeFrameItemsLazyColumn(
                         .fillMaxWidth()
                         .animateItem()
                         .clickable {
-                            timeFrameGroupExpandedState[group.key] = timeFrameGroupExpandedState[group.key] != true
+                            timeFrameGroupExpandedState[group.key] = !isExpanded
                         }
                         .padding(horizontal = Spacings.ScreenHorizontalSpacing),
                     group = group,
@@ -75,7 +76,7 @@ internal fun <T> TimeFrameItemsLazyColumn(
                 )
             }
 
-            if (timeFrameGroupExpandedState[group.key] == true) {
+            if (isExpanded) {
                 items(group.items, key = getItemId) { item ->
                     itemContent(Modifier.animateItem(), item)
                 }
@@ -108,7 +109,9 @@ private fun <T> TimeFrameItemsSectionHeader(
     groupTitle += " ($size)"
 
     Row(
-        modifier = modifier.padding(vertical = Spacings.TimeFrameItems.small),
+        modifier = modifier
+            .padding(vertical = Spacings.TimeFrameItems.small)
+            .testTag("${group.key}-header"),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
