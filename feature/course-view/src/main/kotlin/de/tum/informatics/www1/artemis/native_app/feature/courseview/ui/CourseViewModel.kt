@@ -105,7 +105,6 @@ class CourseViewModel(
         combine(exerciseWithParticipationStatusFlow, exerciseQuery) { exercisesDataState, query ->
             exercisesDataState.bind { exercises ->
                 exercises
-                    .filter { it.visibleToStudents != false }
                     .filter { exercise -> query.isBlank() || exercise.title?.contains(query, ignoreCase = true) ?: false }
                     .groupByTimeFrame(
                         getStartDate = { it.releaseDate },
