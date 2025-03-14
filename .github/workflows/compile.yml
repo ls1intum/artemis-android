@@ -1,4 +1,4 @@
-name: Compile Only
+name: Compile
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  compile-only:
+  compile:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

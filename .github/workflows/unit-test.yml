@@ -2,7 +2,7 @@ name: JUnit Tests
 
 on:
   workflow_run:
-    workflows: ["Compile Only"]
+    workflows: ["Compile"]
     types: [completed]
 
 permissions:
