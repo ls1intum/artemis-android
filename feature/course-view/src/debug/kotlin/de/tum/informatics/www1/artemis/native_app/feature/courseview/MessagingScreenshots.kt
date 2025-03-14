@@ -21,8 +21,8 @@ import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvid
 import de.tum.informatics.www1.artemis.native_app.device.test.NetworkStatusProviderStub
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.CourseScaffold
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.CourseTab
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.impl.EmojiServiceStub
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.EmojiServiceStub
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationChatListScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.DataStatus
@@ -274,8 +274,8 @@ private fun generateMessage(
     time: Instant,
     id: String,
     authorId: Long
-): ChatListItem.IndexedPost {
-    return ChatListItem.IndexedPost(
+): ChatListItem.PostItem {
+    return ChatListItem.PostItem.IndexedItem.Post(
         PostPojo(
             clientPostId = id,
             serverPostId = 0L,
@@ -293,7 +293,9 @@ private fun generateMessage(
             tags = emptyList(),
             answers = emptyList(),
             reactions = emptyList(),
-            displayPriority = null
-        )
+            displayPriority = null,
+            hasForwardedMessages = false
+        ),
+        emptyList()
     )
 }

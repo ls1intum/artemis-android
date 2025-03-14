@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ListAlt
+import androidx.compose.material.icons.filled.AddReaction
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.School
@@ -60,6 +61,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicArtemisTex
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.toPainter
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.appendAtCursor
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.EmojiPickerModalBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.LocalReplyAutoCompleteHintProvider
 import kotlinx.coroutines.launch
@@ -85,6 +88,7 @@ internal fun MarkdownTextField(
 ) {
     val text = textFieldValue.text
     var selectedType by remember { mutableStateOf(ViewType.TEXT) }
+    var showEmojiPicker by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier,
@@ -133,6 +137,19 @@ internal fun MarkdownTextField(
             showAutoCompletePopup = showAutoCompletePopup,
             onOpenImagePicker = { filePickerLauncher.launch("image/*") },
             onOpenFilePicker = { filePickerLauncher.launch("*/*") },
+            onOpenEmojiPicker = { showEmojiPicker = true }
+        )
+    }
+
+    if (showEmojiPicker) {
+        EmojiPickerModalBottomSheet(
+            onEmojiClicked = {
+                onTextChanged(
+                    textFieldValue.appendAtCursor(it.unicode)
+                )
+                showEmojiPicker = false
+            },
+            onDismiss = { showEmojiPicker = false }
         )
     }
 }
@@ -211,7 +228,8 @@ private fun TextFieldOptions(
     showAutoCompletePopup: ((AutoCompleteType) -> Unit)? = null,
     formattingOptionButtons: @Composable () -> Unit = {},
     onOpenFilePicker: () -> Unit = {},
-    onOpenImagePicker: () -> Unit = {}
+    onOpenImagePicker: () -> Unit = {},
+    onOpenEmojiPicker: () -> Unit = {}
 ) {
     var isTextFormattingExpanded by remember { mutableStateOf(false) }
     val textFormattingOptionsOffsetY by animateDpAsState(targetValue = if (isTextFormattingExpanded) 0.dp else textFormattingOptionsHiddenOffsetY)
@@ -233,28 +251,30 @@ private fun TextFieldOptions(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     TextFieldOptionsIconButton(
-                        modifier = Modifier,
                         painter = painterResource(id = R.drawable.image),
                     ) {
                         onOpenImagePicker()
                     }
 
                     TextFieldOptionsIconButton(
-                        modifier = Modifier,
                         painter = painterResource(id = R.drawable.attachment)
                     ) {
                         onOpenFilePicker()
                     }
 
                     TextFieldOptionsIconButton(
-                        modifier = Modifier,
                         painter = painterResource(id = R.drawable.format_text)
                     ) {
                         isTextFormattingExpanded = !isTextFormattingExpanded
                     }
 
                     TextFieldOptionsIconButton(
-                        modifier = Modifier,
+                        painter = Icons.Default.AddReaction.toPainter()
+                    ) {
+                        onOpenEmojiPicker()
+                    }
+
+                    TextFieldOptionsIconButton(
                         painter = painterResource(id = R.drawable.tag)
                     ) {
                         isTaggingDropdownExpanded = !isTaggingDropdownExpanded
@@ -279,7 +299,6 @@ private fun TextFieldOptions(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         TextFieldOptionsIconButton(
-                            modifier = Modifier,
                             imageVector = Icons.Default.Clear
                         ) {
                             isTextFormattingExpanded = false
@@ -294,7 +313,6 @@ private fun TextFieldOptions(
         }
 
         PreviewEditRow(
-            modifier = Modifier,
             selectedType = selectedType,
             isPreviewEnabled = isPreviewEnabled,
             onChangeViewType = onChangeViewType
@@ -304,7 +322,7 @@ private fun TextFieldOptions(
 
 @Composable
 private fun TextFieldOptionsIconButton(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     painter: Painter? = null,
     imageVector: ImageVector? = null,
     onClick: () -> Unit
@@ -416,7 +434,7 @@ private fun TaggingDropDownMenuItem(
 
 @Composable
 private fun PreviewEditRow(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     selectedType: ViewType,
     isPreviewEnabled: Boolean = false,
     onChangeViewType: (ViewType) -> Unit = {}
