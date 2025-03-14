@@ -1,9 +1,12 @@
 name: E2E Tests
 
 on:
-  workflow_run:
-    workflows: ["Compile"]
-    types: [completed]
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+  workflow_dispatch:
 
 permissions:
   id-token: write
@@ -11,16 +14,36 @@ permissions:
   checks: write
 
 jobs:
+  compile:
+    name: Compile
+    runs-on: [self-hosted, ase-large-android-sdk-35]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Gradle Wrapper Verification
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: JDK setup
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 17
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Assemble
+        run: ./gradlew assemble
+
+
   end-to-end-tests:
     name: E2E Tests
     runs-on: [self-hosted, ase-large-android-sdk-35]
     timeout-minutes: 60
+    needs: compile
 
     steps:
-      - name: Download compiled artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: compiled-app
+      - uses: actions/checkout@v4
 
       - name: Set Android Sdk Env
         run: export ANDROID_HOME=/usr/lib/android-sdk

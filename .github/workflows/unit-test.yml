@@ -1,9 +1,12 @@
 name: JUnit Tests
 
 on:
-  workflow_run:
-    workflows: ["Compile"]
-    types: [completed]
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+  workflow_dispatch:
 
 permissions:
   id-token: write
@@ -17,10 +20,7 @@ jobs:
     timeout-minutes: 60
 
     steps:
-      - name: Download compiled artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: compiled-app
+      - uses: actions/checkout@v4
 
       - name: Set local.properties
         run: echo "sdk.dir=/usr/lib/android-sdk" > local.properties
@@ -38,7 +38,7 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Run tests
-        run: ./gradlew test -x assemble -Dskip.unit-tests=false -Dskip.e2e=true -Dskip.debugVariants=true -Dskip.flavor.unrestricted=true -Dskip.flavor.beta=true
+        run: ./gradlew test -Dskip.unit-tests=false -Dskip.e2e=true -Dskip.debugVariants=true -Dskip.flavor.unrestricted=true -Dskip.flavor.beta=true
 
       - name: Test Report
         uses: dorny/test-reporter@v1
