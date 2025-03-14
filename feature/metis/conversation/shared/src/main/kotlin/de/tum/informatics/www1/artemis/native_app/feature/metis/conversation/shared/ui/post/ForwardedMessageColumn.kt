@@ -32,10 +32,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 
-internal const val TEST_TAG_FORWARDED_POST_COLUMN = "TEST_TAG_FORWARDED_POST_COLUMN"
-internal const val TEST_TAG_DELETED_FORWARDED_POST = "TEST_TAG_DELETED_FORWARDED_POST"
+const val TEST_TAG_FORWARDED_POST_COLUMN = "TEST_TAG_FORWARDED_POST_COLUMN"
+const val TEST_TAG_DELETED_FORWARDED_POST = "TEST_TAG_DELETED_FORWARDED_POST"
 
-internal fun testTagForForwardedPost(postId: Long?) = "forwarded-post$postId"
+fun testTagForForwardedPost(postId: Long?) = "forwarded-post$postId"
 
 @Composable
 fun ForwardedMessageColumn(
