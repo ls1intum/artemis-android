@@ -11,6 +11,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
@@ -32,9 +33,10 @@ fun ForwardMessageReplyTextField(
     initialReplyTextProvider: InitialReplyTextProvider,
     hintText: String,
     onFileSelected: (Uri) -> Unit,
+    isEmojiPickerEnabled: Boolean = false,
     textOptionsColor: Color = MaterialTheme.colorScheme.surfaceContainer,
     backgroundColor: Color = BottomSheetDefaults.ContainerColor,
-    sendButton: @Composable RowScope.() -> Unit,
+    sendButton: @Composable RowScope.() -> Unit = {},
     textOptionsTopContent: @Composable ColumnScope.() -> Unit,
     onCreateForwardedMessage: () -> Deferred<MetisModificationFailure?>,
 ) {
@@ -52,11 +54,12 @@ fun ForwardMessageReplyTextField(
 
     val currentTextFieldValue by replyMode.currentText
     val filePickerLauncher = rememberFilePickerLauncher(context, onFileSelected)
-    val requestedAutoCompleteType = remember { mutableStateOf<AutoCompleteType?>(null) }
+    var requestedAutoCompleteType by remember { mutableStateOf<AutoCompleteType?>(null) }
 
     AutoCompletionDialog(
         replyMode = replyMode,
         requestedAutoCompleteType = requestedAutoCompleteType,
+        resetRequestedAutoCompleteType = { requestedAutoCompleteType = null }
     )
 
     MarkdownTextField(
@@ -72,9 +75,10 @@ fun ForwardMessageReplyTextField(
         },
         isTextOptionsInitiallyVisible = false,
         focusRequester = focusRequester,
+        isEmojiPickerEnabled = isEmojiPickerEnabled,
         alignOptionsAtBottom = true,
         showAutoCompletePopup = {
-            requestedAutoCompleteType.value = it
+            requestedAutoCompleteType = it
             val newTextFieldValue = MarkdownStyleUtil.apply(
                 style = when (it) {
                     AutoCompleteType.USERS -> MarkdownStyle.UserMention

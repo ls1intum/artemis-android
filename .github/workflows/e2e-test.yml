@@ -20,10 +20,10 @@ jobs:
     timeout-minutes: 60
 
     steps:
+      - uses: actions/checkout@v4
+
       - name: Set Android Sdk Env
         run: export ANDROID_HOME=/usr/lib/android-sdk
-
-      - uses: actions/checkout@v4
 
       - name: Set local.properties
         run: echo "sdk.dir=/usr/lib/android-sdk" > local.properties
@@ -60,7 +60,7 @@ jobs:
           distribution: 'zulu'
           java-version: 17
 
-      - name: run tests
+      - name: Run tests
         run: ./gradlew test --max-workers=4 -Dskip.unit-tests=true -Dskip.e2e=false -Dskip.debugVariants=true -Dskip.flavor.unrestricted=true -Dskip.flavor.beta=true
         continue-on-error: true
 

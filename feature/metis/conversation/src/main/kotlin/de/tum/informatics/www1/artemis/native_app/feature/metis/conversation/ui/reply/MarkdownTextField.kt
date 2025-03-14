@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ListAlt
+import androidx.compose.material.icons.filled.AddReaction
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.QuestionMark
@@ -64,6 +65,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicArtemisTex
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.toPainter
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.appendAtCursor
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.EmojiPickerModalBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.LocalReplyAutoCompleteHintProvider
 import kotlinx.coroutines.launch
@@ -79,6 +82,7 @@ internal fun MarkdownTextField(
     textFieldValue: TextFieldValue,
     hintText: AnnotatedString,
     alignOptionsAtBottom: Boolean = false,
+    isEmojiPickerEnabled: Boolean = true,
     isTextOptionsInitiallyVisible: Boolean = true,
     backgroundColor: Color,
     textOptionsColor: Color = MaterialTheme.colorScheme.surfaceContainer,
@@ -94,6 +98,7 @@ internal fun MarkdownTextField(
 ) {
     val text = textFieldValue.text
     var selectedType by remember { mutableStateOf(ViewType.TEXT) }
+    var showEmojiPicker by remember { mutableStateOf(false) }
     var isTextOptionsVisible by remember { mutableStateOf(isTextOptionsInitiallyVisible) }
     // weight(1f) is needed for the row to ensure that the TextFieldOptions stay visible when the BasicMarkdownTextField grows.
     // fill has to be disabled for the UI tests to work properly.
@@ -141,6 +146,7 @@ internal fun MarkdownTextField(
         TextFieldOptions(
             selectedType = selectedType,
             isPreviewEnabled = text.isNotBlank(),
+            isEmojiPickerEnabled = isEmojiPickerEnabled,
             backgroundColor = backgroundColor,
             containerColor = textOptionsColor,
             showFormattingOptions = selectedType == ViewType.TEXT,
@@ -149,7 +155,8 @@ internal fun MarkdownTextField(
             showAutoCompletePopup = showAutoCompletePopup,
             onOpenImagePicker = { filePickerLauncher.launch("image/*") },
             onOpenFilePicker = { filePickerLauncher.launch("*/*") },
-        )
+            onOpenEmojiPicker = { showEmojiPicker = true }
+            )
     }
 
     if (alignOptionsAtBottom) {
@@ -186,6 +193,18 @@ internal fun MarkdownTextField(
         AnimatedVisibility(isTextOptionsVisible) {
             options()
         }
+    }
+
+    if (showEmojiPicker) {
+        EmojiPickerModalBottomSheet(
+            onEmojiClicked = {
+                onTextChanged(
+                    textFieldValue.appendAtCursor(it.unicode)
+                )
+                showEmojiPicker = false
+            },
+            onDismiss = { showEmojiPicker = false }
+        )
     }
 }
 
@@ -259,6 +278,7 @@ private fun TextFieldOptions(
     modifier: Modifier = Modifier,
     selectedType: ViewType,
     isPreviewEnabled: Boolean,
+    isEmojiPickerEnabled: Boolean,
     backgroundColor: Color,
     containerColor: Color,
     showFormattingOptions: Boolean,
@@ -266,7 +286,8 @@ private fun TextFieldOptions(
     showAutoCompletePopup: ((AutoCompleteType) -> Unit)? = null,
     formattingOptionButtons: @Composable (Color) -> Unit = {},
     onOpenFilePicker: () -> Unit = {},
-    onOpenImagePicker: () -> Unit = {}
+    onOpenImagePicker: () -> Unit = {},
+    onOpenEmojiPicker: () -> Unit = {}
 ) {
     var isTextFormattingExpanded by remember { mutableStateOf(false) }
     val textFormattingOptionsOffsetY by animateDpAsState(targetValue = if (isTextFormattingExpanded) 0.dp else textFormattingOptionsHiddenOffsetY)
@@ -315,6 +336,15 @@ private fun TextFieldOptions(
                         isTextFormattingExpanded = !isTextFormattingExpanded
                     }
 
+                    if (isEmojiPickerEnabled) {
+                        TextFieldOptionsIconButton(
+                            painter = Icons.Default.AddReaction.toPainter(),
+                            containerColor = containerColor
+                        ) {
+                            onOpenEmojiPicker()
+                        }
+                    }
+
                     TextFieldOptionsIconButton(
                         modifier = Modifier,
                         painter = painterResource(id = R.drawable.tag),
@@ -342,7 +372,6 @@ private fun TextFieldOptions(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         TextFieldOptionsIconButton(
-                            modifier = Modifier,
                             imageVector = Icons.Default.Clear,
                             containerColor = containerColor
                         ) {
@@ -358,7 +387,6 @@ private fun TextFieldOptions(
         }
 
         PreviewEditRow(
-            modifier = Modifier,
             selectedType = selectedType,
             isPreviewEnabled = isPreviewEnabled,
             onChangeViewType = onChangeViewType
@@ -368,7 +396,7 @@ private fun TextFieldOptions(
 
 @Composable
 private fun TextFieldOptionsIconButton(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     painter: Painter? = null,
     imageVector: ImageVector? = null,
     containerColor: Color,
@@ -481,7 +509,7 @@ private fun TaggingDropDownMenuItem(
 
 @Composable
 private fun PreviewEditRow(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     selectedType: ViewType,
     isPreviewEnabled: Boolean = false,
     onChangeViewType: (ViewType) -> Unit = {}
