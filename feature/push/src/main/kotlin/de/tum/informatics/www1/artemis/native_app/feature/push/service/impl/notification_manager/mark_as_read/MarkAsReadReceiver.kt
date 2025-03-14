@@ -9,6 +9,7 @@ import androidx.work.WorkManager
 import androidx.work.workDataOf
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.PushCommunicationEntity
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.StandalonePostCommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.BaseCommunicationNotificationReceiver
 import kotlinx.coroutines.runBlocking
@@ -25,14 +26,17 @@ class MarkAsReadReceiver : BaseCommunicationNotificationReceiver() {
         context: Context,
         intent: Intent
     ) {
-        enqueueWorker(
-            metisContext = communicationEntity.target.metisContext,
-            context = context
-        )
+        // New thread replies do not increase a conversation's unread count, so we don't need to mark them as read.
+        if (communicationEntity.notificationType is StandalonePostCommunicationNotificationType) {
+            enqueueMarkConversationAsReadWorker(
+                metisContext = communicationEntity.target.metisContext,
+                context = context
+            )
+        }
         deleteNotification(communicationEntity.parentId)
     }
 
-    private fun enqueueWorker(
+    private fun enqueueMarkConversationAsReadWorker(
         metisContext: MetisContext.Conversation,
         context: Context
     ) {
