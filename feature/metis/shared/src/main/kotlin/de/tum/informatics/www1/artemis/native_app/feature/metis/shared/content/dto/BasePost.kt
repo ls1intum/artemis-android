@@ -14,6 +14,7 @@ sealed class BasePost : IBasePost {
     abstract override val content: String?
     abstract override val reactions: List<Reaction>?
     abstract override val isSaved: Boolean?
+    abstract override val hasForwardedMessages: Boolean?
 
     override val serverPostId: Long?
         get() = id
@@ -28,4 +29,7 @@ sealed class BasePost : IBasePost {
 
     override val authorImageUrl: String?
         get() = author?.imageUrl
+
+    override val key: Any
+        get() = id ?: clientPostId ?: this
 }

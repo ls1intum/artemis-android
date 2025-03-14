@@ -50,8 +50,6 @@
     <string name="push_notification_setting_setting_newConversationMessages">New messages in conversations</string>
     <string name="push_notification_setting_setting_newConversationReplies">New replies in conversations</string>
     <string name="push_notification_setting_setting_conversationUserMention">New user mention in conversations</string>
-    <string name="push_notification_setting_setting_conversationDataExportFailed">Data Export has failed</string>
-    <string name="push_notification_setting_setting_conversationDataExportCreated">Data Export has been created</string>
 
     <string name="push_notification_setting_setting_description_basicWeeklySummaryDescription">Receive a basic weekly summary every Friday at 5pm (e.g. what new exercises have been released this week and are still open)"</string>
     <string name="push_notification_setting_setting_description_exerciseReleasedDescription">Get notified when a new exercise has been released"</string>

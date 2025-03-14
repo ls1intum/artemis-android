@@ -49,7 +49,8 @@ abstract class MetisStorageBaseTest {
             authorRole = UserRole.USER,
             authorName = author.name!!,
             authorImageUrl = null,
-            isSaved = false
+            isSaved = false,
+            hasForwardedMessages = false
         ),
         reactions = emptyList(),
         serverPostIdCache = AnswerPostPojo.ServerPostIdCache(
@@ -63,6 +64,7 @@ abstract class MetisStorageBaseTest {
         content = "Base post content",
         resolved = false,
         isSaved = false,
+        hasForwardedMessages = false,
         updatedDate = null,
         creationDate = Clock.System.now(),
         authorId = author.id,

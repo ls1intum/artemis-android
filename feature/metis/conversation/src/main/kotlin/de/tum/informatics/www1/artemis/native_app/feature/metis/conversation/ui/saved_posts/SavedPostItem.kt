@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MoreHoriz
@@ -60,9 +61,12 @@ fun SavedPostItem(
         trailingCardContent = trailingCardContent
     ) {
 
+        // TODO: A ChatListItem.PostItem should be passed here to support forwarded messages
+        // https://github.com/ls1intum/artemis-android/issues/459
         PostItemMainContent(
-            modifier = Modifier,
+            modifier = Modifier.wrapContentHeight(unbounded = true),
             post = savedPost,
+            isRoleBadgeVisible = false,
             onClick = onClick,
             onLongClick = onLongClick,
         )

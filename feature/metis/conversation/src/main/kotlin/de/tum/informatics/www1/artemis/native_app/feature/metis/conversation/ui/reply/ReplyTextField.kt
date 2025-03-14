@@ -62,6 +62,9 @@ import androidx.core.content.ContextCompat.getString
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.OnTrueLaunchedEffect
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.EmojiService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.impl.EmojiServiceStub
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.ProvideEmojis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.FileValidationConstants
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteType
@@ -87,78 +90,81 @@ internal fun ReplyTextField(
     replyMode: ReplyMode,
     onFileSelected: (Uri) -> Unit,
     updateFailureState: (MetisModificationFailure?) -> Unit,
-    conversationName: String
+    conversationName: String,
+    emojiService: EmojiService,
 ) {
     val replyState: ReplyState = rememberReplyState(replyMode, updateFailureState)
     var requestedAutoCompleteType by remember { mutableStateOf<AutoCompleteType?>(null) }
 
-    Surface(
-        modifier = modifier,
-        border = BorderStroke(
-            1.dp,
-            Brush.verticalGradient(
-                listOf(
-                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-                    MaterialTheme.colorScheme.background
-                ),
-                startY = 0f,
-                endY = 100f
-            )
-        ),
-        color = MaterialTheme.colorScheme.background,
-        shape = MaterialTheme.shapes.large
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(4.dp)
-                .navigationBarsPadding()
+    ProvideEmojis(emojiService) {
+        Surface(
+            modifier = modifier,
+            border = BorderStroke(
+                1.dp,
+                Brush.verticalGradient(
+                    listOf(
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                        MaterialTheme.colorScheme.background
+                    ),
+                    startY = 0f,
+                    endY = 100f
+                )
+            ),
+            color = MaterialTheme.colorScheme.background,
+            shape = MaterialTheme.shapes.large
         ) {
-            AutoCompletionDialog(
-                replyMode = replyMode,
-                requestedAutoCompleteType = requestedAutoCompleteType,
-                resetRequestedAutoCompleteType = { requestedAutoCompleteType = null }
-            )
-
-            AnimatedContent(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = Spacings.ScreenHorizontalSpacing, vertical = 8.dp)
-                    .align(Alignment.Center),
-                targetState = replyState,
-                label = "CanCreate -> HasSentReply -> IsSendingReply"
-            ) { targetReplyState ->
-                when (targetReplyState) {
-                    is ReplyState.CanCreate -> {
-                        CreateReplyUi(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .testTag(TEST_TAG_CAN_CREATE_REPLY),
-                            replyMode = replyMode,
-                            onReply = { targetReplyState.onCreateReply() },
-                            conversationName = conversationName,
-                            onFileSelected = { uri -> onFileSelected(uri) },
-                            onRequestAutocompleteType = { requestedAutoCompleteType = it }
-                        )
-                    }
+                    .padding(4.dp)
+                    .navigationBarsPadding()
+            ) {
+                AutoCompletionDialog(
+                    replyMode = replyMode,
+                    requestedAutoCompleteType = requestedAutoCompleteType,
+                    resetRequestedAutoCompleteType = { requestedAutoCompleteType = null }
+            )
 
-                    ReplyState.HasSentReply -> {
-                        Box(modifier = Modifier.fillMaxWidth()) {
-                            Icon(
-                                imageVector = Icons.Default.Done,
-                                contentDescription = null,
-                                modifier = Modifier.align(Alignment.Center)
+                AnimatedContent(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = Spacings.ScreenHorizontalSpacing, vertical = 8.dp)
+                        .align(Alignment.Center),
+                    targetState = replyState,
+                    label = "CanCreate -> HasSentReply -> IsSendingReply"
+                ) { targetReplyState ->
+                    when (targetReplyState) {
+                        is ReplyState.CanCreate -> {
+                            CreateReplyUi(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag(TEST_TAG_CAN_CREATE_REPLY),
+                                replyMode = replyMode,
+                                onReply = { targetReplyState.onCreateReply() },
+                                conversationName = conversationName,
+                                onFileSelected = { uri -> onFileSelected(uri) },
+                                onRequestAutocompleteType = { requestedAutoCompleteType = it }
                             )
                         }
-                    }
 
-                    is ReplyState.IsSendingReply -> {
-                        SendingReplyUi(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            onCancel = targetReplyState.onCancelSendReply,
-                            title = stringResource(R.string.create_reply_sending_reply)
-                        )
+                        ReplyState.HasSentReply -> {
+                            Box(modifier = Modifier.fillMaxWidth()) {
+                                Icon(
+                                    imageVector = Icons.Default.Done,
+                                    contentDescription = null,
+                                    modifier = Modifier.align(Alignment.Center)
+                                )
+                            }
+                        }
+
+                        is ReplyState.IsSendingReply -> {
+                            SendingReplyUi(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                onCancel = targetReplyState.onCancelSendReply,
+                                title = stringResource(R.string.create_reply_sending_reply)
+                            )
+                        }
                     }
                 }
             }
@@ -477,7 +483,8 @@ private fun ReplyTextFieldPreview() {
             },
             updateFailureState = {},
             conversationName = "PreviewChat",
-            onFileSelected = { _ -> }
+            onFileSelected = { _ -> },
+            emojiService = EmojiServiceStub
         )
     }
 }

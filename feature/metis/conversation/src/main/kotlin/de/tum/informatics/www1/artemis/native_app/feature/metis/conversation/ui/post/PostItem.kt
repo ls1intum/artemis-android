@@ -73,10 +73,11 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.PostColors
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.EmojiPickerModalBottomSheet
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.getUnicodeForEmojiId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.LinkPreview
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.getUnicodeForEmojiId
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.EmojiDialog
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.EmojiSelection
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.getTestTagForEmojiId
@@ -96,17 +97,6 @@ import kotlinx.datetime.Instant
 import org.koin.compose.koinInject
 import java.time.Duration
 
-sealed class PostItemViewType {
-
-    data class ChatListItem(
-        val answerPosts: List<IAnswerPost>
-    ) : PostItemViewType()
-
-    data object ThreadContextPostItem : PostItemViewType()
-
-    data object ThreadAnswerItem : PostItemViewType()
-}
-
 private const val PlaceholderContent = "WWWWWWW"
 
 /**
@@ -116,7 +106,7 @@ private const val PlaceholderContent = "WWWWWWW"
 internal fun PostItem(
     modifier: Modifier,
     post: IBasePost?,
-    postItemViewType: PostItemViewType,
+    chatListItem: ChatListItem.PostItem,
     clientId: Long,
     displayHeader: Boolean,
     postItemViewJoinedType: PostItemViewJoinedType,
@@ -130,10 +120,7 @@ internal fun PostItem(
     onShowReactionsBottomSheet: (EmojiSelection) -> Unit
 ) {
     val isPlaceholder = post == null
-    val isExpanded = when (postItemViewType) {
-        PostItemViewType.ThreadContextPostItem -> true
-        else -> false
-    }
+    val isExpanded = chatListItem.isThreadContextItem()
     val isDeleting by remember(post) { derivedStateOf { isMarkedAsDeleteList.contains(post) } }
 
     val isPinned = post is IStandalonePost && post.displayPriority == DisplayPriority.PINNED
@@ -175,6 +162,7 @@ internal fun PostItem(
         isPlaceholder = isPlaceholder,
         isDeleting = isDeleting,
         postStatus = postStatus,
+        chatListItem = chatListItem,
         displayHeader = displayHeader,
         linkPreviews = linkPreviews,
         onRemoveLinkPreview = onRemoveLinkPreview,
@@ -254,7 +242,7 @@ internal fun PostItem(
                     },
                 clientId = clientId,
                 reactions = remember(post?.reactions) { post?.reactions.orEmpty() },
-                postItemViewType = postItemViewType,
+                chatListItem = chatListItem,
                 postActions = postActions,
                 onShowReactionsBottomSheet = onShowReactionsBottomSheet
             )
@@ -269,8 +257,10 @@ fun PostItemMainContent(
     isExpanded: Boolean = true,
     isPlaceholder: Boolean = false,
     isDeleting: Boolean = false,
+    isRoleBadgeVisible: Boolean = true,
     isAuthor: Boolean = false,
     postStatus: CreatePostService.Status = CreatePostService.Status.FINISHED,
+    chatListItem: ChatListItem.PostItem? = null, // TODO: ADD support for eg. saved posts (https://github.com/ls1intum/artemis-android/issues/459)
     displayHeader: Boolean = true,
     linkPreviews: List<LinkPreview> = emptyList(),
     onRemoveLinkPreview: (LinkPreview) -> Unit = {},
@@ -295,6 +285,7 @@ fun PostItemMainContent(
             creationDate = post?.creationDate,
             expanded = isExpanded,
             isAnswerPost = post is IAnswerPost,
+            isRoleBadgeVisible = isRoleBadgeVisible,
             displayHeader = displayHeader,
             isDeleting = isDeleting
         ) {
@@ -309,20 +300,22 @@ fun PostItemMainContent(
                     return@PostHeadline
                 }
 
-                MarkdownText(
-                    markdown = remember(post?.content, isPlaceholder) {
-                        if (isPlaceholder) {
-                            PlaceholderContent
-                        } else post?.content.orEmpty()
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .placeholder(visible = isPlaceholder),
-                    style = MaterialTheme.typography.bodyMedium,
-                    onClick = onClick,
-                    onLongClick = onLongClick,
-                    color = if (post?.serverPostId == null) PostColors.unsentMessageText else Color.Unspecified
-                )
+                if (post?.content?.isNotEmpty() == true) {
+                    MarkdownText(
+                        markdown = remember(post.content, isPlaceholder) {
+                            if (isPlaceholder) {
+                                PlaceholderContent
+                            } else post.content.orEmpty()
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .placeholder(visible = isPlaceholder),
+                        style = MaterialTheme.typography.bodyMedium,
+                        onClick = onClick,
+                        onLongClick = onLongClick,
+                        color = if (post.serverPostId == null) PostColors.unsentMessageText else Color.Unspecified
+                    )
+                }
 
                 val instant = post?.updatedDate
                 if (instant != null) {
@@ -347,6 +340,15 @@ fun PostItemMainContent(
                     )
                 }
 
+                if (chatListItem is ChatListItem.PostItem.ForwardedMessage) {
+                    Spacer(modifier = Modifier.height(Spacings.Post.innerSpacing))
+
+                    ForwardedMessageColumn(
+                        modifier = Modifier.fillMaxWidth(),
+                        chatListItem = chatListItem
+                    )
+                }
+
                 trailingContent()
             }
         }
@@ -362,6 +364,7 @@ private fun PostHeadline(
     authorImageUrl: String?,
     creationDate: Instant?,
     postStatus: CreatePostService.Status,
+    isRoleBadgeVisible: Boolean,
     expanded: Boolean = false,
     isAnswerPost: Boolean,
     displayHeader: Boolean = true,
@@ -406,6 +409,7 @@ private fun PostHeadline(
                 authorName = authorName,
                 authorRole = authorRole,
                 creationDate = creationDate,
+                isRoleBadgeVisible = isRoleBadgeVisible,
                 expanded = expanded,
                 isAnswerPost = isAnswerPost,
                 isGrayscale = isDeleting
@@ -449,26 +453,47 @@ private fun HeadlineAuthorInfo(
     creationDate: Instant?,
     expanded: Boolean,
     isAnswerPost: Boolean,
-    isGrayscale: Boolean
+    isGrayscale: Boolean,
+    isRoleBadgeVisible: Boolean
 ) {
     Column(modifier = modifier) {
-        AuthorRoleAndTimeRow(
-            expanded = expanded,
-            authorRole = authorRole,
-            creationDate = creationDate,
-            isAnswerPost = isAnswerPost,
-            isGrayscale = isGrayscale
-        )
+        if (isRoleBadgeVisible) {
+            AuthorRoleAndTimeRow(
+                expanded = expanded,
+                authorRole = authorRole,
+                creationDate = creationDate,
+                isAnswerPost = isAnswerPost,
+                isGrayscale = isGrayscale
+            )
 
-        Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.weight(1f))
+        }
 
-        Text(
-            modifier = Modifier,
-            text = remember(authorName) { authorName ?: "Placeholder" },
-            maxLines = 1,
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Bold
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                modifier = Modifier,
+                text = remember(authorName) { authorName ?: "Placeholder" },
+                maxLines = 1,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold
+            )
+
+            if (!isRoleBadgeVisible) {
+                Text("-")
+
+                CreationDateContent(
+                    modifier = Modifier,
+                    creationDate = creationDate,
+                    expanded = false,
+                    showDateOnly = true,
+                    isAnswerPost = false
+                )
+            }
+        }
     }
 }
 
@@ -484,25 +509,6 @@ private fun AuthorRoleAndTimeRow(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val relativeTimeTo = remember(creationDate) {
-            creationDate ?: Clock.System.now()
-        }
-
-        val creationDateContent: @Composable () -> Unit = {
-
-            val relativeTime = if (expanded || isAnswerPost) {
-                getRelativeTime(to = relativeTimeTo, showDateAndTime = true)
-            } else {
-                getRelativeTime(to = relativeTimeTo, showDate = false)
-            }
-
-            Text(
-                modifier = Modifier,
-                text = relativeTime.toString(),
-                style = MaterialTheme.typography.bodySmall
-            )
-        }
-
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
@@ -517,10 +523,44 @@ private fun AuthorRoleAndTimeRow(
                 modifier = Modifier.applyGrayscale(isGrayscale),
                 userRole = initialAuthorRole
             )
+
             Spacer(modifier = Modifier.weight(1f))
-            creationDateContent()
+
+            CreationDateContent(
+                modifier = Modifier,
+                creationDate = creationDate,
+                expanded = expanded,
+                isAnswerPost = isAnswerPost
+            )
         }
     }
+}
+
+@Composable
+private fun CreationDateContent(
+    modifier: Modifier,
+    creationDate: Instant?,
+    expanded: Boolean,
+    isAnswerPost: Boolean,
+    showDateOnly: Boolean = false,
+) {
+    val relativeTimeTo = remember(creationDate) {
+        creationDate ?: Clock.System.now()
+    }
+
+    val relativeTime = if (expanded || isAnswerPost) {
+        getRelativeTime(to = relativeTimeTo, showDateAndTime = true)
+    } else if (showDateOnly) {
+        getRelativeTime(to = relativeTimeTo, showDate = true)
+    } else {
+        getRelativeTime(to = relativeTimeTo, showDate = false)
+    }
+
+    Text(
+        modifier = modifier,
+        text = relativeTime.toString(),
+        style = MaterialTheme.typography.bodySmall
+    )
 }
 
 @Composable
@@ -562,7 +602,7 @@ private fun StandalonePostFooter(
     modifier: Modifier,
     clientId: Long,
     reactions: List<IReaction>,
-    postItemViewType: PostItemViewType,
+    chatListItem: ChatListItem.PostItem,
     postActions: PostActions,
     onShowReactionsBottomSheet: (EmojiSelection) -> Unit
 ) {
@@ -577,10 +617,10 @@ private fun StandalonePostFooter(
     var showEmojiDialog by remember { mutableStateOf(false) }
 
     if (showEmojiDialog) {
-        EmojiDialog(
-            onDismissRequest = { showEmojiDialog = false },
-            onSelectEmoji = { emojiId ->
-                postActions.onClickReaction?.invoke(emojiId, true)
+        EmojiPickerModalBottomSheet(
+            onDismiss = { showEmojiDialog = false },
+            onEmojiClicked = {
+                postActions.onClickReaction?.invoke(it.emojiId, true)
                 showEmojiDialog = false
             }
         )
@@ -607,13 +647,16 @@ private fun StandalonePostFooter(
                     onLongClick = onShowReactionsBottomSheet
                 )
             }
-            if (reactionCount.isNotEmpty() || postItemViewType is PostItemViewType.ThreadContextPostItem) {
+            if (reactionCount.isNotEmpty() || chatListItem.isThreadContextItem()) {
                 Box(
                     modifier = modifier
                         .background(color = PostColors.EmojiChipColors.background, CircleShape)
                         .clip(CircleShape)
-                        .sizeIn(minHeight = Spacings.Post.emojiHeight, minWidth = Spacings.Post.emojiHeight)
-                        .padding(with(LocalDensity.current) { 5.sp.toDp() } )
+                        .sizeIn(
+                            minHeight = Spacings.Post.emojiHeight,
+                            minWidth = Spacings.Post.emojiHeight
+                        )
+                        .padding(with(LocalDensity.current) { 5.sp.toDp() })
                         .clickable(onClick = {
                             showEmojiDialog = true
                         })
@@ -621,7 +664,7 @@ private fun StandalonePostFooter(
                     Icon(
                         modifier = Modifier
                             .align(Alignment.Center)
-                            .size(with(LocalDensity.current) { Spacings.Post.addEmojiIconSize.toDp() } ),
+                            .size(with(LocalDensity.current) { Spacings.Post.addEmojiIconSize.toDp() }),
                         imageVector = Icons.Default.InsertEmoticon,
                         contentDescription = null,
                     )
@@ -629,8 +672,8 @@ private fun StandalonePostFooter(
             }
         }
 
-        if (postItemViewType is PostItemViewType.ChatListItem) {
-            val replyCount = postItemViewType.answerPosts.size
+        if (chatListItem is ChatListItem.PostItem.IndexedItem) {
+            val replyCount = chatListItem.answers.size
 
             if (replyCount > 0) {
                 Row(
