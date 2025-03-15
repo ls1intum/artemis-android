@@ -13,6 +13,8 @@ import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -35,7 +37,15 @@ fun AccountSettingsScreen(
     viewModel: SettingsViewModel = koinInject(),
     onNavigateUp: () -> Unit,
 ) {
+    val account by viewModel.account.collectAsState()
 
+    AccountSettingsScreen(
+        modifier = modifier,
+        accountDataState = account,
+        onLogout = viewModel::onRequestLogout,
+        onRequestReload = viewModel::requestReload,
+        onNavigateUp = onNavigateUp
+    )
 }
 
 

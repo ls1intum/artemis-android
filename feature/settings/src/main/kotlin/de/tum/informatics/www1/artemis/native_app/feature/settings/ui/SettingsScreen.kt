@@ -63,11 +63,13 @@ internal fun SettingsScreen(
     val linkOpener = LocalLinkOpener.current
     val artemisContext by LocalArtemisContextProvider.current.collectArtemisContextAsState()
 
-    val accountData: DataState<Account>? by viewModel.account.collectAsState()
+    val isLoggedIn by viewModel.isLoggedIn.collectAsState()
+    val accountData: DataState<Account> by viewModel.account.collectAsState()
 
     SettingsScreen(
         modifier = modifier,
         accountDataState = accountData,
+        isLoggedIn = isLoggedIn,
         serverUrl = artemisContext.serverUrl,
         appVersion = viewModel.appVersion,
         linkOpener = linkOpener,
@@ -82,7 +84,8 @@ internal fun SettingsScreen(
 @Composable
 fun SettingsScreen(
     modifier: Modifier = Modifier,
-    accountDataState: DataState<Account>?,
+    accountDataState: DataState<Account>,
+    isLoggedIn: Boolean,
     serverUrl: String,
     appVersion: AppVersion,
     linkOpener: LinkOpener,
@@ -112,10 +115,10 @@ fun SettingsScreen(
                 .pagePadding(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            accountDataState?.let {
+            if (isLoggedIn) {
                 UserInformationSection(
                     modifier = Modifier.fillMaxWidth(),
-                    accountDataState = it,
+                    accountDataState = accountDataState,
                     onRequestLogout = onRequestLogout,
                     onNavigateToAccountSettings = onRequestOpenAccountSettings
                 )

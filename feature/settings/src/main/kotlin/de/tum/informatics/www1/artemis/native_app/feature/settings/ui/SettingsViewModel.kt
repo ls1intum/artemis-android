@@ -6,7 +6,9 @@ import de.tum.informatics.www1.artemis.native_app.core.common.app_version.AppVer
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.performAutoReloadingNetworkCall
+import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.isLoggedIn
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
@@ -15,6 +17,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.unsubscribeFromNo
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
@@ -34,15 +37,17 @@ class SettingsViewModel(
 
     val appVersion = appVersionProvider.appVersion
 
+    val isLoggedIn: StateFlow<Boolean> = accountService.authenticationData.map { it.isLoggedIn }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
-    val account: StateFlow<DataState<Account>?> =
+    val account: StateFlow<DataState<Account>> =
         accountDataService.performAutoReloadingNetworkCall(
             networkStatusProvider = networkStatusProvider,
             manualReloadFlow = onRequestReload
         ) {
             getAccountData()
         }
-            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, null)
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
 
     fun onRequestLogout() {

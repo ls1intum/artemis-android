@@ -12,7 +12,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.LoginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsScreen
 import kotlinx.serialization.Serializable
 
-
+@Serializable
 private object Settings {
     @Serializable
     data object Main
