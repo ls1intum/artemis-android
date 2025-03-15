@@ -302,7 +302,9 @@ private fun SegmentedSelection(
                         modifier = Modifier.testTag(testTag + index),
                         selected = selected,
                         colors = SegmentedButtonDefaults.colors(
-                            inactiveContainerColor = CardDefaults.cardColors().containerColor
+                            inactiveContainerColor = CardDefaults.cardColors().containerColor,
+                            inactiveBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                            activeBorderColor = MaterialTheme.colorScheme.outlineVariant
                         ),
                         onClick = {
                             selectedOption = index

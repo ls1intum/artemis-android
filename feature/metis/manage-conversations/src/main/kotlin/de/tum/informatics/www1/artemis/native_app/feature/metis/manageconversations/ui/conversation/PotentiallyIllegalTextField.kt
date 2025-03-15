@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversat
 import androidx.annotation.StringRes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -61,6 +62,9 @@ internal fun PotentiallyIllegalTextField(
                 Text(text = requiredSupportText)
             }
         },
+        colors = OutlinedTextFieldDefaults.colors(
+            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
+        ),
         shape = MaterialTheme.shapes.medium,
         leadingIcon = leadingIcon,
         isError = isIllegal,
