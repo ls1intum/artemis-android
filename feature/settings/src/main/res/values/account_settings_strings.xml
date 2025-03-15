@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="account_settings_title">Account Settings</string>
+    <string name="account_settings_information_full_name">Full name:</string>
+    <string name="account_settings_information_login">Login:</string>
+    <string name="account_settings_information_email">Email:</string>
+    <string name="account_settings_section">Details</string>
+
+
+</resources>

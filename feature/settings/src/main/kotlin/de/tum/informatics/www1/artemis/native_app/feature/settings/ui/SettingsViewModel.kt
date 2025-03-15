@@ -12,6 +12,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
 import de.tum.informatics.www1.artemis.native_app.feature.push.unsubscribeFromNotifications
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -29,12 +30,15 @@ class SettingsViewModel(
     appVersionProvider: AppVersionProvider,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : ViewModel() {
+    private val onRequestReload = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     val appVersion = appVersionProvider.appVersion
 
+
     val account: StateFlow<DataState<Account>?> =
         accountDataService.performAutoReloadingNetworkCall(
-            networkStatusProvider = networkStatusProvider
+            networkStatusProvider = networkStatusProvider,
+            manualReloadFlow = onRequestReload
         ) {
             getAccountData()
         }
@@ -50,6 +54,12 @@ class SettingsViewModel(
             )
 
             accountService.logout()
+        }
+    }
+
+    fun requestReload() {
+        viewModelScope.launch(coroutineContext) {
+            onRequestReload.emit(Unit)
         }
     }
 }

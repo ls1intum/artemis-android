@@ -13,14 +13,16 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificati
 import kotlinx.serialization.Serializable
 
 
-@Serializable
-private data object Settings
+private object Settings {
+    @Serializable
+    data object Main
 
-@Serializable
-private data object SettingsScreen
+    @Serializable
+    data object AccountDetails
 
-@Serializable
-private data object PushNotificationSettingsScreen
+    @Serializable
+    data object PushNotification
+}
 
 fun NavController.navigateToSettings(builder: NavOptionsBuilder.() -> Unit) {
     navigate(Settings, builder)
@@ -31,9 +33,9 @@ fun NavGraphBuilder.settingsNavGraph(
     onDisplayThirdPartyLicenses: () -> Unit
 ) {
     navigation<Settings>(
-        startDestination = SettingsScreen,
+        startDestination = Settings.Main,
     ) {
-        animatedComposable<SettingsScreen>(
+        animatedComposable<Settings.Main>(
             exitTransition = {
                 val toLoginScreen = targetState.destination.route?.startsWith(LoginScreen::class.qualifiedName!!) ?: false
                 if (toLoginScreen) {
@@ -45,16 +47,27 @@ fun NavGraphBuilder.settingsNavGraph(
             SettingsScreen(
                 modifier = Modifier.fillMaxSize(),
                 onNavigateUp = navController::navigateUp,
-                onDisplayThirdPartyLicenses = onDisplayThirdPartyLicenses
-            ) {
-                navController.navigate(PushNotificationSettingsScreen)
-            }
+                onDisplayThirdPartyLicenses = onDisplayThirdPartyLicenses,
+                onRequestOpenAccountSettings = {
+                    navController.navigate(Settings.AccountDetails)
+                },
+                onRequestOpenNotificationSettings = {
+                    navController.navigate(Settings.PushNotification)
+                }
+            )
         }
 
-        animatedComposable<PushNotificationSettingsScreen> {
+        animatedComposable<Settings.PushNotification> {
             PushNotificationSettingsScreen(
                 modifier = Modifier.fillMaxSize(),
                 onDone = navController::navigateUp
+            )
+        }
+
+        animatedComposable<Settings.AccountDetails> {
+            AccountSettingsScreen(
+                modifier = Modifier.fillMaxSize(),
+                onNavigateUp = navController::navigateUp
             )
         }
     }
