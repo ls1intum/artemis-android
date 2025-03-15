@@ -8,7 +8,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.Sav
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.SavedPostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 import kotlinx.coroutines.test.runTest
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
@@ -17,7 +16,6 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.milliseconds
 
-@Ignore("Suddenly started failing: https://github.com/ls1intum/artemis-android/issues/370")
 @RunWith(RobolectricTestRunner::class)
 @Category(EndToEndTest::class)
 class SavedPostServiceImplTest : ConversationMessagesBaseTest() {

@@ -55,6 +55,8 @@ We use both unit tests and end-to-end integration tests. Before running the end-
 - To run the end-to-end tests, first start artemis locally in docker: 
   - `docker compose -f docker/e2e-tests.yml up artemis-app-setup`
   - `./gradlew test -Dskip.unit-tests=true -Dskip.e2e=false -Dskip.debugVariants=true -Dskip.flavor.unrestricted=true -Dskip.flavor.beta=true`
+  - **Note**: With the end-to-end tests, we create many new courses that might pile up and slow down the performance of the tests. 
+Consider cleaning the database by running `docker volume rm artemis-mysql-data-android` from time to time.
 
 
 For AndroidStudio, there are also preconfigured run configurations available. 
