@@ -15,7 +15,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.Work
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.CommunicationNotificationManagerImpl
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.MiscNotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.NotificationManagerImpl
-import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.UpdateReplyNotificationWorker
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.mark_as_read.MarkConversationAsReadWorker
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.reply.UpdateReplyNotificationWorker
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.network.NotificationSettingsService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.network.impl.NotificationSettingsServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsViewModel
@@ -52,6 +53,7 @@ val pushModule = module {
     workerOf(::UploadPushNotificationDeviceConfigurationWorker)
     workerOf(::UnsubscribeFromNotificationsWorker)
     workerOf(::UpdateReplyNotificationWorker)
+    workerOf(::MarkConversationAsReadWorker)
 
     single<NotificationSettingsService> {
         NotificationSettingsServiceImpl(
