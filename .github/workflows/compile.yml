@@ -3,7 +3,11 @@ name: Compile
 on:
   push:
     branches: [main, develop]
+    paths-ignore:
+      - '*.md'
   pull_request:
+    paths-ignore:
+      - '*.md'
   workflow_dispatch:
 
 permissions:
