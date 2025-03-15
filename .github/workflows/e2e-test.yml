@@ -5,7 +5,11 @@ on:
     branches:
       - main
       - develop
+    paths-ignore:
+      - '**.md'
   pull_request:
+    paths-ignore:
+      - '**.md'
   workflow_dispatch:
 
 permissions:
@@ -41,14 +45,8 @@ jobs:
         if: success() || failure()
         continue-on-error: true
 
-        # Sanity cleanup 2
-      - name: Print what is running on port 3306
-        run: sudo lsof -i:3306 || true
-        continue-on-error: true
-
-      - name: Stop anything still running on port 3306
-        run: sudo kill -9 $(sudo lsof -t -i:3306) || true
-        continue-on-error: true
+      - name: Remove mysql volume
+        run: docker volume rm artemis-mysql-data-android || exit 0
 
       - name: Launch docker containers
         run: docker compose -f docker/e2e-tests.yml up -d artemis-app-setup

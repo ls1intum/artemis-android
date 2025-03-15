@@ -2,12 +2,13 @@ package de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.not
 
 import android.content.Context
 import androidx.core.app.NotificationCompat
-import de.tum.informatics.www1.artemis.native_app.feature.push.ArtemisNotificationBuilder
 import de.tum.informatics.www1.artemis.native_app.core.common.ArtemisNotificationChannel
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ArtemisNotificationManager
+import de.tum.informatics.www1.artemis.native_app.feature.push.ArtemisNotificationBuilder
 import de.tum.informatics.www1.artemis.native_app.feature.push.R
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ArtemisNotification
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.MiscNotificationType
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.util.NotificationTargetManager
 import kotlinx.coroutines.runBlocking
 
 internal class MiscNotificationManager(private val context: Context) : BaseNotificationManager {

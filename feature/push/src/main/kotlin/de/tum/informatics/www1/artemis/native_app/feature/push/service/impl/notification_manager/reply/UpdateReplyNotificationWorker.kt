@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager
+package de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.reply
 
 import android.content.Context
 import androidx.work.WorkerParameters
@@ -33,6 +33,7 @@ class UpdateReplyNotificationWorker(
 
                 communicationNotificationManager.addSelfMessage(
                     parentId = conversationId,
+                    authorLoginName = account.username ?: "self",
                     authorName = account.humanReadableName,
                     authorImageUrl = account.imageUrl,
                     body = content,
