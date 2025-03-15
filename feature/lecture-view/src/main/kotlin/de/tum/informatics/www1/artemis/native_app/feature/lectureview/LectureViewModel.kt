@@ -2,6 +2,8 @@ package de.tum.informatics.www1.artemis.native_app.feature.lectureview
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
@@ -17,11 +19,12 @@ import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvi
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitExercise
-import de.tum.informatics.www1.artemis.native_app.core.ui.authTokenStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BaseExerciseListViewModel
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.service.LectureService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.network.ChannelService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
@@ -33,6 +36,7 @@ import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
@@ -54,6 +58,8 @@ internal class LectureViewModel(
     private val accountService: AccountService,
     private val liveParticipationService: LiveParticipationService,
     private val savedStateHandle: SavedStateHandle,
+    private val channelService: ChannelService,
+    private val artemisContextProvider: ArtemisContextProvider,
     serverTimeService: ServerTimeService,
     courseExerciseService: CourseExerciseService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
@@ -83,7 +89,9 @@ internal class LectureViewModel(
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
 
     val serverUrl: StateFlow<String> = serverUrlStateFlow(serverConfigurationService)
-    val authToken: StateFlow<String> = authTokenStateFlow(accountService)
+    val artemisContext: StateFlow<ArtemisContext> = artemisContextProvider.flow
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, ArtemisContext.Empty)
+
 
     /**
      * The lecture with updated participations as they arrive.
@@ -197,6 +205,26 @@ internal class LectureViewModel(
             }
         }
     }
+
+    val channelDataState: StateFlow<DataState<ChannelChat>> = combine(
+        lectureDataState,
+        serverConfigurationService.serverUrl,
+        accountService.authToken
+    ) { lectureDataState, serverUrl, authToken ->
+        Triple(lectureDataState, serverUrl, authToken)
+    }
+        .flatMapLatest { (lectureDataState, serverUrl, authToken) ->
+            when (lectureDataState) {
+                is DataState.Success -> {
+                    val courseId = lectureDataState.data.course?.id ?: 0L
+                    retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+                        channelService.getLectureChannel(lectureId, courseId)
+                    }
+                }
+                else -> flowOf(DataState.Loading())
+            }
+        }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
 
     fun requestReloadLecture() {
         onReloadLecture.tryEmit(Unit)

@@ -6,8 +6,6 @@
 The native android client for Artemis, an interactive learning platform with individual feedback. 
 It is available on the [Google PlayStore](https://play.google.com/store/apps/details?id=de.tum.cit.aet.artemis).
 
-For the iOS app, check [this repository](https://github.com/ls1intum/artemis-ios)
-
 ## Screenshots
 <p float="left">
   <img src="playStoreScreenshots/smartphone/dashboard.png" width="250"/>
@@ -57,6 +55,8 @@ We use both unit tests and end-to-end integration tests. Before running the end-
 - To run the end-to-end tests, first start artemis locally in docker: 
   - `docker compose -f docker/e2e-tests.yml up artemis-app-setup`
   - `./gradlew test -Dskip.unit-tests=true -Dskip.e2e=false -Dskip.debugVariants=true -Dskip.flavor.unrestricted=true -Dskip.flavor.beta=true`
+  - **Note**: With the end-to-end tests, we create many new courses that might pile up and slow down the performance of the tests. 
+Consider cleaning the database by running `docker volume rm artemis-mysql-data-android` from time to time.
 
 
 For AndroidStudio, there are also preconfigured run configurations available. 
@@ -64,6 +64,10 @@ For AndroidStudio, there are also preconfigured run configurations available.
 ## Play store screenshots
 Screenshots can be generated using preview-composables in the `debug` source sets. They are annotated with `@PlayStoreScreenshots`. To get the screenshots, right click the rendered preview
 in AndroidStudio and select copy-image.
+
+## Related repositories
+- [Native iOS app](https://github.com/ls1intum/artemis-ios)
+- [Backend and Webapp](https://github.com/ls1intum/artemis)
 
 ## License
 By building the dockerfile or using its derived images, you accept the terms in the following license agreements:

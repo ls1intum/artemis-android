@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_c
 
 import android.util.Log
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -29,7 +30,6 @@ import io.ktor.http.appendPathSegments
 import io.ktor.http.contentType
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 
@@ -93,7 +93,7 @@ suspend fun KoinComponent.createCourse(
     ) {
         url(serverConfigurationService.serverUrl.first())
         url {
-            appendPathSegments("api", "admin", "courses")
+            appendPathSegments(*Api.Core.path, "admin", "courses")
         }
 
         cookieAuth(accessToken)
@@ -108,12 +108,12 @@ suspend fun KoinComponent.createExercise(
     accessToken: String,
     courseId: Long,
     exerciseName: String = "Exercise ${generateId()}",
-    endpoint: String,
+    pathSegments: Array<out String>,
     creator: (String, Long) -> String
 ): Exercise {
     return ktorProvider.ktorClient.post(serverConfigurationService.serverUrl.first()) {
         url {
-            appendPathSegments("api", endpoint)
+            appendPathSegments(*pathSegments)
         }
 
         cookieAuth(accessToken)
@@ -132,7 +132,7 @@ suspend fun KoinComponent.createExerciseFormBodyWithPng(
     exerciseName: String = "Exercise ${generateId()}",
     pngByteArray: ByteArray,
     pngFilePath: String,
-    endpoint: String,
+    pathSegments: Array<out String>,
     creator: (String, Long) -> String
 ): Exercise {
     return ktorProvider.ktorClient.submitFormWithBinaryData(
@@ -157,7 +157,7 @@ suspend fun KoinComponent.createExerciseFormBodyWithPng(
     ) {
         url(serverConfigurationService.serverUrl.first())
         url {
-            appendPathSegments("api", endpoint)
+            appendPathSegments(*pathSegments)
         }
 
         cookieAuth(accessToken)
@@ -174,7 +174,7 @@ suspend fun KoinComponent.createLecture(
 ): Lecture {
     return ktorProvider.ktorClient.post(serverConfigurationService.serverUrl.first()) {
         url {
-            appendPathSegments("api", "lectures")
+            appendPathSegments(*Api.Lecture.Lectures.path)
         }
 
         setBody(
@@ -201,7 +201,7 @@ suspend fun KoinComponent.createLectureUnit(
 ): LectureUnit {
     return ktorProvider.ktorClient.post(serverConfigurationService.serverUrl.first()) {
         url {
-            appendPathSegments("api", "lectures", lectureId.toString(), endpoint)
+            appendPathSegments(*Api.Lecture.Lectures.path, lectureId.toString(), endpoint)
         }
 
         setBody(
@@ -255,7 +255,7 @@ suspend fun KoinComponent.createAttachmentUnit(
         url(serverConfigurationService.serverUrl.first())
 
         url {
-            appendPathSegments("api", "lectures", lectureId.toString(), "attachment-units")
+            appendPathSegments(*Api.Lecture.Lectures.path, lectureId.toString(), "attachment-units")
         }
 
         parameter("keepFilename", true)
@@ -306,7 +306,7 @@ suspend fun KoinComponent.createAttachment(
         url(serverConfigurationService.serverUrl.first())
 
         url {
-            appendPathSegments("api", "attachments")
+            appendPathSegments(*Api.Lecture.path, "attachments")
         }
 
         cookieAuth(accessToken)
@@ -323,7 +323,7 @@ suspend fun KoinComponent.addQuizExerciseBatch(
 ): QuizExercise.QuizBatch {
     return ktorProvider.ktorClient.put(serverConfigurationService.serverUrl.first()) {
         url {
-            appendPathSegments("api", "quiz-exercises", exerciseId.toString(), "add-batch")
+            appendPathSegments(*Api.Quiz.QuizExercises.path, exerciseId.toString(), "add-batch")
         }
 
         cookieAuth(accessToken)
@@ -339,7 +339,7 @@ suspend fun KoinComponent.startQuizExerciseBatch(
 ) {
     return ktorProvider.ktorClient.put(serverConfigurationService.serverUrl.first()) {
         url {
-            appendPathSegments("api", "quiz-exercises", exerciseId.toString(), "start-batch")
+            appendPathSegments(*Api.Quiz.QuizExercises.path, exerciseId.toString(), "start-batch")
         }
 
         setBody(batch)

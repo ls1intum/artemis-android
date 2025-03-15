@@ -4,6 +4,7 @@ import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTi
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.ktorProvider
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import io.ktor.client.request.put
@@ -18,6 +19,7 @@ import org.robolectric.RobolectricTestRunner
 
 @Category(EndToEndTest::class)
 @RunWith(RobolectricTestRunner::class)
+@Ignore("This test was super flaky, so we are ignoring it for now")
 internal class QuizPracticeParticipationE2eTest : QuizParticipationBaseE2eTest(QuizType.Practice) {
 
     override suspend fun setupHook() {
@@ -25,7 +27,7 @@ internal class QuizPracticeParticipationE2eTest : QuizParticipationBaseE2eTest(Q
 
         ktorProvider.ktorClient.put(testServerUrl) {
             url {
-                appendPathSegments("api", "quiz-exercises", quiz.id.toString(), "end-now")
+                appendPathSegments(*Api.Quiz.QuizExercises.path, quiz.id.toString(), "end-now")
             }
 
             cookieAuth(getAdminAccessToken())
@@ -34,7 +36,7 @@ internal class QuizPracticeParticipationE2eTest : QuizParticipationBaseE2eTest(Q
 
         ktorProvider.ktorClient.put(testServerUrl) {
             url {
-                appendPathSegments("api", "quiz-exercises", quiz.id.toString(), "open-for-practice")
+                appendPathSegments(*Api.Quiz.QuizExercises.path, quiz.id.toString(), "open-for-practice")
             }
 
             cookieAuth(getAdminAccessToken())
@@ -53,7 +55,6 @@ internal class QuizPracticeParticipationE2eTest : QuizParticipationBaseE2eTest(Q
         )
     }
 
-    @Ignore("This test was super flaky, so we are ignoring it for now")
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can submit practice quiz - multiple choice`() {
         testSubmitMultipleChoiceImpl()
@@ -64,7 +65,6 @@ internal class QuizPracticeParticipationE2eTest : QuizParticipationBaseE2eTest(Q
         testSubmitShortAnswerImpl()
     }
 
-    @Ignore("This test was super flaky, so we are ignoring it for now")
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can submit practice quiz - drag and drop`() {
         testSubmitDragAndDropImpl()

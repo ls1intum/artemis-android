@@ -14,6 +14,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.test.platform.app.InstrumentationRegistry
 import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.test.awaitFirstSuccess
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
@@ -46,8 +47,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.performTestLogin
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.testLoginModule
+import de.tum.informatics.www1.artemis.native_app.feature.metis.communicationModule
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.encodeToString
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -71,7 +72,7 @@ class LectureE2eTest : BaseComposeTest() {
         androidContext(InstrumentationRegistry.getInstrumentation().context)
 
         modules(coreTestModules)
-        modules(loginModule, lectureModule, testLoginModule, testWebsocketModule)
+        modules(loginModule, lectureModule, testLoginModule, testWebsocketModule, communicationModule)
     }
 
     private lateinit var course: Course
@@ -114,7 +115,7 @@ class LectureE2eTest : BaseComposeTest() {
             createExercise(
                 getAdminAccessToken(),
                 course.id!!,
-                endpoint = "text-exercises",
+                pathSegments = Api.Text.TextExercises.path,
                 creator = ::createTextExercise
             )
         }
@@ -237,7 +238,9 @@ class LectureE2eTest : BaseComposeTest() {
             accountService = get(),
             liveParticipationService = get(),
             savedStateHandle = SavedStateHandle(),
+            channelService = get(),
             serverTimeService = get(),
+            artemisContextProvider = get(),
             courseExerciseService = get(),
             coroutineContext = testDispatcher
         )

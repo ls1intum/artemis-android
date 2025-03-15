@@ -28,8 +28,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.NothingOpened
 import de.tum.informatics.www1.artemis.native_app.feature.metis.OpenedConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.OpenedSavedPosts
 import de.tum.informatics.www1.artemis.native_app.feature.metis.OpenedThread
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.ui.SavedPostsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationScreen
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.SavedPostsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.browse_channels.BrowseChannelsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_channel.CreateChannelScreen
@@ -283,6 +283,10 @@ internal fun SinglePageConversationBody(
                                 },
                                 onConversationLeft = {
                                     configuration = NothingOpened
+                                },
+                                onChannelDeleted = {
+                                    configuration = NothingOpened
+
                                 }
                             )
                         }

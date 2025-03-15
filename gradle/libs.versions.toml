@@ -5,19 +5,18 @@ minSdk = "30"
 buildToolsVersion = "35.0.0"
 
 accompanist = "0.30.1"
-androidDesugarJdkLibs = "2.1.4"
+androidDesugarJdkLibs = "2.1.5"
 androidGradlePlugin = "8.7.1"
-androidxActivity = "1.10.0"
+androidxActivity = "1.10.1"
 androidxAppCompat = "1.7.0"
-androidxComposeBom = "2025.02.00"
-androidxDataStore = "1.1.2"
+androidxComposeBom = "2025.03.00"
+androidxDataStore = "1.1.3"
 androidxLifecycle = "2.8.7"
-androidxNavigation = "2.8.7"
+androidxNavigation = "2.8.9"
 androidxPaging = "3.3.6"
 androidxPagingCompose = "3.3.6"
 coil = "3.1.0"
 coil2 = "2.7.0"     # The markwon library still depends on coil2: https://github.com/ls1intum/artemis-android/issues/171
-emoji2 = "1.5.0"
 kotlin = "2.1.10"
 kotlinxCoroutines = "1.10.1"
 kotlinxDatetime = "0.6.2"
@@ -26,13 +25,13 @@ koin = "4.0.2"
 koinAndroidxCompose = "4.0.0"
 kover = "0.9.1"
 krossbow = "9.0.0"
-ktor = "3.1.0"
+ktor = "3.1.1"
 markwon = "4.6.2"
-mockk = "1.13.16"
+mockk = "1.13.17"
 ossLicensesPlugin = "0.10.6"
 placeholderMaterial = "2.0.0"
 room = "2.6.1"
-sentry-android = "8.2.0"
+sentry-android = "8.4.0"
 work = "2.10.0"
 
 [libraries]
@@ -60,10 +59,6 @@ androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "u
 androidx-compose-ui-util = { group = "androidx.compose.ui", name = "ui-util" }
 androidx-dataStore-core = { group = "androidx.datastore", name = "datastore", version.ref = "androidxDataStore" }
 androidx-dataStore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "androidxDataStore" }
-androidx-emoji2 = { group = "androidx.emoji2", name = "emoji2", version.ref = "emoji2" }
-androidx-emoji2-views = { group = "androidx.emoji2", name = "emoji2-views", version.ref = "emoji2" }
-androidx-emoji2-views-helper = { group = "androidx.emoji2", name = "emoji2-views-helper", version.ref = "emoji2" }
-androidx-emoji2-emojiPicker = { group = "androidx.emoji2", name = "emoji2-emojipicker", version.ref = "emoji2" }
 androidx-lifecycle-viewModelCompose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "androidxLifecycle" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "androidxNavigation" }
 androidx-paging-runtime = { group = "androidx.paging", name = "paging-runtime", version.ref = "androidxPaging" }
@@ -82,7 +77,7 @@ coil-compose-core = { group = "io.coil-kt.coil3", name = "coil-compose-core", ve
 coil-test = { group = "io.coil-kt.coil3", name = "coil-test", version.ref = "coil" }
 coil-network = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 coil2-base = { group = "io.coil-kt", name = "coil-base", version.ref = "coil2" }
-google-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version = "33.9.0" }
+google-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version = "33.10.0" }
 google-firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
@@ -137,7 +132,7 @@ android-application = { id = "com.android.application", version.ref = "androidGr
 android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "5.1.1" }
-google-ksp = { id = "com.google.devtools.ksp", version = "2.1.10-1.0.30" }
+google-ksp = { id = "com.google.devtools.ksp", version = "2.1.10-1.0.31" }
 google-services = { id = "com.google.gms.google-services", version = "4.4.2" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

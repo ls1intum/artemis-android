@@ -21,10 +21,12 @@ import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvid
 import de.tum.informatics.www1.artemis.native_app.device.test.NetworkStatusProviderStub
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.CourseScaffold
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.CourseTab
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.EmojiServiceStub
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.impl.EmojiServiceStub
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationChatListScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.DataStatus
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.PostsDataState
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
@@ -42,6 +44,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
@@ -251,6 +254,8 @@ fun `Metis - Conversation Channel`() {
                     onPinPost = { CompletableDeferred() },
                     onSavePost = { CompletableDeferred() },
                     onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
+                    generateLinkPreviews = { _ -> flowOf(emptyList<LinkPreview>()) as StateFlow<List<LinkPreview>> },
+                    onRemoveLinkPreview = { _, _, _ -> CompletableDeferred<MetisModificationFailure>() },
                     bottomItem = null,
                     onClickViewPost = {},
                     onRequestRetrySend = {},
@@ -269,8 +274,8 @@ private fun generateMessage(
     time: Instant,
     id: String,
     authorId: Long
-): ChatListItem.IndexedPost {
-    return ChatListItem.IndexedPost(
+): ChatListItem.PostItem {
+    return ChatListItem.PostItem.IndexedItem.Post(
         PostPojo(
             clientPostId = id,
             serverPostId = 0L,
@@ -288,7 +293,9 @@ private fun generateMessage(
             tags = emptyList(),
             answers = emptyList(),
             reactions = emptyList(),
-            displayPriority = null
-        )
+            displayPriority = null,
+            hasForwardedMessages = false
+        ),
+        emptyList()
     )
 }

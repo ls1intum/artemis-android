@@ -16,6 +16,8 @@ val lectureModule = module {
             get(),
             get(),
             get(),
+            get(),
+            get(),
             get()
         )
     }

@@ -38,10 +38,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
+import de.tum.informatics.www1.artemis.native_app.core.common.app_version.AppVersionProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.performAutoReloadingNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
@@ -61,7 +61,6 @@ import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -74,14 +73,13 @@ import org.koin.compose.koinInject
 @Composable
 internal fun SettingsScreen(
     modifier: Modifier,
-    versionCode: Int,
-    versionName: String,
     onNavigateUp: () -> Unit,
     onDisplayThirdPartyLicenses: () -> Unit,
     onRequestOpenNotificationSettings: () -> Unit
 ) {
     val linkOpener = LocalLinkOpener.current
 
+    val appVersion = koinInject<AppVersionProvider>().appVersion
     val pushNotificationJobService: PushNotificationJobService = koinInject()
     val pushNotificationConfigurationService: PushNotificationConfigurationService = koinInject()
 
@@ -95,19 +93,10 @@ internal fun SettingsScreen(
     val networkStatusProvider: NetworkStatusProvider = koinInject()
 
     val accountDataFlow: StateFlow<DataState<Account>?> = remember {
-        flatMapLatest(
-            accountDataService.onReloadRequired,
-            accountService.authenticationData
-        ) { _, authData ->
-            when (authData) {
-                is AccountService.AuthenticationData.LoggedIn -> {
-                    retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                        accountDataService.getAccountData()
-                    }
-                }
-
-                AccountService.AuthenticationData.NotLoggedIn -> flowOf(null)
-            }
+        accountDataService.performAutoReloadingNetworkCall(
+            networkStatusProvider = networkStatusProvider
+        ) {
+            getAccountData()
         }
             .stateIn(scope, SharingStarted.Eagerly, null)
     }
@@ -141,8 +130,6 @@ internal fun SettingsScreen(
                         scope.launch {
                             // the user manually logs out. Therefore we need to tell the server asap.
                             unsubscribeFromNotifications(
-                                serverConfigurationService,
-                                accountService,
                                 pushNotificationConfigurationService,
                                 pushNotificationJobService
                             )
@@ -175,8 +162,8 @@ internal fun SettingsScreen(
 
             BuildInformationSection(
                 modifier = Modifier.fillMaxWidth(),
-                versionCode = versionCode,
-                versionName = versionName
+                versionCode = appVersion.versionCode,
+                versionName = appVersion.fullVersionName
             )
         }
     }

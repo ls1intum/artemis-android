@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push.service.network
 
+import de.tum.informatics.www1.artemis.native_app.core.common.app_version.NormalizedAppVersion
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.PushNotificationSetting
 import io.ktor.http.HttpStatusCode
@@ -20,7 +21,8 @@ internal interface NotificationSettingsService {
     suspend fun uploadPushNotificationDeviceConfigurationsToServer(
         serverUrl: String,
         authToken: String,
-        firebaseToken: String
+        firebaseToken: String,
+        appVersion: NormalizedAppVersion
     ): NetworkResponse<SecretKey>
 
     /**

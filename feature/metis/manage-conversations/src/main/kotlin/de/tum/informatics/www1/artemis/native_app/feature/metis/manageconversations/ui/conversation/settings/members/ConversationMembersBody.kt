@@ -3,9 +3,13 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversat
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -158,8 +162,16 @@ private fun ConversationMembersList(
             LazyColumn(
                 modifier = modifier
                     .nestedScroll(collapsingContentState.nestedScrollConnection)
-                    .testTag(TEST_TAG_MEMBERS_LIST)
+                    .testTag(TEST_TAG_MEMBERS_LIST),
+                contentPadding = WindowInsets.navigationBars.asPaddingValues(),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                if (members.loadState.prepend is LoadState.Loading) {
+                    item {
+                        CircularProgressIndicator()
+                    }
+                }
+
                 items(
                     count = members.itemCount,
                     key = members.itemKey(key = { it.id })
@@ -181,9 +193,7 @@ private fun ConversationMembersList(
                 when (members.loadState.append) {
                     LoadState.Loading -> {
                         item {
-                            LinearProgressIndicator(
-                                modifier = Modifier.fillMaxWidth(),
-                            )
+                            CircularProgressIndicator()
                         }
                     }
 

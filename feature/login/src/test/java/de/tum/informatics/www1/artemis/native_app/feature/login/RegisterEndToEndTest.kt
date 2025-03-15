@@ -16,6 +16,7 @@ import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTi
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
@@ -124,7 +125,7 @@ class RegisterEndToEndTest : BaseComposeTest() {
     private suspend fun getUsers(loginName: String): List<User> {
         return ktorProvider.ktorClient.get(testServerUrl) {
             url {
-                appendPathSegments("api", "admin", "users")
+                appendPathSegments(*Api.Core.path, "admin", "users")
 
                 parameter("page", 0)
                 parameter("pageSize", 10)

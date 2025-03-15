@@ -94,7 +94,7 @@ fun BasicArtemisTextField(
 
 @Composable
 fun BasicSearchTextField(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     focusRequester: FocusRequester? = null,
     hint: String,
     query: String,

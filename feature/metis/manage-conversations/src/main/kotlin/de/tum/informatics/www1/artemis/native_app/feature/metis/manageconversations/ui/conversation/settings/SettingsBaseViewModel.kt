@@ -8,6 +8,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.performAutoReloadingNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -24,7 +25,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.plus
 import kotlin.coroutines.CoroutineContext
@@ -57,14 +57,11 @@ abstract class SettingsBaseViewModel(
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
-    val clientUsername: StateFlow<DataState<String>> = flatMapLatest(
-        onRequestReload.onStart { emit(Unit) },
-        accountDataService.onReloadRequired,
-    ) { _, _ ->
-        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-            accountDataService.getAccountData()
-        }
-            .map { accountDataState -> accountDataState.bind { it.username.orEmpty() } }
+    val clientUsername: StateFlow<DataState<String>> = accountDataService.performAutoReloadingNetworkCall(
+        networkStatusProvider = networkStatusProvider,
+        manualReloadFlow = onRequestReload
+    ) {
+        getAccountData().bind { it.username.orEmpty() }
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 

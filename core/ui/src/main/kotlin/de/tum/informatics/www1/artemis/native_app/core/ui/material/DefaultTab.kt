@@ -5,14 +5,14 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 
 @Composable
 fun DefaultTab(
     index: Int,
-    icon: ImageVector,
+    iconPainter: Painter,
     textRes: Int,
     selectedTabIndex: Int,
     updateSelectedTabIndex: (Int) -> Unit
@@ -22,7 +22,7 @@ fun DefaultTab(
         onClick = { updateSelectedTabIndex(index) },
         icon = {
             Icon(
-                imageVector = icon,
+                painter = iconPainter,
                 contentDescription = null
             )
         },
@@ -39,13 +39,13 @@ fun DefaultTab(
 @Composable
 fun DefaultTab(
     index: Int,
-    icon: ImageVector,
+    iconPainter: Painter,
     textRes: Int,
     selectedTabIndex: MutableState<Int>
 ) {
     DefaultTab(
         index = index,
-        icon = icon,
+        iconPainter = iconPainter,
         textRes = textRes,
         selectedTabIndex = selectedTabIndex.value,
         updateSelectedTabIndex = { selectedTabIndex.value = it }

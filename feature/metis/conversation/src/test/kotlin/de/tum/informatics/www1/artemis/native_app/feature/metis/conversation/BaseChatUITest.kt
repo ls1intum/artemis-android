@@ -13,12 +13,14 @@ import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.test.ArtemisImageProviderStub
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.EmojiServiceStub
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.impl.EmojiServiceStub
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.model.LinkPreview
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.PostsDataState
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.ConversationThreadUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.MetisThreadUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
@@ -34,8 +36,11 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.P
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.LocalVisibleMetisContextManager
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisiblePostList
 import de.tum.informatics.www1.artemis.native_app.feature.metistest.VisibleMetisContextManagerMock
+import io.mockk.every
+import io.mockk.mockk
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.datetime.Clock
 
 
@@ -131,6 +136,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                 authorName = "author name",
                 authorImageUrl = null,
                 isSaved = false,
+                hasForwardedMessages = false
             ),
             reactions = emptyList(),
             serverPostIdCache = AnswerPostPojo.ServerPostIdCache(
@@ -157,9 +163,31 @@ abstract class BaseChatUITest : BaseComposeTest() {
             answers = if (index == 0) answers else emptyList(),
             reactions = if (index == 0) reactions else emptyList(),
             displayPriority = DisplayPriority.NONE,
-            isSaved = false
+            isSaved = false,
+            hasForwardedMessages = index == 1
         )
     }
+
+    val forwardedPosts = listOf(
+        posts[2].copy(
+            clientPostId = "client-id-forwarded",
+            serverPostId = 10101.toLong(),
+            content = "Post content forwarded",
+            authorName = "author name forwarded"
+        )
+    )
+
+    private val linkPreviewStateFlow = MutableStateFlow(
+        listOf(
+            LinkPreview(
+                title = "Test URL Title",
+                description = "This is a test url description.",
+                image = "https://example.com",
+                url = "https://example.com",
+                shouldPreviewBeShown = false
+            )
+        )
+    )
 
     fun setupThreadUi(
         post: IStandalonePost,
@@ -169,6 +197,16 @@ abstract class BaseChatUITest : BaseComposeTest() {
         isAtLeastTutorInCourse: Boolean = false,
         hasModerationRights: Boolean = false,
     ) {
+        val threadUseCase = mockk<ConversationThreadUseCase>()
+        val testFlow = MutableStateFlow<ChatListItem.PostItem.ThreadItem.Answer?>(null)
+        every { threadUseCase.getAnswerChatListItem(any()) } returns testFlow
+
+        val chatListItem = if (post.hasForwardedMessages == true) {
+            ChatListItem.PostItem.ThreadItem.ContextItem.ContextPostWithForwardedMessage(post, forwardedPosts, course.id!!)
+        } else {
+            ChatListItem.PostItem.ThreadItem.ContextItem.ContextPost(post)
+        }
+
         composeTestRule.setContent {
             MetisThreadUi(
                 modifier = Modifier.fillMaxSize(),
@@ -181,9 +219,13 @@ abstract class BaseChatUITest : BaseComposeTest() {
                     isAtLeastTutorInCourse = isAtLeastTutorInCourse,
                     hasModerationRights = hasModerationRights,
                 ),
+                generateLinkPreviews = { _ -> linkPreviewStateFlow },
+                onRemoveLinkPreview = { _, _, _ -> CompletableDeferred<MetisModificationFailure>() },
                 serverUrl = "",
                 isMarkedAsDeleteList = mutableStateListOf(),
                 emojiService = EmojiServiceStub,
+                chatListContextItem = chatListItem,
+                answerChatListItemState = { answer -> threadUseCase.getAnswerChatListItem(answer) },
                 initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
                 onCreatePost = { CompletableDeferred() },
                 onEditPost = { _, _ -> CompletableDeferred() },
@@ -207,6 +249,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
         isAbleToPin: Boolean = false,
         isAtLeastTutorInCourse: Boolean = false,
         hasModerationRights: Boolean = false,
+        forwardedPosts: List<IStandalonePost?> = this.forwardedPosts,
         onPinPost: (IStandalonePost) -> Deferred<MetisModificationFailure> = { CompletableDeferred() }
     ) {
         composeTestRule.setContent {
@@ -219,7 +262,18 @@ abstract class BaseChatUITest : BaseComposeTest() {
                     )))
                 }
             ) {
-                val list = posts.map { post -> ChatListItem.IndexedPost(post) }.toMutableList()
+                val list = posts.map { post ->
+                    if (post.hasForwardedMessages == true) {
+                        ChatListItem.PostItem.IndexedItem.PostWithForwardedMessage(
+                            post = post,
+                            answers = post.answers.orEmpty(),
+                            forwardedPosts = forwardedPosts,
+                            courseId = course.id!!
+                        )
+                    } else {
+                        ChatListItem.PostItem.IndexedItem.Post(post, post.answers.orEmpty())
+                    }
+                }.toMutableList()
                 MetisChatList(
                     modifier = Modifier.fillMaxSize(),
                     initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
@@ -232,13 +286,18 @@ abstract class BaseChatUITest : BaseComposeTest() {
                     serverUrl = "",
                     courseId = course.id!!,
                     state = rememberLazyListState(),
-                    emojiService = EmojiServiceStub,isMarkedAsDeleteList = mutableStateListOf(),
+                    emojiService = EmojiServiceStub,
+                    isMarkedAsDeleteList = mutableStateListOf(),
                     bottomItem = null,
                     isReplyEnabled = true,
+                    generateLinkPreviews = { _ -> linkPreviewStateFlow },
+                    onRemoveLinkPreview = { _, _, _ -> CompletableDeferred<MetisModificationFailure>() },
                     onCreatePost = { CompletableDeferred() },
                     onEditPost = { _, _ -> CompletableDeferred() },
                     onPinPost = onPinPost,
-                    onSavePost = { CompletableDeferred() },onDeletePost = { CompletableDeferred() },onUndoDeletePost = {},
+                    onSavePost = { CompletableDeferred() },
+                    onDeletePost = { CompletableDeferred() },
+                    onUndoDeletePost = {},
                     onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                     onClickViewPost = {},
                     onRequestRetrySend = { _ -> },

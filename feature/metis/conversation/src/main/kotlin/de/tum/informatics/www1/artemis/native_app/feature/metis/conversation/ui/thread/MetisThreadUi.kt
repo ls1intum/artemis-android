@@ -33,15 +33,16 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.EmojiService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.ProvideEmojis
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ProvideEmojis
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisPostListHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.testTagForPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostItemViewJoinedType
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostWithBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.determinePostItemViewJoinedType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionBar
@@ -54,6 +55,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.isReplyEnabled
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.util.rememberDerivedConversationName
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
@@ -63,6 +65,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visibleme
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleStandalonePostDetails
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.flow.StateFlow
 import org.koin.compose.koinInject
 
 internal const val TEST_TAG_THREAD_LIST = "TEST_TAG_THREAD_LIST"
@@ -77,6 +80,10 @@ internal fun MetisThreadUi(
     viewModel: ConversationViewModel
 ) {
     val postDataState: DataState<IStandalonePost> by viewModel.threadUseCase.post.collectAsState()
+    val chatListContextItem by viewModel.threadUseCase.chatListItem.collectAsState()
+    val answerChatListItemState: (IAnswerPost) -> StateFlow<ChatListItem.PostItem.ThreadItem.Answer?> =
+        { viewModel.threadUseCase.getAnswerChatListItem(it) }
+
     val clientId: Long by viewModel.clientIdOrDefault.collectAsState()
 
     val serverUrl by viewModel.serverUrl.collectAsState()
@@ -103,11 +110,13 @@ internal fun MetisThreadUi(
             initialReplyTextProvider = viewModel,
             conversationDataState = conversationDataState,
             postDataState = postDataState,
+            chatListContextItem = chatListContextItem,
             postActionFlags = postActionFlags,
             serverUrl = serverUrl,
             emojiService = koinInject(),
             isMarkedAsDeleteList = viewModel.isMarkedAsDeleteList,
             clientId = clientId,
+            answerChatListItemState = answerChatListItemState,
             onCreatePost = viewModel::createReply,
             onEditPost = { post, newText ->
                 val parentPost = postDataState.orNull()
@@ -147,6 +156,8 @@ internal fun MetisThreadUi(
             onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
             onRequestReload = viewModel::requestReload,
             onRequestRetrySend = viewModel::retryCreateReply,
+            generateLinkPreviews = viewModel::generateLinkPreviews,
+            onRemoveLinkPreview = viewModel::removeLinkPreview,
             onFileSelect = { uri, context ->
                 viewModel.onFileSelected(uri, context)
             }
@@ -161,11 +172,15 @@ internal fun MetisThreadUi(
     clientId: Long,
     postDataState: DataState<IStandalonePost>,
     conversationDataState: DataState<Conversation>,
+    chatListContextItem: ChatListItem.PostItem.ThreadItem?,
     postActionFlags: PostActionFlags,
     serverUrl: String,
     isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     emojiService: EmojiService,
     initialReplyTextProvider: InitialReplyTextProvider,
+    answerChatListItemState: (IAnswerPost) -> StateFlow<ChatListItem.PostItem.ThreadItem.Answer?>,
+    generateLinkPreviews: (String) -> StateFlow<List<LinkPreview>>,
+    onRemoveLinkPreview: (LinkPreview, IBasePost, IStandalonePost?) -> Unit,
     onCreatePost: () -> Deferred<MetisModificationFailure?>,
     onEditPost: (IBasePost, String) -> Deferred<MetisModificationFailure?>,
     onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure?>)?,
@@ -223,8 +238,10 @@ internal fun MetisThreadUi(
                                     .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                                     .testTag(TEST_TAG_THREAD_LIST),
                                 post = post,
+                                chatListContextItem = chatListContextItem,
                                 postActionFlags = postActionFlags,
                                 clientId = clientId,
+                                answerChatListItemState = answerChatListItemState,
                                 isMarkedAsDeleteList = isMarkedAsDeleteList,
                                 onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
                                 onRequestEdit = onEditPostDelegate,
@@ -233,6 +250,8 @@ internal fun MetisThreadUi(
                                 onRequestResolve = onResolvePostDelegate,
                                 onRequestPin = onPinPostDelegate,
                                 onRequestSave = onSavePostDelegate,
+                                generateLinkPreviews = generateLinkPreviews,
+                                onRemoveLinkPreview = onRemoveLinkPreview,
                                 state = listState,
                                 onRequestRetrySend = onRequestRetrySend
                             )
@@ -249,7 +268,8 @@ internal fun MetisThreadUi(
                             conversationName = conversationName,
                             onFileSelected = { uri, ->
                                 onFileSelect(uri, context)
-                            }
+                            },
+                            emojiService = emojiService
                         )
                     }
                 }
@@ -263,15 +283,19 @@ private fun PostAndRepliesList(
     modifier: Modifier,
     state: LazyListState,
     post: IStandalonePost,
+    chatListContextItem: ChatListItem.PostItem.ThreadItem?,
     postActionFlags: PostActionFlags,
     isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     clientId: Long,
+    answerChatListItemState: (IAnswerPost) -> StateFlow<ChatListItem.PostItem.ThreadItem.Answer?>,
     onRequestEdit: (IBasePost) -> Unit,
     onRequestDelete: (IBasePost) -> Unit,
     onRequestUndoDelete: (IBasePost) -> Unit,
     onRequestResolve: (IBasePost) -> Unit,
     onRequestPin: (IBasePost) -> Unit,
     onRequestSave: (IBasePost) -> Unit,
+    generateLinkPreviews: (String) -> StateFlow<List<LinkPreview>>,
+    onRemoveLinkPreview: (LinkPreview, IBasePost, IStandalonePost?) -> Unit,
     onRequestReactWithEmoji: (IBasePost, emojiId: String, create: Boolean) -> Unit,
     onRequestRetrySend: (clientSidePostId: String, content: String) -> Unit
 ) {
@@ -310,6 +334,9 @@ private fun PostAndRepliesList(
     ) {
         item {
             val postActions = rememberPostActions(post)
+            val linkPreviews by remember(post.content) {
+                generateLinkPreviews(post.content.orEmpty())
+            }.collectAsState()
 
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -319,8 +346,12 @@ private fun PostAndRepliesList(
                     modifier = Modifier
                         .testTag(testTagForPost(post.standalonePostId)),
                     post = post,
-                    postItemViewType = PostItemViewType.ThreadContextPostItem,
+                    chatListItem = chatListContextItem ?: ChatListItem.PostItem.ThreadItem.ContextItem.ContextPost(post),
                     postActions = postActions,
+                    linkPreviews = linkPreviews,
+                    onRemoveLinkPreview = { linkPreview ->
+                        onRemoveLinkPreview(linkPreview, post, null)
+                    },
                     isMarkedAsDeleteList = isMarkedAsDeleteList,
                     displayHeader = true,
                     joinedItemType = PostItemViewJoinedType.PARENT,
@@ -341,8 +372,14 @@ private fun PostAndRepliesList(
 
         itemsIndexed(
             post.orderedAnswerPostings,
-            key = { index, post -> post.clientPostId ?: index }) { index, answerPost ->
+            key = { index, post -> post.clientPostId ?: index }
+        ) { index, answerPost ->
             val postActions = rememberPostActions(answerPost)
+            val answerChatListItem = answerChatListItemState(answerPost).collectAsState()
+            val answerPostLinkPreviews by remember(answerPost.content) {
+                generateLinkPreviews(answerPost.content.orEmpty())
+            }.collectAsState()
+
 
             PostWithBottomSheet(
                 modifier = Modifier
@@ -350,8 +387,12 @@ private fun PostAndRepliesList(
                     .testTag(testTagForAnswerPost(answerPost.clientPostId)),
                 post = answerPost,
                 postActions = postActions,
+                linkPreviews = answerPostLinkPreviews,
+                onRemoveLinkPreview = { linkPreview ->
+                    onRemoveLinkPreview(linkPreview, answerPost, post as? IStandalonePost)
+                },
                 isMarkedAsDeleteList = isMarkedAsDeleteList,
-                postItemViewType = PostItemViewType.ThreadAnswerItem,
+                chatListItem = answerChatListItem.value ?: ChatListItem.PostItem.ThreadItem.Answer.AnswerPost(answerPost),
                 clientId = clientId,
                 displayHeader = shouldDisplayHeader(
                     index = index,

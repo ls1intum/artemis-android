@@ -1,9 +1,11 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push.service.network.impl
 
 import android.util.Base64
+import de.tum.informatics.www1.artemis.native_app.core.common.app_version.NormalizedAppVersion
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.network.NotificationSettingsService
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.PushNotificationSetting
@@ -24,10 +26,6 @@ import javax.crypto.spec.SecretKeySpec
 internal class NotificationSettingsServiceImpl(private val ktorProvider: KtorProvider) :
     NotificationSettingsService {
 
-    private companion object {
-        private val pushNotificationSettingsResourcePathSegments = listOf("api", "notification-settings")
-    }
-
     override suspend fun getNotificationSettings(
         serverUrl: String,
         authToken: String
@@ -35,7 +33,7 @@ internal class NotificationSettingsServiceImpl(private val ktorProvider: KtorPro
         return performNetworkCall {
             ktorProvider.ktorClient.get(serverUrl) {
                 url {
-                    appendPathSegments(pushNotificationSettingsResourcePathSegments)
+                    appendPathSegments(*Api.Communication.NotificationSettings.path)
                 }
 
                 contentType(ContentType.Application.Json)
@@ -53,7 +51,7 @@ internal class NotificationSettingsServiceImpl(private val ktorProvider: KtorPro
         return performNetworkCall {
             ktorProvider.ktorClient.put(serverUrl) {
                 url {
-                    appendPathSegments(pushNotificationSettingsResourcePathSegments)
+                    appendPathSegments(*Api.Communication.NotificationSettings.path)
                 }
 
                 contentType(ContentType.Application.Json)
@@ -67,18 +65,22 @@ internal class NotificationSettingsServiceImpl(private val ktorProvider: KtorPro
     override suspend fun uploadPushNotificationDeviceConfigurationsToServer(
         serverUrl: String,
         authToken: String,
-        firebaseToken: String
+        firebaseToken: String,
+        appVersion: NormalizedAppVersion
     ): NetworkResponse<SecretKey> {
         return performNetworkCall {
             val response: RegisterResponseBody = ktorProvider.ktorClient.post(serverUrl) {
                 url {
-                    appendPathSegments("api", "push_notification", "register")
+                    appendPathSegments(*Api.Communication.PushNotification.path, "register")
                 }
 
                 cookieAuth(authToken)
 
                 contentType(ContentType.Application.Json)
-                setBody(RegisterRequestBody(token = firebaseToken))
+                setBody(RegisterRequestBody(
+                    token = firebaseToken,
+                    versionCode = appVersion.toString()
+                ))
             }.body()
 
             val keyBytes = Base64.decode(
@@ -98,7 +100,7 @@ internal class NotificationSettingsServiceImpl(private val ktorProvider: KtorPro
         return performNetworkCall {
             ktorProvider.ktorClient.delete(serverUrl) {
                 url {
-                    appendPathSegments("api", "push_notification", "unregister")
+                    appendPathSegments(*Api.Communication.PushNotification.path, "unregister")
                 }
 
                 cookieAuth(authToken)
@@ -111,6 +113,7 @@ internal class NotificationSettingsServiceImpl(private val ktorProvider: KtorPro
     @Serializable
     private data class RegisterRequestBody(
         val token: String,
+        val versionCode: String,
         val deviceType: String = "FIREBASE"
     )
 

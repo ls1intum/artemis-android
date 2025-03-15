@@ -167,7 +167,7 @@ internal fun BrowseChannelsScreen(
             EmptyListHint(
                 modifier = Modifier.align(Alignment.Center),
                 hint = stringResource(id = R.string.browse_channel_list_empty),
-                icon = Icons.Default.Tag
+                imageVector = Icons.Default.Tag
             )
         }
 

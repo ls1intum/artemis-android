@@ -19,6 +19,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.text.input.TextFieldValue
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.impl.EmojiServiceStub
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteHint
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteHintCollection
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteType
@@ -54,6 +55,7 @@ class ReplyTextFieldUiTest {
     )
 
     private val hintProviderStub = object : ReplyAutoCompleteHintProvider {
+        override val isFaqEnabled: Boolean = false
         override val legalTagChars: List<Char> = listOf('@')
         override fun produceAutoCompleteHints(tagChar: Char, query: String): Flow<DataState<List<AutoCompleteHintCollection>>> {
             return flowOf(DataState.Success(autoCompleteHints))
@@ -81,7 +83,8 @@ class ReplyTextFieldUiTest {
                         },
                         updateFailureState = {},
                         conversationName = "TestChat",
-                        onFileSelected = { _ -> }
+                        onFileSelected = { _ -> },
+                        emojiService = EmojiServiceStub
                     )
                 }
             }
