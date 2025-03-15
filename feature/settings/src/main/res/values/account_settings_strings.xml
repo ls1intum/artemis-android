@@ -6,5 +6,11 @@
     <string name="account_settings_information_email">Email:</string>
     <string name="account_settings_section">Details</string>
 
+    <string name="account_settings_edit_profile_picture">Change</string>
+    <string name="account_settings_upload_profile_picture">Upload</string>
+
+    <string name="account_settings_change_profile_picture_from_library">Upload photo from library</string>
+    <string name="account_settings_delete_profile_picture">Delete photo</string>
+
 
 </resources>
