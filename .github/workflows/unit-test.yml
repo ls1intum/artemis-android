@@ -6,10 +6,10 @@ on:
       - main
       - develop
     paths-ignore:
-      - '*.md'
+      - '**.md'
   pull_request:
     paths-ignore:
-      - '*.md'
+      - '**.md'
   workflow_dispatch:
 
 permissions:
