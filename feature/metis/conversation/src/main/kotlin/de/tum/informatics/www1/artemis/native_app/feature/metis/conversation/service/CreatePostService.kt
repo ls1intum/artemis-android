@@ -1,12 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service
 
 import androidx.work.WorkContinuation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.CreatePostStatus
 import kotlinx.coroutines.flow.Flow
 
 typealias CreatePostConfigurationBlock = WorkContinuation.(clientSidePostId: String) -> WorkContinuation
 
 interface CreatePostService {
-
 
     fun createPost(
         courseId: Long,
@@ -40,11 +40,5 @@ interface CreatePostService {
         configure: CreatePostConfigurationBlock = { this }
     )
 
-    fun observeCreatePostWorkStatus(clientSidePostId: String): Flow<Status>
-
-    enum class Status {
-        PENDING,
-        FAILED,
-        FINISHED
-    }
+    fun observeCreatePostWorkStatus(clientSidePostId: String): Flow<CreatePostStatus>
 }
