@@ -39,7 +39,7 @@ networks:
     name: artemis
 
 volumes:
-  artemis-mysql-data:
-    name: artemis-mysql-data
+  artemis-mysql-data-android:
+    name: artemis-mysql-data-android
   artemis-data:
     name: artemis-data
