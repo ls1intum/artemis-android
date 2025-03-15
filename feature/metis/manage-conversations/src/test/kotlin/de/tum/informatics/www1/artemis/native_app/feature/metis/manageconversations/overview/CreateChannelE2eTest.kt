@@ -3,8 +3,10 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversat
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -38,6 +40,9 @@ import kotlin.test.assertIs
 @Category(EndToEndTest::class)
 @RunWith(RobolectricTestRunner::class)
 class CreateChannelE2eTest : ConversationBaseTest() {
+
+    private val privateIndex = 1
+    private val courseWideIndex = 0
 
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can create channel`() {
@@ -128,14 +133,13 @@ class CreateChannelE2eTest : ConversationBaseTest() {
             composeTestRule
                 .onNodeWithTag(TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH)
                 .performScrollTo()
-                .performClick()
             composeTestRule
-                .onNodeWithTag(TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH)
-                .assertIsOn()
+                .onNodeWithTag(TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH + privateIndex)
+                .assertIsSelected()
         } else {
             composeTestRule
-                .onNodeWithTag(TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH)
-                .assertIsOff()
+                .onNodeWithTag(TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH + privateIndex)
+                .assertIsNotSelected()
         }
 
         if (isAnnouncement) {
@@ -156,14 +160,13 @@ class CreateChannelE2eTest : ConversationBaseTest() {
             composeTestRule
                 .onNodeWithTag(TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH)
                 .performScrollTo()
-                .performClick()
             composeTestRule
-                .onNodeWithTag(TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH)
-                .assertIsOn()
+                .onNodeWithTag(TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH + courseWideIndex)
+                .assertIsSelected()
         } else {
             composeTestRule
-                .onNodeWithTag(TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH)
-                .assertIsOff()
+                .onNodeWithTag(TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH + courseWideIndex)
+                .assertIsNotSelected()
         }
 
         composeTestRule
@@ -201,6 +204,5 @@ class CreateChannelE2eTest : ConversationBaseTest() {
             channel.isCourseWide,
             "Course Wide property not set correctly"
         )
-
     }
 }

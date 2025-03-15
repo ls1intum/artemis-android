@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversat
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -15,16 +16,24 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -81,9 +90,8 @@ internal fun CreateChannelScreen(
     val isNameIllegal by viewModel.isNameIllegal.collectAsState()
     val isDescriptionIllegal by viewModel.isDescriptionIllegal.collectAsState()
 
-    val isPrivate by viewModel.isPrivate.collectAsState()
+    val isPublic by viewModel.isPublic.collectAsState()
     val isAnnouncement by viewModel.isAnnouncement.collectAsState()
-    val isCourseWide by viewModel.isCourseWide.collectAsState()
 
     val canCreate by viewModel.canCreate.collectAsState()
 
@@ -129,11 +137,19 @@ internal fun CreateChannelScreen(
                     } else R.string.create_channel_text_field_name_hint
                 ),
                 leadingIcon = {
-                    Icon(
-                        modifier = Modifier,
-                        imageVector = Icons.Default.Numbers,
-                        contentDescription = null
-                    )
+                    if (isPublic) {
+                        Icon(
+                            modifier = Modifier,
+                            imageVector = Icons.Default.Numbers,
+                            contentDescription = null
+                        )
+                    } else {
+                        Icon(
+                            modifier = Modifier,
+                            imageVector = Icons.Default.Lock,
+                            contentDescription = null
+                        )
+                    }
                 },
                 requiredSupportText = stringResource(id = R.string.create_channel_text_field_name_required)
             )
@@ -151,31 +167,9 @@ internal fun CreateChannelScreen(
                 requiredSupportText = null
             )
 
-            BinarySelection(
-                modifier = Modifier.fillMaxWidth(),
-                title = stringResource(id = R.string.create_channel_channel_accessibility_type),
-                description = stringResource(id = R.string.create_channel_channel_accessibility_type_hint),
-                isChecked = isPrivate,
-                onCheckedChange = { viewModel.updatePublic(it) },
-                switchTestTag = TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH,
-            )
-
-            BinarySelection(
-                modifier = Modifier.fillMaxWidth(),
-                title = stringResource(id = R.string.create_channel_channel_announcement_type),
-                description = stringResource(id = R.string.create_channel_channel_announcement_type_hint),
-                isChecked = isAnnouncement,
-                onCheckedChange = { viewModel.updateAnnouncement(it) },
-                switchTestTag = TEST_TAG_SET_ANNOUNCEMENT_UNRESTRICTED_SWITCH,
-            )
-
-            BinarySelection(
-                modifier = Modifier.fillMaxWidth(),
-                title = stringResource(id = R.string.create_channel_channel_course_wide_type),
-                description = stringResource(id = R.string.create_channel_channel_course_wide_type_hint),
-                isChecked = isCourseWide,
-                onCheckedChange = { viewModel.updateCourseWide(it) },
-                switchTestTag = TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH,
+            ChannelSettings(
+                viewModel = viewModel,
+                isAnnouncement = isAnnouncement
             )
 
             Button(
@@ -212,6 +206,140 @@ internal fun CreateChannelScreen(
 }
 
 @Composable
+private fun ChannelSettings(
+    modifier: Modifier = Modifier,
+    viewModel: CreateChannelViewModel,
+    isAnnouncement: Boolean
+) {
+    val selectionModifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
+
+    Card(
+        modifier = modifier,
+        shape = MaterialTheme.shapes.medium
+    ) {
+        Column(
+            modifier = modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.create_channel_settings_section_title),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            SegmentedSelection(
+                modifier = selectionModifier,
+                title = stringResource(id = R.string.create_channel_channel_accessibility_type),
+                description = stringResource(id = R.string.create_channel_channel_accessibility_type_hint),
+                buttonLabelOption = listOf(
+                    stringResource(id = R.string.create_channel_channel_accessibility_type_public),
+                    stringResource(id = R.string.create_channel_channel_accessibility_type_private)
+                ),
+                onCheckedChange = { viewModel.updatePublic(it) },
+                testTag = TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH,
+            )
+
+            SegmentedSelection(
+                modifier = selectionModifier,
+                title = stringResource(id = R.string.create_channel_channel_type),
+                description = stringResource(id = R.string.create_channel_channel_course_wide_type_hint),
+                onCheckedChange = { viewModel.updateCourseWide(it) },
+                testTag = TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH,
+                buttonLabelOption = listOf(
+                    stringResource(id = R.string.create_channel_channel_course_wide_type_announcement),
+                    stringResource(id = R.string.create_channel_channel_course_wide_type_unrestricted)
+                ),
+            )
+
+            BinarySelection(
+                modifier = selectionModifier,
+                title = stringResource(id = R.string.create_channel_channel_announcement_type),
+                description = stringResource(id = R.string.create_channel_channel_announcement_type_hint),
+                isChecked = isAnnouncement,
+                onCheckedChange = { viewModel.updateAnnouncement(it) },
+                switchTestTag = TEST_TAG_SET_ANNOUNCEMENT_UNRESTRICTED_SWITCH,
+            )
+        }
+    }
+}
+
+@Composable
+private fun SegmentedSelection(
+    modifier: Modifier,
+    title: String,
+    description: String,
+    buttonLabelOption: List<String>,
+    onCheckedChange: (Boolean) -> Unit,
+    testTag: String = ""
+) {
+    val targetOption = 0
+    var selectedOption by remember { mutableIntStateOf(targetOption) }
+
+    Column(
+        modifier = modifier.padding(bottom = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                modifier = Modifier,
+                text = title,
+                style = MaterialTheme.typography.bodyLarge
+            )
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            SingleChoiceSegmentedButtonRow(
+                modifier = Modifier
+                    .scale(Scaling.SWITCH)
+                    .testTag(testTag)
+            ) {
+                buttonLabelOption.forEachIndexed { index, label ->
+                    val selected = index == selectedOption
+                    SegmentedButton(
+                        modifier = Modifier.testTag(testTag + index),
+                        selected = selected,
+                        colors = SegmentedButtonDefaults.colors(
+                            inactiveContainerColor = CardDefaults.cardColors().containerColor
+                        ),
+                        onClick = {
+                            selectedOption = index
+                            onCheckedChange(selectedOption == targetOption)
+                        },
+                        shape = SegmentedButtonDefaults.itemShape(index, buttonLabelOption.size),
+                        icon = {
+                            SegmentedButtonDefaults.Icon(
+                                active = selected,
+                                activeContent = {
+                                    Icon(
+                                        modifier = Modifier.padding(start = 8.dp),
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = null
+                                    )
+                                }
+                            )
+                        }
+                    ) {
+                        Text(
+                            modifier = Modifier.padding(horizontal = 8.dp),
+                            text = label
+                        )
+                    }
+                }
+            }
+        }
+
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            text = description,
+            style = MaterialTheme.typography.bodySmall
+        )
+    }
+}
+
+@Composable
 private fun BinarySelection(
     modifier: Modifier,
     title: String,
@@ -231,7 +359,7 @@ private fun BinarySelection(
             Text(
                 modifier = Modifier.weight(1f),
                 text = title,
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.bodyLarge
             )
             Switch(
                 modifier = Modifier

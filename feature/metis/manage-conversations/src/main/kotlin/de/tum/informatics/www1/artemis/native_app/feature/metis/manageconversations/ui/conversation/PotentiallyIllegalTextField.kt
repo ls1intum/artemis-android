@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation
 
 import androidx.annotation.StringRes
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -60,6 +61,7 @@ internal fun PotentiallyIllegalTextField(
                 Text(text = requiredSupportText)
             }
         },
+        shape = MaterialTheme.shapes.medium,
         leadingIcon = leadingIcon,
         isError = isIllegal,
         readOnly = readOnly,

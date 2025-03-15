@@ -39,10 +39,10 @@ internal class CreateChannelViewModel(
     val name: StateFlow<String> = savedStateHandle.getStateFlow(KEY_NAME, "")
     val description: StateFlow<String> = savedStateHandle.getStateFlow(KEY_DESCRIPTION, "")
 
-    val isPrivate: StateFlow<Boolean> = savedStateHandle.getStateFlow(KEY_IS_PRIVATE, false)
+    val isPublic: StateFlow<Boolean> = savedStateHandle.getStateFlow(KEY_IS_PRIVATE, true)
     val isAnnouncement: StateFlow<Boolean> =
         savedStateHandle.getStateFlow(KEY_IS_ANNOUNCEMENT, false)
-    val isCourseWide: StateFlow<Boolean> =
+    private val isCourseWide: StateFlow<Boolean> =
         savedStateHandle.getStateFlow(KEY_IS_COURSE_WIDE, false)
 
     val isNameIllegal: StateFlow<Boolean> = name
@@ -68,7 +68,7 @@ internal class CreateChannelViewModel(
                 courseId = courseId,
                 name = name.value,
                 description = description.value,
-                isPublic = !isPrivate.value,
+                isPublic = isPublic.value,
                 isAnnouncement = isAnnouncement.value,
                 isCourseWide = isCourseWide.value,
                 authToken = authToken,
