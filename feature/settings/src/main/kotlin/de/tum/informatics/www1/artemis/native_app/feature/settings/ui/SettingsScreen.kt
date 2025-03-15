@@ -29,8 +29,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,31 +36,22 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import de.tum.informatics.www1.artemis.native_app.core.common.app_version.AppVersionProvider
+import de.tum.informatics.www1.artemis.native_app.core.common.app_version.AppVersion
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
-import de.tum.informatics.www1.artemis.native_app.core.data.service.performAutoReloadingNetworkCall
-import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
-import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
+import de.tum.informatics.www1.artemis.native_app.core.ui.LinkOpener
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
+import de.tum.informatics.www1.artemis.native_app.core.ui.collectAsState
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.pagePadding
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureData
-import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
-import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
-import de.tum.informatics.www1.artemis.native_app.feature.push.unsubscribeFromNotifications
 import de.tum.informatics.www1.artemis.native_app.feature.settings.BuildConfig
 import de.tum.informatics.www1.artemis.native_app.feature.settings.R
 import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 
@@ -73,35 +62,41 @@ import org.koin.compose.koinInject
 @Composable
 internal fun SettingsScreen(
     modifier: Modifier,
+    viewModel: SettingsViewModel = koinInject(),
     onNavigateUp: () -> Unit,
     onDisplayThirdPartyLicenses: () -> Unit,
     onRequestOpenNotificationSettings: () -> Unit
 ) {
     val linkOpener = LocalLinkOpener.current
+    val artemisContext by LocalArtemisContextProvider.current.collectAsState()
 
-    val appVersion = koinInject<AppVersionProvider>().appVersion
-    val pushNotificationJobService: PushNotificationJobService = koinInject()
-    val pushNotificationConfigurationService: PushNotificationConfigurationService = koinInject()
+    val accountData: DataState<Account>? by viewModel.account.collectAsState()
 
-    val accountService: AccountService = koinInject()
-    val serverConfigurationService: ServerConfigurationService = koinInject()
-    val serverUrl by serverConfigurationService.serverUrl.collectAsState(initial = "")
+    SettingsScreen(
+        modifier = modifier,
+        accountDataState = accountData,
+        serverUrl = artemisContext.serverUrl,
+        appVersion = viewModel.appVersion,
+        linkOpener = linkOpener,
+        onNavigateUp = onNavigateUp,
+        onRequestLogout = viewModel::onRequestLogout,
+        onRequestOpenNotificationSettings = onRequestOpenNotificationSettings,
+        onDisplayThirdPartyLicenses = onDisplayThirdPartyLicenses
+    )
+}
 
-    val scope = rememberCoroutineScope()
-
-    val accountDataService: AccountDataService = koinInject()
-    val networkStatusProvider: NetworkStatusProvider = koinInject()
-
-    val accountDataFlow: StateFlow<DataState<Account>?> = remember {
-        accountDataService.performAutoReloadingNetworkCall(
-            networkStatusProvider = networkStatusProvider
-        ) {
-            getAccountData()
-        }
-            .stateIn(scope, SharingStarted.Eagerly, null)
-    }
-    val accountData: DataState<Account>? by accountDataFlow.collectAsState()
-
+@Composable
+fun SettingsScreen(
+    modifier: Modifier = Modifier,
+    accountDataState: DataState<Account>?,
+    serverUrl: String,
+    appVersion: AppVersion,
+    linkOpener: LinkOpener,
+    onNavigateUp: () -> Unit,
+    onRequestLogout: () -> Unit,
+    onRequestOpenNotificationSettings: () -> Unit,
+    onDisplayThirdPartyLicenses: () -> Unit
+) {
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -122,21 +117,11 @@ internal fun SettingsScreen(
                 .pagePadding(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            accountData?.let {
+            accountDataState?.let {
                 UserInformationSection(
                     modifier = Modifier.fillMaxWidth(),
                     accountDataState = it,
-                    onRequestLogout = {
-                        scope.launch {
-                            // the user manually logs out. Therefore we need to tell the server asap.
-                            unsubscribeFromNotifications(
-                                pushNotificationConfigurationService,
-                                pushNotificationJobService
-                            )
-
-                            accountService.logout()
-                        }
-                    }
+                    onRequestLogout = onRequestLogout
                 )
 
                 NotificationSection(
