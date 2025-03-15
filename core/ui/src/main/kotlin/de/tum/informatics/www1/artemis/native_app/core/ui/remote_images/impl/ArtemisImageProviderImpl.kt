@@ -9,7 +9,7 @@ import coil.ImageLoader
 import coil3.request.ImageRequest
 import coil3.request.ImageResult
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
-import de.tum.informatics.www1.artemis.native_app.core.ui.collectAsState
+import de.tum.informatics.www1.artemis.native_app.core.ui.collectArtemisContextAsState
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ArtemisImageProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.BaseImageProvider
 import io.ktor.http.URLBuilder
@@ -40,7 +40,7 @@ class ArtemisImageProviderImpl(
 
     @Composable
     override fun rememberArtemisImageRequest(imagePath: String): ImageRequest {
-        val artemisContext by artemisContextProvider.collectAsState()
+        val artemisContext by artemisContextProvider.collectArtemisContextAsState()
 
         val imageUrl = URLBuilder(artemisContext.serverUrl).appendPathSegments(imagePath).buildString()
         val authToken = artemisContext.authToken
@@ -57,7 +57,7 @@ class ArtemisImageProviderImpl(
 
     @Composable
     override fun rememberArtemisImageLoader(): ImageLoader {
-        val artemisContext by artemisContextProvider.collectAsState()
+        val artemisContext by artemisContextProvider.collectArtemisContextAsState()
         val authorizationToken = artemisContext.authToken
         val context = LocalContext.current
 

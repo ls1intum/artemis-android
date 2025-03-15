@@ -42,7 +42,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.core.ui.LinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
-import de.tum.informatics.www1.artemis.native_app.core.ui.collectAsState
+import de.tum.informatics.www1.artemis.native_app.core.ui.collectArtemisContextAsState
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.pagePadding
@@ -68,7 +68,7 @@ internal fun SettingsScreen(
     onRequestOpenNotificationSettings: () -> Unit
 ) {
     val linkOpener = LocalLinkOpener.current
-    val artemisContext by LocalArtemisContextProvider.current.collectAsState()
+    val artemisContext by LocalArtemisContextProvider.current.collectArtemisContextAsState()
 
     val accountData: DataState<Account>? by viewModel.account.collectAsState()
 
