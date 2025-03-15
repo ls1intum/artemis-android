@@ -58,6 +58,16 @@ abstract class ArtemisContextBasedServiceImpl(
         }
     }
 
+    suspend inline fun <reified T: Any>deleteRequest(
+        contentType: ContentType = ContentType.Application.Json,
+        crossinline block: HttpRequestBuilder.() -> Unit
+    ): NetworkResponse<T> {
+        return request(contentType) {
+            method = HttpMethod.Delete
+            block()
+        }
+    }
+
     suspend inline fun <reified T: Any>request(
         contentType: ContentType = ContentType.Application.Json,
         crossinline block: HttpRequestBuilder.() -> Unit

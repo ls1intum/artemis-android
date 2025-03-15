@@ -10,6 +10,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.DefaultTran
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.login.LoginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsScreen
+import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.account.AccountSettingsScreen
 import kotlinx.serialization.Serializable
 
 @Serializable

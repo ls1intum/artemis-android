@@ -1,29 +1,24 @@
-package de.tum.informatics.www1.artemis.native_app.feature.settings.ui
+package de.tum.informatics.www1.artemis.native_app.feature.settings.ui.account
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.filled.AssignmentInd
 import androidx.compose.material.icons.filled.Camera
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Mail
-import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -35,19 +30,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
-import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.BottomSheetActionButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.pagePadding
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureData
 import de.tum.informatics.www1.artemis.native_app.feature.settings.R
+import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.LogoutButtonEntry
+import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.PreferenceEntry
+import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.PreferenceSection
+import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.SettingsViewModel
 import org.koin.compose.koinInject
 
 
@@ -58,10 +55,15 @@ fun AccountSettingsScreen(
     onNavigateUp: () -> Unit,
 ) {
     val account by viewModel.account.collectAsState()
+    val context = LocalContext.current
 
     AccountSettingsScreen(
         modifier = modifier,
         accountDataState = account,
+        onDeleteProfilePicture = viewModel::onDeleteProfilePicture,
+        onUploadProfilePicture = {
+            viewModel.onUploadProfilePicture(it, context)
+        },
         onLogout = viewModel::onRequestLogout,
         onRequestReload = viewModel::requestReload,
         onNavigateUp = onNavigateUp
@@ -73,6 +75,8 @@ fun AccountSettingsScreen(
 fun AccountSettingsScreen(
     modifier: Modifier = Modifier,
     accountDataState: DataState<Account>,
+    onDeleteProfilePicture: () -> Unit,
+    onUploadProfilePicture: (Uri) -> Unit,
     onLogout: () -> Unit,
     onRequestReload: () -> Unit,
     onNavigateUp: () -> Unit,
@@ -106,41 +110,16 @@ fun AccountSettingsScreen(
         }
 
         if (showChangeActionsBottomSheet) {
-            ModalBottomSheet(
-                modifier = Modifier
-                    .statusBarsPadding(),
-                contentWindowInsets = { WindowInsets.navigationBars },
-                onDismissRequest = { showChangeActionsBottomSheet = false },
-            ) {
-                val hasCustomProfilePicture = accountDataState.orNull()?.hasCustomProfilePicture ?: false
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(Spacings.BottomSheetContentPadding)
-                ) {
-                    BottomSheetActionButton(
-                        icon = Icons.Default.PhotoLibrary,
-                        text = stringResource(R.string.account_settings_change_profile_picture_from_library),
-                        onClick = {
-                            showChangeActionsBottomSheet = false
-                        }
-                    )
-
-                    if (hasCustomProfilePicture) {
-                        BottomSheetActionButton(
-                            icon = Icons.Default.Delete,
-                            text = stringResource(R.string.account_settings_delete_profile_picture),
-                            onClick = {
-                                showChangeActionsBottomSheet = false
-                            }
-                        )
-                    }
-                }
-            }
+            ChangeProfilePictureBottomSheet(
+                accountDataState = accountDataState,
+                onFileSelected = onUploadProfilePicture,
+                onDeleteProfilePicture = onDeleteProfilePicture,
+                onDismiss = { showChangeActionsBottomSheet = false }
+            )
         }
     }
 }
+
 
 @Composable
 private fun AccountSettingsBody(
@@ -178,7 +157,9 @@ private fun ChangeProfilePicture(
     account: Account,
     onChangeClicked: () -> Unit
 ) {
-    Column {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         ProfilePicture(
             modifier = Modifier.size(200.dp),
             profilePictureData = ProfilePictureData.fromAccount(account)
