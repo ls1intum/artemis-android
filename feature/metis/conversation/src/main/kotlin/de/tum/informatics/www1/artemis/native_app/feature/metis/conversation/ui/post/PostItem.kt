@@ -270,7 +270,6 @@ fun PostItemMainContent(
     leadingContent: @Composable ColumnScope.() -> Unit = {},
     trailingContent: @Composable ColumnScope.() -> Unit = {}
 ) {
-    val hasTitle = post is IStandalonePost && post.title != null
     Column(
         modifier = modifier
     ) {
@@ -302,23 +301,17 @@ fun PostItemMainContent(
                 }
 
                 if (post?.content?.isNotEmpty() == true) {
-                    if (hasTitle) {
-                        val title = (post as IStandalonePost).title
-                        MarkdownText(
-                            markdown = remember(title, isPlaceholder) {
-                                if (isPlaceholder) {
-                                    PlaceholderContent
-                                } else title.orEmpty()
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .placeholder(visible = isPlaceholder),
-                            style = MaterialTheme.typography.titleMedium,
-                            onClick = onClick,
-                            onLongClick = onLongClick,
-                            color = PostColors.announcementTitle
-                        )
-                    }
+                    (post as? IStandalonePost)?.takeIf { it.title?.isNotBlank() == true }
+                        ?.let { standalonePost ->
+                            standalonePost.title?.let {
+                                Text(
+                                    text = it,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = PostColors.announcementTitle
+                                )
+                            }
+                        }
 
                     MarkdownText(
                         markdown = remember(post.content, isPlaceholder) {
