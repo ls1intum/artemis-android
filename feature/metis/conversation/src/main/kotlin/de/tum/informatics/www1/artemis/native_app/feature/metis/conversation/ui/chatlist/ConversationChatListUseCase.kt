@@ -16,7 +16,9 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService.StandalonePostsContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.DataStatus
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.ForwardedMessagesHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisFilter
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
@@ -60,7 +62,8 @@ class ConversationChatListUseCase(
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
     conversation: StateFlow<DataState<Conversation>>,
-    private val coroutineContext: CoroutineContext = EmptyCoroutineContext
+    private val coroutineContext: CoroutineContext = EmptyCoroutineContext,
+    private val courseId: Long
 ) {
     companion object {
         private const val TAG = "ConversationChatListUseCase"
@@ -131,6 +134,12 @@ class ConversationChatListUseCase(
                 pageSize = PAGE_SIZE,
                 enablePlaceholders = true
             )
+            val forwardedMessagesHandler = ForwardedMessagesHandler(
+                metisService = metisService,
+                metisContext = metisContext,
+                authToken = pagingDataInput.authenticationData.authToken,
+                serverUrl = pagingDataInput.serverUrl
+            )
 
             val isSearchActive = !pagingDataInput.standalonePostsContext.query.isNullOrBlank()
             val pagerFlow = if (!isSearchActive) {
@@ -156,12 +165,14 @@ class ConversationChatListUseCase(
                                 highestVisiblePostIndex.update { currentHighestIndex ->
                                     max(currentHighestIndex, offset + size)
                                 }
-                            }
+                            },
+                            forwardedMessagesHandler = forwardedMessagesHandler
                         )
                     }
                 )
                     .flow
                     .mapIndexedPosts()
+                    .resolveForwardedPosts(forwardedMessagesHandler)
                     .cachedIn(viewModelScope + coroutineContext)
             } else {
                 Pager(
@@ -173,12 +184,14 @@ class ConversationChatListUseCase(
                             metisService = metisService,
                             context = pagingDataInput.standalonePostsContext,
                             authToken = pagingDataInput.authenticationData.authToken,
-                            serverUrl = pagingDataInput.serverUrl
+                            serverUrl = pagingDataInput.serverUrl,
+                            forwardedMessagesHandler = forwardedMessagesHandler
                         )
                     }
                 )
                     .flow
                     .mapIndexedPosts()
+                    .resolveForwardedPosts(forwardedMessagesHandler)
                     .cachedIn(viewModelScope + coroutineContext)
             }
 
@@ -195,13 +208,31 @@ class ConversationChatListUseCase(
             .shareIn(viewModelScope + coroutineContext, SharingStarted.Lazily, replay = 1)
 
 
-    private fun  Flow<PagingData<out IStandalonePost>>.mapIndexedPosts(): Flow<PagingData<ChatListItem.IndexedPost>> {
+    private fun Flow<PagingData<out IStandalonePost>>.mapIndexedPosts(): Flow<PagingData<ChatListItem.PostItem.IndexedItem>> {
         // TODO: this indexing seems to work, BUT if a chat has between 40 and 60 posts, the pager messes something up
         //  https://github.com/ls1intum/artemis-android/issues/392
         return this.map { pagingData ->
             var indexCounter = 0L
             pagingData.map { post ->
-                ChatListItem.IndexedPost(post, indexCounter++)
+                if (post.hasForwardedMessages == true) {
+                    ChatListItem.PostItem.IndexedItem.PostWithForwardedMessage(
+                        post,
+                        post.answers.orEmpty(),
+                        indexCounter++,
+                        emptyList(), // This is only a placeholder, forwarded messages will be resolved in the next step
+                        courseId
+                    )
+                } else {
+                    ChatListItem.PostItem.IndexedItem.Post(post, post.answers.orEmpty(), indexCounter++)
+                }
+            }
+        }
+    }
+
+    private fun Flow<PagingData<ChatListItem.PostItem.IndexedItem>>.resolveForwardedPosts(forwardedMessagesHandler: ForwardedMessagesHandler): Flow<PagingData<ChatListItem.PostItem.IndexedItem>> {
+        return this.map { pagingData ->
+            pagingData.map { chatListItem ->
+                forwardedMessagesHandler.resolveForwardedMessagesForIndexedPost(chatListItem)
             }
         }
     }
@@ -303,17 +334,17 @@ class ConversationChatListUseCase(
         _query.value = new.ifEmpty { null }
     }
 
-    private fun insertDateSeparators(pagingList: PagingData<ChatListItem.IndexedPost>) =
-        pagingList.insertSeparators { before: ChatListItem.IndexedPost?, after: ChatListItem.IndexedPost? ->
+    private fun insertDateSeparators(pagingList: PagingData<ChatListItem.PostItem.IndexedItem>) =
+        pagingList.insertSeparators { before: ChatListItem.PostItem.IndexedItem?, after: ChatListItem.PostItem.IndexedItem? ->
             when {
                 before == null && after == null -> null
                 before != null && after == null -> {
-                    ChatListItem.DateDivider(before.post.creationLocalDate)
+                    ChatListItem.DateDivider((before.post as IStandalonePost).creationLocalDate)
                 }
 
                 after != null && before != null -> {
-                    val beforeDate = before.post.creationLocalDate
-                    val afterDate = after.post.creationLocalDate
+                    val beforeDate = (before.post as IStandalonePost).creationLocalDate
+                    val afterDate = (after.post as IStandalonePost).creationLocalDate
 
                     if (beforeDate != afterDate) {
                         ChatListItem.DateDivider(beforeDate)
@@ -328,7 +359,7 @@ class ConversationChatListUseCase(
         pagingList.insertSeparators { _, after: ChatListItem? ->
             // If we already know the id, great
             if (lastAlreadyReadPostId != null) {
-                if (after != null && after is ChatListItem.IndexedPost && after.post.serverPostId == lastAlreadyReadPostId) {
+                if (after != null && after is ChatListItem.PostItem.IndexedItem && after.post.serverPostId == lastAlreadyReadPostId) {
                     return@insertSeparators ChatListItem.UnreadIndicator
                 } else {
                     return@insertSeparators null
@@ -343,7 +374,7 @@ class ConversationChatListUseCase(
                 return@insertSeparators null
             }
 
-            if (after != null && after is ChatListItem.IndexedPost && after.index == unreadMessagesCount) {
+            if (after != null && after is ChatListItem.PostItem.IndexedItem && after.index == unreadMessagesCount) {
                 lastAlreadyReadPostId = after.post.serverPostId
                 return@insertSeparators ChatListItem.UnreadIndicator
             }

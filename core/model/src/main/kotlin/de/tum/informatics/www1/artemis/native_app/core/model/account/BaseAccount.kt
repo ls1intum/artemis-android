@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 
 interface BaseAccount {
     val activated: Boolean
-    val authorities: List<String>
+    val authorities: List<AccountAuthority>
     @SerialName("login")
     val username: String?
     val email: String?

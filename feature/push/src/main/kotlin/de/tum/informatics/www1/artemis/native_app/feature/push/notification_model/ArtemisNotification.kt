@@ -1,6 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push.notification_model
 
-import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.NotificationTargetManager
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.util.NotificationTargetManager
 import kotlinx.datetime.Instant
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.KSerializer

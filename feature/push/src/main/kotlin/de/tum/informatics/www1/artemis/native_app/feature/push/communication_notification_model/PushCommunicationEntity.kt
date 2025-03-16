@@ -5,6 +5,8 @@ import androidx.room.Entity
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ReplyPostCommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.StandalonePostCommunicationNotificationType
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.CommunicationPostTarget
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.util.NotificationTargetManager
 
 /**
  * A communication grouping for push notifications.
@@ -29,7 +31,7 @@ data class PushCommunicationEntity(
     @ColumnInfo(name = "container_title")
     val containerTitle: String?,
     @ColumnInfo(name = "target")
-    val target: String,
+    val targetString: String,
     @ColumnInfo(name = "chat_type")
     val conversationTypeString: String?,
 ) {
@@ -43,4 +45,7 @@ data class PushCommunicationEntity(
             } catch (e: IllegalArgumentException) {
                 ReplyPostCommunicationNotificationType.valueOf(notificationTypeString)
             }
+
+    val target: CommunicationPostTarget
+        get() = NotificationTargetManager.getCommunicationNotificationTarget(targetString)
 }

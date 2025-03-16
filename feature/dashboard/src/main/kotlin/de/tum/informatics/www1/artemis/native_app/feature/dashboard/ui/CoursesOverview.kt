@@ -48,6 +48,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicSearchTextField
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.NoSearchResults
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.OnTrueLaunchedEffect
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.BuildConfig
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.R
@@ -114,8 +115,8 @@ internal fun CoursesOverview(
     var lastOffset by remember { mutableIntStateOf(0) }
 
     // Trigger the dialog if service sets value to true
-    LaunchedEffect(shouldDisplayBetaDialog) {
-        if (shouldDisplayBetaDialog) displayBetaDialog = true
+    OnTrueLaunchedEffect(shouldDisplayBetaDialog) {
+        displayBetaDialog = true
     }
 
     LaunchedEffect(sorting, query) {

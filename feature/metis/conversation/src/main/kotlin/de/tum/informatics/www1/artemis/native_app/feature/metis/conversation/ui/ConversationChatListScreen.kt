@@ -61,7 +61,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.inn
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ComponentColors
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.LocalReplyAutoCompleteHintProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.ConversationDataStatusButton
@@ -117,6 +117,7 @@ internal fun ConversationChatListScreen(
 
     LaunchedEffect(courseId, conversationId) {
         chatListState.scrollToItem(0)
+        viewModel.onCloseThread = null
     }
 
     ConversationChatListScreen(

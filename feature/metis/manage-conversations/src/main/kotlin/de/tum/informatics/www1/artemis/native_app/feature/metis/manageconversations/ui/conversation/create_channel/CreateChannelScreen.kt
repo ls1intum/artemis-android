@@ -14,7 +14,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
@@ -32,6 +35,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Scaling
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
@@ -100,11 +104,10 @@ internal fun CreateChannelScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .imePadding()
-                .padding(top = paddingValues.calculateTopPadding())
+                .padding(top = paddingValues.calculateTopPadding() + Spacings.ScreenTopBarSpacing)
                 .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top))
                 .verticalScroll(rememberScrollState())
-                .pagePadding()
-            ,
+                .pagePadding(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
@@ -125,6 +128,13 @@ internal fun CreateChannelScreen(
                         R.string.channel_text_field_name_invalid
                     } else R.string.create_channel_text_field_name_hint
                 ),
+                leadingIcon = {
+                    Icon(
+                        modifier = Modifier,
+                        imageVector = Icons.Default.Numbers,
+                        contentDescription = null
+                    )
+                },
                 requiredSupportText = stringResource(id = R.string.create_channel_text_field_name_required)
             )
 
@@ -224,7 +234,9 @@ private fun BinarySelection(
                 style = MaterialTheme.typography.titleMedium
             )
             Switch(
-                modifier = Modifier.scale(Scaling.SWITCH).testTag(switchTestTag),
+                modifier = Modifier
+                    .scale(Scaling.SWITCH)
+                    .testTag(switchTestTag),
                 checked = isChecked,
                 onCheckedChange = onCheckedChange
             )

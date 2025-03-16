@@ -28,20 +28,20 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.FaqRepository
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.service.SavedPostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.asMetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.FileValidationConstants.isImage
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.Link
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.SavedPostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.ReplyTextStorageService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.asMetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.model.Link
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.model.LinkPreview
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.post.util.LinkPreviewUtil
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ConversationChatListUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.util.LinkPreviewUtil
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompletionUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.ConversationThreadUseCase
@@ -167,7 +167,8 @@ internal open class ConversationViewModel(
         serverConfigurationService = serverConfigurationService,
         accountService = accountService,
         conversation = conversation,
-        coroutineContext = coroutineContext
+        coroutineContext = coroutineContext,
+        courseId = courseId,
     )
 
     val threadUseCase = ConversationThreadUseCase(
@@ -180,7 +181,8 @@ internal open class ConversationViewModel(
         networkStatusProvider = networkStatusProvider,
         serverConfigurationService = serverConfigurationService,
         accountService = accountService,
-        coroutineContext = coroutineContext
+        coroutineContext = coroutineContext,
+        courseId = courseId
     )
 
     val autoCompletionUseCase = AutoCompletionUseCase(

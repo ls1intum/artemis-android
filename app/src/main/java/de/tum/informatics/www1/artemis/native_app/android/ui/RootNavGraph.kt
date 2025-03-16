@@ -4,7 +4,6 @@ import android.net.Uri
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.navOptions
-import de.tum.informatics.www1.artemis.native_app.android.BuildConfig
 import de.tum.informatics.www1.artemis.native_app.feature.courseregistration.courseRegistration
 import de.tum.informatics.www1.artemis.native_app.feature.courseregistration.navigateToCourseRegistration
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.course
@@ -180,8 +179,6 @@ fun NavGraphBuilder.rootNavGraph(
 
     settingsNavGraph(
         navController = navController,
-        versionCode = BuildConfig.VERSION_CODE,
-        versionName = BuildConfig.VERSION_NAME,
         onDisplayThirdPartyLicenses = onDisplayThirdPartyLicenses
     )
 

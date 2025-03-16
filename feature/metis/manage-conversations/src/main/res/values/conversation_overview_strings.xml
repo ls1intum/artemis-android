@@ -13,14 +13,14 @@
     <string name="conversation_overview_conversation_item_mark_as_muted">Mute</string>
     <string name="conversation_overview_conversation_item_unmark_as_muted">Unmute</string>
 
-    <string name="conversation_overview_section_favorites">Favorites</string>
-    <string name="conversation_overview_section_general_channels">General</string>
-    <string name="conversation_overview_section_exercise_channels">Exercises</string>
-    <string name="conversation_overview_section_lecture_channels">Lectures</string>
-    <string name="conversation_overview_section_exam_channels">Exams</string>
-    <string name="conversation_overview_section_groups">Group Chats</string>
-    <string name="conversation_overview_section_direct_messages">Direct Messages</string>
-    <string name="conversation_overview_section_hidden">Archive</string>
+    <string name="conversation_overview_section_favorites">Favorites (%d)</string>
+    <string name="conversation_overview_section_general_channels">General (%d)</string>
+    <string name="conversation_overview_section_exercise_channels">Exercises (%d)</string>
+    <string name="conversation_overview_section_lecture_channels">Lectures (%d)</string>
+    <string name="conversation_overview_section_exam_channels">Exams (%d)</string>
+    <string name="conversation_overview_section_groups">Group Chats (%d)</string>
+    <string name="conversation_overview_section_direct_messages">Direct Messages (%d)</string>
+    <string name="conversation_overview_section_hidden">Archive (%d)</string>
     <string name="conversation_overview_section_saved_posts">Saved Messages</string>
 
     <string name="conversation_overview_section_add_channel_browse">Browse channels</string>

@@ -112,6 +112,14 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 add(configuration.name, "com.google.guava:guava:32.0.1-jre") {
                     because("Created several security issues: https://www.mend.io/vulnerability-database/CVE-2023-2976")
                 }
+
+                add(configuration.name, "io.ktor:ktor-io:3.1.1") {
+                    because("Created several security issues: https://github.com/advisories/GHSA-cqw7-466v-f9g6")
+                }
+
+                add(configuration.name, "io.ktor:ktor-http-cio:3.1.1") {
+                    because("Created several security issues: https://github.com/advisories/GHSA-cqw7-466v-f9g6")
+                }
             }
         }
     }
