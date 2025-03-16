@@ -7,7 +7,7 @@ services:
     container_name: artemis-mysql
     image: docker.io/library/mysql:9.0.1
     volumes:
-      - artemis-mysql-data:/var/lib/mysql
+      - artemis-mysql-data-android:/var/lib/mysql
     # DO NOT use this default file for production systems!
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: true
@@ -37,5 +37,6 @@ networks:
     name: artemis
 
 volumes:
-  artemis-mysql-data:
-    name: artemis-mysql-data
+  # To avoid any conflicts with other Artemis setups (eg on the self-hosted github action runners), we use a unique volume name
+  artemis-mysql-data-android:
+    name: artemis-mysql-data-android
