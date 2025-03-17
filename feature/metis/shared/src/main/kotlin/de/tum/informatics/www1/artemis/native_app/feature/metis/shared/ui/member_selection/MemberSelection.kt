@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection
+package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member_selection
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -29,14 +29,13 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicSearchTextField
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_personal_conversation.PotentialRecipientsUi
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.util.MemberSelectionItem
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.util.MemberSelectionMode
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member_selection.util.MemberSelectionItem
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member_selection.util.MemberSelectionMode
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureData
 
-internal const val TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD = "TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD"
+const val TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD = "TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD"
 internal const val TEST_TAG_RECIPIENTS_LIST = "TEST_TAG_RECIPIENTS_LIST"
 
 /**

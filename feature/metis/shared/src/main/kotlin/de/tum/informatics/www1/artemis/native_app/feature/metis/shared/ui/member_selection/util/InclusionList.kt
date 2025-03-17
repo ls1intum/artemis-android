@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_personal_conversation
+package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member_selection.util
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize

@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection
+package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member_selection
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -47,8 +47,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicSearchText
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.NoSearchResults
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.dropShadowBelow
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.util.MemberSelectionItem
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member_selection.util.MemberSelectionItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureData
 
@@ -168,7 +168,9 @@ fun MemberSelectionDropdownPopup(
                     EmptyListHint(
                         modifier = Modifier.fillMaxWidth(),
                         imageVector = Icons.Default.Keyboard,
-                        hint = stringResource(id = R.string.conversation_member_selection_query_too_short_popup, MemberSelectionBaseViewModel.MINIMUM_QUERY_LENGTH)
+                        hint = stringResource(id = R.string.conversation_member_selection_query_too_short_popup,
+                            MemberSelectionBaseViewModel.MINIMUM_QUERY_LENGTH
+                        )
                     )
                 }
             } else if (recipients.isEmpty()) {

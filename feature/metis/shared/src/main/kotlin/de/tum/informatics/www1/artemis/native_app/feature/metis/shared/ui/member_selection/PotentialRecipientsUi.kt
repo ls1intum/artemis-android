@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_personal_conversation
+package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member_selection
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -33,14 +33,14 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.common.CourseUserListItem
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.MemberSelectionBaseViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.util.MemberSelectionItem
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.util.toMemberSelectionItem
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseUser
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.common.CourseUserListItem
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member_selection.util.InclusionList
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member_selection.util.MemberSelectionItem
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member_selection.util.toMemberSelectionItem
 
-internal fun testTagForPotentialRecipient(username: String) = "potentialRecipient$username"
+fun testTagForPotentialRecipient(username: String) = "potentialRecipient$username"
 
 @Composable
 internal fun PotentialRecipientsUi(

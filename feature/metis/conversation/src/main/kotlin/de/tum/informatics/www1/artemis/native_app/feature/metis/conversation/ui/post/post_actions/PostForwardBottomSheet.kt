@@ -33,9 +33,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.post.ForwardedMessagePreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ForwardMessageReplyTextField
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.MemberSelection
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.util.MemberSelectionMode
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member_selection.MemberSelection
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member_selection.util.MemberSelectionMode
 import kotlinx.coroutines.CompletableDeferred
 
 // The maximum number of users per group chat is set to 9

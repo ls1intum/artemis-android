@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.util
+package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member_selection.util
 
 import android.os.Parcelable
 import androidx.compose.material.icons.Icons
@@ -9,7 +9,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getChannelIconImageVector
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.common.getChannelIconImageVector
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
