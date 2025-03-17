@@ -91,6 +91,7 @@ class SettingsViewModel(
     fun onDeleteProfilePicture() {
         viewModelScope.launch(coroutineContext) {
             changeProfilePictureService.delete()
+            requestReload()
         }
     }
 
