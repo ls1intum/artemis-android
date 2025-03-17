@@ -20,6 +20,11 @@
     <!--  Screen reader information about the expand button to show weekly exercises  -->
     <string name="course_ui_list_expand_button_more_content_info">Expand  list</string>
     <string name="course_ui_list_expand_button_less_content_info">Collapse list</string>
+    <string name="course_ui_list_time_frame_past">Past</string>
+    <string name="course_ui_list_time_frame_current">Current</string>
+    <string name="course_ui_list_time_frame_future">Future</string>
+    <string name="course_ui_list_time_frame_no_date">No date</string>
+    <string name="course_ui_list_time_frame_due_soon">Due soon</string>
 
     <string name="course_ui_lecture_item_start_date_set">Start date: %1$s</string>
     <string name="course_ui_lecture_item_start_date_not_set">No due date</string>
