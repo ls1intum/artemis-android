@@ -60,6 +60,7 @@ fun rememberPostActions(
         val post = chatListItem.post
 
         val hasDeletedSourcePost = chatListItem is ChatListItem.PostItem.ForwardedMessage
+                && chatListItem.forwardedPosts.isNotEmpty()
                 && chatListItem.forwardedPosts[0] == null
 
         val doesPostExistOnServer = post.serverPostId != null
