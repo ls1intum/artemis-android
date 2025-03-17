@@ -53,8 +53,8 @@ fun PostForwardBottomSheet(
     val onSendMessage = forwardMessageUseCase::forwardPost
     val post = chatListItem.post
     val postToForward =
-        if (chatListItem is ChatListItem.PostItem.ForwardedMessage) chatListItem.forwardedPosts.firstOrNull()
-            ?: post else post
+        if (chatListItem is ChatListItem.PostItem.ForwardedMessage && post.content.orEmpty().isEmpty())
+            chatListItem.forwardedPosts.firstOrNull() ?: post else post
 
     val selectedRecipients = forwardMessageUseCase.recipients.collectAsState()
     val selectedConversations = forwardMessageUseCase.conversations.collectAsState()
