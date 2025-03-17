@@ -7,7 +7,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,7 +48,7 @@ internal fun PostWithBottomSheet(
     postActions: PostActions,
     linkPreviews: List<LinkPreview>,
     forwardMessageUseCase: ForwardMessageUseCase,
-    displayForwardBottomSheet: MutableState<Boolean>,
+    displayForwardBottomSheet: Boolean,
     clientId: Long,
     displayHeader: Boolean,
     joinedItemType: PostItemViewJoinedType,
@@ -157,7 +156,7 @@ internal fun PostWithBottomSheet(
         )
     }
 
-    if (displayForwardBottomSheet.value && post != null) {
+    if (displayForwardBottomSheet && post != null) {
         PostForwardBottomSheet(
             chatListItem = chatListItem,
             forwardMessageUseCase = forwardMessageUseCase,

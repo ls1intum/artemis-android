@@ -22,6 +22,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -298,7 +299,7 @@ private fun ChatList(
                     val linkPreviews by remember(post.content) {
                         generateLinkPreviews(post.content.orEmpty())
                     }.collectAsState()
-                    var displayForwardPostBottomSheet = remember(post) { mutableStateOf(false) }
+                    var displayForwardPostBottomSheet by remember(post) { mutableStateOf(false) }
 
                     val postActions = rememberPostActions(
                         chatListItem = chatListItem,
@@ -319,7 +320,7 @@ private fun ChatList(
                         },
                         onResolvePost = null,
                         onPinPost = { onRequestPin(post) },
-                        onForwardPost = { displayForwardPostBottomSheet.value = true },
+                        onForwardPost = { displayForwardPostBottomSheet = true },
                         onSavePost = { onRequestSave(post) },
                         onRequestRetrySend = {
                             onRequestRetrySend(
@@ -375,7 +376,7 @@ private fun ChatList(
                                 onClickViewPost(standalonePostId)
                             }
                         },
-                        dismissForwardBottomSheet = { displayForwardPostBottomSheet.value = false }
+                        dismissForwardBottomSheet = { displayForwardPostBottomSheet = false }
                     )
                 }
 
