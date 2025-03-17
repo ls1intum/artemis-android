@@ -17,36 +17,24 @@ import androidx.compose.material.icons.filled.AssignmentInd
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.mr0xf00.easycrop.CropError
-import com.mr0xf00.easycrop.CropResult
-import com.mr0xf00.easycrop.CropperStyle
-import com.mr0xf00.easycrop.crop
 import com.mr0xf00.easycrop.rememberImageCropper
-import com.mr0xf00.easycrop.rememberImagePicker
-import com.mr0xf00.easycrop.ui.ImageCropperDialog
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
@@ -63,7 +51,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.SettingsVi
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.util.ProfilePictureUploadResult
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.util.getMessage
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 
@@ -74,7 +61,6 @@ fun AccountSettingsScreen(
     onNavigateUp: () -> Unit,
 ) {
     val account by viewModel.account.collectAsState()
-    val context = LocalContext.current
 
     AccountSettingsScreen(
         modifier = modifier,
@@ -102,25 +88,14 @@ internal fun AccountSettingsScreen(
     var uploadJob: Deferred<ProfilePictureUploadResult>? by remember { mutableStateOf(null) }
 
     val imageCropper = rememberImageCropper()
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
-    val imagePicker = rememberImagePicker(onImage = { uri ->
-        scope.launch {
-            val result = imageCropper.crop(
-                uri = uri,
-                context = context,
-            )
-
-            when (result) {
-                CropResult.Cancelled -> { }
-                is CropError -> { }
-                is CropResult.Success -> {
-                    uploadJob = onUploadProfilePicture(result.bitmap)
-                }
-            }
+    val croppingImagePicker = rememberCroppingImagePicker(
+        imageCropper = imageCropper,
+        onCropSuccess = {
+            uploadJob = onUploadProfilePicture(it)
         }
-    })
+    )
 
+    val context = LocalContext.current
     AwaitDeferredCompletion(job = uploadJob) {
         uploadJob = null
         showChangeActionsBottomSheet = false
@@ -134,16 +109,8 @@ internal fun AccountSettingsScreen(
         }
     }
 
-    val cropState = imageCropper.cropState
-    LaunchedEffect(cropState) {
-        if (cropState == null) return@LaunchedEffect
-        val initialRectSideLength = kotlin.math.min(cropState.region.width, cropState.region.height)
-        cropState.region = Rect(Offset.Zero, Size(initialRectSideLength, initialRectSideLength))
-        cropState.aspectLock = true
-    }
-
     fun launchImagePicker() {
-        imagePicker.pick()
+        croppingImagePicker.pick()
     }
 
     Scaffold(
@@ -190,26 +157,9 @@ internal fun AccountSettingsScreen(
             )
         }
 
-        if(cropState != null) {
-            ImageCropperDialog(
-                state = cropState,
-                style = CropperStyle(
-                    autoZoom = false
-                ),
-                topBar = {
-
-                },
-                cropControls = {
-                    Button(
-                        onClick = {
-                            it.done(true)
-                        }
-                    ) {
-                        Text("Crop")
-                    }
-                }
-            )
-        }
+        ImagePickerAndCropper(
+            imageCropper = imageCropper
+        )
     }
 }
 
@@ -254,7 +204,7 @@ private fun ChangeProfilePicture(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         ProfilePicture(
-            modifier = Modifier.size(200.dp),
+            modifier = Modifier.size(160.dp),
             profilePictureData = ProfilePictureData.fromAccount(account)
         )
 
