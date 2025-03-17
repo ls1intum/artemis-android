@@ -8,6 +8,8 @@ android {
 }
 
 dependencies {
+    implementation("io.github.mr0xf00:easycrop:0.1.1")
+
     implementation(project(":core:ui"))
     implementation(project(":core:data"))
     implementation(project(":core:device"))

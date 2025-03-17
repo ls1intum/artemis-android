@@ -1,8 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.settings.ui.account
 
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,24 +17,39 @@ import androidx.compose.material.icons.filled.AssignmentInd
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.mr0xf00.easycrop.CropError
+import com.mr0xf00.easycrop.CropResult
+import com.mr0xf00.easycrop.CropperStyle
+import com.mr0xf00.easycrop.crop
+import com.mr0xf00.easycrop.rememberImageCropper
+import com.mr0xf00.easycrop.rememberImagePicker
+import com.mr0xf00.easycrop.ui.ImageCropperDialog
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
+import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.pagePadding
@@ -47,6 +60,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.LogoutButt
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.PreferenceEntry
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.PreferenceSection
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.SettingsViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.util.ProfilePictureUploadResult
+import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.util.getMessage
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 
@@ -63,9 +80,7 @@ fun AccountSettingsScreen(
         modifier = modifier,
         accountDataState = account,
         onDeleteProfilePicture = viewModel::onDeleteProfilePicture,
-        onUploadProfilePicture = {
-            viewModel.onUploadProfilePicture(it, context)
-        },
+        onUploadProfilePicture = viewModel::onUploadProfilePicture,
         onLogout = viewModel::onRequestLogout,
         onRequestReload = viewModel::requestReload,
         onNavigateUp = onNavigateUp
@@ -74,25 +89,61 @@ fun AccountSettingsScreen(
 
 
 @Composable
-fun AccountSettingsScreen(
+internal fun AccountSettingsScreen(
     modifier: Modifier = Modifier,
     accountDataState: DataState<Account>,
     onDeleteProfilePicture: () -> Unit,
-    onUploadProfilePicture: (Uri) -> Unit,
+    onUploadProfilePicture: (ImageBitmap) -> Deferred<ProfilePictureUploadResult>,
     onLogout: () -> Unit,
     onRequestReload: () -> Unit,
     onNavigateUp: () -> Unit,
 ) {
     var showChangeActionsBottomSheet by remember { mutableStateOf(false) }
-    val filePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        if (uri == null) return@rememberLauncherForActivityResult
+    var uploadJob: Deferred<ProfilePictureUploadResult>? by remember { mutableStateOf(null) }
 
-        onUploadProfilePicture(uri)
+    val imageCropper = rememberImageCropper()
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val imagePicker = rememberImagePicker(onImage = { uri ->
+        scope.launch {
+            val result = imageCropper.crop(
+                uri = uri,
+                context = context,
+            )
+
+            when (result) {
+                CropResult.Cancelled -> { }
+                is CropError -> { }
+                is CropResult.Success -> {
+                    uploadJob = onUploadProfilePicture(result.bitmap)
+                }
+            }
+        }
+    })
+
+    AwaitDeferredCompletion(job = uploadJob) {
+        uploadJob = null
         showChangeActionsBottomSheet = false
+
+        if (it is ProfilePictureUploadResult.Error) {
+            Toast.makeText(
+                context,
+                it.getMessage(context),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    val cropState = imageCropper.cropState
+    LaunchedEffect(cropState) {
+        if (cropState == null) return@LaunchedEffect
+        val initialRectSideLength = kotlin.math.min(cropState.region.width, cropState.region.height)
+        cropState.region = Rect(Offset.Zero, Size(initialRectSideLength, initialRectSideLength))
+        cropState.aspectLock = true
     }
 
     fun launchImagePicker() {
-        filePickerLauncher.launch("image/*")
+        imagePicker.pick()
     }
 
     Scaffold(
@@ -130,11 +181,33 @@ fun AccountSettingsScreen(
         if (showChangeActionsBottomSheet) {
             ChangeProfilePictureBottomSheet(
                 accountDataState = accountDataState,
+                isLoading = uploadJob != null,
                 onOpenFilePicker = {
                     launchImagePicker()
                 },
                 onDeleteProfilePicture = onDeleteProfilePicture,
                 onDismiss = { showChangeActionsBottomSheet = false }
+            )
+        }
+
+        if(cropState != null) {
+            ImageCropperDialog(
+                state = cropState,
+                style = CropperStyle(
+                    autoZoom = false
+                ),
+                topBar = {
+
+                },
+                cropControls = {
+                    Button(
+                        onClick = {
+                            it.done(true)
+                        }
+                    ) {
+                        Text("Crop")
+                    }
+                }
             )
         }
     }

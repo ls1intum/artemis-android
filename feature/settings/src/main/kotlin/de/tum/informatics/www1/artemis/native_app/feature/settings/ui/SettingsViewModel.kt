@@ -1,8 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.settings.ui
 
-import android.content.Context
-import android.net.Uri
-import android.widget.Toast
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.app_version.AppVersionProvider
@@ -19,8 +18,11 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotif
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
 import de.tum.informatics.www1.artemis.native_app.feature.push.unsubscribeFromNotifications
 import de.tum.informatics.www1.artemis.native_app.feature.settings.service.ChangeProfilePictureService
+import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.util.ProfilePictureBitmapUtil
+import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.util.ProfilePictureUploadResult
 import io.ktor.http.ContentType
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -29,12 +31,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
-import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
-
-private val ALLOWED_MIME_TYPES = setOf("image/jpeg", "image/png")
-
 
 class SettingsViewModel(
     private val accountService: AccountService,
@@ -95,76 +93,24 @@ class SettingsViewModel(
         }
     }
 
-    fun onUploadProfilePicture(uri: Uri, context: Context) {
-        viewModelScope.launch(coroutineContext) {
-            try {
-                val mimeType = context.contentResolver.getType(uri)
-                if (mimeType !in ALLOWED_MIME_TYPES) {
-                    Toast.makeText(
-                        context,
-                        "This file type is not supported for profile pictures",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+    internal fun onUploadProfilePicture(bitmap: ImageBitmap): Deferred<ProfilePictureUploadResult> {
+        return viewModelScope.async(coroutineContext) {
+            val resized =
+                ProfilePictureBitmapUtil.ensureSizeConstraints(bitmap.asAndroidBitmap())
+            val byteArray = ProfilePictureBitmapUtil.toJpegCompressedByteArray(resized)
+                ?: return@async ProfilePictureUploadResult.ImageCouldNotBeCompressed
 
-                val fileBytes = withContext(Dispatchers.IO) {
-                    context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                        val fileSize = inputStream.available()
+            val response = changeProfilePictureService.upload(
+                imageContentType = ContentType.Image.JPEG,
+                fileBytes = byteArray,
+            )
 
-                        val maxFileSize = 5 * 1024 * 1024
-                        if (fileSize > maxFileSize) {
-                            throw IllegalArgumentException(
-                                "File size exceeds the maximum allowed file size of 5 MB"
-//                                getString(
-//                                    context,
-//                                    R.string.conversation_vm_file_size_exceed
-//                                )
-                            )
-                        }
-                        inputStream.readBytes()
-                    }
-                } ?: throw IllegalArgumentException(
-                    "Failed to read file bytes"
-//                    getString(
-//                        context,
-//                        R.string.conversation_vm_file_upload_failed
-//                    )
-                )
+            if (response is NetworkResponse.Failure) return@async ProfilePictureUploadResult.UploadFailed
 
-                val response = changeProfilePictureService.upload(
-                    imageContentType = if (mimeType == "image/jpeg") {
-                        ContentType.Image.JPEG
-                    } else {
-                        ContentType.Image.PNG
-                    },
-                    fileBytes = fileBytes,
-                )
+            val updatedAccount = (response as NetworkResponse.Response).data
+            _account.emit(DataState.Success(updatedAccount))
 
-                when (response) {
-                    is NetworkResponse.Response -> {
-                        val updatedAccount = response.data
-                        _account.emit(DataState.Success(updatedAccount))
-                    }
-
-                    else -> {
-                        throw IllegalArgumentException(
-                            "Failed to upload file"
-//                            getString(
-//                                context,
-//                                R.string.conversation_vm_file_upload_failed
-//                            )
-                        )
-                    }
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(
-                        context,
-                        e.message,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
+            ProfilePictureUploadResult.Success
         }
     }
 }
