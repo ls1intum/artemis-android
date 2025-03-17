@@ -14,6 +14,9 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.appendPathSegments
 import io.ktor.utils.io.InternalAPI
 
+// The backend ignores the file name, so we can use a placeholder here
+private const val PLACEHOLDER_FILE_NAME = "profile-picture"
+
 class ChangeProfilePictureServiceImpl(
     ktorProvider: KtorProvider,
     artemisContextProvider: ArtemisContextProvider
@@ -35,8 +38,10 @@ class ChangeProfilePictureServiceImpl(
 
             body = MultiPartFormDataContent(
                 formData {
+                    val fileName = "$PLACEHOLDER_FILE_NAME.${imageContentType.contentSubtype}"
+
                     append("file", fileBytes, Headers.build {
-                        append(HttpHeaders.ContentDisposition, "filename=profile-picture.jpg")
+                        append(HttpHeaders.ContentDisposition, "filename=$fileName")
                         append(HttpHeaders.ContentType, imageContentType.toString())
                     })
                 }

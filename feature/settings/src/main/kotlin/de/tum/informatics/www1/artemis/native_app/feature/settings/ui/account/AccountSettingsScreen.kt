@@ -1,6 +1,8 @@
 package de.tum.informatics.www1.artemis.native_app.feature.settings.ui.account
 
 import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -82,6 +84,16 @@ fun AccountSettingsScreen(
     onNavigateUp: () -> Unit,
 ) {
     var showChangeActionsBottomSheet by remember { mutableStateOf(false) }
+    val filePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+
+        onUploadProfilePicture(uri)
+        showChangeActionsBottomSheet = false
+    }
+
+    fun launchImagePicker() {
+        filePickerLauncher.launch("image/*")
+    }
 
     Scaffold(
         modifier = modifier,
@@ -104,7 +116,13 @@ fun AccountSettingsScreen(
             AccountSettingsBody(
                 modifier = Modifier.fillMaxWidth(),
                 account = account,
-                onChangeClicked = { showChangeActionsBottomSheet = true },      // TODO instantly go to file picker if no custom profile picture
+                onChangeClicked = {
+                    if (account.hasCustomProfilePicture) {
+                        showChangeActionsBottomSheet = true
+                    } else {
+                        launchImagePicker()
+                    }
+                },
                 onLogout = onLogout
             )
         }
@@ -112,7 +130,9 @@ fun AccountSettingsScreen(
         if (showChangeActionsBottomSheet) {
             ChangeProfilePictureBottomSheet(
                 accountDataState = accountDataState,
-                onFileSelected = onUploadProfilePicture,
+                onOpenFilePicker = {
+                    launchImagePicker()
+                },
                 onDeleteProfilePicture = onDeleteProfilePicture,
                 onDismiss = { showChangeActionsBottomSheet = false }
             )
