@@ -1,9 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.settings.ui
 
-import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
-import android.provider.OpenableColumns
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -21,6 +19,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotif
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
 import de.tum.informatics.www1.artemis.native_app.feature.push.unsubscribeFromNotifications
 import de.tum.informatics.www1.artemis.native_app.feature.settings.service.ChangeProfilePictureService
+import io.ktor.http.ContentType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -33,6 +32,9 @@ import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
+
+private val ALLOWED_MIME_TYPES = setOf("image/jpeg", "image/png")
+
 
 class SettingsViewModel(
     private val accountService: AccountService,
@@ -93,15 +95,19 @@ class SettingsViewModel(
     }
 
     fun onUploadProfilePicture(uri: Uri, context: Context) {
-        val fileName = resolveFileName(context, uri)
-        uploadFileOrImage(context = context, fileUri = uri, fileName = fileName)
-    }
-
-    private fun uploadFileOrImage(context: Context, fileUri: Uri, fileName: String) {
         viewModelScope.launch(coroutineContext) {
             try {
+                val mimeType = context.contentResolver.getType(uri)
+                if (mimeType !in ALLOWED_MIME_TYPES) {
+                    Toast.makeText(
+                        context,
+                        "This file type is not supported for profile pictures",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
                 val fileBytes = withContext(Dispatchers.IO) {
-                    context.contentResolver.openInputStream(fileUri)?.use { inputStream ->
+                    context.contentResolver.openInputStream(uri)?.use { inputStream ->
                         val fileSize = inputStream.available()
 
                         val maxFileSize = 5 * 1024 * 1024
@@ -125,6 +131,11 @@ class SettingsViewModel(
                 )
 
                 val response = changeProfilePictureService.upload(
+                    imageContentType = if (mimeType == "image/jpeg") {
+                        ContentType.Image.JPEG
+                    } else {
+                        ContentType.Image.PNG
+                    },
                     fileBytes = fileBytes,
                 )
 
@@ -154,14 +165,5 @@ class SettingsViewModel(
                 }
             }
         }
-    }
-
-    private fun resolveFileName(context: Context, uri: Uri): String {
-        val resolver: ContentResolver = context.contentResolver
-        return resolver.query(uri, null, null, null, null)?.use { cursor ->
-            val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-            cursor.moveToFirst()
-            cursor.getString(nameIndex)
-        } ?: uri.lastPathSegment.orEmpty()
     }
 }

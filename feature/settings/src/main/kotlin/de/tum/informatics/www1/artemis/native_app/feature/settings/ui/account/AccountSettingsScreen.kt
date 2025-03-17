@@ -14,9 +14,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.filled.AssignmentInd
-import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Mail
+import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -104,7 +104,7 @@ fun AccountSettingsScreen(
             AccountSettingsBody(
                 modifier = Modifier.fillMaxWidth(),
                 account = account,
-                onChangeClicked = { showChangeActionsBottomSheet = true },
+                onChangeClicked = { showChangeActionsBottomSheet = true },      // TODO instantly go to file picker if no custom profile picture
                 onLogout = onLogout
             )
         }
@@ -191,7 +191,7 @@ private fun ChangeProfilePictureButton(
             val icon = if (hasCustomProfilePicture) {
                 Icons.Default.Edit
             } else {
-                Icons.Default.Camera
+                Icons.Default.PhotoCamera
             }
 
             Icon(

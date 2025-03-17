@@ -37,7 +37,13 @@ internal fun ChangeProfilePictureBottomSheet(
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
-    val filePickerLauncher = rememberFilePickerLauncher(context, onFileSelected)
+    val filePickerLauncher = rememberFilePickerLauncher(
+        context = context,
+        onFileSelected = {
+            onFileSelected(it)
+            onDismiss()
+        }
+    )
 
     ModalBottomSheet(
         modifier = Modifier
@@ -57,7 +63,6 @@ internal fun ChangeProfilePictureBottomSheet(
                 text = stringResource(R.string.account_settings_change_profile_picture_from_library),
                 onClick = {
                     filePickerLauncher.launch("image/*")
-                    onDismiss()
                 }
             )
 
