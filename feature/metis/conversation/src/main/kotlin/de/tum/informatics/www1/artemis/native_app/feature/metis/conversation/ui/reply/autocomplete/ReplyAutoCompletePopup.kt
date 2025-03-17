@@ -61,9 +61,9 @@ internal fun ReplyAutoCompletePopup(
         ReplyAutoCompletePopupBody(
             modifier = Modifier
                 .padding(vertical = verticalPadding, horizontal = 8.dp)
-                .dropShadowBelow()
                 .heightIn(max = maxHeight - verticalPadding * 2)
-                .width(targetWidth),
+                .width(targetWidth)
+                .dropShadowBelow(),
             autoCompleteCategories = autoCompleteCategories,
             performAutoComplete = performAutoComplete
         )
@@ -79,7 +79,6 @@ private fun ReplyAutoCompletePopupBody(
     LazyColumn(
         modifier = modifier
             .clip(MaterialTheme.shapes.large)
-            .dropShadowBelow()
             .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
             .padding(8.dp)
             .testTag(TEST_TAG_REPLY_AUTO_COMPLETE_POPUP_LIST)

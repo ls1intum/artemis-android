@@ -37,16 +37,18 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ForwardMessageReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.MemberSelection
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.util.MemberSelectionMode
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import kotlinx.coroutines.CompletableDeferred
 
 // The maximum number of users per group chat is set to 9
+// See https://github.com/ls1intum/Artemis/blob/develop/src/main/java/de/tum/cit/aet/artemis/communication/ConversationSettings.java#L6
 private const val MAX_NUMBER_OF_RECIPIENTS = 9
 
 @Composable
 fun PostForwardBottomSheet(
     chatListItem: ChatListItem.PostItem,
     forwardMessageUseCase: ForwardMessageUseCase,
-    onDismissRequest: (Boolean) -> Unit
+    onDismissRequest: (isSuccess: Boolean) -> Unit
 ) {
     val context = LocalContext.current
 
@@ -88,35 +90,12 @@ fun PostForwardBottomSheet(
                 .pagePadding(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.post_forward),
-                    style = MaterialTheme.typography.titleMedium
-                )
-
-                Spacer(Modifier.weight(1f))
-
-                Button(
-                    onClick = {
-                        onSendMessage(postToForward) { success ->
-                            if (success) {
-                                onDismissRequest(true)
-                            }
-                        }
-                    },
-                    enabled = isSendButtonEnabled,
-                    modifier = Modifier
-                ) {
-                    Text(
-                        text = stringResource(R.string.post_forward_send),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
+            ForwardPostHeader(
+                postToForward = postToForward,
+                isSendButtonEnabled = isSendButtonEnabled,
+                onSendMessage = onSendMessage,
+                onDismissRequest = onDismissRequest
+            )
 
             MemberSelection(
                 modifier = Modifier.fillMaxWidth(),
@@ -153,6 +132,45 @@ fun PostForwardBottomSheet(
                         forwardedPost = postToForward
                     )
                 }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ForwardPostHeader(
+    modifier: Modifier = Modifier,
+    postToForward: IBasePost,
+    isSendButtonEnabled: Boolean,
+    onSendMessage: (IBasePost, (Boolean) -> Unit) -> Unit,
+    onDismissRequest: (Boolean) -> Unit,
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.post_forward),
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        Spacer(Modifier.weight(1f))
+
+        Button(
+            onClick = {
+                onSendMessage(postToForward) { success ->
+                    if (success) {
+                        onDismissRequest(true)
+                    }
+                }
+            },
+            enabled = isSendButtonEnabled,
+            modifier = Modifier
+        ) {
+            Text(
+                text = stringResource(R.string.post_forward_send),
+                style = MaterialTheme.typography.bodyMedium
             )
         }
     }

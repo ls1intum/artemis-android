@@ -186,7 +186,7 @@ internal fun PostContextBottomSheet(
 
             if (postActions.onForwardPost != null) {
                 BottomSheetActionButton(
-                    modifier = actionButtonModifier.width(18.dp),
+                    modifier = actionButtonModifier,
                     icon = ImageVector.vectorResource(R.drawable.forward),
                     text = stringResource(id = R.string.post_forward),
                     onClick = {

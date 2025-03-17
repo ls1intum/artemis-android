@@ -24,11 +24,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ListAlt
-import androidx.compose.material.icons.filled.AddReaction
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.outlined.AddReaction
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -338,7 +338,7 @@ private fun TextFieldOptions(
 
                     if (isEmojiPickerEnabled) {
                         TextFieldOptionsIconButton(
-                            painter = Icons.Default.AddReaction.toPainter(),
+                            painter = Icons.Outlined.AddReaction.toPainter(),
                             containerColor = containerColor
                         ) {
                             onOpenEmojiPicker()

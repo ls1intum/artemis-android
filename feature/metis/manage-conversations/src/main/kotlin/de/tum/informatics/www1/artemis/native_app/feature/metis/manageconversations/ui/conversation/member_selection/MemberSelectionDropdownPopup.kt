@@ -52,6 +52,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversati
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureData
 
+private const val POPUP_SCREEN_HEIGHT_FACTOR = 0.4f
+
 @Composable
 fun MemberSelectionDropdownPopup(
     modifier: Modifier,
@@ -91,105 +93,105 @@ fun MemberSelectionDropdownPopup(
         focusRequester = focusRequester
     )
 
-    if (isPopupExpanded && suggestions.isNotEmpty()) {
-        val screenHeight = LocalConfiguration.current.screenHeightDp.dp
-        val maxHeightFromScreen = screenHeight * 0.4f
-        val maxHeight = min(maxHeightFromScreen, Spacings.Popup.maxHeight)
+    if (!isPopupExpanded || suggestions.isEmpty()) return
 
-        Popup(
-            popupPositionProvider = object : PopupPositionProvider {
-                override fun calculatePosition(
-                    anchorBounds: IntRect,
-                    windowSize: IntSize,
-                    layoutDirection: LayoutDirection,
-                    popupContentSize: IntSize
-                ): IntOffset = anchorBounds.bottomLeft + IntOffset(0, 8)
-            },
-            properties = PopupProperties(dismissOnClickOutside = true),
-            onDismissRequest = { isPopupExpanded = false }
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+    val maxHeightFromScreen = screenHeight * POPUP_SCREEN_HEIGHT_FACTOR
+    val maxHeight = min(maxHeightFromScreen, Spacings.Popup.maxHeight)
+
+    Popup(
+        popupPositionProvider = object : PopupPositionProvider {
+            override fun calculatePosition(
+                anchorBounds: IntRect,
+                windowSize: IntSize,
+                layoutDirection: LayoutDirection,
+                popupContentSize: IntSize
+            ): IntOffset = anchorBounds.bottomLeft + IntOffset(0, 8)
+        },
+        properties = PopupProperties(dismissOnClickOutside = true),
+        onDismissRequest = { isPopupExpanded = false }
+    ) {
+        LazyColumn(
+            modifier = Modifier
+                .padding(horizontal = Spacings.ScreenHorizontalSpacing)
+                .heightIn(max = maxHeight)
+                .width(with(LocalDensity.current) { popUpTargetWidth.toDp() })
+                .dropShadowBelow()
+                .clip(MaterialTheme.shapes.large)
+                .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
+                .padding(8.dp)
         ) {
-            LazyColumn(
-                modifier = Modifier
-                    .padding(horizontal = Spacings.ScreenHorizontalSpacing)
-                    .heightIn(max = maxHeight)
-                    .width(with(LocalDensity.current) { popUpTargetWidth.toDp() })
-                    .dropShadowBelow()
-                    .clip(MaterialTheme.shapes.large)
-                    .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
-                    .padding(8.dp)
-            ) {
-                stickyHeader {
-                    PopupHeader(
+            stickyHeader {
+                PopupHeader(
+                    modifier = Modifier.fillMaxWidth(),
+                    title = stringResource(id = R.string.conversation_member_selection_channels)
+                )
+            }
+
+            if (conversations.isEmpty()) {
+                item {
+                    NoSearchResults(
                         modifier = Modifier.fillMaxWidth(),
-                        title = stringResource(id = R.string.conversation_member_selection_channels)
+                        title = stringResource(id = R.string.conversation_member_selection_channels_no_search_results_title),
+                        details = stringResource(
+                            id = R.string.conversation_member_selection_channels_no_search_results_details,
+                            query
+                        ),
+                        showIcon = false
                     )
                 }
-
-                if (conversations.isEmpty()) {
+            } else {
+                conversations.forEach { item ->
                     item {
-                        NoSearchResults(
+                        PopupItem(
                             modifier = Modifier.fillMaxWidth(),
-                            title = stringResource(id = R.string.conversation_member_selection_channels_no_search_results_title),
-                            details = stringResource(
-                                id = R.string.conversation_member_selection_channels_no_search_results_details,
-                                query
-                            ),
-                            showIcon = false
+                            item = item,
+                            onAddMemberItem = onAddMemberItem,
+                            onDismissRequest = {
+                                isPopupExpanded = false
+                                onUpdateQuery("")
+                            }
                         )
                     }
-                } else {
-                    conversations.forEach { item ->
-                        item {
-                            PopupItem(
-                                modifier = Modifier.fillMaxWidth(),
-                                item = item,
-                                onAddMemberItem = onAddMemberItem,
-                                onDismissRequest = {
-                                    isPopupExpanded = false
-                                    onUpdateQuery("")
-                                }
-                            )
-                        }
-                    }
                 }
+            }
 
-                stickyHeader {
-                    PopupHeader(
+            stickyHeader {
+                PopupHeader(
+                    modifier = Modifier.fillMaxWidth(),
+                    title = stringResource(id = R.string.conversation_member_selection_users)
+                )
+            }
+
+            if (recipients.isEmpty() && query.length < MemberSelectionBaseViewModel.MINIMUM_QUERY_LENGTH) {
+                item {
+                    EmptyListHint(
                         modifier = Modifier.fillMaxWidth(),
-                        title = stringResource(id = R.string.conversation_member_selection_users)
+                        imageVector = Icons.Default.Keyboard,
+                        hint = stringResource(id = R.string.conversation_member_selection_query_too_short_popup, MemberSelectionBaseViewModel.MINIMUM_QUERY_LENGTH)
                     )
                 }
-
-                if (recipients.isEmpty() && query.length < MemberSelectionBaseViewModel.MINIMUM_QUERY_LENGTH) {
+            } else if (recipients.isEmpty()) {
+                item {
+                    NoSearchResults(
+                        modifier = Modifier.fillMaxWidth(),
+                        title = stringResource(id = R.string.conversation_member_selection_recipients_no_search_results_title),
+                        details = stringResource(id = R.string.conversation_member_selection_recipients_no_search_results_details, query),
+                        showIcon = false
+                    )
+                }
+            } else {
+                recipients.forEach { item ->
                     item {
-                        EmptyListHint(
+                        PopupItem(
                             modifier = Modifier.fillMaxWidth(),
-                            imageVector = Icons.Default.Keyboard,
-                            hint = stringResource(id = R.string.conversation_member_selection_query_too_short_popup, MemberSelectionBaseViewModel.MINIMUM_QUERY_LENGTH)
+                            item = item,
+                            onAddMemberItem = onAddMemberItem,
+                            onDismissRequest = {
+                                isPopupExpanded = false
+                                onUpdateQuery("")
+                            }
                         )
-                    }
-                } else if (recipients.isEmpty()) {
-                    item {
-                        NoSearchResults(
-                            modifier = Modifier.fillMaxWidth(),
-                            title = stringResource(id = R.string.conversation_member_selection_recipients_no_search_results_title),
-                            details = stringResource(id = R.string.conversation_member_selection_recipients_no_search_results_details, query),
-                            showIcon = false
-                        )
-                    }
-                } else {
-                    recipients.forEach { item ->
-                        item {
-                            PopupItem(
-                                modifier = Modifier.fillMaxWidth(),
-                                item = item,
-                                onAddMemberItem = onAddMemberItem,
-                                onDismissRequest = {
-                                    isPopupExpanded = false
-                                    onUpdateQuery("")
-                                }
-                            )
-                        }
                     }
                 }
             }

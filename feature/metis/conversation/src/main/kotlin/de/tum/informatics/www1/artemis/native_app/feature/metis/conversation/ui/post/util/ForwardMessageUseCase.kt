@@ -22,7 +22,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.PostingType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
@@ -65,7 +64,10 @@ class ForwardMessageUseCase(
      * @param targetConversationId the id of the conversation to create the post in
      * @param forwardedSourcePostList a list of posts that are forwarded in the new post
      */
-    fun createPost(targetConversationId: Long, forwardedSourcePostList: List<ForwardedSourcePostContent>) {
+    fun createPost(
+        targetConversationId: Long,
+        forwardedSourcePostList: List<ForwardedSourcePostContent>
+    ) {
         createPostService.createPost(
             courseId,
             targetConversationId,
@@ -86,18 +88,14 @@ class ForwardMessageUseCase(
      */
     fun forwardPost(post: IBasePost, onComplete: (Boolean) -> Unit) {
         viewModelScope.launch(coroutineContext) {
-            val (recipients, conversations, serverData) = combine(
-                recipients,
-                conversations,
-                serverConfigurationService.serverUrl,
-                accountService.authToken
-            ) { recipients, conversations, serverUrl, authToken ->
-                Triple(recipients, conversations, serverUrl to authToken)
-            }.first()
+            val recipients = recipients.first()
+            val conversations = conversations.first()
+            val serverData =
+                (serverConfigurationService.serverUrl.first() to accountService.authToken.first())
 
             val forwardedSourcePostList = listOf(
                 ForwardedSourcePostContent(
-                    sourcePostId = post.serverPostId ?: -1,
+                    sourcePostId = post.serverPostId ?: return@launch,
                     sourcePostType = when (post) {
                         is IStandalonePost -> PostingType.POST
                         is IAnswerPost -> PostingType.ANSWER
@@ -133,33 +131,33 @@ class ForwardMessageUseCase(
         serverData: Pair<String, String>
     ): Boolean {
         val (serverUrl, authToken) = serverData
-        if (recipients.isNotEmpty()) {
-            if (recipients.size == 1) {
-                conversationService.createOneToOneConversation(
-                    courseId,
-                    recipients[0].userId,
-                    authToken,
-                    serverUrl
-                ).onSuccess { conversation ->
-                    createPost(conversation.id, forwardedSourcePostList = forwardedSourcePostList)
-                    return true
-                }.onFailure {
-                    forwardingMessageError.value = ForwardingMessageError.DM_CREATION_ERROR
-                    return false
-                }
-            } else {
-                conversationService.createGroupChat(
-                    courseId,
-                    recipients.map { it.username },
-                    authToken,
-                    serverUrl
-                ).onSuccess { conversation ->
-                    createPost(conversation.id, forwardedSourcePostList = forwardedSourcePostList)
-                    return true
-                }.onFailure {
-                    forwardingMessageError.value = ForwardingMessageError.GROUP_CHAT_CREATION_ERROR
-                    return false
-                }
+        if (recipients.isEmpty()) return true
+
+        if (recipients.size == 1) {
+            conversationService.createOneToOneConversation(
+                courseId,
+                recipients[0].userId,
+                authToken,
+                serverUrl
+            ).onSuccess { conversation ->
+                createPost(conversation.id, forwardedSourcePostList = forwardedSourcePostList)
+                return true
+            }.onFailure {
+                forwardingMessageError.value = ForwardingMessageError.DM_CREATION_ERROR
+                return false
+            }
+        } else {
+            conversationService.createGroupChat(
+                courseId,
+                recipients.map { it.username },
+                authToken,
+                serverUrl
+            ).onSuccess { conversation ->
+                createPost(conversation.id, forwardedSourcePostList = forwardedSourcePostList)
+                return true
+            }.onFailure {
+                forwardingMessageError.value = ForwardingMessageError.GROUP_CHAT_CREATION_ERROR
+                return false
             }
         }
         return true

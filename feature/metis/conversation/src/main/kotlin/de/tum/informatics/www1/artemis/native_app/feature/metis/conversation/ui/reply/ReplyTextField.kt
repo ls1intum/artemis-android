@@ -96,7 +96,7 @@ internal fun ReplyTextField(
     surfaceShape: Shape = MaterialTheme.shapes.large.copy(
         bottomEnd = CornerSize(0.dp),
         bottomStart = CornerSize(0.dp)
-    ),
+    ), // This parameter is needed to allow tests to override the shape, as there have been issues using custom shapes
     emojiService: EmojiService,
 ) {
     val replyState: ReplyState = rememberReplyState(replyMode, updateFailureState)
