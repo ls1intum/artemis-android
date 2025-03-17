@@ -62,8 +62,9 @@ abstract class MemberSelectionBaseViewModel(
 
     val query: StateFlow<String> = savedStateHandle.getStateFlow(KEY_QUERY, "")
 
-    val isQueryTooShort: StateFlow<Boolean> = query.map { it.length < MINIMUM_QUERY_LENGTH }
-        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, true)
+    val isQueryTooShort: StateFlow<Boolean> =
+        query.debounce(QUERY_DEBOUNCE_TIME).map { it.length < MINIMUM_QUERY_LENGTH }
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, true)
 
     val inclusionList: StateFlow<InclusionList> =
         savedStateHandle.getStateFlow(KEY_INCLUSION_LIST, InclusionList())
@@ -122,17 +123,14 @@ abstract class MemberSelectionBaseViewModel(
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     private val conversationsFromServer: StateFlow<DataState<List<Conversation>>> = combine(
-        query,
         accountService.authToken,
         serverConfigurationService.serverUrl,
         onRequestReloadPotentialRecipients.onStart { emit(Unit) }
-    ) { query, authToken, serverUrl, _ ->
+    ) { authToken, serverUrl, _ ->
         retryOnInternet(networkStatusProvider.currentNetworkStatus) {
             conversationService.getConversations(courseId, authToken, serverUrl).bind { conversations ->
                 // For forwarding a post we currently only allow channels
-                conversations.filter {
-                    it.humanReadableName.contains(query, ignoreCase = true) && it is ChannelChat && !it.isAnnouncementChannel
-                }
+                conversations.filter { it is ChannelChat && !it.isAnnouncementChannel }
             }
         }
     }
@@ -140,13 +138,19 @@ abstract class MemberSelectionBaseViewModel(
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     private val potentialConversations: StateFlow<DataState<List<Conversation>>> = combine(
+        query.debounce(QUERY_DEBOUNCE_TIME),
         conversationsFromServer,
         conversations
-    ) { conversationsFromServerDataState, conversations ->
+    ) { query, conversationsFromServerDataState, conversations ->
         val conversationIds = conversations.map { it.id }
 
         conversationsFromServerDataState.bind { conversationsFromServer ->
-            conversationsFromServer.filter { it.id !in conversationIds }
+            conversationsFromServer.filter {
+                it.humanReadableName.contains(
+                    query,
+                    ignoreCase = true
+                ) && it.id !in conversationIds
+            }
         }
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
