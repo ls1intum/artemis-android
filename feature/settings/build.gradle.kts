@@ -8,8 +8,6 @@ android {
 }
 
 dependencies {
-    implementation("io.github.mr0xf00:easycrop:0.1.1")
-
     implementation(project(":core:ui"))
     implementation(project(":core:data"))
     implementation(project(":core:device"))
@@ -17,6 +15,8 @@ dependencies {
     implementation(project(":feature:push"))
     implementation(project(":feature:login"))
 
+    implementation(libs.krop.core)
+    implementation(libs.krop.ui)
     implementation(libs.placeholder.material)
     implementation(libs.androidx.browser)
     implementation(project(":feature:metis:shared"))

@@ -34,7 +34,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.mr0xf00.easycrop.rememberImageCropper
+import com.attafitamim.krop.core.crop.rememberImageCropper
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion

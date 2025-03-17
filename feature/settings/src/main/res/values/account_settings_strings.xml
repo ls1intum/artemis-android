@@ -12,7 +12,10 @@
     <string name="account_settings_change_profile_picture_from_library">Upload photo from library</string>
     <string name="account_settings_delete_profile_picture">Delete photo</string>
 
+    <string name="profile_picture_crop_title">Crop Image</string>
+    <string name="profile_picture_crop_apply">Apply</string>
     <string name="profile_picture_upload_error_could_not_be_compressed">Profile picture could not be compressed</string>
     <string name="profile_picture_upload_error_failed">Upload failed</string>
+
 
 </resources>
