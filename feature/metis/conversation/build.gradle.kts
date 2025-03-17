@@ -18,6 +18,8 @@ dependencies {
 
     implementation(project(":feature:metis:shared"))
     implementation(project(":feature:metis:manage-conversations"))
+    api(project(":feature:metis:conversation:shared"))
+    api(project(":feature:metis:conversation:saved-posts"))
     testImplementation(project(":feature:metis-test"))
 
     implementation(libs.androidx.paging.runtime)

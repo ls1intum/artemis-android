@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.Data
 import androidx.work.WorkerParameters
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.util.ForwardedSourcePostContent
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.post.util.ForwardedSourcePostContent
 import kotlinx.serialization.json.Json
 
 abstract class BaseCreatePostWorker(appContext: Context, workerParams: WorkerParameters) :

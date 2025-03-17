@@ -9,7 +9,8 @@ import androidx.work.WorkManager
 import de.tum.informatics.www1.artemis.native_app.core.common.defaultInternetWorkRequest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostConfigurationBlock
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.util.ForwardedSourcePostContent
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.CreatePostStatus
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.post.util.ForwardedSourcePostContent
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.work.BaseCreatePostWorker
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.work.CreateClientSidePostWorker
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.work.SendConversationPostWorker
@@ -107,7 +108,7 @@ internal class CreatePostServiceImpl(private val context: Context) : CreatePostS
         )
     }
 
-    override fun observeCreatePostWorkStatus(clientSidePostId: String): Flow<CreatePostService.Status> {
+    override fun observeCreatePostWorkStatus(clientSidePostId: String): Flow<CreatePostStatus> {
         return WorkManager.getInstance(context)
             .getWorkInfosForUniqueWorkFlow(getWorkName(clientSidePostId))
             .map { info ->
@@ -116,9 +117,9 @@ internal class CreatePostServiceImpl(private val context: Context) : CreatePostS
                 val done = info.all { it.state == WorkInfo.State.SUCCEEDED }
 
                 when {
-                    failed -> CreatePostService.Status.FAILED
-                    done -> CreatePostService.Status.FINISHED
-                    else -> CreatePostService.Status.PENDING
+                    failed -> CreatePostStatus.FAILED
+                    done -> CreatePostStatus.FINISHED
+                    else -> CreatePostStatus.PENDING
                 }
             }
     }

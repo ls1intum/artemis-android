@@ -11,7 +11,7 @@ interface ISavedPost : IBasePost {
     @Serializable
     data class SimpleConversationInfo(
         val id: Long,
-        val title: String,
+        val title: String?,
         val type: ConversationType
     ) {
         @Serializable
