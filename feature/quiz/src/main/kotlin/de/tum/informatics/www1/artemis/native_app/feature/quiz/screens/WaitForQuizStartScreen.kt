@@ -196,9 +196,9 @@ private fun BodySynchronized(
 
             Text(
                 text = timeUntilStart,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
-                fontSize = 24.sp
             )
         }
     }

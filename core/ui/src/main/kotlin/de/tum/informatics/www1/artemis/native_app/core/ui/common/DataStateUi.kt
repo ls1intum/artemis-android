@@ -15,6 +15,7 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -101,7 +102,7 @@ inline fun <T> Content(
                     modifier = Modifier.fillMaxWidth(),
                     text = failureText,
                     textAlign = TextAlign.Center,
-                    fontSize = 18.sp
+                    style = MaterialTheme.typography.bodyLarge,
                 )
 
                 TextButton(
@@ -120,7 +121,7 @@ inline fun <T> Content(
                     modifier = Modifier.fillMaxWidth(),
                     text = loadingText,
                     textAlign = TextAlign.Center,
-                    fontSize = 20.sp,
+                    style = MaterialTheme.typography.bodyLarge
                 )
 
                 if (!enablePullToRefresh) {

@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import de.tum.informatics.www1.artemis.native_app.core.model.server_config.Saml2Config
 import de.tum.informatics.www1.artemis.native_app.feature.login.R
@@ -40,8 +41,8 @@ internal fun Saml2BasedLogin(
             Text(
                 modifier = elementModifier,
                 text = pleaseSignInText,
-                fontSize = 20.sp,
-                textAlign = TextAlign.Center
+                style = MaterialTheme.typography.titleLarge,
+                textAlign = TextAlign.Center,
             )
         }
 
@@ -68,7 +69,7 @@ internal fun Saml2BasedLogin(
                 modifier = elementModifier,
                 text = stringResource(id = R.string.login_error_accept_terms),
                 color = MaterialTheme.colorScheme.error,
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center
             )
         }

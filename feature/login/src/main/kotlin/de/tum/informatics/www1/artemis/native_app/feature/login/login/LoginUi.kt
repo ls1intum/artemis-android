@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -21,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -187,7 +189,7 @@ internal fun LoginUi(
                 .fillMaxWidth()
                 .padding(top = 8.dp),
             text = stringResource(id = R.string.login_please_sign_in_account, accountName),
-            fontSize = 22.sp,
+            style = MaterialTheme.typography.titleLarge,
             textAlign = TextAlign.Center
         )
 
@@ -209,9 +211,8 @@ internal fun LoginUi(
                     Text(
                         modifier = modifier,
                         text = stringResource(id = R.string.login_password_or_saml_divider_text),
-                        fontSize = 16.sp,
-                        textAlign = TextAlign.Center
-                    )
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center,)
                 }
             )
         }
@@ -236,3 +237,19 @@ private fun <T> fromProfileInfo(
     default: T,
     onSuccess: (ProfileInfo) -> T
 ): T = dataState.bind(onSuccess).orElse(default)
+
+@Composable
+@Preview
+fun LoginUiPleaseSignInPreview() {
+    LoginUi(
+        modifier = Modifier,
+        accountName = "Artemis",
+        needsToAcceptTerms = false,
+        hasUserAcceptedTerms = true,
+        saml2Config = null,
+        isPasswordLoginDisabled = false,
+        updateUserAcceptedTerms = {},
+        passwordBasedLoginContent = { },
+        saml2BasedLoginContent = { _, _ -> }
+    )
+}
