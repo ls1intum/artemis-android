@@ -15,6 +15,9 @@ import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.service.SavedPostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.asMetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.network.MetisService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.util.ForwardedMessagesHandler
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 import kotlinx.coroutines.Deferred
@@ -32,12 +35,14 @@ class SavedPostsViewModel(
     val courseId: Long,
     val savedPostStatus: SavedPostStatus,
     private val savedPostService: SavedPostService,
+    private val metisService: MetisService,
     serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
     private val networkStatusProvider: NetworkStatusProvider,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : ViewModel() {
 
+    val metisContext = MetisContext.Course(courseId)
     private val onRequestReload = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     val serverUrl: StateFlow<String> = serverConfigurationService.serverUrl
@@ -58,6 +63,13 @@ class SavedPostsViewModel(
                 // TODO: this is currently required of a bug allowing duplicate items in the list
                 //  https://github.com/ls1intum/artemis-android/issues/307
                 .bind {
+                    val forwardedMessagesHandler = ForwardedMessagesHandler(
+                        metisService = metisService,
+                        metisContext = metisContext,
+                        authToken = authToken,
+                        serverUrl = serverUrl
+                    )
+                    forwardedMessagesHandler.extractForwardedMessages(it)
                     it.distinctBy { savedPost -> savedPost.key }
                 }
         }

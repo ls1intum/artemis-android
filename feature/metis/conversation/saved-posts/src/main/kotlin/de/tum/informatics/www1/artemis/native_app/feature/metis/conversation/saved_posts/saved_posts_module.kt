@@ -16,6 +16,7 @@ val saved_posts_module = module {
             get(),
             get(),
             get(),
+            get(),
             get()
         )
     }

@@ -78,6 +78,10 @@ sealed class ChatListItem {
                     override fun copy(post: IBasePost) = copy(post = post as IStandalonePost, forwardedPosts = forwardedPosts, courseId = courseId)
                 }
             }
+
+            sealed class SavedItem: PostItem() {
+
+            }
         }
 
         fun isThreadContextItem(): Boolean = this is ThreadItem.ContextItem
