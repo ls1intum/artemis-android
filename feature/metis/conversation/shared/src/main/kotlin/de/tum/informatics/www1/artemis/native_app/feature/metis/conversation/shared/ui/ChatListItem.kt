@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.sh
 
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import kotlinx.datetime.LocalDate
 
@@ -78,9 +79,21 @@ sealed class ChatListItem {
                     override fun copy(post: IBasePost) = copy(post = post as IStandalonePost, forwardedPosts = forwardedPosts, courseId = courseId)
                 }
             }
+        }
 
-            sealed class SavedItem: PostItem() {
+        sealed class SavedItem: PostItem() {
+            data class SavedPost(
+                override val post: ISavedPost
+            ) : SavedItem() {
+                override fun copy(post: IBasePost): PostItem = copy(post = post as ISavedPost)
+            }
 
+            data class SavedPostWithForwardedMessage(
+                override val post: ISavedPost,
+                override val forwardedPosts: List<IBasePost?>,
+                override val courseId: Long
+            ) : SavedItem(), ForwardedMessage {
+                override fun copy(post: IBasePost) = copy(post = post as ISavedPost, forwardedPosts = forwardedPosts, courseId = courseId)
             }
         }
 

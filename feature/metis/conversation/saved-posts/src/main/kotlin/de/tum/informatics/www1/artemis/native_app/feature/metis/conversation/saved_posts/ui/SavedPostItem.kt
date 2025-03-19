@@ -32,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.post.PostItemMainContent
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPost
@@ -42,12 +43,13 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 @Composable
 fun SavedPostItem(
     modifier: Modifier = Modifier,
-    savedPost: ISavedPost,
+    savedPostChatListItem: ChatListItem.PostItem.SavedItem,
     isLoading: Boolean = false,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     trailingCardContent: (@Composable ColumnScope.() -> Unit)? = null,
 ) {
+    val savedPost = savedPostChatListItem.post as ISavedPost
     ConversationContextInfo(
         modifier = modifier
             .combinedClickable(
@@ -60,12 +62,10 @@ fun SavedPostItem(
         isLoading = isLoading,
         trailingCardContent = trailingCardContent
     ) {
-
-        // TODO: A ChatListItem.PostItem should be passed here to support forwarded messages
-        // https://github.com/ls1intum/artemis-android/issues/459
         PostItemMainContent(
             modifier = Modifier.wrapContentHeight(unbounded = true),
             post = savedPost,
+            chatListItem = savedPostChatListItem,
             isRoleBadgeVisible = false,
             onClick = onClick,
             onLongClick = onLongClick,
@@ -188,7 +188,7 @@ private fun ConversationContextInfoHeader(
 private fun SavedPostItemPreview() {
     SavedPostItem(
         isLoading = true,
-        savedPost = SavedPost(
+        savedPostChatListItem = ChatListItem.PostItem.SavedItem.SavedPost(SavedPost(
             id = 1,
             referencePostId = 1,
             author = User(),
@@ -199,7 +199,7 @@ private fun SavedPostItemPreview() {
                 id = 1,
                 title = "Title",
                 type = ISavedPost.SimpleConversationInfo.ConversationType.CHANNEL,
-            ),
+            )),
         ),
         onClick = {},
         onLongClick = {},

@@ -16,9 +16,12 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.sav
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.asMetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.network.MetisService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.util.ForwardedMessagesHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.PostingType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -48,7 +51,7 @@ class SavedPostsViewModel(
     val serverUrl: StateFlow<String> = serverConfigurationService.serverUrl
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, "")
 
-    val savedPosts: StateFlow<DataState<List<ISavedPost>>> = flatMapLatest(
+    val savedPosts: StateFlow<DataState<List<ChatListItem.PostItem.SavedItem>>> = flatMapLatest(
         serverUrl,
         accountService.authToken,
         onRequestReload
@@ -70,7 +73,16 @@ class SavedPostsViewModel(
                         serverUrl = serverUrl
                     )
                     forwardedMessagesHandler.extractForwardedMessages(it)
-                    it.distinctBy { savedPost -> savedPost.key }
+                    it
+                        .distinctBy { savedPost -> savedPost.key }
+                        .map { post ->
+                            forwardedMessagesHandler.loadForwardedMessages(
+                                postingType = if (post is IAnswerPost) PostingType.ANSWER else PostingType.POST
+                            )
+                            forwardedMessagesHandler.resolveForwardedMessagesForSavedPost(
+                                chatListItem = ChatListItem.PostItem.SavedItem.SavedPost(post)
+                            )
+                        }
                 }
         }
     }

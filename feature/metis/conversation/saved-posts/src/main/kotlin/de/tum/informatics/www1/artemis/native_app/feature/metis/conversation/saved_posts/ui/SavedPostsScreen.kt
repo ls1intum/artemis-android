@@ -39,6 +39,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwo
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.rememberPostArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getIcon
@@ -91,7 +92,7 @@ internal fun SavedPostsScreen (
         SavedPostsScreen(
             modifier = modifier,
             status = status,
-            savedPostsDataState = savedPosts,
+            savedPostsChatListItemsDataState = savedPosts,
             onRequestReload = viewModel::requestReload,
             onNavigateBack = onNavigateBack,
             onNavigateToPost = onNavigateToPost,
@@ -105,7 +106,7 @@ internal fun SavedPostsScreen (
 internal fun SavedPostsScreen (
     modifier: Modifier,
     status: SavedPostStatus,
-    savedPostsDataState: DataState<List<ISavedPost>>,
+    savedPostsChatListItemsDataState: DataState<List<ChatListItem.PostItem.SavedItem>>,
     onRequestReload: () -> Unit,
     onNavigateBack: (() -> Unit),
     onNavigateToPost: (ISavedPost) -> Unit,
@@ -138,19 +139,19 @@ internal fun SavedPostsScreen (
 
             BasicDataStateUi(
                 modifier = Modifier.fillMaxSize(),
-                dataState = savedPostsDataState,
+                dataState = savedPostsChatListItemsDataState,
                 loadingText = stringResource(R.string.saved_posts_loading_posts_loading),
                 failureText = stringResource(R.string.saved_posts_loading_posts_failed),
                 retryButtonText = stringResource(R.string.saved_posts_loading_posts_try_again),
                 onClickRetry = onRequestReload,
                 enablePullToRefresh = false
-            ) { savedPosts ->
+            ) { savedPostChatListItems ->
 
                 ProvideMarkwon {
                     SavedPostsList(
                         modifier = Modifier.fillMaxSize(),
                         status = status,
-                        savedPosts = savedPosts,
+                        savedPostChatListItems = savedPostChatListItems,
                         onNavigateToPost = onNavigateToPost,
                         onChangeStatus = onChangeStatus,
                         onRemoveFromSavedPosts = onRemoveFromSavedPosts
@@ -165,13 +166,13 @@ internal fun SavedPostsScreen (
 private fun SavedPostsList(
     modifier: Modifier = Modifier,
     status: SavedPostStatus,
-    savedPosts: List<ISavedPost>,
+    savedPostChatListItems: List<ChatListItem.PostItem.SavedItem>,
     onNavigateToPost: (ISavedPost) -> Unit,
     onChangeStatus: (ISavedPost, SavedPostStatus) -> Deferred<MetisModificationFailure?>,
     onRemoveFromSavedPosts: (ISavedPost) -> Deferred<MetisModificationFailure?>
 ) {
     AnimatedContent(
-        targetState = savedPosts.isEmpty(),
+        targetState = savedPostChatListItems.isEmpty(),
         label = "Animated saved posts list: empty <-> not empty"
     ) { isEmpty ->
         if (isEmpty) {
@@ -192,22 +193,23 @@ private fun SavedPostsList(
             contentPadding = Spacings.calculateContentPaddingValues()
         ) {
             items(
-                items = savedPosts,
+                items = savedPostChatListItems,
                 key = { it.key }
             ) {
+                val savedPost = it.post as ISavedPost
                 SavedPostWithActions(
                     modifier = Modifier
                         .fillMaxWidth()
                         .animateItem(),
-                    savedPost = it,
+                    savedPostChatListItem = it,
                     onClick = {
-                        onNavigateToPost(it)
+                        onNavigateToPost(savedPost)
                     },
                     onChangeStatus = { newStatus ->
-                        onChangeStatus(it, newStatus)
+                        onChangeStatus(savedPost, newStatus)
                     },
                     onRemoveFromSavedPosts = {
-                        onRemoveFromSavedPosts(it)
+                        onRemoveFromSavedPosts(savedPost)
                     }
                 )
             }

@@ -97,6 +97,21 @@ class ForwardedMessagesHandler(
     }
 
     /**
+     * A wrapper method to resolve forwarded messages for a given ChatListItem of type PostItem.SavedItem.
+     * This method is used for the SavedPosts only, the logic is handled in [resolveForwardedMessages]
+     *
+     * @param chatListItem The ChatListItem of type PostItem.SavedItem for which the source posts should be matched.
+     */
+    fun resolveForwardedMessagesForSavedPost(
+        chatListItem: ChatListItem.PostItem.SavedItem,
+    ): ChatListItem.PostItem.SavedItem {
+        if (chatListItem !is ChatListItem.PostItem.ForwardedMessage) return chatListItem
+
+        return resolveForwardedMessages(chatListItem as ChatListItem.PostItem.SavedItem.SavedPostWithForwardedMessage) as ChatListItem.PostItem.SavedItem.SavedPostWithForwardedMessage
+    }
+
+
+    /**
      * Matches the previously loaded source posts to a given destination post by comparing the
      * destination id of the source post with the id of the destination post.
      */
@@ -131,6 +146,7 @@ class ForwardedMessagesHandler(
                 }
 
                 cachedStandaloneSourcePosts = updatedSourcePosts
+                println(updatedSourcePosts)
             }
         }
 

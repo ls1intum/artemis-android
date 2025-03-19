@@ -74,7 +74,7 @@ fun PostItemMainContent(
     isRoleBadgeVisible: Boolean = true,
     isAuthor: Boolean = false,
     postStatus: CreatePostStatus = CreatePostStatus.FINISHED,
-    chatListItem: ChatListItem.PostItem? = null, // TODO: ADD support for eg. saved posts (https://github.com/ls1intum/artemis-android/issues/459)
+    chatListItem: ChatListItem.PostItem? = null,
     displayHeader: Boolean = true,
     linkPreviews: List<LinkPreview> = emptyList(),
     onRemoveLinkPreview: (LinkPreview) -> Unit = {},
