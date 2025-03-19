@@ -146,7 +146,6 @@ class ForwardedMessagesHandler(
                 }
 
                 cachedStandaloneSourcePosts = updatedSourcePosts
-                println(updatedSourcePosts)
             }
         }
 
