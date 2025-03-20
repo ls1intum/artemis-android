@@ -21,7 +21,8 @@ interface ImagePicker {
 }
 
 /** Creates and remembers a instance of [ImagePicker] that launches
- * [ActivityResultContracts.GetContent] and calls [onImage] when the result is available */
+ * [ActivityResultContracts.GetContent] and calls [onImage] when the result is available
+ * */
 @Composable
 fun rememberImagePicker(
     onImage: (uri: ImageSrc) -> Unit

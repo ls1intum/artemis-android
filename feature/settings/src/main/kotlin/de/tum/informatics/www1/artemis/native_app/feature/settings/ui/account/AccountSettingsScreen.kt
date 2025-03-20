@@ -16,7 +16,7 @@ import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.filled.AssignmentInd
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Mail
-import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -234,7 +234,7 @@ private fun ChangeProfilePictureButton(
             val icon = if (hasCustomProfilePicture) {
                 Icons.Default.Edit
             } else {
-                Icons.Default.PhotoCamera
+                Icons.Default.Upload
             }
 
             Icon(
