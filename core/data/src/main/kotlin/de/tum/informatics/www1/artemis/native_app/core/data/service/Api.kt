@@ -18,79 +18,79 @@ sealed class Api(
 
     // With 8.0.0 API changes:
 
-//    data object Core: Api(api, "core") {
-//        data object Public : Api(*Core.path, "public")
-//        data object Courses : Api(*Core.path, "courses")
-//    }
-//
-//    data object Communication: Api(api, "communication") {
-//        data object Courses : Api(*Communication.path, "courses")
-//        data object NotificationSettings : Api(*Communication.path, "notification-settings")
-//        data object PushNotification : Api(*Communication.path, "push_notification")
-//        data object SavedPosts : Api(*Communication.path, "saved-posts")
-//    }
-//
-//    data object Lecture: Api(api, "lecture") {
-//        data object Lectures : Api(*Lecture.path, "lectures")
-//    }
-//
-//    data object Exercise: Api(api, "exercise") {
-//        data object Exercises : Api(*Exercise.path, "exercises")
-//    }
-//
-//    data object Text: Api(api, "text") {
-//        data object TextExercises : Api(*Text.path, "text-exercises")
-//    }
-//
-//    data object Modeling: Api(api, "modeling") {
-//        data object ModelingExercises : Api(*Modeling.path, "modeling-exercises")
-//    }
-//
-//    data object Programming: Api(api, "programming") {
-//        data object ProgrammingExercises : Api(*Programming.path, "programming-exercises")
-//    }
-//
-//    data object Quiz: Api(api, "quiz") {
-//        data object QuizExercises : Api(*Quiz.path, "quiz-exercises")
-//    }
-
-
-    // Prior to 8.0.0 API changes:
-    // Active for now to be compatible with the artemis-latest docker version used for e2e tests
-
-    data object Core: Api(api) {
+    data object Core: Api(api, "core") {
         data object Public : Api(*Core.path, "public")
         data object Courses : Api(*Core.path, "courses")
     }
 
-    data object Communication: Api(api) {
+    data object Communication: Api(api, "communication") {
         data object Courses : Api(*Communication.path, "courses")
         data object NotificationSettings : Api(*Communication.path, "notification-settings")
         data object PushNotification : Api(*Communication.path, "push_notification")
         data object SavedPosts : Api(*Communication.path, "saved-posts")
     }
 
-    data object Lecture: Api(api) {
+    data object Lecture: Api(api, "lecture") {
         data object Lectures : Api(*Lecture.path, "lectures")
     }
 
-    data object Exercise: Api(api) {
+    data object Exercise: Api(api, "exercise") {
         data object Exercises : Api(*Exercise.path, "exercises")
     }
 
-    data object Text: Api(api) {
+    data object Text: Api(api, "text") {
         data object TextExercises : Api(*Text.path, "text-exercises")
     }
 
-    data object Modeling: Api(api) {
+    data object Modeling: Api(api, "modeling") {
         data object ModelingExercises : Api(*Modeling.path, "modeling-exercises")
     }
 
-    data object Programming: Api(api) {
+    data object Programming: Api(api, "programming") {
         data object ProgrammingExercises : Api(*Programming.path, "programming-exercises")
     }
 
-    data object Quiz: Api(api) {
+    data object Quiz: Api(api, "quiz") {
         data object QuizExercises : Api(*Quiz.path, "quiz-exercises")
     }
+
+
+    // Prior to 8.0.0 API changes:
+    // Uncomment this block and remove the block above to run the app with a Artemis version lower than 8.0.0
+
+//    data object Core: Api(api) {
+//        data object Public : Api(*Core.path, "public")
+//        data object Courses : Api(*Core.path, "courses")
+//    }
+//
+//    data object Communication: Api(api) {
+//        data object Courses : Api(*Communication.path, "courses")
+//        data object NotificationSettings : Api(*Communication.path, "notification-settings")
+//        data object PushNotification : Api(*Communication.path, "push_notification")
+//        data object SavedPosts : Api(*Communication.path, "saved-posts")
+//    }
+//
+//    data object Lecture: Api(api) {
+//        data object Lectures : Api(*Lecture.path, "lectures")
+//    }
+//
+//    data object Exercise: Api(api) {
+//        data object Exercises : Api(*Exercise.path, "exercises")
+//    }
+//
+//    data object Text: Api(api) {
+//        data object TextExercises : Api(*Text.path, "text-exercises")
+//    }
+//
+//    data object Modeling: Api(api) {
+//        data object ModelingExercises : Api(*Modeling.path, "modeling-exercises")
+//    }
+//
+//    data object Programming: Api(api) {
+//        data object ProgrammingExercises : Api(*Programming.path, "programming-exercises")
+//    }
+//
+//    data object Quiz: Api(api) {
+//        data object QuizExercises : Api(*Quiz.path, "quiz-exercises")
+//    }
 }
