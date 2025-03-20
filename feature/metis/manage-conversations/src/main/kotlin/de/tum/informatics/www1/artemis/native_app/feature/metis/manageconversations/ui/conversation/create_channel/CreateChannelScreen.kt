@@ -215,9 +215,10 @@ private fun ChannelSettings(
     isPublic: Boolean,
     isCourseWide: Boolean
 ) {
-    val publicIndex = viewModel.publicIndex
-    val courseWideIndex = viewModel.courseWideIndex
-    val unselectedIndex = viewModel.unselectedIndex
+    val publicIndex = CreateChannelViewModel.Visibility.PUBLIC.ordinal
+    val courseWideIndex = CreateChannelViewModel.Scope.COURSEWIDE.ordinal
+    val privateIndex = CreateChannelViewModel.Visibility.PRIVATE.ordinal
+    val selectiveIndex = CreateChannelViewModel.Scope.SELECTIVE.ordinal
     val selectionModifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
 
     Card(
@@ -242,7 +243,7 @@ private fun ChannelSettings(
                     stringResource(id = R.string.create_channel_channel_accessibility_type_public),
                     stringResource(id = R.string.create_channel_channel_accessibility_type_private)
                 ),
-                selectedOption = if (isPublic) publicIndex else unselectedIndex,
+                selectedOption = if (isPublic) publicIndex else privateIndex,
                 onCheckedChange = { viewModel.updateVisibility(it) },
                 testTag = TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH,
             )
@@ -252,7 +253,7 @@ private fun ChannelSettings(
                 title = stringResource(id = R.string.create_channel_channel_type),
                 description = stringResource(id = R.string.create_channel_channel_course_wide_type_hint),
                 onCheckedChange = { viewModel.updateScope(it) },
-                selectedOption = if (isCourseWide) courseWideIndex else unselectedIndex,
+                selectedOption = if (isCourseWide) courseWideIndex else selectiveIndex,
                 testTag = TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH,
                 buttonLabelOption = listOf(
                     stringResource(id = R.string.create_channel_channel_course_wide_type_announcement),

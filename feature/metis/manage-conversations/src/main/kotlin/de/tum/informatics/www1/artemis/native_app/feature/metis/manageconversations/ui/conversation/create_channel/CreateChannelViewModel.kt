@@ -36,9 +36,15 @@ internal class CreateChannelViewModel(
         private const val KEY_IS_COURSE_WIDE = "course_wide"
     }
 
-    val publicIndex = 0
-    val courseWideIndex = 0
-    val unselectedIndex = 1
+    enum class Scope {
+        COURSEWIDE,
+        SELECTIVE,
+    }
+
+    enum class Visibility {
+        PUBLIC,
+        PRIVATE
+    }
 
     val name: StateFlow<String> = savedStateHandle.getStateFlow(KEY_NAME, "")
     val description: StateFlow<String> = savedStateHandle.getStateFlow(KEY_DESCRIPTION, "")
@@ -92,7 +98,7 @@ internal class CreateChannelViewModel(
     }
 
     fun updateVisibility(index: Int) {
-        val isPublic = index == publicIndex
+        val isPublic = index == Visibility.PUBLIC.ordinal
         savedStateHandle[KEY_IS_PUBLIC] = isPublic
     }
 
@@ -101,7 +107,7 @@ internal class CreateChannelViewModel(
     }
 
     fun updateScope(index: Int) {
-        val isCourseWide = index == courseWideIndex
+        val isCourseWide = index == Scope.COURSEWIDE.ordinal
         savedStateHandle[KEY_IS_COURSE_WIDE] = isCourseWide
     }
 }
