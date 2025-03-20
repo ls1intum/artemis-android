@@ -31,7 +31,7 @@ mockk = "1.13.17"
 ossLicensesPlugin = "0.10.6"
 placeholderMaterial = "2.0.0"
 room = "2.6.1"
-sentry-android = "8.4.0"
+sentry-android = "8.5.0"
 work = "2.10.0"
 
 [libraries]
