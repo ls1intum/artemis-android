@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -55,7 +56,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profil
 private const val POPUP_SCREEN_HEIGHT_FACTOR = 0.4f
 
 @Composable
-fun MemberSelectionDropdownPopup(
+fun ColumnScope.MemberSelectionDropdownPopup(
     modifier: Modifier,
     query: String,
     focusRequester: FocusRequester,
