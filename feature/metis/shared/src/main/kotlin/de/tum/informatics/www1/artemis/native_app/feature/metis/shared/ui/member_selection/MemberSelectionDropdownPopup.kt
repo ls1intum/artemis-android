@@ -4,10 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -19,7 +18,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -29,16 +27,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.min
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
@@ -53,29 +50,26 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureData
 
-private const val POPUP_SCREEN_HEIGHT_FACTOR = 0.4f
-
 @Composable
-fun ColumnScope.MemberSelectionDropdownPopup(
+fun MemberSelectionDropdownPopup(
     modifier: Modifier,
     query: String,
+    targetWidth: Dp,
+    maxHeightFromScreen: Dp,
     focusRequester: FocusRequester,
     suggestions: List<MemberSelectionItem>,
     searchBarBackground: Color,
     onUpdateQuery: (String) -> Unit,
     onAddMemberItem: (MemberSelectionItem) -> Unit
 ) {
+    val maxHeight = min(maxHeightFromScreen, Spacings.Popup.maxHeight)
+    val height = max(maxHeight, Spacings.Popup.minHeight)
     var isPopupExpanded by remember { mutableStateOf(true) }
     val conversations = suggestions.filterIsInstance<MemberSelectionItem.Conversation>()
     val recipients = suggestions.filterIsInstance<MemberSelectionItem.Recipient>()
 
-    var popUpTargetWidth by remember { mutableIntStateOf(0) }
-
     BasicSearchTextField(
         modifier = modifier
-            .onGloballyPositioned {
-                popUpTargetWidth = it.size.width
-            }
             .onFocusChanged { focusState ->
                 isPopupExpanded = focusState.isFocused && suggestions.isNotEmpty()
             }
@@ -96,10 +90,6 @@ fun ColumnScope.MemberSelectionDropdownPopup(
 
     if (!isPopupExpanded || suggestions.isEmpty()) return
 
-    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
-    val maxHeightFromScreen = screenHeight * POPUP_SCREEN_HEIGHT_FACTOR
-    val maxHeight = min(maxHeightFromScreen, Spacings.Popup.maxHeight)
-
     Popup(
         popupPositionProvider = object : PopupPositionProvider {
             override fun calculatePosition(
@@ -115,8 +105,8 @@ fun ColumnScope.MemberSelectionDropdownPopup(
         LazyColumn(
             modifier = Modifier
                 .padding(horizontal = Spacings.ScreenHorizontalSpacing)
-                .heightIn(max = maxHeight)
-                .width(with(LocalDensity.current) { popUpTargetWidth.toDp() })
+                .height(height)
+                .width(targetWidth)
                 .dropShadowBelow()
                 .clip(MaterialTheme.shapes.large)
                 .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)

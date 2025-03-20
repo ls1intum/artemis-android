@@ -146,7 +146,7 @@ internal fun MarkdownTextField(
 
 val options: @Composable (applyPadding: Boolean) -> Unit = { applyPadding ->
         TextFieldOptions(
-            modifier = Modifier.then(if (applyPadding) Modifier.padding(top = 8.dp) else Modifier),
+            modifier = Modifier.then(if (applyPadding) Modifier.padding(top = 4.dp) else Modifier),
             selectedType = selectedType,
             isPreviewEnabled = text.isNotBlank(),
             isEmojiPickerEnabled = isEmojiPickerEnabled,
@@ -412,7 +412,7 @@ private fun TextFieldOptions(
                 )
 
                 Box(
-                    modifier = Modifier
+                    modifier = modifier
                         .offset(y = textFormattingOptionsOffsetY)
                         .background(backgroundColor)
                 ) {
@@ -438,6 +438,7 @@ private fun TextFieldOptions(
         }
 
         PreviewEditRow(
+            modifier = modifier,
             selectedType = selectedType,
             isPreviewEnabled = isPreviewEnabled,
             onChangeViewType = onChangeViewType

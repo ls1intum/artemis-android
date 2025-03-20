@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -19,12 +21,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -34,6 +43,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member_selection.util.MemberSelectionMode
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureData
+import kotlin.math.absoluteValue
 
 const val TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD = "TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD"
 internal const val TEST_TAG_RECIPIENTS_LIST = "TEST_TAG_RECIPIENTS_LIST"
@@ -167,15 +177,36 @@ private fun RecipientsTextField(
             return
         }
 
-        MemberSelectionDropdownPopup(
-            modifier = Modifier,
-            query = query,
-            suggestions = suggestions,
-            focusRequester = focusRequester,
-            searchBarBackground = searchBarBackground,
-            onUpdateQuery = onUpdateQuery,
-            onAddMemberItem = onAddMemberItem
-        )
+        var boxWidth by remember { mutableIntStateOf(0) }
+        var boxYOffset by remember { mutableIntStateOf(0) }
+
+        val localConfiguration = LocalConfiguration.current
+        val localDensity = LocalDensity.current
+        val imeInsets = WindowInsets.ime.getBottom(localDensity)
+        Box(
+            modifier = Modifier
+                .onSizeChanged {
+                    boxWidth = it.width
+                }
+                .onGloballyPositioned { coordinates ->
+                    val boxBottomY = coordinates.positionInWindow().y + coordinates.size.height
+                    val screenHeightPx = with(localDensity) { localConfiguration.screenHeightDp.dp.toPx() }
+                    boxYOffset = (boxBottomY - screenHeightPx + imeInsets).toInt().absoluteValue
+                }
+                .fillMaxWidth()
+        ) {
+            MemberSelectionDropdownPopup(
+                modifier = Modifier,
+                query = query,
+                targetWidth = with(LocalDensity.current) { boxWidth.toDp() },
+                maxHeightFromScreen = with(LocalDensity.current) { boxYOffset.toDp() },
+                suggestions = suggestions,
+                focusRequester = focusRequester,
+                searchBarBackground = searchBarBackground,
+                onUpdateQuery = onUpdateQuery,
+                onAddMemberItem = onAddMemberItem
+            )
+        }
     }
 }
 
