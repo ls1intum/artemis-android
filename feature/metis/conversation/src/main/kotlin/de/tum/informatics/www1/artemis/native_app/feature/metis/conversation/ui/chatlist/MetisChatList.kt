@@ -20,7 +20,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,6 +44,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostWithBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.determinePostItemViewJoinedType
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.ForwardMessageUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.rememberPostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.shouldDisplayHeader
@@ -83,6 +86,7 @@ internal fun MetisChatList(
 
     val clientId: Long by viewModel.clientIdOrDefault.collectAsState()
     val postActionFlags by viewModel.postActionFlags.collectAsState()
+    val forwardMessageUseCase = viewModel.forwardMessageUseCase
 
     val serverUrl by viewModel.serverUrl.collectAsState()
 
@@ -106,6 +110,7 @@ internal fun MetisChatList(
             state = state,
             isMarkedAsDeleteList = viewModel.isMarkedAsDeleteList,
             bottomItem = bottomItem,
+            forwardMessageUseCase = forwardMessageUseCase,
             isReplyEnabled = isReplyEnabled,
             onCreatePost = viewModel::createPost,
             onEditPost = viewModel::editPost,
@@ -134,6 +139,7 @@ fun MetisChatList(
     bottomItem: PostPojo?,
     clientId: Long,
     postActionFlags: PostActionFlags,
+    forwardMessageUseCase: ForwardMessageUseCase,
     serverUrl: String,
     courseId: Long,
     state: LazyListState,
@@ -210,6 +216,7 @@ fun MetisChatList(
                             isMarkedAsDeleteList = isMarkedAsDeleteList,
                             onClickViewPost = onClickViewPost,
                             postActionFlags = postActionFlags,
+                            forwardMessageUseCase = forwardMessageUseCase,
                             onRequestEdit = onEditPostDelegate,
                             onRequestDelete = onDeletePostDelegate,
                             onRequestUndoDelete = onUndoDeletePost,
@@ -245,6 +252,7 @@ private fun ChatList(
     state: LazyListState,
     posts: PostsDataState.Loaded,
     postActionFlags: PostActionFlags,
+    forwardMessageUseCase: ForwardMessageUseCase,
     isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     clientId: Long,
     displayUnreadIndicator: Boolean = false,        // See https://github.com/ls1intum/artemis-android/pull/375#issuecomment-2656030353
@@ -291,9 +299,10 @@ private fun ChatList(
                     val linkPreviews by remember(post.content) {
                         generateLinkPreviews(post.content.orEmpty())
                     }.collectAsState()
+                    var displayForwardPostBottomSheet by remember(post) { mutableStateOf(false) }
 
                     val postActions = rememberPostActions(
-                        post = post,
+                        chatListItem = chatListItem,
                         postActionFlags = postActionFlags,
                         clientId = clientId,
                         onRequestEdit = { onRequestEdit(post) },
@@ -311,6 +320,7 @@ private fun ChatList(
                         },
                         onResolvePost = null,
                         onPinPost = { onRequestPin(post) },
+                        onForwardPost = { displayForwardPostBottomSheet = true },
                         onSavePost = { onRequestSave(post) },
                         onRequestRetrySend = {
                             onRequestRetrySend(
@@ -330,6 +340,8 @@ private fun ChatList(
                         chatListItem = chatListItem,
                         postActions = postActions,
                         linkPreviews = linkPreviews,
+                        forwardMessageUseCase = forwardMessageUseCase,
+                        displayForwardBottomSheet = displayForwardPostBottomSheet,
                         displayHeader = shouldDisplayHeader(
                             index = index,
                             post = post,
@@ -363,7 +375,8 @@ private fun ChatList(
                             if (post.serverPostId != null && standalonePostId != null) {
                                 onClickViewPost(standalonePostId)
                             }
-                        }
+                        },
+                        dismissForwardBottomSheet = { displayForwardPostBottomSheet = false }
                     )
                 }
 

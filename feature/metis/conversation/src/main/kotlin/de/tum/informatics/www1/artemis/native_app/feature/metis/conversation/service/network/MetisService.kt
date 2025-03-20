@@ -10,6 +10,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ForwardedMessage
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.PostingType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
+import io.ktor.client.statement.HttpResponse
 
 interface MetisService {
 
@@ -41,6 +42,13 @@ interface MetisService {
         serverUrl: String,
         authToken: String
     ): NetworkResponse<List<ForwardedMessage>>
+
+    suspend fun createForwardedMessage(
+        metisContext: MetisContext,
+        forwardedMessage: ForwardedMessage,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<HttpResponse>
 
     suspend fun getPostsByIds(
         metisContext: MetisContext,

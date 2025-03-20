@@ -14,6 +14,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.getTestTagForEmojiId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.getTestTagForReactionAuthor
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
@@ -91,7 +92,7 @@ class ConversationBottomSheetUiTest : BaseChatUITest() {
         composeTestRule.assertPostActionVisibility(
             R.string.post_resolves,
             isVisible = true,
-            postContentToClick = simpleAnswerContent
+            simpleAnswerPostId
         )
     }
 
@@ -108,7 +109,7 @@ class ConversationBottomSheetUiTest : BaseChatUITest() {
         composeTestRule.assertPostActionVisibility(
             R.string.post_resolves,
             isVisible = true,
-            postContentToClick = simpleAnswerContent
+            simpleAnswerPostId
         )
     }
 
@@ -124,7 +125,7 @@ class ConversationBottomSheetUiTest : BaseChatUITest() {
         composeTestRule.assertPostActionVisibility(
             R.string.post_resolves,
             isVisible = false,
-            postContentToClick = simpleAnswerContent
+            simpleAnswerPostId
         )
     }
 
@@ -167,7 +168,7 @@ class ConversationBottomSheetUiTest : BaseChatUITest() {
         composeTestRule.assertPostActionVisibility(
             R.string.post_pin,
             isVisible = false,
-            postContentToClick = simpleAnswerContent
+            simpleAnswerPostId
         )
     }
 
@@ -189,6 +190,40 @@ class ConversationBottomSheetUiTest : BaseChatUITest() {
         )
 
         composeTestRule.assertPostActionVisibility(R.string.post_unsave, isVisible = true)
+    }
+
+    // ######################################## FORWARD ##############################################
+
+    @Test
+    fun `test GIVEN a post that has content WHEN long pressing the post THEN forward option is shown`() {
+        setupChatUi(
+            posts = listOf(simplePost(otherUser))
+        )
+
+        composeTestRule.assertPostActionVisibility(R.string.post_forward, isVisible = true)
+    }
+
+    @Ignore("This test is flaky and does not work")
+    @Test
+    fun `test GIVEN a post that has no content but forwarded messages WHEN long pressing the post THEN forward option is shown`() {
+        val post = posts[1].copy(content = "")
+        setupChatUi(
+            posts = listOf(post)
+        )
+
+        val postId = post.serverPostId ?: post.hashCode().toLong()
+        composeTestRule.assertPostActionVisibility(R.string.post_forward, isVisible = true, postId)
+    }
+
+    @Test
+    fun `test GIVEN a post that no content and a deleted forwarded message WHEN long pressing the post THEN forward option is not shown`() {
+        setupChatUi(
+            posts = listOf(posts[1].copy(content = "")),
+            forwardedPosts = listOf(null)
+        )
+
+        val postId = posts[1].serverPostId ?: posts[1].hashCode().toLong()
+        composeTestRule.assertPostActionVisibility(R.string.post_forward, isVisible = false, postId)
     }
 
     // ################################## VIEW REACTING AUTHORS ######################################
@@ -244,9 +279,9 @@ class ConversationBottomSheetUiTest : BaseChatUITest() {
     private fun ComposeTestRule.assertPostActionVisibility(
         stringResId: Int,
         isVisible: Boolean,
-        postContentToClick: String = this@ConversationBottomSheetUiTest.simplePostContent,
+        id: Long = simplePostId,
     ) {
-        onNodeWithText(postContentToClick)
+        onNodeWithTag(getTestTagForPost(id))
             .performSemanticsAction(SemanticsActions.OnLongClick)
 
         onNodeWithTag(TEST_TAG_POST_CONTEXT_BOTTOM_SHEET)

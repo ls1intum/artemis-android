@@ -28,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -38,6 +39,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 
 @Composable
 internal fun FormattingOptions(
+    containerColor: Color,
     applyMarkdownStyle: (MarkdownStyle) -> Unit
 ) {
     var isListDropDownExpanded by remember { mutableStateOf(false) }
@@ -45,7 +47,7 @@ internal fun FormattingOptions(
 
     val applyMarkdownStyleFormattingButton = @Composable { markdownStyle: MarkdownStyle, drawableId: Int ->
         FormattingButton(
-            modifier = Modifier,
+            modifier = Modifier.background(containerColor),
             applyMarkdown = {
                 applyMarkdownStyle(markdownStyle)
             },
@@ -59,7 +61,7 @@ internal fun FormattingOptions(
             .fillMaxWidth()
             .height(32.dp)
             .horizontalScroll(rememberScrollState())
-            .background(MaterialTheme.colorScheme.surfaceContainer),
+            .background(containerColor),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -73,7 +75,7 @@ internal fun FormattingOptions(
         // Code Button
         Box(modifier = Modifier.align(Alignment.Top)) {
             FormattingButton(
-                modifier = Modifier,
+                modifier = Modifier.background(containerColor),
                 applyMarkdown = {
                     isCodeDropdownExpanded = !isCodeDropdownExpanded
                 },
@@ -92,7 +94,7 @@ internal fun FormattingOptions(
 
         Box(modifier = Modifier.align(Alignment.Top)) {
             FormattingButton(
-                modifier = Modifier,
+                modifier = Modifier.background(containerColor),
                 applyMarkdown = {
                     isListDropDownExpanded = !isListDropDownExpanded
                 },

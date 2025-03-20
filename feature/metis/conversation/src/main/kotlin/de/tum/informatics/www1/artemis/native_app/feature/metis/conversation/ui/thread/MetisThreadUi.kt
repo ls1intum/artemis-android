@@ -19,7 +19,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -37,14 +39,15 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.ProvideEmojis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.model.LinkPreview
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisPostListHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.testTagForPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostItemViewJoinedType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostWithBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.determinePostItemViewJoinedType
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.ForwardMessageUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionBar
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActions
@@ -80,6 +83,7 @@ internal fun MetisThreadUi(
     viewModel: ConversationViewModel
 ) {
     val postDataState: DataState<IStandalonePost> by viewModel.threadUseCase.post.collectAsState()
+    val forwardMessageUseCase = viewModel.forwardMessageUseCase
     val chatListContextItem by viewModel.threadUseCase.chatListItem.collectAsState()
     val answerChatListItemState: (IAnswerPost) -> StateFlow<ChatListItem.PostItem.ThreadItem.Answer?> =
         { viewModel.threadUseCase.getAnswerChatListItem(it) }
@@ -112,6 +116,7 @@ internal fun MetisThreadUi(
             postDataState = postDataState,
             chatListContextItem = chatListContextItem,
             postActionFlags = postActionFlags,
+            forwardMessageUseCase = forwardMessageUseCase,
             serverUrl = serverUrl,
             emojiService = koinInject(),
             isMarkedAsDeleteList = viewModel.isMarkedAsDeleteList,
@@ -174,6 +179,7 @@ internal fun MetisThreadUi(
     conversationDataState: DataState<Conversation>,
     chatListContextItem: ChatListItem.PostItem.ThreadItem?,
     postActionFlags: PostActionFlags,
+    forwardMessageUseCase: ForwardMessageUseCase,
     serverUrl: String,
     isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     emojiService: EmojiService,
@@ -240,6 +246,7 @@ internal fun MetisThreadUi(
                                 post = post,
                                 chatListContextItem = chatListContextItem,
                                 postActionFlags = postActionFlags,
+                                forwardMessageUseCase = forwardMessageUseCase,
                                 clientId = clientId,
                                 answerChatListItemState = answerChatListItemState,
                                 isMarkedAsDeleteList = isMarkedAsDeleteList,
@@ -266,7 +273,7 @@ internal fun MetisThreadUi(
                             replyMode = replyMode,
                             updateFailureState = updateFailureStateDelegate,
                             conversationName = conversationName,
-                            onFileSelected = { uri, ->
+                            onFileSelected = { uri ->
                                 onFileSelect(uri, context)
                             },
                             emojiService = emojiService
@@ -285,6 +292,7 @@ private fun PostAndRepliesList(
     post: IStandalonePost,
     chatListContextItem: ChatListItem.PostItem.ThreadItem?,
     postActionFlags: PostActionFlags,
+    forwardMessageUseCase: ForwardMessageUseCase,
     isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     clientId: Long,
     answerChatListItemState: (IAnswerPost) -> StateFlow<ChatListItem.PostItem.ThreadItem.Answer?>,
@@ -299,33 +307,36 @@ private fun PostAndRepliesList(
     onRequestReactWithEmoji: (IBasePost, emojiId: String, create: Boolean) -> Unit,
     onRequestRetrySend: (clientSidePostId: String, content: String) -> Unit
 ) {
-    val rememberPostActions: @Composable (IBasePost) -> PostActions = { affectedPost: IBasePost ->
-        rememberPostActions(
-            affectedPost,
-            postActionFlags,
-            clientId,
-            onRequestEdit = { onRequestEdit(affectedPost) },
-            onRequestDelete = { onRequestDelete(affectedPost) },
-            onRequestUndoDelete = { onRequestUndoDelete(affectedPost) },
-            onClickReaction = { emojiId, create ->
-                onRequestReactWithEmoji(
-                    affectedPost,
-                    emojiId,
-                    create
-                )
-            },
-            onReplyInThread = null,
-            onResolvePost = { onRequestResolve(affectedPost) },
-            onPinPost = { onRequestPin(affectedPost) },
-            onSavePost = { onRequestSave(affectedPost) },
-            onRequestRetrySend = {
-                onRequestRetrySend(
-                    affectedPost.clientPostId ?: return@rememberPostActions,
-                    affectedPost.content.orEmpty()
-                )
-            }
-        )
-    }
+    val rememberPostActions: @Composable (ChatListItem.PostItem, () -> Unit) -> PostActions =
+        { chatListItem: ChatListItem.PostItem, showForwardBottomSheet: () -> Unit ->
+            val affectedPost = chatListItem.post
+            rememberPostActions(
+                chatListItem,
+                postActionFlags,
+                clientId,
+                onRequestEdit = { onRequestEdit(affectedPost) },
+                onRequestDelete = { onRequestDelete(affectedPost) },
+                onRequestUndoDelete = { onRequestUndoDelete(affectedPost) },
+                onClickReaction = { emojiId, create ->
+                    onRequestReactWithEmoji(
+                        affectedPost,
+                        emojiId,
+                        create
+                    )
+                },
+                onReplyInThread = null,
+                onResolvePost = { onRequestResolve(affectedPost) },
+                onPinPost = { onRequestPin(affectedPost) },
+                onForwardPost = showForwardBottomSheet,
+                onSavePost = { onRequestSave(affectedPost) },
+                onRequestRetrySend = {
+                    onRequestRetrySend(
+                        affectedPost.clientPostId ?: return@rememberPostActions,
+                        affectedPost.content.orEmpty()
+                    )
+                }
+            )
+        }
 
     LazyColumn(
         modifier = modifier,
@@ -333,10 +344,13 @@ private fun PostAndRepliesList(
         state = state
     ) {
         item {
-            val postActions = rememberPostActions(post)
+            val chatListItem = chatListContextItem
+                ?: ChatListItem.PostItem.ThreadItem.ContextItem.ContextPost(post)
             val linkPreviews by remember(post.content) {
                 generateLinkPreviews(post.content.orEmpty())
             }.collectAsState()
+            var displayForwardBottomSheet by remember(post) { mutableStateOf(false) }
+            val postActions = rememberPostActions(chatListItem, { displayForwardBottomSheet = true })
 
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -346,9 +360,11 @@ private fun PostAndRepliesList(
                     modifier = Modifier
                         .testTag(testTagForPost(post.standalonePostId)),
                     post = post,
-                    chatListItem = chatListContextItem ?: ChatListItem.PostItem.ThreadItem.ContextItem.ContextPost(post),
+                    chatListItem = chatListItem,
                     postActions = postActions,
+                    displayForwardBottomSheet = displayForwardBottomSheet,
                     linkPreviews = linkPreviews,
+                    forwardMessageUseCase = forwardMessageUseCase,
                     onRemoveLinkPreview = { linkPreview ->
                         onRemoveLinkPreview(linkPreview, post, null)
                     },
@@ -356,7 +372,8 @@ private fun PostAndRepliesList(
                     displayHeader = true,
                     joinedItemType = PostItemViewJoinedType.PARENT,
                     clientId = clientId,
-                    onClick = {}
+                    onClick = {},
+                    dismissForwardBottomSheet = { displayForwardBottomSheet = false }
                 )
 
                 PostActionBar(
@@ -374,12 +391,18 @@ private fun PostAndRepliesList(
             post.orderedAnswerPostings,
             key = { index, post -> post.clientPostId ?: index }
         ) { index, answerPost ->
-            val postActions = rememberPostActions(answerPost)
             val answerChatListItem = answerChatListItemState(answerPost).collectAsState()
+            val chatListAnswerItem =
+                answerChatListItem.value ?: ChatListItem.PostItem.ThreadItem.Answer.AnswerPost(
+                    answerPost
+                )
             val answerPostLinkPreviews by remember(answerPost.content) {
                 generateLinkPreviews(answerPost.content.orEmpty())
             }.collectAsState()
-
+            var displayForwardBottomSheet by remember(answerPost) { mutableStateOf(false) }
+            val postActions = rememberPostActions(
+                chatListAnswerItem, { displayForwardBottomSheet = true }
+            )
 
             PostWithBottomSheet(
                 modifier = Modifier
@@ -388,11 +411,13 @@ private fun PostAndRepliesList(
                 post = answerPost,
                 postActions = postActions,
                 linkPreviews = answerPostLinkPreviews,
+                forwardMessageUseCase = forwardMessageUseCase,
                 onRemoveLinkPreview = { linkPreview ->
                     onRemoveLinkPreview(linkPreview, answerPost, post as? IStandalonePost)
                 },
                 isMarkedAsDeleteList = isMarkedAsDeleteList,
-                chatListItem = answerChatListItem.value ?: ChatListItem.PostItem.ThreadItem.Answer.AnswerPost(answerPost),
+                chatListItem = chatListAnswerItem,
+                displayForwardBottomSheet = displayForwardBottomSheet,
                 clientId = clientId,
                 displayHeader = shouldDisplayHeader(
                     index = index,
@@ -408,7 +433,8 @@ private fun PostAndRepliesList(
                     order = DisplayPostOrder.REGULAR,
                     getPost = post.orderedAnswerPostings::get
                 ),
-                onClick = {}
+                onClick = {},
+                dismissForwardBottomSheet = { displayForwardBottomSheet = false }
             )
         }
     }

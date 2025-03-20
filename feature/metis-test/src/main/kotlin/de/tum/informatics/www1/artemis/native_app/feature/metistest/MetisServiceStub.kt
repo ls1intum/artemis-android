@@ -8,6 +8,17 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ForwardedMessage
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.PostingType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
+import io.ktor.client.HttpClient
+import io.ktor.client.call.HttpClientCall
+import io.ktor.client.statement.HttpResponse
+import io.ktor.http.Headers
+import io.ktor.http.HttpProtocolVersion
+import io.ktor.http.HttpStatusCode
+import io.ktor.util.date.GMTDate
+import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.InternalAPI
+import kotlinx.coroutines.Job
+import kotlin.coroutines.CoroutineContext
 
 class MetisServiceStub(
     var posts: List<StandalonePost> = emptyList(),
@@ -43,6 +54,15 @@ class MetisServiceStub(
         return NetworkResponse.Response(forwardedMessages)
     }
 
+    override suspend fun createForwardedMessage(
+        metisContext: MetisContext,
+        forwardedMessage: ForwardedMessage,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<HttpResponse> {
+        return NetworkResponse.Response(HTTPResponseStub())
+    }
+
     override suspend fun getPostsByIds(
         metisContext: MetisContext,
         postIds: List<Long>,
@@ -68,4 +88,28 @@ class MetisServiceStub(
     ): NetworkResponse<LinkPreview?> {
         return NetworkResponse.Response(null)
     }
+}
+
+private class HTTPResponseStub @InternalAPI constructor(
+    override val call: HttpClientCall,
+    override val coroutineContext: CoroutineContext,
+    override val headers: Headers,
+    @InternalAPI override val rawContent: ByteReadChannel,
+    override val requestTime: GMTDate,
+    override val responseTime: GMTDate,
+    override val status: HttpStatusCode,
+    override val version: HttpProtocolVersion
+): HttpResponse() {
+
+    @OptIn(InternalAPI::class)
+    constructor(): this(
+        call = HttpClientCall(HttpClient()),
+        coroutineContext = Job(),
+        headers = Headers.Empty,
+        rawContent = ByteReadChannel.Empty,
+        requestTime = GMTDate(0),
+        responseTime = GMTDate(0),
+        status = HttpStatusCode.OK,
+        version = HttpProtocolVersion.HTTP_1_1
+    )
 }

@@ -1,7 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation
 
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.saved_posts_module
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.emojiPickerModule
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.saved_posts_module
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.CreatePostServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService

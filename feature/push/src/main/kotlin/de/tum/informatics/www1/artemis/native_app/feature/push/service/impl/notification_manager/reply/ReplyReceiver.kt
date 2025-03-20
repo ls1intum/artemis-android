@@ -67,6 +67,7 @@ class ReplyReceiver : BaseCommunicationNotificationReceiver() {
                             metisContext.conversationId,
                             clientSidePostId,
                             response,
+                            hasForwardedMessage = false,
                             postType = BaseCreatePostWorker.PostType.ANSWER_POST,
                             parentPostId = parentPostId
                         )

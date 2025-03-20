@@ -1,12 +1,18 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.TextFieldValue
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
@@ -19,7 +25,15 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.sha
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.PostsDataState
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.ForwardMessageUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyMode
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteHint
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteHintCollection
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteType
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.LocalReplyAutoCompleteHintProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.ReplyAutoCompleteHintProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.ConversationThreadUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.MetisThreadUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
@@ -40,7 +54,9 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.datetime.Clock
 
 
@@ -56,6 +72,8 @@ private fun User.asConversationUser(isRequestingUser: Boolean = false): Conversa
 abstract class BaseChatUITest : BaseComposeTest() {
 
     val clientId = 20L
+    val simplePostId = 1L
+    val simpleAnswerPostId = 2L
 
     private val course: Course = Course(id = 1)
 
@@ -100,7 +118,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
         postAuthor: User,
         isSaved: Boolean = false
     ): StandalonePost = StandalonePost(
-        id = 1,
+        id = simplePostId,
         author = postAuthor,
         content = simplePostContent,
         isSaved = isSaved
@@ -112,7 +130,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
     ): StandalonePost {
         val basePost = simplePost(postAuthor)
         val answerPost = AnswerPost(
-            id = 2,
+            id = simpleAnswerPostId,
             author = answerAuthor,
             content = simpleAnswerContent,
             post = basePost
@@ -198,6 +216,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
         hasModerationRights: Boolean = false,
     ) {
         val threadUseCase = mockk<ConversationThreadUseCase>()
+        val forwardMessageUseCaseMock = mockk<ForwardMessageUseCase>()
         val testFlow = MutableStateFlow<ChatListItem.PostItem.ThreadItem.Answer?>(null)
         every { threadUseCase.getAnswerChatListItem(any()) } returns testFlow
 
@@ -222,6 +241,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                 generateLinkPreviews = { _ -> linkPreviewStateFlow },
                 onRemoveLinkPreview = { _, _, _ -> CompletableDeferred<MetisModificationFailure>() },
                 serverUrl = "",
+                forwardMessageUseCase = forwardMessageUseCaseMock,
                 isMarkedAsDeleteList = mutableStateListOf(),
                 emojiService = EmojiServiceStub,
                 chatListContextItem = chatListItem,
@@ -274,6 +294,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                         ChatListItem.PostItem.IndexedItem.Post(post, post.answers.orEmpty())
                     }
                 }.toMutableList()
+                val forwardMessageUseCaseMock = mockk<ForwardMessageUseCase>()
                 MetisChatList(
                     modifier = Modifier.fillMaxSize(),
                     initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
@@ -284,6 +305,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                         isAtLeastTutorInCourse = isAtLeastTutorInCourse,
                         hasModerationRights = hasModerationRights,),
                     serverUrl = "",
+                    forwardMessageUseCase = forwardMessageUseCaseMock,
                     courseId = course.id!!,
                     state = rememberLazyListState(),
                     emojiService = EmojiServiceStub,
@@ -304,6 +326,56 @@ abstract class BaseChatUITest : BaseComposeTest() {
                     conversationName = "Title",
                     onFileSelected = { _ -> }
                 )
+            }
+        }
+    }
+
+    // ############################## REPLY TEXT FIELD SETUP ########################################
+
+    private val autoCompleteHints = listOf(
+        AutoCompleteHintCollection(
+            type = AutoCompleteType.USERS,
+            items = listOf(
+                AutoCompleteHint("User1", "<User1>", "1"),
+                AutoCompleteHint("User2", "<User2>", "2"),
+                AutoCompleteHint("User3", "<User3>", "3"),
+            )
+        )
+    )
+
+    private val hintProviderStub = object : ReplyAutoCompleteHintProvider {
+        override val isFaqEnabled: Boolean = false
+        override val legalTagChars: List<Char> = listOf('@')
+        override fun produceAutoCompleteHints(tagChar: Char, query: String): Flow<DataState<List<AutoCompleteHintCollection>>> {
+            return flowOf(DataState.Success(autoCompleteHints))
+        }
+    }
+
+    fun setupReplyTextField() {
+        composeTestRule.setContent {
+            CompositionLocalProvider(LocalReplyAutoCompleteHintProvider provides hintProviderStub) {
+                val text = remember { mutableStateOf(TextFieldValue()) }
+
+                Column {
+                    // This Spacer is required to allocate some space where the autocompletion dialog can be
+                    // displayed above the TextField.
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    ReplyTextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        replyMode = ReplyMode.NewMessage(
+                            text,
+                            onUpdateTextUpstream = { text.value = it }
+                        ) {
+                            CompletableDeferred()
+                        },
+                        updateFailureState = {},
+                        conversationName = "TestChat",
+                        onFileSelected = { _ -> },
+                        surfaceShape = MaterialTheme.shapes.large,
+                        emojiService = EmojiServiceStub
+                    )
+                }
             }
         }
     }

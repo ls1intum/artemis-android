@@ -37,7 +37,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.MetisThreadUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.util.rememberDerivedConversationName
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.ConversationIcon
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.common.ConversationIcon
 
 /**
  * Display the post and its replied. If metis may be outdated, a banner will be displayed to the user.
