@@ -28,6 +28,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metistest.ConversationBaseTest
 import kotlinx.coroutines.runBlocking
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
@@ -44,6 +45,7 @@ class CreateChannelE2eTest : ConversationBaseTest() {
     private val privateIndex = 1
     private val courseWideIndex = 0
 
+    @Ignore("This test does not work anymore, see https://github.com/ls1intum/artemis-android/issues/495")
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can create channel`() {
         canCreateChannelTestImpl(
@@ -55,6 +57,7 @@ class CreateChannelE2eTest : ConversationBaseTest() {
         )
     }
 
+    @Ignore("This test does not work anymore, see https://github.com/ls1intum/artemis-android/issues/495")
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `fun create channel without description`() {
         canCreateChannelTestImpl(
@@ -66,6 +69,7 @@ class CreateChannelE2eTest : ConversationBaseTest() {
         )
     }
 
+    @Ignore("This test does not work anymore, see https://github.com/ls1intum/artemis-android/issues/495")
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `fun create private and unrestricted channel`() {
         canCreateChannelTestImpl(
@@ -77,6 +81,7 @@ class CreateChannelE2eTest : ConversationBaseTest() {
         )
     }
 
+    @Ignore("This test does not work anymore, see https://github.com/ls1intum/artemis-android/issues/495")
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can create course-wide channel`() {
         canCreateChannelTestImpl(
