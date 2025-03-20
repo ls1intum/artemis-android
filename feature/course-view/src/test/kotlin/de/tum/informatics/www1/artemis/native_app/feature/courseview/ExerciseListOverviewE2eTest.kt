@@ -4,6 +4,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToKey
 import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
@@ -90,6 +91,10 @@ class ExerciseListOverviewE2eTest : BaseCourseTest() {
                 hasTestTag(TEST_TAG_EXERCISE_LIST_LAZY_COLUMN),
                 DefaultTimeoutMillis
             )
+
+        composeTestRule
+            .onNodeWithTag("noDate-header")
+            .performClick()
 
         composeTestRule
             .onNodeWithTag(TEST_TAG_EXERCISE_LIST_LAZY_COLUMN)

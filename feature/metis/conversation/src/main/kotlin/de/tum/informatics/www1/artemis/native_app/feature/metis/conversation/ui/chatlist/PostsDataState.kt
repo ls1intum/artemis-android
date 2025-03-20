@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
 
 /**
  * Abstract layer over the loaded posts state, so we can use both a Pager and a simple list to display posts.
