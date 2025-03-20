@@ -33,7 +33,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -92,6 +91,7 @@ internal fun CreateChannelScreen(
 
     val isPublic by viewModel.isPublic.collectAsState()
     val isAnnouncement by viewModel.isAnnouncement.collectAsState()
+    val isCourseWide by viewModel.isCourseWide.collectAsState()
 
     val canCreate by viewModel.canCreate.collectAsState()
 
@@ -169,7 +169,9 @@ internal fun CreateChannelScreen(
 
             ChannelSettings(
                 viewModel = viewModel,
-                isAnnouncement = isAnnouncement
+                isAnnouncement = isAnnouncement,
+                isPublic = isPublic,
+                isCourseWide = isCourseWide
             )
 
             Button(
@@ -209,8 +211,13 @@ internal fun CreateChannelScreen(
 private fun ChannelSettings(
     modifier: Modifier = Modifier,
     viewModel: CreateChannelViewModel,
-    isAnnouncement: Boolean
+    isAnnouncement: Boolean,
+    isPublic: Boolean,
+    isCourseWide: Boolean
 ) {
+    val publicIndex = viewModel.publicIndex
+    val courseWideIndex = viewModel.courseWideIndex
+    val unselectedIndex = viewModel.unselectedIndex
     val selectionModifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
 
     Card(
@@ -235,7 +242,8 @@ private fun ChannelSettings(
                     stringResource(id = R.string.create_channel_channel_accessibility_type_public),
                     stringResource(id = R.string.create_channel_channel_accessibility_type_private)
                 ),
-                onCheckedChange = { viewModel.updatePublic(it) },
+                selectedOption = if (isPublic) publicIndex else unselectedIndex,
+                onCheckedChange = { viewModel.updateVisibility(it) },
                 testTag = TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH,
             )
 
@@ -243,7 +251,8 @@ private fun ChannelSettings(
                 modifier = selectionModifier,
                 title = stringResource(id = R.string.create_channel_channel_type),
                 description = stringResource(id = R.string.create_channel_channel_course_wide_type_hint),
-                onCheckedChange = { viewModel.updateCourseWide(it) },
+                onCheckedChange = { viewModel.updateScope(it) },
+                selectedOption = if (isCourseWide) courseWideIndex else unselectedIndex,
                 testTag = TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH,
                 buttonLabelOption = listOf(
                     stringResource(id = R.string.create_channel_channel_course_wide_type_announcement),
@@ -268,13 +277,11 @@ private fun SegmentedSelection(
     modifier: Modifier,
     title: String,
     description: String,
+    selectedOption: Int,
     buttonLabelOption: List<String>,
-    onCheckedChange: (Boolean) -> Unit,
+    onCheckedChange: (Int) -> Unit,
     testTag: String = ""
 ) {
-    val targetOption = 0
-    var selectedOption by remember { mutableIntStateOf(targetOption) }
-
     Column(
         modifier = modifier.padding(bottom = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -299,7 +306,7 @@ private fun SegmentedSelection(
                 buttonLabelOption.forEachIndexed { index, label ->
                     val selected = index == selectedOption
                     SegmentedButton(
-                        modifier = Modifier.testTag(testTag + index),
+                        modifier = Modifier.testTag(testTag + index + selected),
                         selected = selected,
                         colors = SegmentedButtonDefaults.colors(
                             inactiveContainerColor = CardDefaults.cardColors().containerColor,
@@ -307,11 +314,10 @@ private fun SegmentedSelection(
                             activeBorderColor = MaterialTheme.colorScheme.outlineVariant
                         ),
                         onClick = {
-                            selectedOption = index
-                            onCheckedChange(selectedOption == targetOption)
+                            onCheckedChange(index)
                         },
                         shape = SegmentedButtonDefaults.itemShape(index, buttonLabelOption.size),
-                        icon = {
+                        icon = {    // This had to be added manually to add padding to the icon
                             SegmentedButtonDefaults.Icon(
                                 active = selected,
                                 activeContent = {
