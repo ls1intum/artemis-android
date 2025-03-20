@@ -1,10 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.common
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -159,4 +161,30 @@ fun <T> EmptyDataStateUi(
         is DataState.Success -> content(dataState.data)
         else -> otherwise()
     }
+}
+
+@Composable
+fun <T>AnimatedDataStateUi(
+    modifier: Modifier = Modifier,
+    dataState: DataState<T>,
+    loadingContent: @Composable () -> Unit = @Composable {
+        CircularProgressIndicator()
+    },
+    failureContent: @Composable () -> Unit = @Composable {
+        Text(text = "Failed to load data")
+    },
+    successContent: @Composable (T) -> Unit
+) {
+    AnimatedContent(
+        targetState = dataState,
+        modifier = modifier,
+        label = "AnimatedDataStateUi"
+    ) { state ->
+        when (state) {
+            is DataState.Loading -> loadingContent()
+            is DataState.Failure -> failureContent()
+            is DataState.Success -> successContent(state.data)
+        }
+    }
+
 }

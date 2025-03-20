@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -30,13 +29,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.common.app_version.AppVersion
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.core.ui.LinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.collectArtemisContextAsState
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.AnimatedDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.pagePadding
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
@@ -165,13 +163,12 @@ private fun UserInformationSection(
         modifier = modifier,
         title = stringResource(id = R.string.settings_account_information_section)
     ) {
-        EmptyDataStateUi(
+        AnimatedDataStateUi(
             dataState = accountDataState,
-            otherwise = {
-                LinearProgressIndicator(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
+            failureContent = {
+                LogoutButtonEntry(
+                    modifier = Modifier.fillMaxWidth(),
+                    onRequestLogout = onRequestLogout
                 )
             }
         ) { account ->
@@ -200,13 +197,6 @@ private fun UserInformationSection(
                     }
                 }
             }
-        }
-
-        if (accountDataState.isSuccess.not()) {
-            LogoutButtonEntry(
-                modifier = Modifier.fillMaxWidth(),
-                onRequestLogout = onRequestLogout
-            )
         }
     }
 }
