@@ -84,6 +84,12 @@ object Spacings {
         val large = 24.dp
         val medium = 16.dp
     }
+
+    object TimeFrameItems {
+        val small = 8.dp
+        val iconSize = 32.dp
+
+    }
 }
 
 fun Modifier.endOfPagePadding() = padding(bottom = Spacings.EndOfScrollablePageSpacing).navigationBarsPadding()
