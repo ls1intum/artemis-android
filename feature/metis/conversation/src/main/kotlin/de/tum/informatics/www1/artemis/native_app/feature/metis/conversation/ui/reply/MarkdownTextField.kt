@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply
 
+import android.annotation.SuppressLint
 import android.net.Uri
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.compose.animation.AnimatedVisibility
@@ -76,6 +77,7 @@ const val TEST_TAG_MARKDOWN_TEXTFIELD = "TEST_TAG_MARKDOWN_TEXTFIELD"
 val textFormattingOptionsHiddenOffsetY = 200.dp
 
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 internal fun MarkdownTextField(
     modifier: Modifier,
@@ -102,10 +104,10 @@ internal fun MarkdownTextField(
     var isTextOptionsVisible by remember { mutableStateOf(isTextOptionsInitiallyVisible) }
     // weight(1f) is needed for the row to ensure that the TextFieldOptions stay visible when the BasicMarkdownTextField grows.
     // fill has to be disabled for the UI tests to work properly.
-    val content: @Composable ColumnScope.() -> Unit = {
+    val content: @Composable ColumnScope.(applyWeight: Boolean) -> Unit = { applyWeight ->
         Row(
             modifier = Modifier
-                .weight(1f, false)
+                .then(if (applyWeight) Modifier.weight(1f, false) else Modifier)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -142,8 +144,9 @@ internal fun MarkdownTextField(
         }
     }
 
-    val options = @Composable {
+val options: @Composable (applyPadding: Boolean) -> Unit = { applyPadding ->
         TextFieldOptions(
+            modifier = Modifier.then(if (applyPadding) Modifier.padding(top = 8.dp) else Modifier),
             selectedType = selectedType,
             isPreviewEnabled = text.isNotBlank(),
             isEmojiPickerEnabled = isEmojiPickerEnabled,
@@ -160,40 +163,24 @@ internal fun MarkdownTextField(
     }
 
     if (alignOptionsAtBottom) {
-        Box(
-            modifier = modifier.imePadding()
-        ) {
-            Column(
-                modifier = Modifier,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                content()
-                textOptionsTopContent()
-            }
-
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-            ) {
-                AnimatedVisibility(isTextOptionsVisible) {
-                    options()
-                }
-            }
-        }
+        BoxedMarkdownTextField(
+            modifier = modifier,
+            backgroundColor = backgroundColor,
+            isTextOptionsVisible = isTextOptionsVisible,
+            content = content,
+            textOptionsTopContent = textOptionsTopContent,
+            options = options
+        )
         return
     }
 
-    Column(
+    ChatMarkdownTextField(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        content()
-        textOptionsTopContent()
-        AnimatedVisibility(isTextOptionsVisible) {
-            options()
-        }
-    }
+        content = content,
+        textOptionsTopContent = textOptionsTopContent,
+        isTextOptionsVisible = isTextOptionsVisible,
+        options = options
+    )
 
     if (showEmojiPicker) {
         EmojiPickerModalBottomSheet(
@@ -205,6 +192,70 @@ internal fun MarkdownTextField(
             },
             onDismiss = { showEmojiPicker = false }
         )
+    }
+}
+
+@Composable
+private fun BoxedMarkdownTextField(
+    modifier: Modifier,
+    backgroundColor: Color,
+    isTextOptionsVisible: Boolean,
+    content: @Composable ColumnScope.(applyWeight: Boolean) -> Unit,
+    textOptionsTopContent: @Composable ColumnScope.() -> Unit,
+    options: @Composable (Boolean) -> Unit,
+) {
+    Box(
+        modifier = modifier.imePadding()
+    ) {
+        val scrollState = rememberScrollState()
+        val optionsHeight = if (isTextOptionsVisible) 56.dp else 0.dp
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(scrollState)
+                .padding(bottom = optionsHeight)
+        ) {
+            content(false)
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                content = textOptionsTopContent
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .background(backgroundColor)
+                .fillMaxWidth()
+        ) {
+            AnimatedVisibility(isTextOptionsVisible) {
+                options(true)
+            }
+        }
+    }
+}
+
+@Composable
+private fun ChatMarkdownTextField(
+    modifier: Modifier,
+    content: @Composable ColumnScope.(applyWeight: Boolean) -> Unit,
+    textOptionsTopContent: @Composable ColumnScope.() -> Unit,
+    isTextOptionsVisible: Boolean = true,
+    options: @Composable (Boolean) -> Unit,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        content(true)
+        textOptionsTopContent()
+        AnimatedVisibility(isTextOptionsVisible) {
+            options(false)
+        }
     }
 }
 
