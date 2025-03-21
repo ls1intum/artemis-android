@@ -89,9 +89,9 @@ internal fun CreateChannelScreen(
     val isNameIllegal by viewModel.isNameIllegal.collectAsState()
     val isDescriptionIllegal by viewModel.isDescriptionIllegal.collectAsState()
 
-    val isPublic by viewModel.isPublic.collectAsState()
+    val visibility by viewModel.visibility.collectAsState()
     val isAnnouncement by viewModel.isAnnouncement.collectAsState()
-    val isCourseWide by viewModel.isCourseWide.collectAsState()
+    val scope by viewModel.scope.collectAsState()
 
     val canCreate by viewModel.canCreate.collectAsState()
 
@@ -137,7 +137,7 @@ internal fun CreateChannelScreen(
                     } else R.string.create_channel_text_field_name_hint
                 ),
                 leadingIcon = {
-                    if (isPublic) {
+                    if (visibility == CreateChannelViewModel.Visibility.PUBLIC) {
                         Icon(
                             modifier = Modifier,
                             imageVector = Icons.Default.Numbers,
@@ -170,8 +170,8 @@ internal fun CreateChannelScreen(
             ChannelSettings(
                 viewModel = viewModel,
                 isAnnouncement = isAnnouncement,
-                isPublic = isPublic,
-                isCourseWide = isCourseWide
+                visibility = visibility,
+                scope = scope
             )
 
             Button(
@@ -212,13 +212,9 @@ private fun ChannelSettings(
     modifier: Modifier = Modifier,
     viewModel: CreateChannelViewModel,
     isAnnouncement: Boolean,
-    isPublic: Boolean,
-    isCourseWide: Boolean
+    visibility: CreateChannelViewModel.Visibility,
+    scope: CreateChannelViewModel.Scope,
 ) {
-    val publicIndex = CreateChannelViewModel.Visibility.PUBLIC.ordinal
-    val courseWideIndex = CreateChannelViewModel.Scope.COURSEWIDE.ordinal
-    val privateIndex = CreateChannelViewModel.Visibility.PRIVATE.ordinal
-    val selectiveIndex = CreateChannelViewModel.Scope.SELECTIVE.ordinal
     val selectionModifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
 
     Card(
@@ -243,8 +239,8 @@ private fun ChannelSettings(
                     stringResource(id = R.string.create_channel_channel_accessibility_type_public),
                     stringResource(id = R.string.create_channel_channel_accessibility_type_private)
                 ),
-                selectedOption = if (isPublic) publicIndex else privateIndex,
-                onCheckedChange = { viewModel.updateVisibility(it) },
+                selectedOption = visibility.ordinal,
+                onCheckedChange = { viewModel.updateVisibility(CreateChannelViewModel.Visibility.entries[it]) },
                 testTag = TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH,
             )
 
@@ -252,8 +248,8 @@ private fun ChannelSettings(
                 modifier = selectionModifier,
                 title = stringResource(id = R.string.create_channel_channel_type),
                 description = stringResource(id = R.string.create_channel_channel_course_wide_type_hint),
-                onCheckedChange = { viewModel.updateScope(it) },
-                selectedOption = if (isCourseWide) courseWideIndex else selectiveIndex,
+                selectedOption = scope.ordinal,
+                onCheckedChange = { viewModel.updateScope(CreateChannelViewModel.Scope.entries[it]) },
                 testTag = TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH,
                 buttonLabelOption = listOf(
                     stringResource(id = R.string.create_channel_channel_course_wide_type_announcement),
