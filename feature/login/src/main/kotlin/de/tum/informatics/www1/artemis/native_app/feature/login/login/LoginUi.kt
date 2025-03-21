@@ -188,7 +188,7 @@ internal fun LoginUi(
                 .fillMaxWidth()
                 .padding(top = 8.dp),
             text = stringResource(id = R.string.login_please_sign_in_account, accountName),
-            style = MaterialTheme.typography.titleLarge,
+            style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center
         )
 

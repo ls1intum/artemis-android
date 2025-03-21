@@ -489,7 +489,6 @@ internal fun ArtemisHeader(
             modifier = modifier.padding(horizontal = 32.dp)
         )
 
-
         if (BuildConfig.DEBUG || selectedInstance.type == ArtemisInstances.ArtemisInstance.Type.CUSTOM) {
             Spacer(Modifier.height(8.dp))
 
