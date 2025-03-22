@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="account_settings_title">Account Settings</string>
+    <string name="account_settings_information_full_name">Full name:</string>
+    <string name="account_settings_information_login">Login:</string>
+    <string name="account_settings_information_email">Email:</string>
+    <string name="account_settings_section">Details</string>
+
+    <string name="account_settings_edit_profile_picture">Change</string>
+    <string name="account_settings_upload_profile_picture">Upload</string>
+
+    <string name="account_settings_change_profile_picture_from_library">Upload photo from library</string>
+    <string name="account_settings_delete_profile_picture">Delete photo</string>
+
+    <string name="profile_picture_crop_title">Crop Image</string>
+    <string name="profile_picture_crop_apply">Apply</string>
+    <string name="profile_picture_upload_error_could_not_be_compressed">Profile picture could not be compressed</string>
+    <string name="profile_picture_upload_error_failed">Upload failed</string>
+
+
+</resources>

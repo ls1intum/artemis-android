@@ -19,21 +19,23 @@ open class Account(
     override val imageUrl: String? = null,
     override val id: Long = 0L,
     val groups: List<String> = emptyList()
-) : BaseAccount
+) : BaseAccount {
 
-fun Account.isAtLeastTutorInCourse(course: Course): Boolean {
-    return hasGroup(course.instructorGroupName) ||
-            hasGroup(course.editorGroupName) ||
-            hasGroup(course.teachingAssistantGroupName) ||
-            hasAnyAuthorityDirect(listOf(AccountAuthority.ROLE_INSTRUCTOR))
+    val hasCustomProfilePicture: Boolean
+        get() = imageUrl != null
+
+    fun isAtLeastTutorInCourse(course: Course): Boolean {
+        return hasGroup(course.instructorGroupName) ||
+                hasGroup(course.editorGroupName) ||
+                hasGroup(course.teachingAssistantGroupName) ||
+                hasAnyAuthorityDirect(listOf(AccountAuthority.ROLE_INSTRUCTOR))
+    }
+
+    private fun hasGroup(groupName: String): Boolean {
+        return groupName in groups
+    }
+
+    private fun hasAnyAuthorityDirect(authorities: List<AccountAuthority>): Boolean {
+        return this.authorities.any { it in authorities }
+    }
 }
-
-private fun Account.hasGroup(groupName: String): Boolean {
-    return groupName in groups
-}
-
-private fun Account.hasAnyAuthorityDirect(authorities: List<AccountAuthority>): Boolean {
-    return this.authorities.any { it in authorities }
-}
-
-private fun Account.highestAuthority() = authorities.maxOrNull()

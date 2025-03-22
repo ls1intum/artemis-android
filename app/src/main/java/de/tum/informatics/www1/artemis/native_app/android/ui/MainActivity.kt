@@ -35,6 +35,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.isLoggedIn
 import de.tum.informatics.www1.artemis.native_app.core.ui.LinkOpener
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalWindowSizeClassProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.WindowSizeClassProvider
@@ -221,7 +222,8 @@ class MainActivity : AppCompatActivity(),
             LocalWindowSizeClassProvider provides windowSizeClassProvider,
             LocalLinkOpener provides linkOpener,
             LocalArtemisImageProvider provides koinInject(),
-            LocalMarkdownLinkResolver provides koinInject()
+            LocalMarkdownLinkResolver provides koinInject(),
+            LocalArtemisContextProvider provides koinInject()
         ) {
 
             val updateRepository = koinInject<UpdateRepository>()

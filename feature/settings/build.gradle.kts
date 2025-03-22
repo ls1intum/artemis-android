@@ -15,6 +15,8 @@ dependencies {
     implementation(project(":feature:push"))
     implementation(project(":feature:login"))
 
+    implementation(libs.krop.core)
+    implementation(libs.krop.ui)
     implementation(libs.placeholder.material)
     implementation(libs.androidx.browser)
     implementation(project(":feature:metis:shared"))

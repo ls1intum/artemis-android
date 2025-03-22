@@ -17,12 +17,11 @@ val exerciseModule = module {
             get(),
             get(),
             get(),
-            get(),
         )
     }
 
     viewModel { params ->
-        TextExerciseParticipationViewModel(params[0], params[1], get(), get(), get(), get())
+        TextExerciseParticipationViewModel(params[0], params[1], get(), get(), get())
     }
 
     single<TextSubmissionService> { TextSubmissionServiceImpl(get(), get()) }

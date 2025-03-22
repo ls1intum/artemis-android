@@ -9,7 +9,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ArtemisDeepl
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CommunicationDeeplinks
 
 const val TYPE_ICON_RESOURCE_PATH = "android.resource://de.tum.cit.aet.artemis/"
-val ATTACHMENTS_ENDPOINT = "/${Api.Core.getJointPath()}/files/attachments/"
+val ATTACHMENTS_ENDPOINT = "/${Api.Core.Files.getJointPath()}/attachments/"
 
 class PostArtemisMarkdownTransformer(val serverUrl: String, val courseId: Long) : ArtemisMarkdownTransformer() {
 

@@ -11,5 +11,5 @@ import org.koin.dsl.module
 val uiModule = module {
     single<BaseImageProvider> { BaseImageProviderImpl() }
     single<ArtemisImageProvider> { ArtemisImageProviderImpl(get(), get()) }
-    single<MarkdownLinkResolver> { MarkdownLinkResolverImpl(get()) }
+    single<MarkdownLinkResolver> { MarkdownLinkResolverImpl() }
 }

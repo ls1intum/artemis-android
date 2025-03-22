@@ -25,9 +25,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.BottomSheetActionButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.BottomSheetActionButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.MetisModificationTaskHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
@@ -147,8 +147,6 @@ private fun SavedPostBottomSheet(
                 )
 
                 BottomSheetActionButton(
-                    modifier = Modifier
-                        .fillMaxWidth(),
                     text = text,
                     icon = status.getIcon(),
                     onClick = { onChangeStatusActionClick(status) }
@@ -156,8 +154,6 @@ private fun SavedPostBottomSheet(
             }
 
             BottomSheetActionButton(
-                modifier = Modifier
-                    .fillMaxWidth(),
                 text = stringResource(id = R.string.saved_posts_action_remove),
                 icon = Icons.Default.Delete,
                 onClick = onRemoveClick

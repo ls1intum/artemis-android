@@ -8,21 +8,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.common.markdown.MarkdownUrlUtil
 import de.tum.informatics.www1.artemis.native_app.core.ui.LinkOpener
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
-import de.tum.informatics.www1.artemis.native_app.core.ui.collectAsState
+import de.tum.informatics.www1.artemis.native_app.core.ui.collectArtemisContextAsState
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.LinkBottomSheet
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.LinkBottomSheetState
 import io.noties.markwon.LinkResolver
 
-class MarkdownLinkResolverImpl(
-    private val artemisContextProvider: ArtemisContextProvider
-): MarkdownLinkResolver {
+class MarkdownLinkResolverImpl(): MarkdownLinkResolver {
     @Composable
     override fun rememberMarkdownLinkResolver(): LinkResolver {
-        val artemisContext by artemisContextProvider.collectAsState()
+        val artemisContext by LocalArtemisContextProvider.current.collectArtemisContextAsState()
         val serverUrl = artemisContext.serverUrl
         val authToken = artemisContext.authToken
         val context = LocalContext.current

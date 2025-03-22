@@ -33,7 +33,8 @@ import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
-import de.tum.informatics.www1.artemis.native_app.core.ui.collectAsState
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.collectArtemisContextAsState
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseViewModel
@@ -60,7 +61,7 @@ internal fun ExerciseScreen(
     onParticipateInQuiz: (courseId: Long, isPractice: Boolean) -> Unit,
     onClickViewQuizResults: (courseId: Long) -> Unit
 ) {
-    val artemisContext by viewModel.artemisContextProvider.collectAsState()
+    val artemisContext by LocalArtemisContextProvider.current.collectArtemisContextAsState()
 
     val exerciseDataState by viewModel.exerciseDataState.collectAsState()
     val channelDataState by viewModel.channelDataState.collectAsState()

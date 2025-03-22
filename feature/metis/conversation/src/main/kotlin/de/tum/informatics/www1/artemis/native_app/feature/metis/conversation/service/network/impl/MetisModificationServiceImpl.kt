@@ -273,8 +273,7 @@ internal class MetisModificationServiceImpl(
             ) {
                 url {
                     appendPathSegments(
-                        *Api.Core.path,
-                        "files",
+                        *Api.Core.Files.path,
                         "courses",
                         courseId,
                         "conversations",

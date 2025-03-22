@@ -20,7 +20,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import de.tum.informatics.www1.artemis.native_app.core.data.join
-import de.tum.informatics.www1.artemis.native_app.core.ui.collectAsState
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.collectArtemisContextAsState
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.ArtemisWebView
@@ -48,7 +49,7 @@ internal fun ViewResultScreen(
             )
         }
     ) { padding ->
-        val artemisContext by viewModel.artemisContextProvider.collectAsState()
+        val artemisContext by LocalArtemisContextProvider.current.collectArtemisContextAsState()
         val exerciseDataState by viewModel.exerciseDataState.collectAsState()
         val latestResultDataState by viewModel.latestResultDataState.collectAsState()
 
