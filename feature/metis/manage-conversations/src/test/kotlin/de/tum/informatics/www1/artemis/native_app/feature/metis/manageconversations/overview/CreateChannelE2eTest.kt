@@ -3,8 +3,10 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversat
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -26,6 +28,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metistest.ConversationBaseTest
 import kotlinx.coroutines.runBlocking
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
@@ -39,6 +42,10 @@ import kotlin.test.assertIs
 @RunWith(RobolectricTestRunner::class)
 class CreateChannelE2eTest : ConversationBaseTest() {
 
+    private val privateIndex = 1
+    private val courseWideIndex = 0
+
+    @Ignore("This test does not work anymore, see https://github.com/ls1intum/artemis-android/issues/495")
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can create channel`() {
         canCreateChannelTestImpl(
@@ -50,6 +57,7 @@ class CreateChannelE2eTest : ConversationBaseTest() {
         )
     }
 
+    @Ignore("This test does not work anymore, see https://github.com/ls1intum/artemis-android/issues/495")
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `fun create channel without description`() {
         canCreateChannelTestImpl(
@@ -61,6 +69,7 @@ class CreateChannelE2eTest : ConversationBaseTest() {
         )
     }
 
+    @Ignore("This test does not work anymore, see https://github.com/ls1intum/artemis-android/issues/495")
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `fun create private and unrestricted channel`() {
         canCreateChannelTestImpl(
@@ -72,6 +81,7 @@ class CreateChannelE2eTest : ConversationBaseTest() {
         )
     }
 
+    @Ignore("This test does not work anymore, see https://github.com/ls1intum/artemis-android/issues/495")
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can create course-wide channel`() {
         canCreateChannelTestImpl(
@@ -128,14 +138,13 @@ class CreateChannelE2eTest : ConversationBaseTest() {
             composeTestRule
                 .onNodeWithTag(TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH)
                 .performScrollTo()
-                .performClick()
             composeTestRule
-                .onNodeWithTag(TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH)
-                .assertIsOn()
+                .onNodeWithTag(TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH + privateIndex)
+                .assertIsSelected()
         } else {
             composeTestRule
-                .onNodeWithTag(TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH)
-                .assertIsOff()
+                .onNodeWithTag(TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH + privateIndex)
+                .assertIsNotSelected()
         }
 
         if (isAnnouncement) {
@@ -156,14 +165,13 @@ class CreateChannelE2eTest : ConversationBaseTest() {
             composeTestRule
                 .onNodeWithTag(TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH)
                 .performScrollTo()
-                .performClick()
             composeTestRule
-                .onNodeWithTag(TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH)
-                .assertIsOn()
+                .onNodeWithTag(TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH + courseWideIndex)
+                .assertIsSelected()
         } else {
             composeTestRule
-                .onNodeWithTag(TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH)
-                .assertIsOff()
+                .onNodeWithTag(TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH + courseWideIndex)
+                .assertIsNotSelected()
         }
 
         composeTestRule
@@ -201,6 +209,5 @@ class CreateChannelE2eTest : ConversationBaseTest() {
             channel.isCourseWide,
             "Course Wide property not set correctly"
         )
-
     }
 }

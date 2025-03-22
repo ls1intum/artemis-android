@@ -7,11 +7,12 @@
     <string name="create_channel_text_field_name_label">Name</string>
     <string name="create_channel_text_field_name_hint">e.g. tech-support</string>
     <string name="create_channel_text_field_name_required">required</string>
+    <string name="create_channel_settings_section_title">Channel Options</string>
 
     <string name="create_channel_text_field_description_label">Description (optional)</string>
     <string name="create_channel_text_field_description_hint">What\'s this channel about?</string>
 
-    <string name="create_channel_channel_accessibility_type">Private Channel?</string>
+    <string name="create_channel_channel_accessibility_type">Visibility</string>
     <string name="create_channel_channel_accessibility_type_hint">Every user except instructors will need an invitation to join a private channel. Everybody can join a public channel.</string>
     <string name="create_channel_channel_accessibility_type_public">Public</string>
     <string name="create_channel_channel_accessibility_type_private">Private</string>
@@ -21,10 +22,10 @@
     <string name="create_channel_channel_announcement_type_announcement">Announcement Channel</string>
     <string name="create_channel_channel_announcement_type_unrestricted">Unrestricted Channel</string>
 
-    <string name="create_channel_channel_course_wide_type">Course Wide Channel?</string>
+    <string name="create_channel_channel_type">Scope</string>
     <string name="create_channel_channel_course_wide_type_hint">In a course-wide channel, all users in the course are automatically added. In a selective channel, you can manually select the users to be added after creation.</string>
-    <string name="create_channel_channel_course_wide_type_announcement">Course Wide Channel</string>
-    <string name="create_channel_channel_course_wide_type_unrestricted">Selective Channel</string>
+    <string name="create_channel_channel_course_wide_type_announcement">Course-wide</string>
+    <string name="create_channel_channel_course_wide_type_unrestricted">Selective</string>
 
     <string name="create_channel_button">Create Channel</string>
     <string name="create_channel_failed_title">Could not create channel.</string>
