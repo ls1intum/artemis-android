@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.KeyboardAlt
 import androidx.compose.material.icons.filled.PersonOff
 import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -97,6 +98,11 @@ private fun InclusionListUi(
                     contentDescription = null
                 )
             },
+            border = FilterChipDefaults.filterChipBorder(
+                borderColor = MaterialTheme.colorScheme.outlineVariant,
+                selected = selected,
+                enabled = true
+            ),
             label = { Text(text = stringResource(id = labelResId)) }
         )
     }
