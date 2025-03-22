@@ -73,7 +73,6 @@ class ForwardMessageUseCase(
             courseId,
             targetConversationId,
             newMessageText.value.text,
-            true,
             forwardedSourcePostList = forwardedSourcePostList,
         )
     }

@@ -56,8 +56,7 @@ class SendConversationPostWorker(
         clientSidePostId: String,
         content: String,
         postType: PostType,
-        hasForwardedMessage: Boolean,
-        forwardedSourcePostList: List<ForwardedSourcePostContent>?,
+        forwardedSourcePostList: List<ForwardedSourcePostContent>,
         parentPostId: Long?
     ): Result {
         Log.d(TAG, "Starting send post to server. ClientSidePostId=$clientSidePostId")
@@ -83,7 +82,6 @@ class SendConversationPostWorker(
                             courseId = courseId,
                             conversationId = conversationId,
                             content = content,
-                            hasForwardedMessage = hasForwardedMessage,
                             forwardedSourcePostList = forwardedSourcePostList,
                             serverUrl = serverUrl,
                             authToken = authData.authToken
@@ -106,7 +104,6 @@ class SendConversationPostWorker(
                             conversationId = conversationId,
                             postId = parentPostId,
                             content = content,
-                            hasForwardedMessage = hasForwardedMessage,
                             forwardedSourcePostList = forwardedSourcePostList,
                             serverUrl = serverUrl,
                             authToken = authData.authToken
@@ -130,8 +127,7 @@ class SendConversationPostWorker(
         courseId: Long,
         conversationId: Long,
         content: String,
-        hasForwardedMessage: Boolean,
-        forwardedSourcePostList: List<ForwardedSourcePostContent>?,
+        forwardedSourcePostList: List<ForwardedSourcePostContent>,
         serverUrl: String,
         authToken: String
     ): NetworkResponse<StandalonePost> {
@@ -147,7 +143,7 @@ class SendConversationPostWorker(
                     id = null,
                     title = null,
                     tags = null,
-                    hasForwardedMessages = hasForwardedMessage,
+                    hasForwardedMessages = forwardedSourcePostList.isNotEmpty(),
                     content = content,
                     conversation = conversation,
                     creationDate = Clock.System.now(),
@@ -156,10 +152,10 @@ class SendConversationPostWorker(
                 serverUrl = serverUrl,
                 authToken = authToken
             ).onSuccess {
-                if (hasForwardedMessage) {
+                if (forwardedSourcePostList.isNotEmpty()) {
                     createForwardedMessages(
                         destinationPost = it,
-                        forwardedSourcePostList = forwardedSourcePostList ?: return@onSuccess,
+                        forwardedSourcePostList = forwardedSourcePostList,
                         destinationType = PostingType.POST,
                         metisContext = MetisContext.Conversation(courseId, conversationId),
                         serverUrl = serverUrl,
@@ -175,8 +171,7 @@ class SendConversationPostWorker(
         conversationId: Long,
         postId: Long,
         content: String,
-        hasForwardedMessage: Boolean,
-        forwardedSourcePostList: List<ForwardedSourcePostContent>?,
+        forwardedSourcePostList: List<ForwardedSourcePostContent>,
         serverUrl: String,
         authToken: String
     ): NetworkResponse<AnswerPost> {
@@ -190,7 +185,7 @@ class SendConversationPostWorker(
                 context = MetisContext.Conversation(courseId, conversationId),
                 post = AnswerPost(
                     content = content,
-                    hasForwardedMessages = hasForwardedMessage,
+                    hasForwardedMessages = forwardedSourcePostList.isNotEmpty(),
                     post = StandalonePost(
                         id = postId,
                         conversation = conversation
@@ -200,10 +195,10 @@ class SendConversationPostWorker(
                 serverUrl = serverUrl,
                 authToken = authToken
             ).onSuccess {
-                if (hasForwardedMessage) {
+                if (forwardedSourcePostList.isNotEmpty()) {
                     createForwardedMessages(
                         destinationPost = it,
-                        forwardedSourcePostList = forwardedSourcePostList ?: return@onSuccess,
+                        forwardedSourcePostList = forwardedSourcePostList,
                         destinationType = PostingType.ANSWER,
                         metisContext = MetisContext.Conversation(courseId, conversationId),
                         serverUrl = serverUrl,

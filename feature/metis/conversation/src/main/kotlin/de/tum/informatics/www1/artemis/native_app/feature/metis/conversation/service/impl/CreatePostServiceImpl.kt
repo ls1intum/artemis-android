@@ -24,8 +24,7 @@ internal class CreatePostServiceImpl(private val context: Context) : CreatePostS
         courseId: Long,
         conversationId: Long,
         content: String,
-        hasForwardedMessage: Boolean,
-        forwardedSourcePostList: List<ForwardedSourcePostContent>?,
+        forwardedSourcePostList: List<ForwardedSourcePostContent>,
         configure: CreatePostConfigurationBlock
     ) {
         scheduleCreatePostWork(
@@ -34,7 +33,6 @@ internal class CreatePostServiceImpl(private val context: Context) : CreatePostS
             content = content,
             postType = BaseCreatePostWorker.PostType.POST,
             parentPostId = null,
-            hasForwardedMessage = hasForwardedMessage,
             forwardedSourcePostList = forwardedSourcePostList,
             clientSidePostId = null,
             configure = configure
@@ -46,8 +44,7 @@ internal class CreatePostServiceImpl(private val context: Context) : CreatePostS
         conversationId: Long,
         parentPostId: Long,
         content: String,
-        hasForwardedMessage: Boolean,
-        forwardedSourcePostList: List<ForwardedSourcePostContent>?,
+        forwardedSourcePostList: List<ForwardedSourcePostContent>,
         configure: CreatePostConfigurationBlock
     ) {
         scheduleCreatePostWork(
@@ -56,7 +53,6 @@ internal class CreatePostServiceImpl(private val context: Context) : CreatePostS
             content = content,
             postType = BaseCreatePostWorker.PostType.ANSWER_POST,
             parentPostId = parentPostId,
-            hasForwardedMessage = hasForwardedMessage,
             forwardedSourcePostList = forwardedSourcePostList,
             clientSidePostId = null,
             configure = configure
@@ -68,8 +64,7 @@ internal class CreatePostServiceImpl(private val context: Context) : CreatePostS
         conversationId: Long,
         clientSidePostId: String,
         content: String,
-        hasForwardedMessage: Boolean,
-        forwardedSourcePostList: List<ForwardedSourcePostContent>?,
+        forwardedSourcePostList: List<ForwardedSourcePostContent>,
         configure: CreatePostConfigurationBlock
     ) {
         scheduleCreatePostWork(
@@ -78,7 +73,6 @@ internal class CreatePostServiceImpl(private val context: Context) : CreatePostS
             content = content,
             postType = BaseCreatePostWorker.PostType.POST,
             parentPostId = null,
-            hasForwardedMessage = hasForwardedMessage,
             forwardedSourcePostList = forwardedSourcePostList,
             clientSidePostId = clientSidePostId,
             configure = configure
@@ -91,8 +85,7 @@ internal class CreatePostServiceImpl(private val context: Context) : CreatePostS
         parentPostId: Long,
         clientSidePostId: String,
         content: String,
-        hasForwardedMessage: Boolean,
-        forwardedSourcePostList: List<ForwardedSourcePostContent>?,
+        forwardedSourcePostList: List<ForwardedSourcePostContent>,
         configure: CreatePostConfigurationBlock
     ) {
         scheduleCreatePostWork(
@@ -102,7 +95,6 @@ internal class CreatePostServiceImpl(private val context: Context) : CreatePostS
             postType = BaseCreatePostWorker.PostType.POST,
             parentPostId = parentPostId,
             clientSidePostId = clientSidePostId,
-            hasForwardedMessage = hasForwardedMessage,
             forwardedSourcePostList = forwardedSourcePostList,
             configure = configure
         )
@@ -131,8 +123,7 @@ internal class CreatePostServiceImpl(private val context: Context) : CreatePostS
         content: String,
         postType: BaseCreatePostWorker.PostType,
         parentPostId: Long?,
-        hasForwardedMessage: Boolean,
-        forwardedSourcePostList: List<ForwardedSourcePostContent>?,
+        forwardedSourcePostList: List<ForwardedSourcePostContent>,
         clientSidePostId: String?,
         configure: CreatePostConfigurationBlock
     ) {
@@ -144,7 +135,6 @@ internal class CreatePostServiceImpl(private val context: Context) : CreatePostS
             clientSidePostId = postId,
             content = content,
             postType = postType,
-            hasForwardedMessage = hasForwardedMessage,
             forwardedSourcePostList = forwardedSourcePostList,
             parentPostId = parentPostId
         )

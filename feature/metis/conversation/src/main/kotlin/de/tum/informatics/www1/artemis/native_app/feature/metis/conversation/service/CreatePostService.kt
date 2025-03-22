@@ -13,8 +13,7 @@ interface CreatePostService {
         courseId: Long,
         conversationId: Long,
         content: String,
-        hasForwardedMessage: Boolean = false,
-        forwardedSourcePostList: List<ForwardedSourcePostContent>? = null,
+        forwardedSourcePostList: List<ForwardedSourcePostContent> = emptyList(),
         configure: CreatePostConfigurationBlock = { this }
     )
 
@@ -23,8 +22,7 @@ interface CreatePostService {
         conversationId: Long,
         clientSidePostId: String,
         content: String,
-        hasForwardedMessage: Boolean = false,
-        forwardedSourcePostList: List<ForwardedSourcePostContent>? = null,
+        forwardedSourcePostList: List<ForwardedSourcePostContent> = emptyList(),
         configure: CreatePostConfigurationBlock = { this }
     )
 
@@ -33,8 +31,7 @@ interface CreatePostService {
         conversationId: Long,
         parentPostId: Long,
         content: String,
-        hasForwardedMessage: Boolean = false,
-        forwardedSourcePostList: List<ForwardedSourcePostContent>? = null,
+        forwardedSourcePostList: List<ForwardedSourcePostContent> = emptyList(),
         configure: CreatePostConfigurationBlock = { this }
     )
 
@@ -44,8 +41,7 @@ interface CreatePostService {
         parentPostId: Long,
         clientSidePostId: String,
         content: String,
-        hasForwardedMessage: Boolean = false,
-        forwardedSourcePostList: List<ForwardedSourcePostContent>? = null,
+        forwardedSourcePostList: List<ForwardedSourcePostContent> = emptyList(),
         configure: CreatePostConfigurationBlock = { this }
     )
 

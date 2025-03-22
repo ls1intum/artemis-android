@@ -37,8 +37,7 @@ class CreateClientSidePostWorker(
         clientSidePostId: String,
         content: String,
         postType: PostType,
-        hasForwardedMessage: Boolean,
-        forwardedSourcePostList: List<ForwardedSourcePostContent>?,
+        forwardedSourcePostList: List<ForwardedSourcePostContent>,
         parentPostId: Long?
     ): Result {
         val authorAccount = accountDataService.getCachedAccountData()
@@ -63,7 +62,7 @@ class CreateClientSidePostWorker(
                         title = null,
                         tags = null,
                         author = author,
-                        hasForwardedMessages = hasForwardedMessage,
+                        hasForwardedMessages = forwardedSourcePostList.isNotEmpty(),
                         authorRole = null, // We do not know the role of the user here!
                         content = content,
                         creationDate = Clock.System.now()
@@ -81,7 +80,7 @@ class CreateClientSidePostWorker(
                         content = content,
                         author = author,
                         authorRole = null,
-                        hasForwardedMessages = hasForwardedMessage,
+                        hasForwardedMessages = forwardedSourcePostList.isNotEmpty(),
                         post = StandalonePost(id = parentPostId),
                         creationDate = Clock.System.now()
                     ),

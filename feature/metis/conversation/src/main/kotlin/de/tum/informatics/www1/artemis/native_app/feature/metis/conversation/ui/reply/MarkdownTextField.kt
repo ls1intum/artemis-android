@@ -355,8 +355,7 @@ private fun TextFieldOptions(
     ) {
         if (showFormattingOptions) {
             Box(
-                modifier = Modifier
-                    .weight(1f),
+                modifier = Modifier.weight(1f),
                 contentAlignment = Alignment.CenterStart
             ) {
                 Row(

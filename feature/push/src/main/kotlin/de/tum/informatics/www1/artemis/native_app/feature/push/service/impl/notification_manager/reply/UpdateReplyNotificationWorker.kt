@@ -23,8 +23,7 @@ class UpdateReplyNotificationWorker(
         clientSidePostId: String,
         content: String,
         postType: PostType,
-        hasForwardedMessage: Boolean,
-        forwardedSourcePostList: List<ForwardedSourcePostContent>?,
+        forwardedSourcePostList: List<ForwardedSourcePostContent>,
         parentPostId: Long?
     ): Result {
         // We can add to the notification that the user has responded. However, this does not have super high priority
