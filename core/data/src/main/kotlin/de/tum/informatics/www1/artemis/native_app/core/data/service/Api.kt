@@ -21,6 +21,7 @@ sealed class Api(
     data object Core: Api(api, "core") {
         data object Public : Api(*Core.path, "public")
         data object Courses : Api(*Core.path, "courses")
+        data object Files : Api(*Core.path, "files")
     }
 
     data object Communication: Api(api, "communication") {
@@ -61,6 +62,7 @@ sealed class Api(
 //    data object Core: Api(api) {
 //        data object Public : Api(*Core.path, "public")
 //        data object Courses : Api(*Core.path, "courses")
+//        data object Files : Api(*Core.path, "files")
 //    }
 //
 //    data object Communication: Api(api) {
