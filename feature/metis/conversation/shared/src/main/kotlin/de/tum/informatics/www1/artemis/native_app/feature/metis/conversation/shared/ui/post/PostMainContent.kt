@@ -122,7 +122,6 @@ fun PostItemMainContent(
                                     text = it,
                                     modifier = Modifier.fillMaxWidth(),
                                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = PostColors.announcementTitle
                                 )
                             }
                         }
