@@ -255,7 +255,7 @@ private fun CourseItemHeader(
                 Text(
                     modifier = Modifier.align(Alignment.Center),
                     text = course.title.first().toString(),
-                    fontSize = 24.sp,
+                    style = MaterialTheme.typography.headlineMedium,
                 )
             }
         }
