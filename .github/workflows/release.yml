@@ -1,0 +1,74 @@
+# This workflow was heavily inspired by the following medium article:
+# https://medium.com/@vontonnie/automating-success-github-actions-workflow-for-android-app-deployment-908095d53b97
+
+name: Create new release
+'on':
+  workflow_dispatch: null
+jobs:
+  build:
+    name: Job 1 - Build Signed AAB
+    runs-on: [self-hosted, ase-large-android-sdk-35]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set Android Sdk Env
+        run: export ANDROID_HOME=/usr/lib/android-sdk
+
+      - name: Set local.properties
+        run: echo "sdk.dir=/usr/lib/android-sdk" > local.properties
+
+      - name: Gradle Wrapper Verification
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: JDK setup
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 17
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Setup Gradle Cache
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-home-cache-cleanup: true
+
+      - name: Build prodRelease
+        run: ./gradlew bundleProductionUnrestrictedRelease
+
+      - name: Sign AAb
+        id: sign
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: app/build/outputs/bundle/productionUnrestrictedRelease
+          signingKeyBase64: '${{ secrets.KEYSTORE }}'
+          alias: '${{ secrets.SIGNING_KEY_ALIAS }}'
+          keyStorePassword: '${{ secrets.SIGNING_STORE_PASSWORD }}'
+          keyPassword: '${{ secrets.SIGNING_KEY_PASSWORD }}'
+
+      - name: Upload app bundle as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: app-bundle
+          path: app/build/outputs/bundle/productionUnrestrictedRelease/app-release.aab
+
+      - run: 'echo Build status report=${{ job.status }}'
+
+#  deploy:
+#    name: Job_2 - Deploy aab to playstore
+#    needs: build
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Download app bundle from artifact
+#        uses: actions/download-artifact@v2
+#        with:
+#          name: app-bundle
+#
+#      - name: Publish to Play Store
+#        uses: r0adkll/upload-google-play@v1
+#        with:
+#          serviceAccountJsonPlainText: '${{ secrets.SERVICE_ACCOUNT_JSON }}'
+#          packageName: de.tum.cit.aet.artemis
+#          releaseFiles: '${{ github.workspace }}/app-release.aab'
+#          track: production
