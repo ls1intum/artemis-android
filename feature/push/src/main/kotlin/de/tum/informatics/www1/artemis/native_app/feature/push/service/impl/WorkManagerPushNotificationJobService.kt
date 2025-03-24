@@ -43,7 +43,7 @@ internal class WorkManagerPushNotificationJobService(
     }
 
     override suspend fun scheduleUnsubscribeFromNotifications(firebaseToken: String) {
-        val artemisContext = artemisContextProvider.flow.first()
+        val artemisContext = artemisContextProvider.stateFlow.first()
         val request = defaultInternetWorkRequest<UnsubscribeFromNotificationsWorker>(
             Data
                 .Builder()

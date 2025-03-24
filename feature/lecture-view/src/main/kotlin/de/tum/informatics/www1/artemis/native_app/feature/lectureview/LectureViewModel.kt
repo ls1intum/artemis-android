@@ -89,7 +89,7 @@ internal class LectureViewModel(
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
 
     val serverUrl: StateFlow<String> = serverUrlStateFlow(serverConfigurationService)
-    val artemisContext: StateFlow<ArtemisContext> = artemisContextProvider.flow
+    val artemisContext: StateFlow<ArtemisContext> = artemisContextProvider.stateFlow
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, ArtemisContext.Empty)
 
 

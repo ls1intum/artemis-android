@@ -29,9 +29,9 @@ abstract class ArtemisContextBasedServiceImpl(
     private val artemisContextProvider: ArtemisContextProvider,
 ) : ArtemisContextBasedService {
 
-    override val onReloadRequired: Flow<Unit> = artemisContextProvider.flow.map { Unit }
+    override val onReloadRequired: Flow<Unit> = artemisContextProvider.stateFlow.map { Unit }
 
-    suspend fun artemisContext(): ArtemisContext = artemisContextProvider.flow.first()
+    suspend fun artemisContext(): ArtemisContext = artemisContextProvider.stateFlow.first()
     suspend fun serverUrl(): String = artemisContext().serverUrl
     suspend fun authToken(): String = artemisContext().authToken
 

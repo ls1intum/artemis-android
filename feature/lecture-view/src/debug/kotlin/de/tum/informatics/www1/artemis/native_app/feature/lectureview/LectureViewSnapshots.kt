@@ -24,6 +24,8 @@ import de.tum.informatics.www1.artemis.native_app.core.websocket.test.LivePartic
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.service.LectureService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.network.impl.ChannelServiceStub
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.emptyFlow
 
 @PlayStoreScreenshots
@@ -84,7 +86,7 @@ fun `Lecture - Overview`() {
         savedStateHandle = SavedStateHandle(),
         channelService = ChannelServiceStub,
         artemisContextProvider = object : ArtemisContextProvider {
-            override val flow: Flow<ArtemisContext> = emptyFlow()
+            override val stateFlow: StateFlow<ArtemisContext> = MutableStateFlow(ArtemisContext.Empty)
         },
         serverTimeService = ServerTimeServiceStub(),
         courseExerciseService = object : CourseExerciseService {

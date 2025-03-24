@@ -22,7 +22,7 @@ class ArtemisImageProviderImpl(
     private val imageProvider: BaseImageProvider
 ) : ArtemisImageProvider {
 
-    private suspend fun artemisContext() = artemisContextProvider.flow.first()
+    private suspend fun artemisContext() = artemisContextProvider.stateFlow.first()
 
     override suspend fun loadArtemisImage(context: Context, imagePath: String): ImageResult {
         val serverUrl = artemisContext().serverUrl

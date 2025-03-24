@@ -30,7 +30,7 @@ class MarkConversationAsReadWorker(
                 return@withContext Result.failure()
             }
 
-            val artemisContext = artemisContextProvider.flow.first()
+            val artemisContext = artemisContextProvider.stateFlow.first()
             conversationService.markConversationAsRead(
                 courseId = courseId,
                 conversationId = conversationId,
