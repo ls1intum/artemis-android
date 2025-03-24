@@ -65,11 +65,19 @@ jobs:
         with:
           name: app-bundle
 
+      - name: Find AAB file
+        id: find-aab
+        run: |
+          AAB_PATH=$(find ./ -name "*.aab" | head -n 1)
+          echo "AAB_PATH=$AAB_PATH" >> $GITHUB_OUTPUT
+          echo "Found AAB file at: $AAB_PATH"
+
+
       - name: Publish to Play Store
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: '${{ secrets.SERVICE_ACCOUNT_JSON }}'
           packageName: de.tum.cit.aet.artemis
-          releaseFiles: '${{ github.workspace }}/app-release.aab'
+          releaseFiles: '${{ steps.find-aab.outputs.AAB_PATH }}'
           track: beta
           status: draft
