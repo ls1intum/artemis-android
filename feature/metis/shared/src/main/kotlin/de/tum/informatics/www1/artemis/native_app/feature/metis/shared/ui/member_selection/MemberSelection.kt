@@ -168,7 +168,7 @@ private fun RecipientsTextField(
         }
 
         MemberSearchWithDropdownPopup(
-            modifier = Modifier,
+            modifier = Modifier.fillMaxWidth(),
             query = query,
             suggestions = suggestions,
             focusRequester = focusRequester,
