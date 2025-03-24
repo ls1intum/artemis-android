@@ -40,6 +40,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
@@ -99,84 +100,79 @@ fun MemberSearchWithDropdownPopup(
 
         if (!isPopupExpanded || suggestions.isEmpty()) return
 
-        var boxWidth by remember { mutableStateOf(0.dp) }
-        var boxYPosition by remember { mutableStateOf(0.dp) }
-
-        val localConfiguration = LocalConfiguration.current
-        val localDensity = LocalDensity.current
-        val statusBarInsets = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-        val imeInsets = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
-        val navigationInsets = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-
-        Box(
-            modifier = Modifier
-                .onSizeChanged {
-                    val widthInPx = it.width
-                    boxWidth = with(localDensity) { widthInPx.toDp() }
-                }
-                .onGloballyPositioned { coordinates ->
-                    val boxYPositionInPx = coordinates.positionOnScreen().y
-                    boxYPosition = with(localDensity) { boxYPositionInPx.toDp() }
-                }
-                .fillMaxWidth()
-        ) {
-            val screenHeight = localConfiguration.screenHeightDp.dp
-            // It seems that the statusBar- and navigationInsets are not included in the screenHeight
-            val totalScreenHeight = screenHeight + statusBarInsets + navigationInsets
-            val maxHeightBetweenBoxAndIme = totalScreenHeight - imeInsets - boxYPosition
-
-            val maxHeight = min(maxHeightBetweenBoxAndIme, Spacings.Popup.maxHeight)
-            val height = max(maxHeight, Spacings.Popup.minHeight)
-
-            Popup(
-                popupPositionProvider = object : PopupPositionProvider {
-                    override fun calculatePosition(
-                        anchorBounds: IntRect,
-                        windowSize: IntSize,
-                        layoutDirection: LayoutDirection,
-                        popupContentSize: IntSize
-                    ): IntOffset = anchorBounds.bottomLeft
+        BoxWithPositionedPopup(
+            onDismissRequest = { isPopupExpanded = false }
+        ) { contentWidth, contentHeight ->
+            PopupContent(
+                modifier = Modifier
+                    .width(contentWidth)
+                    .height(contentHeight)
+                    .padding(vertical = Spacings.Popup.ContentVerticalPadding),
+                conversations = conversations,
+                recipients = recipients,
+                query = query,
+                onDismissRequest = {
+                    isPopupExpanded = false
+                    onUpdateQuery("")
                 },
-                properties = PopupProperties(dismissOnClickOutside = true),
-                onDismissRequest = { isPopupExpanded = false }
-            ) {
-                PopupContent(
-                    modifier = Modifier
-                        .height(height)
-                        .width(boxWidth)
-                        .padding(vertical = Spacings.Popup.ContentVerticalPadding),
-                    conversations = conversations,
-                    recipients = recipients,
-                    query = query,
-                    onDismissRequest = {
-                        isPopupExpanded = false
-                        onUpdateQuery("")
-                    },
-                    onAddMemberItem = onAddMemberItem
-                )
-            }
+                onAddMemberItem = onAddMemberItem
+            )
         }
     }
 }
 
 @Composable
-private fun PopupHeader(
-    modifier: Modifier,
-    title: String
+private fun BoxWithPositionedPopup(
+    onDismissRequest: () -> Unit,
+    popupContent: @Composable (contentWidth: Dp, contentHeight: Dp) -> Unit
 ) {
-    Box(modifier) {
-        Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
-                .padding(horizontal = Spacings.Popup.HintHorizontalPadding, vertical = 4.dp),
-            text = title,
-            color = MaterialTheme.colorScheme.primary,
-            style = MaterialTheme.typography.labelLarge,
-            textAlign = TextAlign.Center
-        )
+    var boxWidth by remember { mutableStateOf(0.dp) }
+    var boxYPosition by remember { mutableStateOf(0.dp) }
+
+    val localConfiguration = LocalConfiguration.current
+    val localDensity = LocalDensity.current
+    val statusBarInsets = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    val imeInsets = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
+    val navigationInsets = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+
+    Box(
+        modifier = Modifier
+            .onSizeChanged {
+                val widthInPx = it.width
+                boxWidth = with(localDensity) { widthInPx.toDp() }
+            }
+            .onGloballyPositioned { coordinates ->
+                val boxYPositionInPx = coordinates.positionOnScreen().y
+                boxYPosition = with(localDensity) { boxYPositionInPx.toDp() }
+            }
+            .fillMaxWidth()
+    ) {
+        val screenHeight = localConfiguration.screenHeightDp.dp
+        // It seems that the statusBar- and navigationInsets are not included in the screenHeight
+        val totalScreenHeight = screenHeight + statusBarInsets + navigationInsets
+        val maxHeightBetweenBoxAndIme = totalScreenHeight - imeInsets - boxYPosition
+
+        val maxHeight = min(maxHeightBetweenBoxAndIme, Spacings.Popup.maxHeight)
+        val height = max(maxHeight, Spacings.Popup.minHeight)
+
+        Popup(
+            popupPositionProvider = object : PopupPositionProvider {
+                override fun calculatePosition(
+                    anchorBounds: IntRect,
+                    windowSize: IntSize,
+                    layoutDirection: LayoutDirection,
+                    popupContentSize: IntSize
+                ): IntOffset = anchorBounds.bottomLeft
+            },
+            properties = PopupProperties(dismissOnClickOutside = true),
+            onDismissRequest = onDismissRequest
+        ) {
+            popupContent(boxWidth, height)
+        }
     }
 }
+
+
 
 @Composable
 private fun PopupContent(
@@ -264,6 +260,25 @@ private fun PopupContent(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun PopupHeader(
+    modifier: Modifier,
+    title: String
+) {
+    Box(modifier) {
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
+                .padding(horizontal = Spacings.Popup.HintHorizontalPadding, vertical = 4.dp),
+            text = title,
+            color = MaterialTheme.colorScheme.primary,
+            style = MaterialTheme.typography.labelLarge,
+            textAlign = TextAlign.Center
+        )
     }
 }
 
