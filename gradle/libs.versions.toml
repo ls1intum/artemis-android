@@ -17,13 +17,14 @@ androidxPaging = "3.3.6"
 androidxPagingCompose = "3.3.6"
 coil = "3.1.0"
 coil2 = "2.7.0"     # The markwon library still depends on coil2: https://github.com/ls1intum/artemis-android/issues/171
-kotlin = "2.1.10"
+kotlin = "2.1.20"
 kotlinxCoroutines = "1.10.1"
 kotlinxDatetime = "0.6.2"
 kotlinxSerializationJson = "1.8.0"
 koin = "4.0.2"
 koinAndroidxCompose = "4.0.0"
 kover = "0.9.1"
+krop = "0.1.6"
 krossbow = "9.1.0"
 ktor = "3.1.1"
 markwon = "4.6.2"
@@ -102,6 +103,8 @@ ktor-client-websockets = { group = "io.ktor", name = "ktor-client-websockets", v
 ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
 ktor-client-cio = { group = "io.ktor", name = "ktor-client-cio", version.ref = "ktor" }
+krop-core = { group = "com.attafitamim.krop", name = "core", version.ref = "krop" }
+krop-ui = { group = "com.attafitamim.krop", name = "ui", version.ref = "krop" }
 krossbow-stomp-core = { group = "org.hildan.krossbow", name = "krossbow-stomp-core", version.ref = "krossbow" }
 krossbow-websocket-ktor = { group = "org.hildan.krossbow", name = "krossbow-websocket-ktor", version.ref = "krossbow" }
 krossbow-websocket-okhttp = { group = "org.hildan.krossbow", name = "krossbow-websocket-okhttp", version.ref = "krossbow" }
@@ -132,7 +135,7 @@ android-application = { id = "com.android.application", version.ref = "androidGr
 android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "5.1.1" }
-google-ksp = { id = "com.google.devtools.ksp", version = "2.1.10-1.0.31" }
+google-ksp = { id = "com.google.devtools.ksp", version = "2.1.20-1.0.31" }
 google-services = { id = "com.google.gms.google-services", version = "4.4.2" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

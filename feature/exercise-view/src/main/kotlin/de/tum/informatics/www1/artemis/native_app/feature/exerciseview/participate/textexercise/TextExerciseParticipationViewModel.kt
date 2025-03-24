@@ -2,7 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.exerciseview.particip
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
@@ -46,7 +45,6 @@ internal class TextExerciseParticipationViewModel(
     private val exerciseId: Long,
     private val participationId: Long,
     private val textSubmissionService: TextSubmissionService,
-    val artemisContextProvider: ArtemisContextProvider,
     textEditorService: TextEditorService,
     networkStatusProvider: NetworkStatusProvider,
     coroutineContext: CoroutineContext = EmptyCoroutineContext

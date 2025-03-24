@@ -27,7 +27,7 @@ class CodeOfConductServiceImpl(
         return performNetworkCall {
             ktorProvider.ktorClient.get(serverUrl) {
                 url {
-                    appendPathSegments(*Api.Core.path, "files", "templates", "code-of-conduct")
+                    appendPathSegments(*Api.Core.Files.path, "templates", "code-of-conduct")
                 }
 
                 cookieAuth(authToken)

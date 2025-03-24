@@ -21,6 +21,14 @@ sealed class Api(
     data object Core: Api(api, "core") {
         data object Public : Api(*Core.path, "public")
         data object Courses : Api(*Core.path, "courses")
+        data object Files : Api(*Core.path, "files")
+
+        /**
+         * This is a special case, because for the 8.0 API the image path for eg profile picture or
+         * course icons do not contain the "api(/core)/files" part, while prior to 8.0 it did.
+         */
+        // TODO: this can be removed once the app v2.0.0 is released
+        data object UploadedImage : Api(*Files.path)
     }
 
     data object Communication: Api(api, "communication") {
@@ -61,6 +69,13 @@ sealed class Api(
 //    data object Core: Api(api) {
 //        data object Public : Api(*Core.path, "public")
 //        data object Courses : Api(*Core.path, "courses")
+//        data object Files : Api(*Core.path, "files")
+//
+//        /**
+//         * This is a special case, because for the 8.0 API the image path for eg profile picture or
+//         * course icons do not contain the "api(/core)/files" part, while prior to 8.0 it did.
+//         */
+//        data object UploadedImage : Api("")
 //    }
 //
 //    data object Communication: Api(api) {
