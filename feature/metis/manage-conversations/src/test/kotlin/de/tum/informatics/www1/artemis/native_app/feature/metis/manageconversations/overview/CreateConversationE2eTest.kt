@@ -22,13 +22,14 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.test.user3Userna
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_personal_conversation.CreatePersonalConversationScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_personal_conversation.CreatePersonalConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_personal_conversation.TEST_TAG_CREATE_PERSONAL_CONVERSATION_BUTTON
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.MemberSelectionBaseViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseUser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member_selection.MemberSelectionBaseViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member_selection.TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member_selection.util.toMemberSelectionItem
 import de.tum.informatics.www1.artemis.native_app.feature.metistest.ConversationBaseTest
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
@@ -101,7 +102,8 @@ class CreateConversationE2eTest : ConversationBaseTest() {
             }
         )
 
-        recipients.forEach(viewModel::addRecipient)
+        val memberItems = recipients.map { it.toMemberSelectionItem() }
+        memberItems.forEach(viewModel::addMemberItem)
 
         composeTestRule
             .onNodeWithTag(TEST_TAG_CREATE_PERSONAL_CONVERSATION_BUTTON)

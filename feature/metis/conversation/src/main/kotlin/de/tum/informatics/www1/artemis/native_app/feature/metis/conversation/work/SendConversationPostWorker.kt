@@ -13,15 +13,19 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ArtemisNotifica
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.post.util.ForwardedSourcePostContent
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ForwardedMessage
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.PostingType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.Clock
 
@@ -36,6 +40,7 @@ class SendConversationPostWorker(
     params: WorkerParameters,
     private val metisModificationService: MetisModificationService,
     private val metisStorageService: MetisStorageService,
+    private val metisService: MetisService,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
     private val conversationService: ConversationService
@@ -51,6 +56,7 @@ class SendConversationPostWorker(
         clientSidePostId: String,
         content: String,
         postType: PostType,
+        forwardedSourcePostList: List<ForwardedSourcePostContent>,
         parentPostId: Long?
     ): Result {
         Log.d(TAG, "Starting send post to server. ClientSidePostId=$clientSidePostId")
@@ -76,6 +82,7 @@ class SendConversationPostWorker(
                             courseId = courseId,
                             conversationId = conversationId,
                             content = content,
+                            forwardedSourcePostList = forwardedSourcePostList,
                             serverUrl = serverUrl,
                             authToken = authData.authToken
                         ).onSuccess { post ->
@@ -97,6 +104,7 @@ class SendConversationPostWorker(
                             conversationId = conversationId,
                             postId = parentPostId,
                             content = content,
+                            forwardedSourcePostList = forwardedSourcePostList,
                             serverUrl = serverUrl,
                             authToken = authData.authToken
                         ).onSuccess { post ->
@@ -119,6 +127,7 @@ class SendConversationPostWorker(
         courseId: Long,
         conversationId: Long,
         content: String,
+        forwardedSourcePostList: List<ForwardedSourcePostContent>,
         serverUrl: String,
         authToken: String
     ): NetworkResponse<StandalonePost> {
@@ -134,6 +143,7 @@ class SendConversationPostWorker(
                     id = null,
                     title = null,
                     tags = null,
+                    hasForwardedMessages = forwardedSourcePostList.isNotEmpty(),
                     content = content,
                     conversation = conversation,
                     creationDate = Clock.System.now(),
@@ -141,7 +151,18 @@ class SendConversationPostWorker(
                 ),
                 serverUrl = serverUrl,
                 authToken = authToken
-            )
+            ).onSuccess {
+                if (forwardedSourcePostList.isNotEmpty()) {
+                    createForwardedMessages(
+                        destinationPost = it,
+                        forwardedSourcePostList = forwardedSourcePostList,
+                        destinationType = PostingType.POST,
+                        metisContext = MetisContext.Conversation(courseId, conversationId),
+                        serverUrl = serverUrl,
+                        authToken = authToken
+                    )
+                }
+            }
         }
     }
 
@@ -150,6 +171,7 @@ class SendConversationPostWorker(
         conversationId: Long,
         postId: Long,
         content: String,
+        forwardedSourcePostList: List<ForwardedSourcePostContent>,
         serverUrl: String,
         authToken: String
     ): NetworkResponse<AnswerPost> {
@@ -163,6 +185,7 @@ class SendConversationPostWorker(
                 context = MetisContext.Conversation(courseId, conversationId),
                 post = AnswerPost(
                     content = content,
+                    hasForwardedMessages = forwardedSourcePostList.isNotEmpty(),
                     post = StandalonePost(
                         id = postId,
                         conversation = conversation
@@ -171,7 +194,18 @@ class SendConversationPostWorker(
                 ),
                 serverUrl = serverUrl,
                 authToken = authToken
-            )
+            ).onSuccess {
+                if (forwardedSourcePostList.isNotEmpty()) {
+                    createForwardedMessages(
+                        destinationPost = it,
+                        forwardedSourcePostList = forwardedSourcePostList,
+                        destinationType = PostingType.ANSWER,
+                        metisContext = MetisContext.Conversation(courseId, conversationId),
+                        serverUrl = serverUrl,
+                        authToken = authToken
+                    )
+                }
+            }
         }
     }
 
@@ -223,6 +257,33 @@ class SendConversationPostWorker(
                 .notify(id, notification)
         } catch (e: SecurityException) {
             Log.e(TAG, "Could not push reply notification due to missing permission")
+        }
+    }
+
+    private suspend fun createForwardedMessages(
+        destinationPost: IBasePost,
+        forwardedSourcePostList: List<ForwardedSourcePostContent>,
+        destinationType: PostingType,
+        metisContext: MetisContext,
+        serverUrl: String,
+        authToken: String
+    ) {
+        forwardedSourcePostList.forEach { forwardedSourcePostContent ->
+            val forwardedMessage = ForwardedMessage(
+                sourceId = forwardedSourcePostContent.sourcePostId,
+                sourceType = forwardedSourcePostContent.sourcePostType,
+                destinationPostId = if (destinationType == PostingType.POST) destinationPost.serverPostId else null,
+                destinationAnswerPostId = if (destinationType == PostingType.ANSWER) destinationPost.serverPostId else null,
+                id = null,
+                content = destinationPost.content
+            )
+
+            metisService.createForwardedMessage(
+                metisContext = metisContext,
+                forwardedMessage = forwardedMessage,
+                serverUrl = serverUrl,
+                authToken = authToken
+            ).orThrow("Failed to create forwarded message")
         }
     }
 }

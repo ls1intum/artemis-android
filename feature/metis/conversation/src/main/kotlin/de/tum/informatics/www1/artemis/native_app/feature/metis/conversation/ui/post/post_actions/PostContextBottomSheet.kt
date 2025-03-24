@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Reply
+import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.AddReaction
 import androidx.compose.material.icons.filled.BookmarkAdd
 import androidx.compose.material.icons.filled.BookmarkRemove
@@ -175,6 +175,17 @@ internal fun PostContextBottomSheet(
                 )
             }
 
+            if (postActions.onForwardPost != null) {
+                BottomSheetActionButton(
+                    icon = ImageVector.vectorResource(R.drawable.forward),
+                    text = stringResource(id = R.string.post_forward),
+                    onClick = {
+                        onDismissRequest()
+                        postActions.onForwardPost.invoke()
+                    }
+                )
+            }
+
             if (postActions.onSavePost != null) {
                 val isSaved = post.isSaved == true
                 BottomSheetActionButton(
@@ -191,7 +202,7 @@ internal fun PostContextBottomSheet(
 
             postActions.onReplyInThread?.let {
                 BottomSheetActionButton(
-                    icon = Icons.AutoMirrored.Filled.Reply,
+                    icon = Icons.AutoMirrored.Filled.Message,
                     text = stringResource(id = R.string.post_reply),
                     onClick = {
                         onDismissRequest()

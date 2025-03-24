@@ -60,7 +60,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture_un
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture_units.LectureUnitTextUi
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture_units.LectureUnitVideoUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getChannelIconImageVector
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.common.getChannelIconImageVector
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
