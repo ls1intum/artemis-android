@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.compose
 
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
@@ -9,10 +10,14 @@ import androidx.compose.ui.graphics.vector.ImageVector
 
 @Composable
 fun NavigationBackButton(
-    onNavigateBack: () -> Unit,
+    onNavigateBack: (() -> Unit)? = null, // Nullable function parameter
     imageVector: ImageVector = Icons.AutoMirrored.Filled.ArrowBack
 ) {
-    IconButton(onClick = onNavigateBack) {
-        Icon(imageVector = imageVector, contentDescription = null)
+    val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+
+    IconButton(onClick = {
+        onNavigateBack?.invoke() ?: backDispatcher?.onBackPressed() // Use function if provided, otherwise system back
+    }) {
+        Icon(imageVector = imageVector, contentDescription = "Back")
     }
 }

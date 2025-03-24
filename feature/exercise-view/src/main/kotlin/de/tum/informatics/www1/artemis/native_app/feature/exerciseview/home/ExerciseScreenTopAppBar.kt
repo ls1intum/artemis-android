@@ -40,7 +40,7 @@ internal fun ExerciseScreenTopAppBar(
             modifier = Modifier.fillMaxWidth(),
             title = { TitleText(modifier = modifier, maxLines = 1, exerciseDataState = exerciseDataState) },
             navigationIcon = {
-                NavigationBackButton(onNavigateBack = onNavigateBack)
+                NavigationBackButton()
             }
         )
     }
