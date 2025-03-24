@@ -17,4 +17,4 @@ private object EmptyArtemisContextProvider : ArtemisContextProvider {
 }
 
 @Composable
-fun ArtemisContextProvider.collectArtemisContextAsState() = this.stateFlow.collectAsState(ArtemisContext.Empty)
+fun ArtemisContextProvider.collectArtemisContextAsState() = this.stateFlow.collectAsState()

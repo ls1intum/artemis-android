@@ -8,6 +8,7 @@ import androidx.compose.ui.platform.LocalContext
 import coil.ImageLoader
 import coil3.request.ImageRequest
 import coil3.request.ImageResult
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.ui.collectArtemisContextAsState
@@ -15,27 +16,24 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ArtemisI
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.BaseImageProvider
 import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
-import kotlinx.coroutines.flow.first
 
 class ArtemisImageProviderImpl(
     private val artemisContextProvider: ArtemisContextProvider,
     private val imageProvider: BaseImageProvider
 ) : ArtemisImageProvider {
 
-    private suspend fun artemisContext() = artemisContextProvider.stateFlow.first()
+    private val artemisContext: ArtemisContext
+        get() = artemisContextProvider.stateFlow.value
 
     override suspend fun loadArtemisImage(context: Context, imagePath: String): ImageResult {
-        val serverUrl = artemisContext().serverUrl
-        val authToken = artemisContext().authToken
-
-        val imageUrl = URLBuilder(serverUrl)
+        val imageUrl = URLBuilder(artemisContext.serverUrl)
             .appendPathSegments(*Api.Core.UploadedImage.path)
             .appendPathSegments(imagePath)
             .buildString()
         val request = imageProvider.createImageRequest(
             context = context,
             imageUrl = imageUrl,
-            authorizationToken = authToken,
+            authorizationToken = artemisContext.authToken,
         )
 
         val loader = coil3.ImageLoader(context)

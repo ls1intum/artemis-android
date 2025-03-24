@@ -2,8 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.lectureview
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
-import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
@@ -59,7 +57,6 @@ internal class LectureViewModel(
     private val liveParticipationService: LiveParticipationService,
     private val savedStateHandle: SavedStateHandle,
     private val channelService: ChannelService,
-    private val artemisContextProvider: ArtemisContextProvider,
     serverTimeService: ServerTimeService,
     courseExerciseService: CourseExerciseService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
@@ -89,8 +86,6 @@ internal class LectureViewModel(
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
 
     val serverUrl: StateFlow<String> = serverUrlStateFlow(serverConfigurationService)
-    val artemisContext: StateFlow<ArtemisContext> = artemisContextProvider.stateFlow
-        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, ArtemisContext.Empty)
 
 
     /**

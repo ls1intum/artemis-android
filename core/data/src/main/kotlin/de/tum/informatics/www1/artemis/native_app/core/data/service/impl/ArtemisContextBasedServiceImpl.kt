@@ -18,7 +18,6 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 
@@ -31,9 +30,14 @@ abstract class ArtemisContextBasedServiceImpl(
 
     override val onReloadRequired: Flow<Unit> = artemisContextProvider.stateFlow.map { Unit }
 
-    suspend fun artemisContext(): ArtemisContext = artemisContextProvider.stateFlow.first()
-    suspend fun serverUrl(): String = artemisContext().serverUrl
-    suspend fun authToken(): String = artemisContext().authToken
+    val artemisContext: ArtemisContext
+        get() = artemisContextProvider.stateFlow.value
+
+    val serverUrl: String
+        get() = artemisContext.serverUrl
+
+    val authToken: String
+        get() = artemisContext.authToken
 
     suspend inline fun <reified T: Any>getRequest(
         contentType: ContentType = ContentType.Application.Json,
@@ -80,10 +84,10 @@ abstract class ArtemisContextBasedServiceImpl(
         crossinline block: HttpRequestBuilder.() -> Unit
     ): NetworkResponse<T> {
         return performNetworkCall {
-            val response = ktorProvider.ktorClient.request(serverUrl()) {
+            val response = ktorProvider.ktorClient.request(serverUrl) {
                 block()
                 contentType(contentType)
-                cookieAuth(authToken())
+                cookieAuth(authToken)
             }
 
             val requestString = "${response.request.method} ${response.request.url}"

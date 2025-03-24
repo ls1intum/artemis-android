@@ -6,8 +6,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavController
-import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
-import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.ServerTimeServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseExerciseService
@@ -24,8 +22,6 @@ import de.tum.informatics.www1.artemis.native_app.core.websocket.test.LivePartic
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.service.LectureService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.network.impl.ChannelServiceStub
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.emptyFlow
 
 @PlayStoreScreenshots
@@ -85,9 +81,6 @@ fun `Lecture - Overview`() {
         liveParticipationService = LiveParticipationServiceStub(),
         savedStateHandle = SavedStateHandle(),
         channelService = ChannelServiceStub,
-        artemisContextProvider = object : ArtemisContextProvider {
-            override val stateFlow: StateFlow<ArtemisContext> = MutableStateFlow(ArtemisContext.Empty)
-        },
         serverTimeService = ServerTimeServiceStub(),
         courseExerciseService = object : CourseExerciseService {
             override val onReloadRequired: Flow<Unit> = emptyFlow()
