@@ -55,20 +55,21 @@ jobs:
 
       - run: 'echo Build status report=${{ job.status }}'
 
-#  deploy:
-#    name: Job_2 - Deploy aab to playstore
-#    needs: build
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Download app bundle from artifact
-#        uses: actions/download-artifact@v2
-#        with:
-#          name: app-bundle
-#
-#      - name: Publish to Play Store
-#        uses: r0adkll/upload-google-play@v1
-#        with:
-#          serviceAccountJsonPlainText: '${{ secrets.SERVICE_ACCOUNT_JSON }}'
-#          packageName: de.tum.cit.aet.artemis
-#          releaseFiles: '${{ github.workspace }}/app-release.aab'
-#          track: production
+  deploy:
+    name: Job_2 - Deploy aab to playstore
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download app bundle from artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: app-bundle
+
+      - name: Publish to Play Store
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: '${{ secrets.SERVICE_ACCOUNT_JSON }}'
+          packageName: de.tum.cit.aet.artemis
+          releaseFiles: '${{ github.workspace }}/app-release.aab'
+          track: beta
+          status: draft
