@@ -35,6 +35,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
+import androidx.compose.material3.InputChipDefaults
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -575,7 +576,12 @@ private fun PreviewEditRow(
             onClick = { onChangeViewType(ViewType.TEXT) },
             label = {
                 Text(text = stringResource(id = R.string.markdown_textfield_tab_text))
-            }
+            },
+            border = InputChipDefaults.inputChipBorder(
+                borderColor = MaterialTheme.colorScheme.outlineVariant,
+                enabled = true,
+                selected = selectedType == ViewType.TEXT,
+            )
         )
 
         InputChip(
@@ -584,7 +590,12 @@ private fun PreviewEditRow(
             enabled = isPreviewEnabled,
             label = {
                 Text(text = stringResource(id = R.string.markdown_textfield_tab_preview))
-            }
+            },
+            border = InputChipDefaults.inputChipBorder(
+                borderColor = MaterialTheme.colorScheme.outlineVariant,
+                enabled = isPreviewEnabled,
+                selected = selectedType == ViewType.PREVIEW,
+            )
         )
     }
 }
