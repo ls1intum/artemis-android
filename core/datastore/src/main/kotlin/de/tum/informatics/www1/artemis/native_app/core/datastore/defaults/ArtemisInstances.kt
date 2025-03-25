@@ -12,7 +12,6 @@ object ArtemisInstances {
         type = ArtemisInstance.Type.LEGACY
     )
 
-    // TODO: search for string occurences
     val LegacyTumArtemis2 = ArtemisInstance(
         host = "artemis.cit.tum.de",
         name = R.string.artemis_instance_tum_legacy,
