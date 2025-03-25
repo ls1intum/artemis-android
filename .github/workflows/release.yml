@@ -1,9 +1,13 @@
 # This workflow was heavily inspired by the following medium article:
 # https://medium.com/@vontonnie/automating-success-github-actions-workflow-for-android-app-deployment-908095d53b97
 
-name: Create new release
+name: Deploy New Release
 'on':
+  push:
+    branches:
+    - main
   workflow_dispatch: null
+
 jobs:
   build:
     name: Job 1 - Build Signed AAB
@@ -34,6 +38,12 @@ jobs:
         with:
           gradle-home-cache-cleanup: true
 
+      - name: Bump Version Code
+        uses: chkfung/android-version-actions@v1.2.3
+        with:
+          gradlePath: app/build.gradle.kts
+          versionCode: ${{ 625 + github.run_number }}   # 624 was the last version code before switching to this workflow for deployment
+
       - name: Build prodRelease
         run: ./gradlew bundleProductionUnrestrictedRelease
 
@@ -56,7 +66,7 @@ jobs:
       - run: 'echo Build status report=${{ job.status }}'
 
   deploy:
-    name: Job_2 - Deploy aab to playstore
+    name: Job_2 - Deploy AAB to Play Console
     needs: build
     runs-on: ubuntu-latest
     steps:
