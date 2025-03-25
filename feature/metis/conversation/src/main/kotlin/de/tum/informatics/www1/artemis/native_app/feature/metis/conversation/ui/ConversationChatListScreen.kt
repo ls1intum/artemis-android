@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
@@ -68,6 +69,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.LocalReplyAutoCompleteHintProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.ConversationDataStatusButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.isReplyEnabled
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisFilter
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
@@ -130,8 +132,10 @@ internal fun ConversationChatListScreen(
         conversationDataState = conversationDataState,
         conversationDataStatus = conversationDataStatus,
         query = query,
+        filter = filter,
         onNavigateBack = onNavigateBack,
         onNavigateToSettings = onNavigateToSettings,
+        onUpdateFilter = viewModel.chatListUseCase::updateFilter,
         onUpdateQuery = viewModel.chatListUseCase::updateQuery,
         onRequestSoftReload = viewModel::requestReload
     ) { padding ->
@@ -162,11 +166,13 @@ fun ConversationChatListScreen(
     courseId: Long,
     conversationId: Long,
     query: String,
+    filter: MetisFilter,
     conversationDataStatus: DataStatus,
     conversationDataState: DataState<Conversation>,
     onNavigateBack: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onUpdateQuery: (String) -> Unit,
+    onUpdateFilter: (MetisFilter) -> Unit,
     onRequestSoftReload: () -> Unit,
     content: @Composable (PaddingValues) -> Unit
 ) {
@@ -275,6 +281,8 @@ fun ConversationChatListScreen(
 
                             FilterDropdownMenu(
                                 isFilterDropdownExpanded = isFilterDropdownExpanded,
+                                filter = filter,
+                                onFilterSelected = onUpdateFilter,
                                 onDismissRequest = { isFilterDropdownExpanded = false }
                             )
                         }
@@ -415,70 +423,49 @@ private fun InfoDropdownMenu(
 @Composable
 fun FilterDropdownMenu(
     isFilterDropdownExpanded: Boolean,
+    filter: MetisFilter,
     onDismissRequest: () -> Unit,
+    onFilterSelected: (MetisFilter) -> Unit
 ) {
+    val icon = @Composable {
+        Icon(
+            imageVector = Icons.Default.Check,
+            contentDescription = null
+        )
+    }
+
     DropdownMenu(
         expanded = isFilterDropdownExpanded,
         onDismissRequest = onDismissRequest
     ) {
         DropdownMenuItem(
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.open),
-                    contentDescription = null
-                )
-            },
+            leadingIcon = if (filter == MetisFilter.ALL) icon else null,
             text = { Text(text = stringResource(R.string.conversation_filter_messages_all)) },
-            onClick = {
-            }
+            onClick = { onFilterSelected(MetisFilter.ALL) }
         )
 
         DropdownMenuItem(
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.open),
-                    contentDescription = null
-                )
-            },
+            leadingIcon = if (filter == MetisFilter.UNRESOLVED) icon else null,
             text = { Text(text = stringResource(R.string.conversation_filter_messages_unresolved)) },
-            onClick = {
-            }
+            onClick = { onFilterSelected(MetisFilter.UNRESOLVED) }
         )
 
         DropdownMenuItem(
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.open),
-                    contentDescription = null
-                )
-            },
+            leadingIcon = if (filter == MetisFilter.CREATED_BY_CLIENT) icon else null,
             text = { Text(text = stringResource(R.string.conversation_filter_messages_own)) },
-            onClick = {
-            }
+            onClick = { onFilterSelected(MetisFilter.CREATED_BY_CLIENT) }
         )
 
         DropdownMenuItem(
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.open),
-                    contentDescription = null
-                )
-            },
+            leadingIcon = if (filter == MetisFilter.WITH_REACTION) icon else null,
             text = { Text(text = stringResource(R.string.conversation_filter_messages_reacted)) },
-            onClick = {
-            }
+            onClick = { onFilterSelected(MetisFilter.WITH_REACTION) }
         )
 
         DropdownMenuItem(
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.open),
-                    contentDescription = null
-                )
-            },
+            leadingIcon = if (filter == MetisFilter.PINNED) icon else null,
             text = { Text(text = stringResource(R.string.conversation_filter_messages_pinned)) },
-            onClick = {
-            }
+            onClick = { onFilterSelected(MetisFilter.PINNED) }
         )
     }
 }
