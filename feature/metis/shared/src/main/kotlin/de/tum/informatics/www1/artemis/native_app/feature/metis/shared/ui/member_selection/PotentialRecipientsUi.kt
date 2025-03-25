@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_personal_conversation
+package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member_selection
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -34,12 +34,14 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.common.CourseUserListItem
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.MemberSelectionBaseViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseUser
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.common.CourseUserListItem
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member_selection.util.InclusionList
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member_selection.util.MemberSelectionItem
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member_selection.util.toMemberSelectionItem
 
-internal fun testTagForPotentialRecipient(username: String) = "potentialRecipient$username"
+fun testTagForPotentialRecipient(username: String) = "potentialRecipient$username"
 
 @Composable
 internal fun PotentialRecipientsUi(
@@ -47,7 +49,7 @@ internal fun PotentialRecipientsUi(
     potentialRecipientsDataState: DataState<List<CourseUser>>,
     isQueryTooShort: Boolean,
     inclusionList: InclusionList,
-    addRecipient: (CourseUser) -> Unit,
+    onAddMemberItem: (MemberSelectionItem) -> Unit,
     updateInclusionList: (InclusionList) -> Unit,
     retryLoadPotentialRecipients: () -> Unit
 ) {
@@ -74,7 +76,7 @@ internal fun PotentialRecipientsUi(
                     .fillMaxSize()
                     .imePadding(),
                 recipients = potentialRecipients,
-                addRecipient = addRecipient,
+                onAddMemberItem = onAddMemberItem,
                 isQueryTooShort = isQueryTooShort
             )
         }
@@ -129,7 +131,7 @@ private fun InclusionListUi(
 private fun PotentialRecipientsList(
     modifier: Modifier,
     recipients: List<CourseUser>,
-    addRecipient: (CourseUser) -> Unit,
+    onAddMemberItem: (MemberSelectionItem) -> Unit,
     isQueryTooShort: Boolean
 ) {
     if (recipients.isNotEmpty()) {
@@ -152,7 +154,7 @@ private fun PotentialRecipientsList(
                                     .clip(CircleShape)
                                     .size(32.dp)
                                     .background(MaterialTheme.colorScheme.surfaceContainer),
-                                onClick = { addRecipient(user) }
+                                onClick = { onAddMemberItem(user.toMemberSelectionItem()) }
                             ) {
                                 Icon(
                                     modifier = Modifier.size(24.dp),

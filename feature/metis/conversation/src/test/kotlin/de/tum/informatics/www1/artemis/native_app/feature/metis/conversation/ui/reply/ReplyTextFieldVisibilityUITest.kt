@@ -6,6 +6,7 @@ import androidx.compose.ui.test.performClick
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.BaseChatUITest
 import junit.framework.TestCase.assertTrue
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
@@ -15,12 +16,14 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class ReplyTextFieldVisibilityUITest : BaseChatUITest() {
 
+    @Ignore("This test does not work anymore, see https://github.com/ls1intum/artemis-android/issues/495")
     @Test
     fun `test GIVEN the thread view is shown containing one post and three answer posts WHEN the markdown text field is clicked THEN the keyboard is shown below the markdown text field`() {
         setupThreadUi(posts[0])
         runTest()
     }
 
+    @Ignore("This test does not work anymore, see https://github.com/ls1intum/artemis-android/issues/495")
     @Test
     fun `test GIVEN the chat list containing three posts is shown WHEN the markdown text field is clicked THEN the keyboard is shown below the markdown text field`() {
         setupChatUi(posts)

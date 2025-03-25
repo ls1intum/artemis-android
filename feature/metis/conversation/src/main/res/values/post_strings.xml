@@ -8,6 +8,7 @@
     <string name="post_does_not_resolve">Doesn\'t Resolve Post</string>
     <string name="post_pin">Pin Post</string>
     <string name="post_unpin">Unpin Post</string>
+    <string name="post_forward">Forward Post</string>
     <string name="post_save">Save Post</string>
     <string name="post_unsave">Remove Bookmark</string>
     <string name="post_is_resolved">Resolved</string>
@@ -21,4 +22,20 @@
     </plurals>
     <string name="post_reactions_show_all">All (%d)</string>
 
+    <string name="post_forwarded_from">Forwarded from</string>
+    <string name="post_forwarded_from_a_thread">a thread in %s</string>
+    <string name="post_forwarded_from_a_direct_message">a direct message</string>
+    <string name="post_forwarded_from_a_group_chat">a group message</string>
+    <string name="post_forwarded_from_default">a conversation</string>
+    <string name="post_forwarded_deleted">This message has been deleted</string>
+
+    <string name="post_forward_title">Forward this Post</string>
+    <string name="post_forward_hint">Add a message, if you\'d like</string>
+    <string name="post_forward_send">Send</string>
+    <string name="post_forward_too_many_recipients">The number of selected users cannot be greater than 9.</string>
+    <string name="post_forward_error_DM_creation">Failed to create a direct chat with selected user.</string>
+    <string name="post_forward_error_group_creation">Failed to create a group chat with selected users.</string>
+    <string name="post_forward_success">Post has been forwarded successfully.</string>
+
+    <string name="post_sending_failed">Sending post failed. Click to try again.</string>
 </resources>
