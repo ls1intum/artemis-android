@@ -78,5 +78,5 @@ jobs:
           serviceAccountJsonPlainText: '${{ secrets.SERVICE_ACCOUNT_JSON }}'
           packageName: de.tum.cit.aet.artemis
           releaseFiles: '${{ steps.find-aab.outputs.AAB_PATH }}'
-          track: qa
+          track: internal
           status: draft
