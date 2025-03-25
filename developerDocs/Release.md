@@ -22,10 +22,13 @@ and PlayStore release notes.
 In Android Studio, you can copy the functions in the scripts to a scratch file and call the methods 
 there (use "Interactive mode" to immediately access the returned formatted strings).
 
-### How to add a new release
-We created a github action to build, sign and deploy a new release. It is called "Create new release" and can be triggered manually.
-This workflow with create a new app version draft in the internal testing track in the Play Console.
-
-Make sure to update the version code for each new release (otherwise the workflow will fail).
+### Building a new app bundle
+For now, we do this locally, but it is planned to shift this step to Github actions
 
 
+#### Locally
+- Make sure the version-name and -code changes are synced with gradle
+- In android studio, go to "Build > Generate Signed App Bundle / APK"
+- Select "Android App Bundle"
+- Provide the signing keystore and password
+- Choose "productionUnrestrictedRelease" build variant
