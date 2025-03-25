@@ -42,7 +42,7 @@ jobs:
         uses: chkfung/android-version-actions@v1.2.3
         with:
           gradlePath: app/build.gradle.kts
-          versionCode: ${{ 625 + github.run_number }}   # 624 was the last version code before switching to this workflow for deployment
+          versionCode: '${{ 625 + github.run_number }}'   # 624 was the last version code before switching to this workflow for deployment
 
       - name: Build prodRelease
         run: ./gradlew bundleProductionUnrestrictedRelease
@@ -82,11 +82,10 @@ jobs:
           echo "AAB_PATH=$AAB_PATH" >> $GITHUB_OUTPUT
           echo "Found AAB file at: $AAB_PATH"
 
-      - name: Publish draft release to "Internal Testing" in Play Console
+      - name: Publish release to "Internal Testing" in Play Console
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: '${{ secrets.SERVICE_ACCOUNT_JSON }}'
           packageName: de.tum.cit.aet.artemis
           releaseFiles: '${{ steps.find-aab.outputs.AAB_PATH }}'
           track: internal
-          status: draft

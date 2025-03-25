@@ -5,7 +5,7 @@
   - Make the automatically generated release notes more readable by sorting them and removing irrelevant information (eg Dependabot version updates)
 - Test all the newly introduced features and the basic app functionality (such as sending and receiving posts)
 - Update the app version name in `app/build.gralde.kts` and commit that to `develop` (the app version *code* will be set by the Github action)
-- Merge `develop` into `main`, this will build a new app bundle and release it as a draft on the Play Console
+- Merge `develop` into `main`, this will build a new app bundle and release it for internal testing on the Play Console
   - For the PlayStore release notes (configured in the Play Console), shorten the Github release notes and only include the most relevant information for the end users
 - "Save and Publish" the new internal release and promote it to production if applicable
 
@@ -23,5 +23,5 @@ there (use "Interactive mode" to immediately access the returned formatted strin
 
 ### How to add a new release
 We created a github action to build, sign and deploy a new release. It is called "Create new release" and can be triggered manually or by merging / pushing to `main`.
-This workflow will create a new app version draft in the internal testing track in the Play Console.
+This workflow will create a new app version in the internal testing track in the Play Console.
 
