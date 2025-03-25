@@ -38,11 +38,19 @@ jobs:
         with:
           gradle-home-cache-cleanup: true
 
+      - name: Calculate New Version Code
+        # 624 was the last version code before switching to this workflow for deployment, so we start from 625
+        run: |
+          OFFSET=625
+          NEW_VERSION_CODE=$(( OFFSET + ${{ github.run_number }} ))
+          echo "Calculated new versionCode: $NEW_VERSION_CODE"
+          echo "NEW_VERSION_CODE=$NEW_VERSION_CODE" >> $GITHUB_ENV
+
       - name: Bump Version Code
         uses: chkfung/android-version-actions@v1.2.3
         with:
           gradlePath: app/build.gradle.kts
-          versionCode: '${{ 625 + github.run_number }}'   # 624 was the last version code before switching to this workflow for deployment
+          versionCode: '${{ env.NEW_VERSION_CODE }}'
 
       - name: Build prodRelease
         run: ./gradlew bundleProductionUnrestrictedRelease
