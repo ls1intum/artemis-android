@@ -1,9 +1,13 @@
 # This workflow was heavily inspired by the following medium article:
 # https://medium.com/@vontonnie/automating-success-github-actions-workflow-for-android-app-deployment-908095d53b97
 
-name: Create new release
+name: Deploy New Release
 'on':
+  push:
+    branches:
+    - main
   workflow_dispatch: null
+
 jobs:
   build:
     name: Job 1 - Build Signed AAB
@@ -34,6 +38,12 @@ jobs:
         with:
           gradle-home-cache-cleanup: true
 
+      - name: Bump Version Code
+        uses: chkfung/android-version-actions@v1.2.3
+        with:
+          gradlePath: app/build.gradle.kts
+          versionCode: ${{ 625 + github.run_number }}   # 624 was the last version code before switching to this workflow for deployment
+
       - name: Build prodRelease
         run: ./gradlew bundleProductionUnrestrictedRelease
 
@@ -48,28 +58,35 @@ jobs:
           keyPassword: '${{ secrets.SIGNING_KEY_PASSWORD }}'
 
       - name: Upload app bundle as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: app-bundle
-          path: app/build/outputs/bundle/productionUnrestrictedRelease/app-release.aab
+          path: '${{ env.SIGNED_RELEASE_FILE }}'
 
       - run: 'echo Build status report=${{ job.status }}'
 
   deploy:
-    name: Job_2 - Deploy aab to playstore
+    name: Job_2 - Deploy AAB to Play Console
     needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Download app bundle from artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: app-bundle
 
-      - name: Publish to Play Store
+      - name: Find AAB file
+        id: find-aab
+        run: |
+          AAB_PATH=$(find ./ -name "*.aab" | head -n 1)
+          echo "AAB_PATH=$AAB_PATH" >> $GITHUB_OUTPUT
+          echo "Found AAB file at: $AAB_PATH"
+
+      - name: Publish draft release to "Internal Testing" in Play Console
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: '${{ secrets.SERVICE_ACCOUNT_JSON }}'
           packageName: de.tum.cit.aet.artemis
-          releaseFiles: '${{ github.workspace }}/app-release.aab'
-          track: beta
+          releaseFiles: '${{ steps.find-aab.outputs.AAB_PATH }}'
+          track: internal
           status: draft
