@@ -36,6 +36,7 @@ abstract class ArtemisDeeplink {
 
     companion object {
         const val IN_APP_HOST = "artemis:/"        // Defined in intent filters in AndroidManifest.xml
-        val WEB_HOSTS = ArtemisInstances.instances.map { it.host } + ArtemisInstances.LegacyTumArtemis.host
+        val WEB_HOSTS: List<String> = (ArtemisInstances.instances + ArtemisInstances.legacyTumInstances)
+            .map { it.host }
     }
 }
