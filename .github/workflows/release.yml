@@ -48,10 +48,10 @@ jobs:
           keyPassword: '${{ secrets.SIGNING_KEY_PASSWORD }}'
 
       - name: Upload app bundle as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: app-bundle
-          path: app/build/outputs/bundle/productionUnrestrictedRelease/app-release.aab
+          path: '${{ env.SIGNED_RELEASE_FILE }}'
 
       - run: 'echo Build status report=${{ job.status }}'
 
@@ -61,15 +61,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download app bundle from artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: app-bundle
 
-      - name: Publish to Play Store
+      - name: Find AAB file
+        id: find-aab
+        run: |
+          AAB_PATH=$(find ./ -name "*.aab" | head -n 1)
+          echo "AAB_PATH=$AAB_PATH" >> $GITHUB_OUTPUT
+          echo "Found AAB file at: $AAB_PATH"
+
+      - name: Publish draft release to "Internal Testing" in Play Console
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: '${{ secrets.SERVICE_ACCOUNT_JSON }}'
           packageName: de.tum.cit.aet.artemis
-          releaseFiles: '${{ github.workspace }}/app-release.aab'
-          track: beta
+          releaseFiles: '${{ steps.find-aab.outputs.AAB_PATH }}'
+          track: internal
           status: draft
