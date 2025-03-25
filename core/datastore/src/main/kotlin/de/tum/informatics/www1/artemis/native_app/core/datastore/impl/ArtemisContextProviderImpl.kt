@@ -4,6 +4,7 @@ import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.Ar
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -13,6 +14,7 @@ import kotlinx.coroutines.flow.stateIn
 class ArtemisContextProviderImpl(
     serverConfigurationService: ServerConfigurationService,
     accountService: AccountService,
+    scope: CoroutineScope = MainScope()
 ) : ArtemisContextProvider {
 
     override val stateFlow: StateFlow<ArtemisContext> = combine(
@@ -28,5 +30,5 @@ class ArtemisContextProviderImpl(
                 username = authData.username
             )
         }
-    }.stateIn(MainScope(), SharingStarted.Eagerly, ArtemisContext.Empty)
+    }.stateIn(scope, SharingStarted.Eagerly, ArtemisContext.Empty)
 }
