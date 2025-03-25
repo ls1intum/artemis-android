@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.DropdownMenu
@@ -263,7 +264,7 @@ fun ConversationChatListScreen(
                             }
                         ) {
                             Icon(
-                                imageVector = Icons.Outlined.Info,
+                                imageVector = Icons.Default.MoreVert,
                                 tint = MaterialTheme.colorScheme.primary,
                                 contentDescription = null
                             )
@@ -439,31 +440,31 @@ fun FilterDropdownMenu(
         onDismissRequest = onDismissRequest
     ) {
         DropdownMenuItem(
-            leadingIcon = if (filter == MetisFilter.ALL) icon else null,
+            trailingIcon = if (filter == MetisFilter.ALL) icon else null,
             text = { Text(text = stringResource(R.string.conversation_filter_messages_all)) },
             onClick = { onFilterSelected(MetisFilter.ALL) }
         )
 
         DropdownMenuItem(
-            leadingIcon = if (filter == MetisFilter.UNRESOLVED) icon else null,
+            trailingIcon = if (filter == MetisFilter.UNRESOLVED) icon else null,
             text = { Text(text = stringResource(R.string.conversation_filter_messages_unresolved)) },
             onClick = { onFilterSelected(MetisFilter.UNRESOLVED) }
         )
 
         DropdownMenuItem(
-            leadingIcon = if (filter == MetisFilter.CREATED_BY_CLIENT) icon else null,
+            trailingIcon = if (filter == MetisFilter.CREATED_BY_CLIENT) icon else null,
             text = { Text(text = stringResource(R.string.conversation_filter_messages_own)) },
             onClick = { onFilterSelected(MetisFilter.CREATED_BY_CLIENT) }
         )
 
         DropdownMenuItem(
-            leadingIcon = if (filter == MetisFilter.WITH_REACTION) icon else null,
+            trailingIcon = if (filter == MetisFilter.WITH_REACTION) icon else null,
             text = { Text(text = stringResource(R.string.conversation_filter_messages_reacted)) },
             onClick = { onFilterSelected(MetisFilter.WITH_REACTION) }
         )
 
         DropdownMenuItem(
-            leadingIcon = if (filter == MetisFilter.PINNED) icon else null,
+            trailingIcon = if (filter == MetisFilter.PINNED) icon else null,
             text = { Text(text = stringResource(R.string.conversation_filter_messages_pinned)) },
             onClick = { onFilterSelected(MetisFilter.PINNED) }
         )

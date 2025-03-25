@@ -87,7 +87,6 @@ class ConversationChatListUseCase(
         _filter,
         delayedQuery
     ) { filter, query ->
-        println(filter)
         StandalonePostsContext(
             metisContext = metisContext,
             filter = filter,
@@ -131,7 +130,6 @@ class ConversationChatListUseCase(
     @OptIn(ExperimentalPagingApi::class)
     val postPagingData: Flow<PagingData<ChatListItem>> =
         pagingDataInput.flatMapLatest { pagingDataInput ->
-            println(pagingDataInput.standalonePostsContext.filter)
             val config = PagingConfig(
                 pageSize = PAGE_SIZE,
                 enablePlaceholders = true

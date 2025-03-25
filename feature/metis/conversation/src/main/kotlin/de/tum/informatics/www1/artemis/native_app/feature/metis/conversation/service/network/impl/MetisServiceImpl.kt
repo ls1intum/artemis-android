@@ -103,7 +103,7 @@ internal class MetisServiceImpl(
                 if (standalonePostsContext.query != null) {
                     parameter("searchText", standalonePostsContext.query)
                 }
-                println(standalonePostsContext.filter)
+
                 if (standalonePostsContext.courseWideContext != CourseWideContext.ANNOUNCEMENT) {
                     parameter(
                         "filterToUnresolved",
