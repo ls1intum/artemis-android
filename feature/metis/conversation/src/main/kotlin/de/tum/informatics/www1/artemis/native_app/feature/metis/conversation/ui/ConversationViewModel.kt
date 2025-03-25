@@ -842,5 +842,4 @@ internal open class ConversationViewModel(
             cursor.getString(nameIndex)
         } ?: uri.lastPathSegment.orEmpty()
     }
-
 }

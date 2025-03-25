@@ -21,10 +21,12 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -107,6 +109,7 @@ internal fun ConversationChatListScreen(
     onClickViewPost: (StandalonePostId) -> Unit
 ) {
     val query by viewModel.chatListUseCase.query.collectAsState()
+    val filter by viewModel.chatListUseCase.filter.collectAsState()
     val conversationDataState by viewModel.latestUpdatedConversation.collectAsState()
     val conversationDataStatus by viewModel.conversationDataStatus.collectAsState()
 
@@ -169,12 +172,12 @@ fun ConversationChatListScreen(
 ) {
     var isSearchBarOpen by rememberSaveable(courseId, conversationId) { mutableStateOf(false) }
     var isInfoDropdownExpanded by remember { mutableStateOf(false) }
+    var isFilterDropdownExpanded by remember { mutableStateOf(false) }
 
     val searchBarFocusRequester = remember { FocusRequester() }
     val conversation = conversationDataState.orNull()
     val hasExercise = conversation?.filterPredicate(FILTER_EXERCISE) == true
     val hasLecture = conversation?.filterPredicate(FILTER_LECTURE) == true
-    val hasInfoDropdown = hasExercise || hasLecture
 
     val closeSearch = {
         isSearchBarOpen = false
@@ -250,10 +253,7 @@ fun ConversationChatListScreen(
 
                         IconButton(
                             onClick = {
-                                isInfoDropdownExpanded = hasInfoDropdown
-                                if (!hasInfoDropdown) {
-                                    onNavigateToSettings()
-                                }
+                                isInfoDropdownExpanded = true
                             }
                         ) {
                             Icon(
@@ -267,9 +267,15 @@ fun ConversationChatListScreen(
                                 hasExercise = hasExercise,
                                 hasLecture = hasLecture,
                                 courseId = courseId,
-                                conversation = if (conversation is ChannelChat) conversation else return@IconButton,
+                                conversation = conversation ?: return@IconButton,
                                 onDismissRequest = { isInfoDropdownExpanded = false },
+                                onOpenFilterDropdown = { isFilterDropdownExpanded = true },
                                 onNavigateToSettings = onNavigateToSettings
+                            )
+
+                            FilterDropdownMenu(
+                                isFilterDropdownExpanded = isFilterDropdownExpanded,
+                                onDismissRequest = { isFilterDropdownExpanded = false }
                             )
                         }
                     }
@@ -338,9 +344,10 @@ private fun InfoDropdownMenu(
     hasExercise: Boolean,
     hasLecture: Boolean,
     courseId: Long,
-    conversation: ChannelChat,
+    conversation: Conversation,
     onDismissRequest: () -> Unit,
-    onNavigateToSettings: () -> Unit
+    onNavigateToSettings: () -> Unit,
+    onOpenFilterDropdown: () -> Unit,
 ) {
     val isParameterCombinationIllegal = hasExercise && hasLecture
     require(!isParameterCombinationIllegal)
@@ -371,6 +378,7 @@ private fun InfoDropdownMenu(
         )
 
         referenceType?.let { referenceType ->
+            val channel = conversation as ChannelChat
             DropdownMenuItem(
                 leadingIcon = {
                     Icon(
@@ -380,9 +388,97 @@ private fun InfoDropdownMenu(
                 },
                 text = { Text(text = stringResource) },
                 onClick = {
-                    localLinkOpener.openLink("artemis://courses/${courseId}/${referenceType}/${conversation.subTypeReferenceId}")
+                    localLinkOpener.openLink("artemis://courses/${courseId}/${referenceType}/${channel.subTypeReferenceId}")
                 }
             )
+
+            HorizontalDivider()
         }
+
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.FilterList,
+                    contentDescription = null
+                )
+            },
+            text = { Text(text = stringResource(R.string.conversation_filter_messages)) },
+            onClick = {
+                onDismissRequest()
+                onOpenFilterDropdown()
+            }
+        )
+    }
+}
+
+
+@Composable
+fun FilterDropdownMenu(
+    isFilterDropdownExpanded: Boolean,
+    onDismissRequest: () -> Unit,
+) {
+    DropdownMenu(
+        expanded = isFilterDropdownExpanded,
+        onDismissRequest = onDismissRequest
+    ) {
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.open),
+                    contentDescription = null
+                )
+            },
+            text = { Text(text = stringResource(R.string.conversation_filter_messages_all)) },
+            onClick = {
+            }
+        )
+
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.open),
+                    contentDescription = null
+                )
+            },
+            text = { Text(text = stringResource(R.string.conversation_filter_messages_unresolved)) },
+            onClick = {
+            }
+        )
+
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.open),
+                    contentDescription = null
+                )
+            },
+            text = { Text(text = stringResource(R.string.conversation_filter_messages_own)) },
+            onClick = {
+            }
+        )
+
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.open),
+                    contentDescription = null
+                )
+            },
+            text = { Text(text = stringResource(R.string.conversation_filter_messages_reacted)) },
+            onClick = {
+            }
+        )
+
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.open),
+                    contentDescription = null
+                )
+            },
+            text = { Text(text = stringResource(R.string.conversation_filter_messages_pinned)) },
+            onClick = {
+            }
+        )
     }
 }
