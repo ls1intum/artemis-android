@@ -31,6 +31,10 @@ dependencies {
 
     testImplementation(libs.ktor.client.cio)
 
+    // Supporting passkeys
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+
     testImplementation(project(":core:common-test"))
     testImplementation(project(":core:data-test"))
     testImplementation(libs.kotlinx.coroutines.test)
