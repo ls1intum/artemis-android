@@ -25,6 +25,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.toRoute
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
@@ -270,6 +271,7 @@ private fun buildOpenAttachmentLink(
     attachmentLink: String
 ): String {
     return URLBuilder(serverUrl).apply {
+        appendPathSegments(*Api.Core.UploadedFile.path)
         appendPathSegments(attachmentLink)
     }.buildString()
 }

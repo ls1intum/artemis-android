@@ -28,7 +28,7 @@ sealed class Api(
          * course icons do not contain the "api(/core)/files" part, while prior to 8.0 it did.
          */
         // TODO: this can be removed once the app v2.0.0 is released
-        data object UploadedImage : Api(*Files.path)
+        data object UploadedFile : Api(*Files.path)
     }
 
     data object Communication: Api(api, "communication") {
