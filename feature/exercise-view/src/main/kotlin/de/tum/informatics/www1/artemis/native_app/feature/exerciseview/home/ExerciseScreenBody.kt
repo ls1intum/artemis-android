@@ -15,8 +15,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseD
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.home.overview.ExerciseOverviewTab
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 
-// Ratio of metis content in contrast to the actual exercise content
-const val METIS_RATIO = 0.3f
 
 @Composable
 internal fun ExerciseScreenBody(
