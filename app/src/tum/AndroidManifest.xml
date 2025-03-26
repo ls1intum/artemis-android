@@ -18,6 +18,7 @@
                 <data android:scheme="https"/>
                 <data android:host="artemis.ase.in.tum.de"/>
                 <data android:host="artemis.cit.tum.de"/>
+                <data android:host="artemis.tum.de"/>
 
                 <data android:pathPattern="/courses/.*" />
                 <data android:pathPattern="/courses/.*/exercises/.*/" />

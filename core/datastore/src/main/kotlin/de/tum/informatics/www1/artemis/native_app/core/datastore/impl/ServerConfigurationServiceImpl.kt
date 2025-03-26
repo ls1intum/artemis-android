@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import de.tum.informatics.www1.artemis.native_app.core.datastore.BuildConfig
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.defaults.ArtemisInstances
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
@@ -40,8 +41,18 @@ internal class ServerConfigurationServiceImpl(
             .serverCommunicationPreferences
             .data
             .map { data -> data[SERVER_URL_KEY] ?: BuildConfig.defaultServerUrl }
+            .map { updateServerUrlIfLegacy(it) }
             .distinctUntilChanged()
             .shareIn(GlobalScope, SharingStarted.Eagerly, replay = 1)
+    }
+
+    private fun updateServerUrlIfLegacy(serverUrl: String): String {
+        val legacyTumServerUrls = ArtemisInstances.legacyTumInstances.map { it.serverUrl }
+        return if (serverUrl in legacyTumServerUrls) {
+            ArtemisInstances.TumArtemis.serverUrl
+        } else {
+            serverUrl
+        }
     }
 
     override suspend fun updateServerUrl(serverUrl: String) {
