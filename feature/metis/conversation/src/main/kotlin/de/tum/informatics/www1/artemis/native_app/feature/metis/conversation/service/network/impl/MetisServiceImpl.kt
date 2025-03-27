@@ -107,15 +107,19 @@ internal class MetisServiceImpl(
                 if (standalonePostsContext.courseWideContext != CourseWideContext.ANNOUNCEMENT) {
                     parameter(
                         "filterToUnresolved",
-                        MetisFilter.UNRESOLVED in standalonePostsContext.filter
+                        standalonePostsContext.filter == MetisFilter.UNRESOLVED
                     )
                     parameter(
                         "filterToOwn",
-                        MetisFilter.CREATED_BY_CLIENT in standalonePostsContext.filter
+                        standalonePostsContext.filter == MetisFilter.CREATED_BY_CLIENT
                     )
                     parameter(
                         "filterToAnsweredOrReacted",
-                        MetisFilter.WITH_REACTION in standalonePostsContext.filter
+                         standalonePostsContext.filter == MetisFilter.WITH_REACTION
+                    )
+                    parameter(
+                        "pinnedOnly",
+                        standalonePostsContext.filter == MetisFilter.PINNED
                     )
                 }
 
@@ -141,7 +145,7 @@ internal class MetisServiceImpl(
         val posts = getPosts(
             standalonePostsContext = MetisService.StandalonePostsContext(
                 metisContext = metisContext,
-                filter = emptyList(),
+                filter = MetisFilter.ALL,
                 query = "#$serverSidePostId",
                 sortingStrategy = MetisSortingStrategy.DATE_DESCENDING,
                 courseWideContext = null
