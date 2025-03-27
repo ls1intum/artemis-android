@@ -29,7 +29,7 @@ class ArtemisImageProviderImpl(
         val authToken = artemisContext().authToken
 
         val imageUrl = URLBuilder(serverUrl)
-            .appendPathSegments(*Api.Core.UploadedImage.path)
+            .appendPathSegments(*Api.Core.UploadedFile.path)
             .appendPathSegments(imagePath)
             .buildString()
         val request = imageProvider.createImageRequest(
@@ -47,7 +47,7 @@ class ArtemisImageProviderImpl(
         val artemisContext by artemisContextProvider.collectArtemisContextAsState()
 
         val imageUrl = URLBuilder(artemisContext.serverUrl)
-            .appendPathSegments(*Api.Core.UploadedImage.path)
+            .appendPathSegments(*Api.Core.UploadedFile.path)
             .appendPathSegments(imagePath)
             .buildString()
         val authToken = artemisContext.authToken
