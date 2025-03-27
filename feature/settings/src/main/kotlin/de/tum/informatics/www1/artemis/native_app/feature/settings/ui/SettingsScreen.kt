@@ -73,7 +73,6 @@ import org.koin.compose.koinInject
 @Composable
 internal fun SettingsScreen(
     modifier: Modifier,
-    onNavigateUp: () -> Unit,
     onDisplayThirdPartyLicenses: () -> Unit,
     onRequestOpenNotificationSettings: () -> Unit
 ) {
@@ -109,7 +108,7 @@ internal fun SettingsScreen(
                 title = {
                     Text(text = stringResource(id = R.string.settings_screen_title))
                 },
-                navigationIcon = { NavigationBackButton(onNavigateUp) }
+                navigationIcon = { NavigationBackButton() }
             )
         }
     ) { padding ->

@@ -58,7 +58,6 @@ fun NavController.navigateToLecture(
 
 fun NavGraphBuilder.lecture(
     navController: NavController,
-    onNavigateBack: () -> Unit,
     onViewExercise: (exerciseId: Long) -> Unit,
     onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
     onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
@@ -85,7 +84,6 @@ fun NavGraphBuilder.lecture(
             lectureId = lectureId,
             viewModel = viewModel,
             navController = navController,
-            onNavigateBack = onNavigateBack,
             onViewExercise = onViewExercise,
             onNavigateToExerciseResultView = onNavigateToExerciseResultView,
             onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
@@ -108,7 +106,6 @@ internal fun LectureScreen(
     lectureId: Long,
     viewModel: LectureViewModel,
     navController: NavController,
-    onNavigateBack: () -> Unit,
     onViewExercise: (exerciseId: Long) -> Unit,
     onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
     onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,

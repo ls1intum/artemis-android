@@ -66,14 +66,12 @@ fun NavController.navigateToCourseRegistration(builder: NavOptionsBuilder.() -> 
 }
 
 fun NavGraphBuilder.courseRegistration(
-    onNavigateUp: () -> Unit,
     onRegisteredInCourse: (courseId: Long) -> Unit
 ) {
     animatedComposable<CourseRegistrationScreen> {
         RegisterForCourseScreen(
             modifier = Modifier.fillMaxSize(),
             viewModel = koinViewModel(),
-            onNavigateUp = onNavigateUp,
             onRegisteredInCourse = onRegisteredInCourse
         )
     }
@@ -83,7 +81,6 @@ fun NavGraphBuilder.courseRegistration(
 internal fun RegisterForCourseScreen(
     modifier: Modifier,
     viewModel: RegisterForCourseViewModel = koinViewModel(),
-    onNavigateUp: () -> Unit,
     onRegisteredInCourse: (courseId: Long) -> Unit
 ) {
     val courses by viewModel.registrableCourses.collectAsState()
@@ -109,7 +106,7 @@ internal fun RegisterForCourseScreen(
         topBar = {
             TopAppBar(
                 title = { Text(text = stringResource(id = R.string.course_registration_title)) },
-                navigationIcon = { NavigationBackButton(onNavigateUp) }
+                navigationIcon = { NavigationBackButton() }
             )
         }
     ) { padding ->

@@ -44,7 +44,6 @@ fun NavGraphBuilder.settingsNavGraph(
         ) {
             SettingsScreen(
                 modifier = Modifier.fillMaxSize(),
-                onNavigateUp = navController::navigateUp,
                 onDisplayThirdPartyLicenses = onDisplayThirdPartyLicenses
             ) {
                 navController.navigate(PushNotificationSettingsScreen)

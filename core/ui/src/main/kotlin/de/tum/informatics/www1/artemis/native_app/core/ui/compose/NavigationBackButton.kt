@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 
 @Composable
 fun NavigationBackButton(
-    onNavigateBack: (() -> Unit)? = null, // Nullable function parameter
+    onNavigateBack: (() -> Unit)? = null,
     imageVector: ImageVector = Icons.AutoMirrored.Filled.ArrowBack
 ) {
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher

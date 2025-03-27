@@ -54,7 +54,6 @@ internal fun ExerciseScreen(
     modifier: Modifier,
     viewModel: ExerciseViewModel,
     navController: NavController,
-    onNavigateBack: () -> Unit,
     onViewResult: () -> Unit,
     onViewTextExerciseParticipationScreen: (participationId: Long) -> Unit,
     onParticipateInQuiz: (courseId: Long, isPractice: Boolean) -> Unit,
@@ -146,7 +145,6 @@ internal fun ExerciseScreen(
                 topBar = {
                     ExerciseScreenTopAppBar(
                         modifier = Modifier.fillMaxWidth(),
-                        onNavigateBack = onNavigateBack,
                         exerciseDataState = exerciseDataState
                     )
                 },
