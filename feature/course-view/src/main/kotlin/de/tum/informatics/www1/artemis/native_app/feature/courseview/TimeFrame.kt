@@ -25,3 +25,8 @@ sealed class TimeFrame<T>(val items: List<T>) {
         }
 
 }
+
+data class WeeklyGroup<T>(
+    val startOfWeekLabel: String,
+    val items: List<T>
+)

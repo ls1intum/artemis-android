@@ -1,7 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.feature.courseview
 
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 fun <T> List<T>.groupByTimeFrame(
     now: Instant = Clock.System.now(),
@@ -54,3 +59,62 @@ fun <T> List<T>.groupByTimeFrame(
     return grouped
 }
 
+
+fun <T> groupByWeek(
+    items: List<T>,
+): List<WeeklyGroup<T>> {
+    if (items.isEmpty()) return emptyList()
+
+    val map = mutableMapOf<Pair<Int?, Int?>, MutableList<T>>()
+    val fmt = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+
+    for (item in items) {
+
+        val end = when (item) {
+            is Exercise -> item.dueDate
+            is Lecture -> item.endDate
+            else -> null
+        }
+        if (end == null) {
+            map.getOrPut(null to null) { mutableListOf() }.add(item)
+        } else {
+            val cal = Calendar.getInstance()
+            cal.timeInMillis = end.toEpochMilliseconds()
+            val year = cal.get(Calendar.YEAR)
+            val weekOfYear = cal.get(Calendar.WEEK_OF_YEAR)
+            map.getOrPut(year to weekOfYear) { mutableListOf() }.add(item)
+        }
+    }
+
+    return map
+        .toList()
+        .sortedBy { (yearWeek, _) ->
+            val (year, week) = yearWeek
+            if (year == null || week == null) Instant.DISTANT_FUTURE
+            else {
+                val cal = Calendar.getInstance()
+                cal.clear()
+                cal.firstDayOfWeek = Calendar.MONDAY
+                cal.minimalDaysInFirstWeek = 4
+                cal.setWeekDate(year, week, Calendar.MONDAY)
+                Instant.fromEpochMilliseconds(cal.timeInMillis)
+            }
+        }
+        .map { (yearWeek, bucketItems) ->
+            val (year, week) = yearWeek
+            val label = if (year == null || week == null) {
+                "No Date Associated"
+            } else {
+                val cal = Calendar.getInstance()
+                cal.clear()
+                cal.firstDayOfWeek = Calendar.MONDAY
+                cal.minimalDaysInFirstWeek = 4
+                cal.setWeekDate(year, week, Calendar.MONDAY)
+                val start = cal.time
+                cal.add(Calendar.DAY_OF_YEAR, 6)
+                val end = cal.time
+                "${fmt.format(start)} - ${fmt.format(end)}"
+            }
+            WeeklyGroup(label, bucketItems)
+        }
+}

@@ -22,13 +22,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.TimeFrame
+import de.tum.informatics.www1.artemis.native_app.feature.courseview.groupByWeek
 import kotlinx.parcelize.Parcelize
 
 @Composable
@@ -60,7 +63,7 @@ internal fun <T> TimeFrameItemsLazyColumn(
         verticalArrangement = verticalArrangement,
         contentPadding = Spacings.calculateContentPaddingValues()
     ) {
-        timeFrameGroup.forEachIndexed { index, group ->
+        timeFrameGroup.forEach { group ->
             val isExpanded = timeFrameGroupExpandedState[group.key] == true
             item {
                 TimeFrameItemsSectionHeader(
@@ -77,8 +80,36 @@ internal fun <T> TimeFrameItemsLazyColumn(
             }
 
             if (isExpanded) {
-                items(group.items, key = getItemId) { item ->
-                    itemContent(Modifier.animateItem(), item)
+                if (group !is TimeFrame.NoDate && group.items.size > 5) {
+                    val weeklyGroups = groupByWeek(
+                        items = group.items
+                    )
+
+                    weeklyGroups.forEach { weeklyGroup ->
+                        item {
+                            // Sub-header: e.g. "21 Oct 2024 - 27 Oct 2024"
+                            Text(
+                                text = weeklyGroup.startOfWeekLabel,
+                                style = MaterialTheme.typography.titleSmall,
+                                color = Color.Gray,
+                                modifier = Modifier
+                                    .animateItem()
+                                    .padding( horizontal = Spacings.ScreenHorizontalSpacing)
+                                    .padding(Spacings.TimeFrameItems.small)
+                            )
+                        }
+
+                        items(
+                            items = weeklyGroup.items,
+                            key = getItemId
+                        ) { subItem ->
+                            itemContent(Modifier.animateItem(), subItem)
+                        }
+                    }
+                } else {
+                    items(group.items, key = getItemId) { item ->
+                        itemContent(Modifier.animateItem(), item)
+                    }
                 }
             }
         }
