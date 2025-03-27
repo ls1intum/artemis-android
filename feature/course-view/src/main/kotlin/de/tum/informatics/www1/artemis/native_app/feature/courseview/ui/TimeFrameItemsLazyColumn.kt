@@ -16,6 +16,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.SaverScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -27,7 +28,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.TimeFrame
@@ -39,6 +39,7 @@ internal fun <T> TimeFrameItemsLazyColumn(
     modifier: Modifier,
     timeFrameGroup: List<TimeFrame<T>>,
     verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(8.dp),
+    forceExpand: Set<String>? = null,
     getItemId: T.() -> Long,
     itemContent: @Composable (Modifier, T) -> Unit
 ) {
@@ -57,6 +58,13 @@ internal fun <T> TimeFrameItemsLazyColumn(
             }
         }
     }
+
+    LaunchedEffect(forceExpand, timeFrameGroup) {
+        forceExpand?.forEach { key ->
+            timeFrameGroupExpandedState[key] = true
+        }
+    }
+
 
     LazyColumn(
         modifier = modifier,
