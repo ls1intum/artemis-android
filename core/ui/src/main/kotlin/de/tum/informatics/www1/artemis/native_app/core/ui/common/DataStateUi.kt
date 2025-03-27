@@ -1,10 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.common
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -15,10 +17,11 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.ui.R
 
 
 /**
@@ -30,9 +33,9 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 inline fun <T> BasicDataStateUi(
     modifier: Modifier,
     dataState: DataState<T>?,
-    loadingText: String,
-    failureText: String,
-    retryButtonText: String,
+    loadingText: String = stringResource(R.string.basic_data_state_ui_loading),
+    failureText: String = stringResource(R.string.basic_data_state_ui_failure),
+    retryButtonText: String = stringResource(R.string.basic_data_state_ui_retry),
     enablePullToRefresh: Boolean = true,
     noinline onClickRetry: () -> Unit,
     crossinline successUi: @Composable (BoxScope.(data: T) -> Unit)
@@ -101,7 +104,7 @@ inline fun <T> Content(
                     modifier = Modifier.fillMaxWidth(),
                     text = failureText,
                     textAlign = TextAlign.Center,
-                    fontSize = 18.sp
+                    style = MaterialTheme.typography.bodyLarge,
                 )
 
                 TextButton(
@@ -120,7 +123,7 @@ inline fun <T> Content(
                     modifier = Modifier.fillMaxWidth(),
                     text = loadingText,
                     textAlign = TextAlign.Center,
-                    fontSize = 20.sp,
+                    style = MaterialTheme.typography.bodyLarge
                 )
 
                 if (!enablePullToRefresh) {
@@ -157,4 +160,30 @@ fun <T> EmptyDataStateUi(
         is DataState.Success -> content(dataState.data)
         else -> otherwise()
     }
+}
+
+@Composable
+fun <T>AnimatedDataStateUi(
+    modifier: Modifier = Modifier,
+    dataState: DataState<T>,
+    loadingContent: @Composable () -> Unit = @Composable {
+        CircularProgressIndicator()
+    },
+    failureContent: @Composable () -> Unit = @Composable {
+        Text(text = "Failed to load data")
+    },
+    successContent: @Composable (T) -> Unit
+) {
+    AnimatedContent(
+        targetState = dataState,
+        modifier = modifier,
+        label = "AnimatedDataStateUi"
+    ) { state ->
+        when (state) {
+            is DataState.Loading -> loadingContent()
+            is DataState.Failure -> failureContent()
+            is DataState.Success -> successContent(state.data)
+        }
+    }
+
 }

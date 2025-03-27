@@ -2,6 +2,10 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content
 
 enum class MetisFilter {
     /**
+     * Disabled filter.
+     */
+    ALL,
+    /**
      * Filter for the courses this user has created.
      */
     CREATED_BY_CLIENT,
@@ -12,5 +16,9 @@ enum class MetisFilter {
     /**
      * Filter for posts which have not been resolved yet
      */
-    UNRESOLVED
+    UNRESOLVED,
+    /**
+     * Filter for posts which are pinned
+     */
+    PINNED
 }

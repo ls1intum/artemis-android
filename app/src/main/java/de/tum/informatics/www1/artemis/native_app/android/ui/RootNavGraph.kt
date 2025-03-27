@@ -136,7 +136,6 @@ fun NavGraphBuilder.rootNavGraph(
     )
 
     exercise(
-        navController = navController,
         onNavigateBack = navController::navigateUp,
         onParticipateInQuiz = onParticipateInQuiz,
         onClickViewQuizResults = onClickViewQuizResults

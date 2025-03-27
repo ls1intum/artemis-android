@@ -34,6 +34,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 
 internal const val TEST_TAG_PIN_POST = "TEST_TAG_PIN_POST"
 internal const val TEST_TAG_SAVE_POST = "TEST_TAG_SAVE_POST"
+internal const val TEST_TAG_FORWARD_POST = "TEST_TAG_FORWARD_POST"
 internal const val TEST_TAG_POST_EDIT = "TEST_TAG_POST_EDIT"
 internal const val  TEST_TAG_POST_DELETE = "TEST_TAG_POST_DELETE"
 
@@ -79,9 +80,9 @@ private fun ActionBar(
         modifier = Modifier.horizontalScroll(rememberScrollState()),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        NullableActionIconButton(
-            onClick = postActions.onCopyText,
-            icon = Icons.Default.ContentCopy,
+        CopyForwardActionGroup(
+            onCopyText = postActions.onCopyText,
+            requestForwardPost = postActions.onForwardPost
         )
 
         PinSaveActionGroup(
@@ -121,6 +122,23 @@ private fun PinSaveActionGroup(
         modifier = Modifier.testTag(TEST_TAG_SAVE_POST),
         onClick = requestSavePost,
         icon = saveIcon,
+    )
+}
+
+@Composable
+private fun CopyForwardActionGroup(
+    onCopyText: () -> Unit,
+    requestForwardPost: (() -> Unit)?
+) {
+    NullableActionIconButton(
+        onClick = onCopyText,
+        icon = Icons.Default.ContentCopy,
+    )
+
+    NullableActionIconButton(
+        modifier = Modifier.testTag(TEST_TAG_FORWARD_POST),
+        onClick = requestForwardPost,
+        icon = ImageVector.vectorResource(R.drawable.forward),
     )
 }
 

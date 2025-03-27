@@ -38,7 +38,8 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.isInitializationAfterDueDate
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
-import de.tum.informatics.www1.artemis.native_app.core.ui.collectAsState
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.collectArtemisContextAsState
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.ArtemisWebView
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
@@ -54,7 +55,7 @@ internal fun TextExerciseParticipationScreen(
     exercise: Exercise,
     onNavigateUp: () -> Unit
 ) {
-    val artemisContext by viewModel.artemisContextProvider.collectAsState()
+    val artemisContext by LocalArtemisContextProvider.current.collectArtemisContextAsState()
 
     val courseId: Long? = exercise.course?.id
     val exerciseId: Long = exercise.id ?: 0L

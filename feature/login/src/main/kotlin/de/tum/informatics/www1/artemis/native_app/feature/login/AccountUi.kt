@@ -78,12 +78,16 @@ import java.io.IOException
 private sealed interface NestedDestination {
     @Serializable
     data object CustomInstanceSelection : NestedDestination
+
     @Serializable
     data object Home : NestedDestination
+
     @Serializable
     data object Login : NestedDestination
+
     @Serializable
     data object Register : NestedDestination
+
     @Serializable
     data class Saml2Login(val rememberMe: Boolean) : NestedDestination
 }
@@ -233,7 +237,7 @@ internal fun LoginUiScreen(
                     showInstanceSelectionBottomSheet = false
                 },
                 onSelectArtemisInstance = {
-                        serverConfigurationService.updateServerUrl(it)
+                    serverConfigurationService.updateServerUrl(it)
                 },
                 onRequestOpenCustomInstanceSelection = {
                     nestedNavController.navigate(
@@ -473,18 +477,17 @@ internal fun ArtemisHeader(
     ) {
         Text(
             text = stringResource(id = R.string.account_screen_title),
-            fontSize = 32.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
+            style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
+            textAlign = TextAlign.Center,
+            modifier = modifier.padding(horizontal = 16.dp)
         )
 
         Text(
             text = stringResource(id = R.string.account_screen_subtitle),
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Normal,
-            textAlign = TextAlign.Center
+            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Normal),
+            textAlign = TextAlign.Center,
+            modifier = modifier.padding(horizontal = 32.dp)
         )
-
 
         if (BuildConfig.DEBUG || selectedInstance.type == ArtemisInstances.ArtemisInstance.Type.CUSTOM) {
             Spacer(Modifier.height(8.dp))
