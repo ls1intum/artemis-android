@@ -101,9 +101,15 @@ fun EmojiPicker(
                 items(
                     count = filteredEmojis.size
                 ) { index ->
+                    val emoji = filteredEmojis[index]
+
                     EmojiLineItem(
-                        modifier = Modifier.fillMaxWidth(),
-                        emoji = filteredEmojis[index]
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                onEmojiClicked(emoji)
+                            },
+                        emoji = emoji
                     )
                 }
             }
