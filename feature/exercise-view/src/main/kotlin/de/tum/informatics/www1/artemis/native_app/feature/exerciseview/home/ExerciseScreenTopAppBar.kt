@@ -33,14 +33,13 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.getExerciseTy
 internal fun ExerciseScreenTopAppBar(
     modifier: Modifier,
     exerciseDataState: DataState<Exercise>,
-    onNavigateBack: () -> Unit
 ) {
     Column(modifier = modifier) {
         ArtemisTopAppBar(
             modifier = Modifier.fillMaxWidth(),
             title = { TitleText(modifier = modifier, maxLines = 1, exerciseDataState = exerciseDataState) },
             navigationIcon = {
-                NavigationBackButton(onNavigateBack = onNavigateBack)
+                NavigationBackButton()
             }
         )
     }
