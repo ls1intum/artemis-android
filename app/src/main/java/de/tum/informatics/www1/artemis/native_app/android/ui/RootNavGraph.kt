@@ -168,9 +168,7 @@ fun NavGraphBuilder.rootNavGraph(
         }
     )
 
-    quizResults(
-        onRequestLeaveQuizResults = navController::navigateUp
-    )
+    quizResults()
 
     settingsNavGraph(
         navController = navController,

@@ -66,8 +66,7 @@ fun NavGraphBuilder.settingsNavGraph(
 
         animatedComposable<Settings.AccountDetails> {
             AccountSettingsScreen(
-                modifier = Modifier.fillMaxSize(),
-                onNavigateUp = navController::navigateUp
+                modifier = Modifier.fillMaxSize()
             )
         }
     }
