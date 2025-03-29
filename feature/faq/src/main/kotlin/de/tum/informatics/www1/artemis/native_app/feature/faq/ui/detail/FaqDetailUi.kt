@@ -97,6 +97,10 @@ fun FaqDetailUi(
             ArtemisTopAppBar(
                 title = {},
                 navigationIcon = { NavigationBackButton() }
+                title = {
+                    Text(stringResource(R.string.faq_details_title))
+                },
+                navigationIcon = { NavigationBackButton() }
             )
         }
     ) { paddingValues ->
