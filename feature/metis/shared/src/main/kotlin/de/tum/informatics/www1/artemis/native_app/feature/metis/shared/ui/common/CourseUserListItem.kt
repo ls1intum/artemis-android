@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.common
+package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.common
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ListItem
@@ -11,7 +11,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.ICourseUser
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.CourseUserRoleBadgesRow
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureWithDialog
 
 // From https://m3.material.io/components/lists/specs#d156b3f2-6763-4fde-ba6f-0f088ce5a4e4

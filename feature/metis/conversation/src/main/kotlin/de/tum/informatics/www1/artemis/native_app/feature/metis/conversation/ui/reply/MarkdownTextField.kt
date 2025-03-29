@@ -1,18 +1,22 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply
 
+import android.annotation.SuppressLint
 import android.net.Uri
 import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -21,16 +25,17 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ListAlt
-import androidx.compose.material.icons.filled.AddReaction
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.School
-import androidx.compose.material.icons.filled.Tag
+import androidx.compose.material.icons.outlined.AddReaction
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
+import androidx.compose.material3.InputChipDefaults
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -45,6 +50,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
@@ -72,33 +78,37 @@ const val TEST_TAG_MARKDOWN_TEXTFIELD = "TEST_TAG_MARKDOWN_TEXTFIELD"
 val textFormattingOptionsHiddenOffsetY = 200.dp
 
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 internal fun MarkdownTextField(
     modifier: Modifier,
     textFieldValue: TextFieldValue,
     hintText: AnnotatedString,
+    alignOptionsAtBottom: Boolean = false,
+    isEmojiPickerEnabled: Boolean = true,
+    isTextOptionsInitiallyVisible: Boolean = true,
+    backgroundColor: Color,
+    textOptionsColor: Color = MaterialTheme.colorScheme.surfaceContainer,
     filePickerLauncher: ManagedActivityResultLauncher<String, Uri?>,
     focusRequester: FocusRequester = remember { FocusRequester() },
     textFieldTrailingContent: @Composable RowScope.() -> Unit = {},
+    textOptionsTopContent: @Composable ColumnScope.() -> Unit = {},
     onFocusAcquired: () -> Unit = {},
     onFocusLost: () -> Unit = {},
     onTextChanged: (TextFieldValue) -> Unit,
     showAutoCompletePopup: ((AutoCompleteType) -> Unit)? = null,
-    formattingOptionButtons: @Composable () -> Unit = {},
+    formattingOptionButtons: @Composable (Color) -> Unit = {},
 ) {
     val text = textFieldValue.text
     var selectedType by remember { mutableStateOf(ViewType.TEXT) }
     var showEmojiPicker by remember { mutableStateOf(false) }
-
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        // weight(1f) is needed for the row to ensure that the TextFieldOptions stay visible when the BasicMarkdownTextField grows.
-        // fill has to be disabled for the UI tests to work properly.
+    var isTextOptionsVisible by remember { mutableStateOf(isTextOptionsInitiallyVisible) }
+    // weight(1f) is needed for the row to ensure that the TextFieldOptions stay visible when the BasicMarkdownTextField grows.
+    // fill has to be disabled for the UI tests to work properly.
+    val content: @Composable ColumnScope.(applyWeight: Boolean) -> Unit = { applyWeight ->
         Row(
             modifier = Modifier
-                .weight(1f, false)
+                .then(if (applyWeight) Modifier.weight(1f, false) else Modifier)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -110,9 +120,16 @@ internal fun MarkdownTextField(
                         textFieldValue = textFieldValue,
                         onTextChanged = onTextChanged,
                         hintText = hintText,
+                        backgroundColor = backgroundColor,
                         focusRequester = focusRequester,
-                        onFocusAcquired = onFocusAcquired,
-                        onFocusLost = onFocusLost
+                        onFocusAcquired = {
+                            onFocusAcquired()
+                            isTextOptionsVisible = true
+                        },
+                        onFocusLost = {
+                            onFocusLost()
+                            isTextOptionsVisible = false
+                        }
                     )
                 }
 
@@ -126,11 +143,16 @@ internal fun MarkdownTextField(
 
             textFieldTrailingContent()
         }
+    }
 
-
+val options: @Composable (applyPadding: Boolean) -> Unit = { applyPadding ->
         TextFieldOptions(
+            modifier = Modifier.then(if (applyPadding) Modifier.padding(top = 4.dp) else Modifier),
             selectedType = selectedType,
             isPreviewEnabled = text.isNotBlank(),
+            isEmojiPickerEnabled = isEmojiPickerEnabled,
+            backgroundColor = backgroundColor,
+            containerColor = textOptionsColor,
             showFormattingOptions = selectedType == ViewType.TEXT,
             onChangeViewType = { selectedType = it },
             formattingOptionButtons = formattingOptionButtons,
@@ -138,8 +160,28 @@ internal fun MarkdownTextField(
             onOpenImagePicker = { filePickerLauncher.launch("image/*") },
             onOpenFilePicker = { filePickerLauncher.launch("*/*") },
             onOpenEmojiPicker = { showEmojiPicker = true }
-        )
+            )
     }
+
+    if (alignOptionsAtBottom) {
+        BoxedMarkdownTextField(
+            modifier = modifier,
+            backgroundColor = backgroundColor,
+            isTextOptionsVisible = isTextOptionsVisible,
+            content = content,
+            textOptionsTopContent = textOptionsTopContent,
+            options = options
+        )
+        return
+    }
+
+    ChatMarkdownTextField(
+        modifier = modifier,
+        content = content,
+        textOptionsTopContent = textOptionsTopContent,
+        isTextOptionsVisible = isTextOptionsVisible,
+        options = options
+    )
 
     if (showEmojiPicker) {
         EmojiPickerModalBottomSheet(
@@ -155,11 +197,76 @@ internal fun MarkdownTextField(
 }
 
 @Composable
+private fun BoxedMarkdownTextField(
+    modifier: Modifier,
+    backgroundColor: Color,
+    isTextOptionsVisible: Boolean,
+    content: @Composable ColumnScope.(applyWeight: Boolean) -> Unit,
+    textOptionsTopContent: @Composable ColumnScope.() -> Unit,
+    options: @Composable (Boolean) -> Unit,
+) {
+    Box(
+        modifier = modifier.imePadding()
+    ) {
+        val scrollState = rememberScrollState()
+        val optionsHeight = if (isTextOptionsVisible) 56.dp else 0.dp
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(scrollState)
+                .padding(bottom = optionsHeight)
+        ) {
+            content(false)
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                content = textOptionsTopContent
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .background(backgroundColor)
+                .fillMaxWidth()
+        ) {
+            AnimatedVisibility(isTextOptionsVisible) {
+                options(true)
+            }
+        }
+    }
+}
+
+@Composable
+private fun ChatMarkdownTextField(
+    modifier: Modifier,
+    content: @Composable ColumnScope.(applyWeight: Boolean) -> Unit,
+    textOptionsTopContent: @Composable ColumnScope.() -> Unit,
+    isTextOptionsVisible: Boolean = true,
+    options: @Composable (Boolean) -> Unit,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        content(true)
+        textOptionsTopContent()
+        AnimatedVisibility(isTextOptionsVisible) {
+            options(false)
+        }
+    }
+}
+
+@Composable
 fun BasicMarkdownTextField(
     modifier: Modifier = Modifier,
     textFieldValue: TextFieldValue,
     hintText: AnnotatedString,
     focusRequester: FocusRequester,
+    backgroundColor: Color,
     maxVisibleLines: Int = 8,
     onTextChanged: (TextFieldValue) -> Unit,
     onFocusAcquired: () -> Unit = {},
@@ -199,7 +306,7 @@ fun BasicMarkdownTextField(
             modifier = modifier
                 .fillMaxWidth()
                 .testTag(TEST_TAG_MARKDOWN_TEXTFIELD),
-            backgroundColor = MaterialTheme.colorScheme.background,
+            backgroundColor = backgroundColor,
             value = textFieldValue,
             onValueChange = onTextChanged,
             focusRequester = focusRequester,
@@ -223,10 +330,13 @@ private fun TextFieldOptions(
     modifier: Modifier = Modifier,
     selectedType: ViewType,
     isPreviewEnabled: Boolean,
+    isEmojiPickerEnabled: Boolean,
+    backgroundColor: Color,
+    containerColor: Color,
     showFormattingOptions: Boolean,
     onChangeViewType: (ViewType) -> Unit,
     showAutoCompletePopup: ((AutoCompleteType) -> Unit)? = null,
-    formattingOptionButtons: @Composable () -> Unit = {},
+    formattingOptionButtons: @Composable (Color) -> Unit = {},
     onOpenFilePicker: () -> Unit = {},
     onOpenImagePicker: () -> Unit = {},
     onOpenEmojiPicker: () -> Unit = {}
@@ -235,6 +345,10 @@ private fun TextFieldOptions(
     val textFormattingOptionsOffsetY by animateDpAsState(targetValue = if (isTextFormattingExpanded) 0.dp else textFormattingOptionsHiddenOffsetY)
     var isTaggingDropdownExpanded by remember { mutableStateOf(false) }
 
+    val textOptionsFieldOptionsModifier = Modifier
+        .clip(CircleShape)
+        .background(containerColor)
+
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -242,8 +356,7 @@ private fun TextFieldOptions(
     ) {
         if (showFormattingOptions) {
             Box(
-                modifier = Modifier
-                    .weight(1f),
+                modifier = Modifier.weight(1f),
                 contentAlignment = Alignment.CenterStart
             ) {
                 Row(
@@ -251,31 +364,42 @@ private fun TextFieldOptions(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     TextFieldOptionsIconButton(
+                        modifier = textOptionsFieldOptionsModifier,
                         painter = painterResource(id = R.drawable.image),
+                        containerColor = containerColor
                     ) {
                         onOpenImagePicker()
                     }
 
                     TextFieldOptionsIconButton(
-                        painter = painterResource(id = R.drawable.attachment)
+                        modifier = textOptionsFieldOptionsModifier,
+                        painter = painterResource(id = R.drawable.attachment),
+                        containerColor = containerColor
                     ) {
                         onOpenFilePicker()
                     }
 
                     TextFieldOptionsIconButton(
-                        painter = painterResource(id = R.drawable.format_text)
+                        modifier = textOptionsFieldOptionsModifier,
+                        painter = painterResource(id = R.drawable.format_text),
+                        containerColor = containerColor
                     ) {
                         isTextFormattingExpanded = !isTextFormattingExpanded
                     }
 
-                    TextFieldOptionsIconButton(
-                        painter = Icons.Default.AddReaction.toPainter()
-                    ) {
-                        onOpenEmojiPicker()
+                    if (isEmojiPickerEnabled) {
+                        TextFieldOptionsIconButton(
+                            painter = Icons.Outlined.AddReaction.toPainter(),
+                            containerColor = containerColor
+                        ) {
+                            onOpenEmojiPicker()
+                        }
                     }
 
                     TextFieldOptionsIconButton(
-                        painter = painterResource(id = R.drawable.tag)
+                        modifier = Modifier,
+                        painter = painterResource(id = R.drawable.tag),
+                        containerColor = containerColor
                     ) {
                         isTaggingDropdownExpanded = !isTaggingDropdownExpanded
                     }
@@ -288,9 +412,9 @@ private fun TextFieldOptions(
                 )
 
                 Box(
-                    modifier = Modifier
+                    modifier = modifier
                         .offset(y = textFormattingOptionsOffsetY)
-                        .background(MaterialTheme.colorScheme.background)
+                        .background(backgroundColor)
                 ) {
                     Row(
                         modifier = Modifier
@@ -299,12 +423,13 @@ private fun TextFieldOptions(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         TextFieldOptionsIconButton(
-                            imageVector = Icons.Default.Clear
+                            imageVector = Icons.Default.Clear,
+                            containerColor = containerColor
                         ) {
                             isTextFormattingExpanded = false
                         }
 
-                        formattingOptionButtons()
+                        formattingOptionButtons(containerColor)
                     }
                 }
             }
@@ -313,6 +438,7 @@ private fun TextFieldOptions(
         }
 
         PreviewEditRow(
+            modifier = modifier,
             selectedType = selectedType,
             isPreviewEnabled = isPreviewEnabled,
             onChangeViewType = onChangeViewType
@@ -325,6 +451,7 @@ private fun TextFieldOptionsIconButton(
     modifier: Modifier = Modifier,
     painter: Painter? = null,
     imageVector: ImageVector? = null,
+    containerColor: Color,
     onClick: () -> Unit
 ) {
     require(painter != null || imageVector != null)
@@ -333,7 +460,7 @@ private fun TextFieldOptionsIconButton(
         modifier = modifier
             .clip(CircleShape)
             .size(32.dp)
-            .background(MaterialTheme.colorScheme.surfaceContainer),
+            .background(containerColor),
         onClick = onClick
     ) {
         painter?.let {
@@ -384,7 +511,7 @@ private fun TaggingDropdownMenu(
         )
 
         TaggingDropDownMenuItem(
-            iconPainter = Icons.Default.Tag.toPainter(),
+            iconPainter = Icons.Default.Numbers.toPainter(),
             text = stringResource(R.string.reply_format_mention_channels),
             onClick = { onClick(AutoCompleteType.CHANNELS) }
         )
@@ -449,7 +576,12 @@ private fun PreviewEditRow(
             onClick = { onChangeViewType(ViewType.TEXT) },
             label = {
                 Text(text = stringResource(id = R.string.markdown_textfield_tab_text))
-            }
+            },
+            border = InputChipDefaults.inputChipBorder(
+                borderColor = MaterialTheme.colorScheme.outlineVariant,
+                enabled = true,
+                selected = selectedType == ViewType.TEXT,
+            )
         )
 
         InputChip(
@@ -458,7 +590,12 @@ private fun PreviewEditRow(
             enabled = isPreviewEnabled,
             label = {
                 Text(text = stringResource(id = R.string.markdown_textfield_tab_preview))
-            }
+            },
+            border = InputChipDefaults.inputChipBorder(
+                borderColor = MaterialTheme.colorScheme.outlineVariant,
+                enabled = isPreviewEnabled,
+                selected = selectedType == ViewType.PREVIEW,
+            )
         )
     }
 }

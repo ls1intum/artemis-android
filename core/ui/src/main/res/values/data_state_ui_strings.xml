@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="basic_data_state_ui_loading">Loading ...</string>
+    <string name="basic_data_state_ui_failure">Something went wrong</string>
+    <string name="basic_data_state_ui_retry">Retry</string>
+</resources>

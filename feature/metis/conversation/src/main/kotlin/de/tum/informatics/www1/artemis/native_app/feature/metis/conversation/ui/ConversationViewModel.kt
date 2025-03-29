@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.core.content.ContextCompat.getString
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -41,6 +42,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.sha
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.post.util.LinkPreviewUtil
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ConversationChatListUseCase
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.ForwardMessageUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompletionUseCase
@@ -196,6 +198,18 @@ internal open class ConversationViewModel(
         networkStatusProvider = networkStatusProvider,
         course = course,
         coroutineContext = coroutineContext
+    )
+
+    val forwardMessageUseCase = ForwardMessageUseCase(
+        courseId = courseId,
+        conversationService = conversationService,
+        accountService = accountService,
+        createPostService = createPostService,
+        serverConfigurationService = serverConfigurationService,
+        networkStatusProvider = networkStatusProvider,
+        savedStateHandle = SavedStateHandle(),
+        coroutineContext = coroutineContext,
+        onFileSelected = ::onFileSelected
     )
 
     /**
@@ -828,5 +842,4 @@ internal open class ConversationViewModel(
             cursor.getString(nameIndex)
         } ?: uri.lastPathSegment.orEmpty()
     }
-
 }

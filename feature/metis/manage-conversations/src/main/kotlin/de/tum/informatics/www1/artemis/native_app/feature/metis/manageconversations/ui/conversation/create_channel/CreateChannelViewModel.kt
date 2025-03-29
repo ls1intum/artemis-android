@@ -31,19 +31,29 @@ internal class CreateChannelViewModel(
     private companion object {
         private const val KEY_NAME = "name"
         private const val KEY_DESCRIPTION = "description"
-        private const val KEY_IS_PRIVATE = "is_private"
+        private const val KEY_VISIBILITY = "is_public"
         private const val KEY_IS_ANNOUNCEMENT = "announcement"
-        private const val KEY_IS_COURSE_WIDE = "course_wide"
+        private const val KEY_SCOPE = "course_wide"
+    }
+
+    enum class Scope {
+        COURSEWIDE,
+        SELECTIVE,
+    }
+
+    enum class Visibility {
+        PUBLIC,
+        PRIVATE
     }
 
     val name: StateFlow<String> = savedStateHandle.getStateFlow(KEY_NAME, "")
     val description: StateFlow<String> = savedStateHandle.getStateFlow(KEY_DESCRIPTION, "")
 
-    val isPrivate: StateFlow<Boolean> = savedStateHandle.getStateFlow(KEY_IS_PRIVATE, false)
+    val visibility: StateFlow<Visibility> = savedStateHandle.getStateFlow(KEY_VISIBILITY, Visibility.PUBLIC)
     val isAnnouncement: StateFlow<Boolean> =
         savedStateHandle.getStateFlow(KEY_IS_ANNOUNCEMENT, false)
-    val isCourseWide: StateFlow<Boolean> =
-        savedStateHandle.getStateFlow(KEY_IS_COURSE_WIDE, false)
+    val scope: StateFlow<Scope> =
+        savedStateHandle.getStateFlow(KEY_SCOPE, Scope.COURSEWIDE)
 
     val isNameIllegal: StateFlow<Boolean> = name
         .mapIsChannelNameIllegal()
@@ -68,9 +78,9 @@ internal class CreateChannelViewModel(
                 courseId = courseId,
                 name = name.value,
                 description = description.value,
-                isPublic = !isPrivate.value,
+                isPublic = visibility.value == Visibility.PUBLIC,
                 isAnnouncement = isAnnouncement.value,
-                isCourseWide = isCourseWide.value,
+                isCourseWide = scope.value == Scope.COURSEWIDE,
                 authToken = authToken,
                 serverUrl = serverUrl
             ).orNull()
@@ -87,15 +97,15 @@ internal class CreateChannelViewModel(
         savedStateHandle[KEY_DESCRIPTION] = description
     }
 
-    fun updatePublic(isPrivate: Boolean) {
-        savedStateHandle[KEY_IS_PRIVATE] = isPrivate
+    fun updateVisibility(visibility: Visibility) {
+        savedStateHandle[KEY_VISIBILITY] = visibility
     }
 
     fun updateAnnouncement(isAnnouncement: Boolean) {
         savedStateHandle[KEY_IS_ANNOUNCEMENT] = isAnnouncement
     }
 
-    fun updateCourseWide(isCourseWide: Boolean) {
-        savedStateHandle[KEY_IS_COURSE_WIDE] = isCourseWide
+    fun updateScope(scope: Scope) {
+        savedStateHandle[KEY_SCOPE] = scope
     }
 }

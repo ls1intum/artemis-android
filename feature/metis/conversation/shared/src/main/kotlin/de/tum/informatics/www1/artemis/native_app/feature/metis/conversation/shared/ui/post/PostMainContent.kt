@@ -51,8 +51,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.sha
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.UserRoleBadge
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.common.UserRoleBadge
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureWithDialog
 import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.coroutines.delay
@@ -114,6 +115,17 @@ fun PostItemMainContent(
                 }
 
                 if (post?.content?.isNotEmpty() == true) {
+                    (post as? IStandalonePost)?.takeIf { it.title?.isNotBlank() == true }
+                        ?.let { standalonePost ->
+                            standalonePost.title?.let {
+                                Text(
+                                    text = it,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                )
+                            }
+                        }
+
                     MarkdownText(
                         markdown = remember(post.content, isPlaceholder) {
                             if (isPlaceholder) {

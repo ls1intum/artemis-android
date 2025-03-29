@@ -47,6 +47,7 @@ internal fun ConversationOtherSettings(
         if (conversation !is ChannelChat || !conversation.isCreator) {
             OutlinedButton(
                 modifier = buttonModifier,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                 onClick = onLeaveConversation
             ) {
                 Text(text = stringResource(id = R.string.conversation_settings_section_other_leave_conversation))
@@ -65,6 +66,7 @@ internal fun ConversationOtherSettings(
             if (hasChannelModerationRights) {
                 OutlinedButton(
                     modifier = buttonModifier,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                     onClick = { displayArchiveChannelDialog = true }
                 ) {
                     Text(

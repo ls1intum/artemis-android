@@ -71,8 +71,8 @@ class ConversationChatListUseCase(
         private const val PAGE_SIZE = 20
     }
 
-    private val _filter = MutableStateFlow<List<MetisFilter>>(emptyList())
-    val filter: StateFlow<List<MetisFilter>> = _filter
+    private val _filter = MutableStateFlow(MetisFilter.ALL)
+    val filter: StateFlow<MetisFilter> = _filter
 
     private val _query = MutableStateFlow<String?>(null)
     val query: StateFlow<String> = _query
@@ -142,7 +142,8 @@ class ConversationChatListUseCase(
             )
 
             val isSearchActive = !pagingDataInput.standalonePostsContext.query.isNullOrBlank()
-            val pagerFlow = if (!isSearchActive) {
+            val isFilteringActive = pagingDataInput.standalonePostsContext.filter != MetisFilter.ALL
+            val pagerFlow = if (!isSearchActive && !isFilteringActive) {
                 Pager(
                     config = config,
                     remoteMediator = MetisRemoteMediator(
@@ -332,6 +333,10 @@ class ConversationChatListUseCase(
 
     fun updateQuery(new: String) {
         _query.value = new.ifEmpty { null }
+    }
+
+    fun updateFilter(new: MetisFilter) {
+        _filter.value = new
     }
 
     private fun insertDateSeparators(pagingList: PagingData<ChatListItem.PostItem.IndexedItem>) =

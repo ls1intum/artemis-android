@@ -32,6 +32,7 @@
                 <data android:scheme="https"/>
                 <data android:host="artemis.ase.in.tum.de"/>
                 <data android:host="artemis.cit.tum.de"/>
+                <data android:host="artemis.tum.de"/>
                 <data android:host="artemis.codeability.uibk.ac.at"/>
                 <data android:host="artemis.praktomat.cs.kit.edu"/>
                 <data android:host="artemis-test0.artemis.in.tum.de"/>

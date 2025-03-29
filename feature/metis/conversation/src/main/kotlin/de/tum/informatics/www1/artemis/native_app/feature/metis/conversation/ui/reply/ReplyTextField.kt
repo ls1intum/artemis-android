@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Cancel
@@ -44,6 +45,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
@@ -91,6 +93,10 @@ internal fun ReplyTextField(
     onFileSelected: (Uri) -> Unit,
     updateFailureState: (MetisModificationFailure?) -> Unit,
     conversationName: String,
+    surfaceShape: Shape = MaterialTheme.shapes.large.copy(
+        bottomEnd = CornerSize(0.dp),
+        bottomStart = CornerSize(0.dp)
+    ), // This parameter is needed to allow tests to override the shape, as there have been issues using custom shapes
     emojiService: EmojiService,
 ) {
     val replyState: ReplyState = rememberReplyState(replyMode, updateFailureState)
@@ -111,7 +117,8 @@ internal fun ReplyTextField(
                 )
             ),
             color = MaterialTheme.colorScheme.background,
-            shape = MaterialTheme.shapes.large
+            shape = surfaceShape,
+            shadowElevation = Spacings.AppBarElevation
         ) {
             Box(
                 modifier = Modifier
@@ -123,7 +130,7 @@ internal fun ReplyTextField(
                     replyMode = replyMode,
                     requestedAutoCompleteType = requestedAutoCompleteType,
                     resetRequestedAutoCompleteType = { requestedAutoCompleteType = null }
-            )
+                )
 
                 AnimatedContent(
                     modifier = Modifier
@@ -173,7 +180,7 @@ internal fun ReplyTextField(
 }
 
 @Composable
-private fun AutoCompletionDialog(
+fun AutoCompletionDialog(
     replyMode: ReplyMode,
     requestedAutoCompleteType: AutoCompleteType?,
     resetRequestedAutoCompleteType: () -> Unit
@@ -214,7 +221,6 @@ private fun AutoCompletionDialog(
         modifier = Modifier
             .onSizeChanged {
                 boxWidth = it.width
-                println("boxWidth: $boxWidth")
             }
             .onGloballyPositioned { coordinates ->
                 val boxRootTopLeft = coordinates.localToRoot(Offset.Zero)
@@ -331,6 +337,7 @@ private fun CreateReplyUi(
                 .testTag(TEST_TAG_REPLY_TEXT_FIELD),
             textFieldValue = currentTextFieldValue,
             hintText = hintText,
+            backgroundColor = MaterialTheme.colorScheme.background,
             filePickerLauncher = filePickerLauncher,
             onTextChanged = { newValue ->
                 val finalValue = continueListIfApplicable(prevReplyContent, newValue)
@@ -370,8 +377,9 @@ private fun CreateReplyUi(
                     )
                 }
             },
-            formattingOptionButtons = {
+            formattingOptionButtons = { containerColor ->
                 FormattingOptions(
+                    containerColor = containerColor,
                     applyMarkdownStyle = {
                         val newTextFieldValue = MarkdownStyleUtil.apply(
                             style = it,
@@ -386,7 +394,7 @@ private fun CreateReplyUi(
 }
 
 @Composable
-private fun rememberFilePickerLauncher(
+fun rememberFilePickerLauncher(
     context: Context,
     onFileSelected: (Uri) -> Unit
 ) = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->

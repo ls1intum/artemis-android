@@ -370,7 +370,7 @@ private fun FilterRow(
                         selectedContainerColor = filter.selectedColor.copy(alpha = filterChipColorAlpha)
                     ),
                     border = FilterChipDefaults.filterChipBorder(
-                        borderColor = MaterialTheme.colorScheme.surfaceVariant,
+                        borderColor = MaterialTheme.colorScheme.outlineVariant,
                         selectedBorderColor = filter.selectedColor.copy(alpha = filterChipColorAlpha),
                         enabled = true,
                         selected = selected,

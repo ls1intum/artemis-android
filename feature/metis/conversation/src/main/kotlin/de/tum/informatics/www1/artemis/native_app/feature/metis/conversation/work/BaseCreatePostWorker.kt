@@ -1,10 +1,11 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.work
 
 import android.content.Context
-import androidx.compose.runtime.clearCompositionErrors
 import androidx.work.CoroutineWorker
 import androidx.work.Data
 import androidx.work.WorkerParameters
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.post.util.ForwardedSourcePostContent
+import kotlinx.serialization.json.Json
 
 abstract class BaseCreatePostWorker(appContext: Context, workerParams: WorkerParameters) :
     CoroutineWorker(appContext, workerParams) {
@@ -14,6 +15,7 @@ abstract class BaseCreatePostWorker(appContext: Context, workerParams: WorkerPar
         const val KEY_COURSE_ID = "course_id"
         const val KEY_CONVERSATION_ID = "conversation_id"
         const val KEY_CONTENT = "content"
+        const val KEY_FORWARDED_SOURCE_POST_LIST = "forwarded_source_post_list"
         const val KEY_PARENT_POST_ID = "parent_post_id"
 
         /**
@@ -27,14 +29,18 @@ abstract class BaseCreatePostWorker(appContext: Context, workerParams: WorkerPar
             clientSidePostId: String,
             content: String,
             postType: PostType,
+            forwardedSourcePostList: List<ForwardedSourcePostContent> = emptyList(),
             parentPostId: Long?
         ): Data {
+            val encodedSourcePostsList = Json.encodeToString(forwardedSourcePostList)
+
             return Data.Builder()
                 .putLong(KEY_COURSE_ID, courseId)
                 .putLong(KEY_CONVERSATION_ID, conversationId)
                 .putString(KEY_CLIENT_SIDE_POST_ID, clientSidePostId)
                 .putString(KEY_CONTENT, content)
                 .putString(KEY_POST_TYPE, postType.name)
+                .putString(KEY_FORWARDED_SOURCE_POST_LIST, encodedSourcePostsList)
                 .apply {
                     if (parentPostId != null) putLong(KEY_PARENT_POST_ID, parentPostId)
                 }
@@ -53,6 +59,9 @@ abstract class BaseCreatePostWorker(appContext: Context, workerParams: WorkerPar
             inputData.getString(KEY_POST_TYPE) ?: return Result.failure()
         )
 
+        val decodedSourcePostList = inputData.getString(KEY_FORWARDED_SOURCE_POST_LIST) ?: "[]"
+        val sourcePosts = Json.decodeFromString<List<ForwardedSourcePostContent>>(decodedSourcePostList)
+
         val parentPostId = if (KEY_PARENT_POST_ID in inputData.keyValueMap)
             inputData.getLong(KEY_PARENT_POST_ID, 0)
         else null
@@ -66,6 +75,7 @@ abstract class BaseCreatePostWorker(appContext: Context, workerParams: WorkerPar
             clientSidePostId = clientSidePostId,
             content = content,
             postType = postType,
+            forwardedSourcePostList = sourcePosts,
             parentPostId = parentPostId
         )
     }
@@ -76,6 +86,7 @@ abstract class BaseCreatePostWorker(appContext: Context, workerParams: WorkerPar
         clientSidePostId: String,
         content: String,
         postType: PostType,
+        forwardedSourcePostList: List<ForwardedSourcePostContent> = emptyList(),
         parentPostId: Long?
     ): Result
 
