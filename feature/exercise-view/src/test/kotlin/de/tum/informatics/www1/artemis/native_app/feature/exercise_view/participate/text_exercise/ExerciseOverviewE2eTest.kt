@@ -69,7 +69,6 @@ class ExerciseOverviewE2eTest : BaseExerciseTest() {
             ExerciseScreen(
                 modifier = Modifier.fillMaxSize(),
                 viewModel = viewModel,
-                onNavigateBack = { },
                 onViewResult = { },
                 onViewTextExerciseParticipationScreen = onViewTextExerciseParticipationScreen,
                 onParticipateInQuiz = { _, _ -> },
