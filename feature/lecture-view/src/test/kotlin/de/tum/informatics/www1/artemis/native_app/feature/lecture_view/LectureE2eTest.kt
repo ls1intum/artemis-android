@@ -252,7 +252,6 @@ class LectureE2eTest : BaseComposeTest() {
                 lectureId = lecture.id!!,
                 viewModel = viewModel,
                 navController = rememberNavController(),
-                onNavigateBack = { },
                 onViewExercise = {},
                 onNavigateToExerciseResultView = {},
                 onNavigateToTextExerciseParticipation = { _, _ -> },
