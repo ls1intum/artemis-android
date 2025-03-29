@@ -31,15 +31,18 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.TimeFrame
-import de.tum.informatics.www1.artemis.native_app.feature.courseview.groupByWeek
+import de.tum.informatics.www1.artemis.native_app.feature.courseview.TimeFrameUtils
+import de.tum.informatics.www1.artemis.native_app.feature.courseview.TimeFrameUtils.toRangeString
 import kotlinx.parcelize.Parcelize
+
+const val MAX_NUMBER_OF_ITEMS_WITHOUT_SUB_LABEL = 5
 
 @Composable
 internal fun <T> TimeFrameItemsLazyColumn(
     modifier: Modifier,
     timeFrameGroup: List<TimeFrame<T>>,
     verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(8.dp),
-    forceExpand: Set<String>? = null,
+    query: String,
     getItemId: T.() -> Long,
     itemContent: @Composable (Modifier, T) -> Unit
 ) {
@@ -59,9 +62,23 @@ internal fun <T> TimeFrameItemsLazyColumn(
         }
     }
 
-    LaunchedEffect(forceExpand, timeFrameGroup) {
-        forceExpand?.forEach { key ->
-            timeFrameGroupExpandedState[key] = true
+    LaunchedEffect(query, timeFrameGroup) {
+        if (query.isNotBlank()) {
+            timeFrameGroup.forEach { frame ->
+                if (frame.items.isNotEmpty()) {
+                    timeFrameGroupExpandedState[frame.key] = true
+                }
+            }
+        } else {
+            timeFrameGroupExpandedState.forEach { (key, _) ->
+                val frame = timeFrameGroup.find { it.key == key } ?: return@forEach
+                val defaultExpanded = when (frame) {
+                    is TimeFrame.Current -> true
+                    is TimeFrame.DueSoon -> true
+                    else -> false
+                }
+                timeFrameGroupExpandedState[key] = defaultExpanded
+            }
         }
     }
 
@@ -87,37 +104,39 @@ internal fun <T> TimeFrameItemsLazyColumn(
                 )
             }
 
-            if (isExpanded) {
-                if (group !is TimeFrame.NoDate && group.items.size > 5) {
-                    val weeklyGroups = groupByWeek(
-                        items = group.items
-                    )
+            if (!isExpanded) {
+                return@forEach
+            }
 
-                    weeklyGroups.forEach { weeklyGroup ->
-                        item {
-                            // Sub-header: e.g. "21 Oct 2024 - 27 Oct 2024"
-                            Text(
-                                text = weeklyGroup.startOfWeekLabel,
-                                style = MaterialTheme.typography.titleSmall,
-                                color = Color.Gray,
-                                modifier = Modifier
-                                    .animateItem()
-                                    .padding( horizontal = Spacings.ScreenHorizontalSpacing)
-                                    .padding(Spacings.TimeFrameItems.small)
-                            )
-                        }
+            if (group !is TimeFrame.NoDate && group.items.size > MAX_NUMBER_OF_ITEMS_WITHOUT_SUB_LABEL) {
+                val weeklyGroups = TimeFrameUtils.groupByWeek(
+                    items = group.items
+                )
 
-                        items(
-                            items = weeklyGroup.items,
-                            key = getItemId
-                        ) { subItem ->
-                            itemContent(Modifier.animateItem(), subItem)
-                        }
+                weeklyGroups.forEach { weeklyGroup ->
+                    item {
+                        // Sub-header: e.g. "21 Oct 2024 - 27 Oct 2024"
+                        Text(
+                            modifier = Modifier
+                                .animateItem()
+                                .padding(horizontal = Spacings.ScreenHorizontalSpacing)
+                                .padding(Spacings.TimeFrameItems.small),
+                            text = weeklyGroup.indicator.toRangeString(),
+                            style = MaterialTheme.typography.titleSmall,
+                            color = Color.Gray
+                        )
                     }
-                } else {
-                    items(group.items, key = getItemId) { item ->
-                        itemContent(Modifier.animateItem(), item)
+
+                    items(
+                        items = weeklyGroup.items,
+                        key = getItemId
+                    ) { subItem ->
+                        itemContent(Modifier.animateItem(), subItem)
                     }
+                }
+            } else {
+                items(group.items, key = getItemId) { item ->
+                    itemContent(Modifier.animateItem(), item)
                 }
             }
         }

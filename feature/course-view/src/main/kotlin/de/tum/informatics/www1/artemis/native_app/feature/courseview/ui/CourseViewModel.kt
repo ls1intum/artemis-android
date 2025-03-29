@@ -12,7 +12,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BaseExerciseListViewModel
 import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.TimeFrame
-import de.tum.informatics.www1.artemis.native_app.feature.courseview.groupByTimeFrame
+import de.tum.informatics.www1.artemis.native_app.feature.courseview.TimeFrameUtils.groupByTimeFrame
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -26,7 +26,12 @@ sealed class TimeFrame<T>(val items: List<T>) {
 
 }
 
+sealed interface WeekIndicator {
+    data class Dated(val year: Int, val weekOfYear: Int) : WeekIndicator
+    data object NoDate : WeekIndicator
+}
+
 data class WeeklyGroup<T>(
-    val startOfWeekLabel: String,
+    val indicator: WeekIndicator,
     val items: List<T>
 )

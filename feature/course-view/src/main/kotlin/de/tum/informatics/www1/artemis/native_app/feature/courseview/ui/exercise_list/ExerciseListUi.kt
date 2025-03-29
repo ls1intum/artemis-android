@@ -36,16 +36,6 @@ internal fun ExerciseListUi(
     actions: BoundExerciseActions,
     onClickExercise: (exerciseId: Long) -> Unit
 ) {
-    val nonEmptyTimeFrames = remember(exercises) {
-        exercises.filter { it.items.isNotEmpty() }
-    }
-
-    val forceExpandKeys = remember(query, nonEmptyTimeFrames) {
-        if (query.isNotBlank()) {
-            nonEmptyTimeFrames.map { it.key }.toSet()
-        } else emptySet()
-    }
-
     if (exercises.isEmpty()) {
         if (query.isNotBlank()) {
             NoSearchResults(
@@ -64,14 +54,12 @@ internal fun ExerciseListUi(
         return
     }
 
-
-
     TimeFrameItemsLazyColumn(
         modifier = modifier
             .nestedScroll(collapsingContentState.nestedScrollConnection)
             .testTag(TEST_TAG_EXERCISE_LIST_LAZY_COLUMN),
         timeFrameGroup = exercises,
-        forceExpand = forceExpandKeys,
+        query = query,
         getItemId = { id ?: 0 }
     ) { m, exercise ->
         ExerciseListItem(

@@ -13,7 +13,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -27,8 +26,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.NoSearchResults
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
-import de.tum.informatics.www1.artemis.native_app.feature.courseview.TimeFrame
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
+import de.tum.informatics.www1.artemis.native_app.feature.courseview.TimeFrame
 
 internal const val TEST_TAG_LECTURE_LIST = "lecture list"
 
@@ -40,16 +39,6 @@ internal fun LectureListUi(
     query: String,
     onClickLecture: (Lecture) -> Unit
 ) {
-    val nonEmptyTimeFrames = remember(lectures) {
-        lectures.filter { it.items.isNotEmpty() }
-    }
-
-    val forceExpandKeys = remember(query, nonEmptyTimeFrames) {
-        if (query.isNotBlank()) {
-            nonEmptyTimeFrames.map { it.key }.toSet()
-        } else emptySet()
-    }
-
     if (lectures.isEmpty()) {
         if (query.isNotBlank()) {
             NoSearchResults(
@@ -73,7 +62,7 @@ internal fun LectureListUi(
             .nestedScroll(collapsingContentState.nestedScrollConnection)
             .testTag(TEST_TAG_LECTURE_LIST),
         timeFrameGroup = lectures,
-        forceExpand = forceExpandKeys,
+        query = query,
         getItemId = { id ?: 0L }
     ) { m, lecture ->
         LectureListItem(
