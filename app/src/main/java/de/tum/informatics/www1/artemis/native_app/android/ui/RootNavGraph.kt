@@ -107,7 +107,6 @@ fun NavGraphBuilder.rootNavGraph(
     )
 
     courseRegistration(
-        onNavigateUp = navController::navigateUp,
         onRegisteredInCourse = { courseId ->
             navController.navigateUp()
             navController.navigateToCourse(courseId) { }
@@ -144,7 +143,6 @@ fun NavGraphBuilder.rootNavGraph(
 
     lecture(
         navController = navController,
-        onNavigateBack = navController::navigateUp,
         onViewExercise = { exerciseId ->
             navController.navigateToExercise(
                 exerciseId,
@@ -157,9 +155,7 @@ fun NavGraphBuilder.rootNavGraph(
         onClickViewQuizResults = onClickViewQuizResults
     )
 
-    faqDetail(
-        onNavigateBack = navController::navigateUp
-    )
+    faqDetail()
 
     quizParticipation(
         onLeaveQuiz = {
@@ -172,9 +168,7 @@ fun NavGraphBuilder.rootNavGraph(
         }
     )
 
-    quizResults(
-        onRequestLeaveQuizResults = navController::navigateUp
-    )
+    quizResults()
 
     settingsNavGraph(
         navController = navController,

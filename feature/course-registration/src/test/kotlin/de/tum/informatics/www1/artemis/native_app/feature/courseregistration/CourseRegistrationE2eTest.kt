@@ -67,7 +67,6 @@ class CourseRegistrationE2eTest : BaseComposeTest() {
         composeTestRule.setContent {
             RegisterForCourseScreen(
                 modifier = Modifier.fillMaxSize(),
-                onNavigateUp = { },
                 onRegisteredInCourse = { registeredCourseId = it },
                 viewModel = viewModel
             )

@@ -128,7 +128,6 @@ fun NavGraphBuilder.exercise(
                 ExerciseScreen(
                     modifier = Modifier.fillMaxSize(),
                     viewModel = exerciseViewModel,
-                    onNavigateBack = nestedNavigateUp,
                     onViewResult = {
                         nestedNavController.navigate(ExerciseViewUiNestedNavigation.Result)
                     },

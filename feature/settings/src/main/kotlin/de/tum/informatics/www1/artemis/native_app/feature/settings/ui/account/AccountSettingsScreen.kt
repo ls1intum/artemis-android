@@ -53,12 +53,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.util.getMe
 import kotlinx.coroutines.Deferred
 import org.koin.compose.koinInject
 
-
 @Composable
 fun AccountSettingsScreen(
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = koinInject(),
-    onNavigateUp: () -> Unit,
 ) {
     val account by viewModel.account.collectAsState()
 
@@ -68,9 +66,7 @@ fun AccountSettingsScreen(
         onDeleteProfilePicture = viewModel::onDeleteProfilePicture,
         onUploadProfilePicture = viewModel::onUploadProfilePicture,
         onLogout = viewModel::onRequestLogout,
-        onRequestReload = viewModel::requestReload,
-        onNavigateUp = onNavigateUp
-    )
+        onRequestReload = viewModel::requestReload)
 }
 
 
@@ -81,8 +77,7 @@ internal fun AccountSettingsScreen(
     onDeleteProfilePicture: () -> Unit,
     onUploadProfilePicture: (ImageBitmap) -> Deferred<ProfilePictureUploadResult>,
     onLogout: () -> Unit,
-    onRequestReload: () -> Unit,
-    onNavigateUp: () -> Unit,
+    onRequestReload: () -> Unit
 ) {
     var showChangeActionsBottomSheet by remember { mutableStateOf(false) }
     var uploadJob: Deferred<ProfilePictureUploadResult>? by remember { mutableStateOf(null) }
@@ -118,7 +113,7 @@ internal fun AccountSettingsScreen(
         topBar = {
             TopAppBar(
                 navigationIcon = {
-                    NavigationBackButton(onNavigateUp)
+                    NavigationBackButton()
                 },
                 title = {
                     Text(text = stringResource(id = R.string.account_settings_title))
