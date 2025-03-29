@@ -95,8 +95,6 @@ fun FaqDetailUi(
         modifier = modifier,
         topBar = {
             ArtemisTopAppBar(
-                title = {},
-                navigationIcon = { NavigationBackButton() }
                 title = {
                     Text(stringResource(R.string.faq_details_title))
                 },
