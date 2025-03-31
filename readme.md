@@ -46,7 +46,7 @@ Alternative, you can install the Android SDK as described here: https://benshapi
 
 ## Build flavors
 This project is configured to support multiple [flavor dimensions](https://developer.android.com/build/build-variants):
-- TUM or unrestricted: For TUM builds, users are forced to connect to the [TUM Artemis instance](https://artemis.cit.tum.de).
+- TUM or unrestricted: For TUM builds, users are forced to connect to the [TUM Artemis instance](https://artemis.tum.de).
 - Beta or production: In beta builds, an extra label and dialog is displayed to signal that the build may contain bugs. 
 
 ## Tests

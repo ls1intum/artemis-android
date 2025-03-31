@@ -96,7 +96,6 @@ fun `Lecture - Overview`() {
             lectureId = 0L,
             viewModel = viewModel,
             navController = NavController(LocalContext.current),
-            onNavigateBack = {},
             onViewExercise = {},
             onNavigateToExerciseResultView = {},
             onNavigateToTextExerciseParticipation = { _, _ -> },

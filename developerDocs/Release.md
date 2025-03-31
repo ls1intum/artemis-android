@@ -4,11 +4,10 @@
 - Create a new draft release on github. 
   - Make the automatically generated release notes more readable by sorting them and removing irrelevant information (eg Dependabot version updates)
 - Test all the newly introduced features and the basic app functionality (such as sending and receiving posts)
-- Update the app version name and code in `app/build.gralde.kts` and commit that to `develop`
-- Merge `develop` into `main`
-- Build a new app bundle and release it on the Play Console
-  - For the PlayStore release notes, shorten the Github release notes and only include the most relevant information for the end users
-
+- Update the app version name in `app/build.gralde.kts` and commit that to `develop` (the app version *code* will be set by the Github action)
+- Merge `develop` into `main`, this will build a new app bundle and release it for internal testing on the Play Console
+  - For the PlayStore release notes (configured in the Play Console), shorten the Github release notes and only include the most relevant information for the end users
+- "Save and Publish" the new internal release and promote it to production if applicable
 
 ### Release versioning
 - For breaking changes, introduce an new major version (1.x.x -> 2.0.0)
@@ -22,13 +21,7 @@ and PlayStore release notes.
 In Android Studio, you can copy the functions in the scripts to a scratch file and call the methods 
 there (use "Interactive mode" to immediately access the returned formatted strings).
 
-### Building a new app bundle
-For now, we do this locally, but it is planned to shift this step to Github actions
+### How to add a new release
+We created a github action to build, sign and deploy a new release. It is called "Create new release" and can be triggered manually or by merging / pushing to `main`.
+This workflow will create a new app version in the internal testing track in the Play Console.
 
-
-#### Locally
-- Make sure the version-name and -code changes are synced with gradle
-- In android studio, go to "Build > Generate Signed App Bundle / APK"
-- Select "Android App Bundle"
-- Provide the signing keystore and password
-- Choose "productionUnrestrictedRelease" build variant

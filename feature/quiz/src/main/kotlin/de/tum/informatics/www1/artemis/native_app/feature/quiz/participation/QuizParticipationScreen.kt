@@ -99,8 +99,7 @@ fun NavGraphBuilder.quizParticipation(onLeaveQuiz: () -> Unit) {
             ViewQuizResultScreen(
                 modifier = Modifier.fillMaxSize(),
                 exerciseId = exerciseId,
-                quizType = currentViewableQuizType,
-                onNavigateUp = onLeaveQuiz
+                quizType = currentViewableQuizType
             )
         }
     }

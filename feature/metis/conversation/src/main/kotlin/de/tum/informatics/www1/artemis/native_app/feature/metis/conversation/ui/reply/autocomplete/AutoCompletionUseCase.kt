@@ -28,7 +28,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.M
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getChannelIconImageVector
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.common.getChannelIconImageVector
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -194,7 +194,9 @@ class AutoCompletionUseCase(
                             hint = channel.name,
                             replacementText = "[channel]${channel.name}(${channel.id})[/channel]",
                             id = "Channel:${channel.id}",
-                            icon = AutoCompleteIcon.DrawableFromImageVector(getChannelIconImageVector(channel))
+                            icon = AutoCompleteIcon.DrawableFromImageVector(
+                                getChannelIconImageVector(channel)
+                            )
                         )
                     }
 

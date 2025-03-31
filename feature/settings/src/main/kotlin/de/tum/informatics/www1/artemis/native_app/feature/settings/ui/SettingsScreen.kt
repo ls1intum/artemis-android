@@ -54,7 +54,6 @@ import org.koin.compose.koinInject
 internal fun SettingsScreen(
     modifier: Modifier,
     viewModel: SettingsViewModel = koinInject(),
-    onNavigateUp: () -> Unit,
     onDisplayThirdPartyLicenses: () -> Unit,
     onRequestOpenAccountSettings: () -> Unit,
     onRequestOpenNotificationSettings: () -> Unit
@@ -72,7 +71,6 @@ internal fun SettingsScreen(
         serverUrl = artemisContext.serverUrl,
         appVersion = viewModel.appVersion,
         linkOpener = linkOpener,
-        onNavigateUp = onNavigateUp,
         onRequestLogout = viewModel::onRequestLogout,
         onRequestOpenAccountSettings = onRequestOpenAccountSettings,
         onRequestOpenNotificationSettings = onRequestOpenNotificationSettings,
@@ -88,7 +86,6 @@ fun SettingsScreen(
     serverUrl: String,
     appVersion: AppVersion,
     linkOpener: LinkOpener,
-    onNavigateUp: () -> Unit,
     onRequestLogout: () -> Unit,
     onRequestOpenAccountSettings: () -> Unit,
     onRequestOpenNotificationSettings: () -> Unit,
@@ -101,7 +98,7 @@ fun SettingsScreen(
                 title = {
                     Text(text = stringResource(id = R.string.settings_screen_title))
                 },
-                navigationIcon = { NavigationBackButton(onNavigateUp) }
+                navigationIcon = { NavigationBackButton() }
             )
         }
     ) { padding ->

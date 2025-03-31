@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.work.WorkerParameters
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.post.util.ForwardedSourcePostContent
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.work.BaseCreatePostWorker
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
@@ -22,6 +23,7 @@ class UpdateReplyNotificationWorker(
         clientSidePostId: String,
         content: String,
         postType: PostType,
+        forwardedSourcePostList: List<ForwardedSourcePostContent>,
         parentPostId: Long?
     ): Result {
         // We can add to the notification that the user has responded. However, this does not have super high priority

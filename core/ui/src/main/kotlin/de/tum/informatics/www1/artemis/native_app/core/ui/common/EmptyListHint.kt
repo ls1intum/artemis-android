@@ -69,7 +69,8 @@ fun EmptyListHint(
 fun NoSearchResults(
     modifier: Modifier,
     title: String,
-    details: String
+    details: String,
+    showIcon: Boolean = true,
 ) {
     Box(modifier = modifier
         .navigationBarsPadding()
@@ -83,12 +84,14 @@ fun NoSearchResults(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Icon(
-                imageVector = Icons.Default.SearchOff,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(84.dp)
-            )
+            if (showIcon) {
+                Icon(
+                    imageVector = Icons.Default.SearchOff,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(84.dp)
+                )
+            }
 
             Text(
                 modifier = Modifier.fillMaxWidth(),

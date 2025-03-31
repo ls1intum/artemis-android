@@ -24,9 +24,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_o
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.impl.EmojiServiceStub
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.model.LinkPreview
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationChatListScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.DataStatus
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.PostsDataState
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
@@ -36,6 +36,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversati
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.ConversationOverviewBody
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.ConversationOverviewViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ConversationServiceStub
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisFilter
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser
@@ -51,6 +52,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atTime
 import kotlinx.datetime.toInstant
+import org.koin.compose.koinInject
 import kotlin.time.Duration.Companion.minutes
 
 private val sharedConversation = ChannelChat(
@@ -215,6 +217,8 @@ fun `Metis - Conversation Channel`() {
             conversationId = sharedConversation.id,
             conversationDataState = DataState.Success(sharedConversation),
             query = "",
+            filter = MetisFilter.ALL,
+            onUpdateFilter = {},
             onUpdateQuery = {},
             onNavigateBack = {},
             onNavigateToSettings = {},
@@ -244,6 +248,7 @@ fun `Metis - Conversation Channel`() {
                     ),
                     serverUrl = "",
                     courseId = 0,
+                    forwardMessageUseCase = koinInject(), // This is a only a workaround
                     state = rememberLazyListState(),
                     isReplyEnabled = true,
                     isMarkedAsDeleteList = mutableStateListOf(),
