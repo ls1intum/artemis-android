@@ -7,7 +7,6 @@ import androidx.work.WorkManager
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.common.defaultInternetWorkRequest
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.guava.await
 
 internal class WorkManagerPushNotificationJobService(
@@ -43,7 +42,7 @@ internal class WorkManagerPushNotificationJobService(
     }
 
     override suspend fun scheduleUnsubscribeFromNotifications(firebaseToken: String) {
-        val artemisContext = artemisContextProvider.flow.first()
+        val artemisContext = artemisContextProvider.stateFlow.value
         val request = defaultInternetWorkRequest<UnsubscribeFromNotificationsWorker>(
             Data
                 .Builder()

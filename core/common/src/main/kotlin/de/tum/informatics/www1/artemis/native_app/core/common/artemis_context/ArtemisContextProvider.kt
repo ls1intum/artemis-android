@@ -1,8 +1,8 @@
 package de.tum.informatics.www1.artemis.native_app.core.common.artemis_context
 
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
 interface ArtemisContextProvider {
 
-    val flow: Flow<ArtemisContext>
+    val stateFlow: StateFlow<ArtemisContext>
 }
