@@ -31,7 +31,7 @@ object ArtemisInstances {
     )
 
     private val Kit = ArtemisInstance(
-        host = "artemis.praktomat.cs.kit.edu",
+        host = "artemis.cs.kit.edu",
         name = R.string.artemis_instance_kiot_production,
         type = ArtemisInstance.Type.PRODUCTION
     )
