@@ -22,7 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.web.WebContent
 import com.google.accompanist.web.WebViewState
-import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.authTokenOrEmptyString
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.collectArtemisContextAsState
 import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.PdfFile
 
 enum class LinkBottomSheetState {
@@ -34,12 +36,12 @@ enum class LinkBottomSheetState {
 @Composable
 fun LinkBottomSheet(
     modifier: Modifier,
-    artemisContext: ArtemisContext,
     link: String,
     fileName: String?,
     state: LinkBottomSheetState,
     onDismissRequest: () -> Unit
 ) {
+    val artemisContext by LocalArtemisContextProvider.current.collectArtemisContextAsState()
     var webView: WebView? by remember { mutableStateOf(null) }
     val webViewState = getWebViewState(link)
 
@@ -55,7 +57,7 @@ fun LinkBottomSheet(
         ) {
             when (state) {
                 LinkBottomSheetState.PDFVIEWSTATE -> {
-                    val pdfFile = PdfFile(link, artemisContext.authToken, fileName)
+                    val pdfFile = PdfFile(link, artemisContext.authTokenOrEmptyString, fileName)
                     ArtemisPdfView(
                         modifier = Modifier.fillMaxSize(),
                         pdfFile = pdfFile,
@@ -78,7 +80,6 @@ fun LinkBottomSheet(
                                 webViewState = webViewState,
                                 webView = webView,
                                 setWebView = { webView = it },
-                                artemisContext = artemisContext
                             )
                         }
                     }

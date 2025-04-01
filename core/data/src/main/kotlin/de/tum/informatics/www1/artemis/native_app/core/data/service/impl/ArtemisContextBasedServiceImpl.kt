@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.core.data.service.impl
 import android.util.Log
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ifLoggedIn
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
@@ -88,17 +89,16 @@ abstract class ArtemisContextBasedServiceImpl(
         contentType: ContentType = ContentType.Application.Json,
         crossinline block: HttpRequestBuilder.() -> Unit
     ): NetworkResponse<T> {
-        val serverUrl = serverUrl()
-        val authToken = when (val context = artemisContext<ArtemisContext>()) {
-            is ArtemisContext.LoggedIn -> context.authToken
-            else -> ""
-        }
+        val artemisContext = artemisContext<ArtemisContext>()
 
         return performNetworkCall {
-            val response = ktorProvider.ktorClient.request(serverUrl) {
+            val response = ktorProvider.ktorClient.request(artemisContext.serverUrl) {
                 block()
                 contentType(contentType)
-                cookieAuth(authToken)
+
+                artemisContext.ifLoggedIn {
+                    cookieAuth(it.authToken)
+                }
             }
 
             val requestString = "${response.request.method} ${response.request.url}"
