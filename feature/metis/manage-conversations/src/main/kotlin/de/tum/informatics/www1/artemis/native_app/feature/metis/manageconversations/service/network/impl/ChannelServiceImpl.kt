@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.network.impl
 
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
@@ -102,8 +103,10 @@ class ChannelServiceImpl(
         courseId: Long,
         conversationId: Long,
     ): NetworkResponse<Boolean> {
+        val artemisContext = artemisContext() as ArtemisContext.LoggedIn
+
         return performNetworkCall {
-            ktorProvider.ktorClient.post(serverUrl) {
+            ktorProvider.ktorClient.post(artemisContext.serverUrl) {
                 url {
                     appendPathSegments(
                         *Api.Communication.Courses.path,
@@ -117,7 +120,7 @@ class ChannelServiceImpl(
                 setBody(listOf(artemisContext.username))
                 contentType(ContentType.Application.Json)
 
-                cookieAuth(authToken)
+                cookieAuth(artemisContext.authToken)
             }
                 .status
                 .isSuccess()

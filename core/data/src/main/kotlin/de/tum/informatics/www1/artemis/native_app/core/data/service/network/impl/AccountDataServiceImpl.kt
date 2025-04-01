@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
@@ -31,6 +32,7 @@ internal class AccountDataServiceImpl(
     private val Context.accountDataCache by preferencesDataStore(ACCOUNT_DATA_CACHE_NAME)
 
     override suspend fun getAccountData(): NetworkResponse<Account> {
+        val authToken = (artemisContext() as ArtemisContext.LoggedIn).authToken
         return getRequest<Account> {
             url {
                 appendPathSegments(*Api.Core.Public.path, "account")
@@ -43,6 +45,7 @@ internal class AccountDataServiceImpl(
     }
 
     override suspend fun getCachedAccountData(): Account? {
+        val authToken = (artemisContext() as ArtemisContext.LoggedIn).authToken
         val cacheData = context.accountDataCache.data.first()
         val cacheKey = getAccountDataCacheKey(authToken)
         val cacheEntry = cacheData[cacheKey]

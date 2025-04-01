@@ -18,26 +18,31 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlin.reflect.KClass
 
 
 const val TAG = "ArtemisContextBasedServiceImpl"
 
 abstract class ArtemisContextBasedServiceImpl(
     val ktorProvider: KtorProvider,
-    private val artemisContextProvider: ArtemisContextProvider,
+    artemisContextProvider: ArtemisContextProvider,
+    contextClass: KClass<out ArtemisContext> = ArtemisContext.LoggedIn::class,
 ) : ArtemisContextBasedService {
 
-    override val onReloadRequired: Flow<Unit> = artemisContextProvider.stateFlow.map { Unit }
+    private val filteredArtemisContextFlow: Flow<ArtemisContext> = artemisContextProvider.stateFlow
+        .filterIsInstance(contextClass)
 
-    val artemisContext: ArtemisContext
-        get() = artemisContextProvider.stateFlow.value
+    override val onReloadRequired: Flow<Unit> = filteredArtemisContextFlow
+        .distinctUntilChanged()
+        .map { Unit }
 
-    val serverUrl: String
-        get() = artemisContext.serverUrl
+    suspend fun artemisContext(): ArtemisContext = filteredArtemisContextFlow.first()
 
-    val authToken: String
-        get() = artemisContext.authToken
+    suspend fun serverUrl(): String = artemisContext().serverUrl
 
     suspend inline fun <reified T: Any>getRequest(
         contentType: ContentType = ContentType.Application.Json,
@@ -83,6 +88,12 @@ abstract class ArtemisContextBasedServiceImpl(
         contentType: ContentType = ContentType.Application.Json,
         crossinline block: HttpRequestBuilder.() -> Unit
     ): NetworkResponse<T> {
+        val serverUrl = serverUrl()
+        val authToken = when (val context = artemisContext()) {
+            is ArtemisContext.LoggedIn -> context.authToken
+            else -> ""
+        }
+
         return performNetworkCall {
             val response = ktorProvider.ktorClient.request(serverUrl) {
                 block()
