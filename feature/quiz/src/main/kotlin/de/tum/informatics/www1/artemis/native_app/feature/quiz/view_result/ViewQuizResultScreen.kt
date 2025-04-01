@@ -42,15 +42,14 @@ fun NavController.navigateToQuizResult(
     navigate(ViewQuizResultScreen(courseId, exerciseId))
 }
 
-fun NavGraphBuilder.quizResults(onRequestLeaveQuizResults: () -> Unit) {
+fun NavGraphBuilder.quizResults() {
     animatedComposable<ViewQuizResultScreen> { backStackEntry ->
         val route: ViewQuizResultScreen = backStackEntry.toRoute()
 
         ViewQuizResultScreen(
             modifier = Modifier.fillMaxSize(),
             exerciseId = route.exerciseId,
-            quizType = QuizType.ViewResults,
-            onNavigateUp = onRequestLeaveQuizResults
+            quizType = QuizType.ViewResults
         )
     }
 }
@@ -59,8 +58,7 @@ fun NavGraphBuilder.quizResults(onRequestLeaveQuizResults: () -> Unit) {
 internal fun ViewQuizResultScreen(
     modifier: Modifier,
     exerciseId: Long,
-    quizType: QuizType.ViewableQuizType,
-    onNavigateUp: () -> Unit
+    quizType: QuizType.ViewableQuizType
 ) {
     val viewModel: QuizResultViewModel = koinViewModel { parametersOf(exerciseId, quizType) }
 
@@ -76,7 +74,7 @@ internal fun ViewQuizResultScreen(
             ArtemisTopAppBar(
                 title = { Text(text = stringResource(id = R.string.quiz_results_title)) },
                 navigationIcon = {
-                    NavigationBackButton(onNavigateUp)
+                    NavigationBackButton()
                 },
                 actions = {
                     IconButton(onClick = viewModel::retryLoadExercise) {

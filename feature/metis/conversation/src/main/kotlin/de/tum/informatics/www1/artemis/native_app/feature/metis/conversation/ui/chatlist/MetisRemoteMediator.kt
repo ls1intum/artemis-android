@@ -13,6 +13,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.network.MetisService.StandalonePostsContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisFilter
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
@@ -97,7 +98,7 @@ internal class MetisRemoteMediator(
             return metisService.getPosts(
                 standalonePostsContext = StandalonePostsContext(
                     metisContext = context,
-                    filter = emptyList(),
+                    filter = MetisFilter.ALL,
                     query = null,
                     sortingStrategy = MetisSortingStrategy.DATE_DESCENDING,
                     courseWideContext = null

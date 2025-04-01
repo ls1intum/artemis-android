@@ -8,17 +8,16 @@ import org.koin.dsl.module
 val lectureModule = module {
     viewModel {
         LectureViewModel(
-            it.get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get()
+            lectureId = it.get(),
+            networkStatusProvider = get(),
+            lectureService = get(),
+            serverConfigurationService = get(),
+            accountService = get(),
+            liveParticipationService = get(),
+            savedStateHandle = get(),
+            channelService = get(),
+            serverTimeService = get(),
+            courseExerciseService = get()
         )
     }
     single<LectureService> { LectureServiceImpl(get()) }

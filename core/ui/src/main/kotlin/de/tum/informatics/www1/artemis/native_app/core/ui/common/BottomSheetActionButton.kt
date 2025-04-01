@@ -1,6 +1,7 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui
+package de.tum.informatics.www1.artemis.native_app.core.ui.common
 
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -12,13 +13,13 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun BottomSheetActionButton(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     icon: ImageVector,
     text: String,
     onClick: () -> Unit
 ) {
     TextButton(
-        modifier = modifier,
+        modifier = modifier.fillMaxWidth(),
         onClick = onClick
     ) {
         Icon(

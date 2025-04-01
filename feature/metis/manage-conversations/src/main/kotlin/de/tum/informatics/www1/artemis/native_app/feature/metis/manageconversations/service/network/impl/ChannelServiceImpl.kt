@@ -103,7 +103,7 @@ class ChannelServiceImpl(
         conversationId: Long,
     ): NetworkResponse<Boolean> {
         return performNetworkCall {
-            ktorProvider.ktorClient.post(serverUrl()) {
+            ktorProvider.ktorClient.post(serverUrl) {
                 url {
                     appendPathSegments(
                         *Api.Communication.Courses.path,
@@ -114,10 +114,10 @@ class ChannelServiceImpl(
                     )
                 }
 
-                setBody(listOf(artemisContext().username))
+                setBody(listOf(artemisContext.username))
                 contentType(ContentType.Application.Json)
 
-                cookieAuth(authToken())
+                cookieAuth(authToken)
             }
                 .status
                 .isSuccess()

@@ -60,9 +60,7 @@ fun NavController.navigateToFaqDetail(
     navigate(FaqDetailUi(courseId, faqId), builder)
 }
 
-fun NavGraphBuilder.faqDetail(
-    onNavigateBack: () -> Unit,
-) {
+fun NavGraphBuilder.faqDetail() {
     animatedComposable<FaqDetailUi>(
         deepLinks = FaqDeeplinks.ToFaq.generateLinks(),
     ) { backStackEntry ->
@@ -81,8 +79,7 @@ fun NavGraphBuilder.faqDetail(
             FaqDetailUi(
                 modifier = Modifier.fillMaxSize(),
                 faqDataState = faq,
-                onReloadRequest = viewModel::requestReload,
-                onNavigateBack = onNavigateBack
+                onReloadRequest = viewModel::requestReload
             )
         }
     }
@@ -92,15 +89,16 @@ fun NavGraphBuilder.faqDetail(
 fun FaqDetailUi(
     modifier: Modifier = Modifier,
     faqDataState: DataState<Faq>,
-    onReloadRequest: () -> Unit,
-    onNavigateBack: () -> Unit
+    onReloadRequest: () -> Unit
 ) {
     Scaffold(
         modifier = modifier,
         topBar = {
             ArtemisTopAppBar(
-                title = {},
-                navigationIcon = { NavigationBackButton(onNavigateBack) }
+                title = {
+                    Text(stringResource(R.string.faq_details_title))
+                },
+                navigationIcon = { NavigationBackButton() }
             )
         }
     ) { paddingValues ->

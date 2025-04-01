@@ -43,7 +43,4 @@ object PostColors {
 
     val unsentMessageText: Color
         @Composable get() = Color.Gray
-    val announcementTitle: Color
-        @Composable get() = MaterialTheme.colorScheme.primary
-
 }

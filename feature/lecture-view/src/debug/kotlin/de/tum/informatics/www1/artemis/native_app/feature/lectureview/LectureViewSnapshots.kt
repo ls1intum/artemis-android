@@ -6,8 +6,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavController
-import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
-import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.ServerTimeServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseExerciseService
@@ -83,9 +81,6 @@ fun `Lecture - Overview`() {
         liveParticipationService = LiveParticipationServiceStub(),
         savedStateHandle = SavedStateHandle(),
         channelService = ChannelServiceStub,
-        artemisContextProvider = object : ArtemisContextProvider {
-            override val flow: Flow<ArtemisContext> = emptyFlow()
-        },
         serverTimeService = ServerTimeServiceStub(),
         courseExerciseService = object : CourseExerciseService {
             override val onReloadRequired: Flow<Unit> = emptyFlow()
@@ -101,7 +96,6 @@ fun `Lecture - Overview`() {
             lectureId = 0L,
             viewModel = viewModel,
             navController = NavController(LocalContext.current),
-            onNavigateBack = {},
             onViewExercise = {},
             onNavigateToExerciseResultView = {},
             onNavigateToTextExerciseParticipation = { _, _ -> },

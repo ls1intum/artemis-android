@@ -6,14 +6,20 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.R
 
 object ArtemisInstances {
 
-    val LegacyTumArtemis = ArtemisInstance(
+    val LegacyTumArtemis1 = ArtemisInstance(
         host = "artemis.ase.in.tum.de",
         name = R.string.artemis_instance_tum_legacy,
         type = ArtemisInstance.Type.LEGACY
     )
 
-    val TumArtemis = ArtemisInstance(
+    val LegacyTumArtemis2 = ArtemisInstance(
         host = "artemis.cit.tum.de",
+        name = R.string.artemis_instance_tum_legacy,
+        type = ArtemisInstance.Type.LEGACY
+    )
+
+    val TumArtemis = ArtemisInstance(
+        host = "artemis.tum.de",
         name = R.string.artemis_instance_tum_production,
         type = ArtemisInstance.Type.PRODUCTION
     )
@@ -25,7 +31,7 @@ object ArtemisInstances {
     )
 
     private val Kit = ArtemisInstance(
-        host = "artemis.praktomat.cs.kit.edu",
+        host = "artemis.cs.kit.edu",
         name = R.string.artemis_instance_kiot_production,
         type = ArtemisInstance.Type.PRODUCTION
     )
@@ -48,10 +54,14 @@ object ArtemisInstances {
         type = ArtemisInstance.Type.TEST
     )
 
+    val legacyTumInstances = listOf(LegacyTumArtemis1, LegacyTumArtemis2)
+    private val testInstances = listOf(TumTs0, TumTs1, TumTs2)
+
     val instances: List<ArtemisInstance> =
         (if (BuildConfig.DEBUG) {
-            listOf(TumTs0, TumTs1, TumTs2)
+            testInstances
         } else emptyList()) + listOf(TumArtemis, Kit, Codeability)
+
 
     data class ArtemisInstance(val host: String, @StringRes val name: Int, val type: Type) {
         enum class Type {

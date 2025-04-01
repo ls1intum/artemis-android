@@ -1,0 +1,99 @@
+# This workflow was heavily inspired by the following medium article:
+# https://medium.com/@vontonnie/automating-success-github-actions-workflow-for-android-app-deployment-908095d53b97
+
+name: Deploy New Release
+'on':
+  push:
+    branches:
+    - main
+  workflow_dispatch: null
+
+jobs:
+  build:
+    name: Job 1 - Build Signed AAB
+    runs-on: [self-hosted, ase-large-android-sdk-35]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set Android Sdk Env
+        run: export ANDROID_HOME=/usr/lib/android-sdk
+
+      - name: Set local.properties
+        run: echo "sdk.dir=/usr/lib/android-sdk" > local.properties
+
+      - name: Gradle Wrapper Verification
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: JDK setup
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 17
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Setup Gradle Cache
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-home-cache-cleanup: true
+
+      - name: Calculate New Version Code
+        # 624 was the last version code before switching to this workflow for deployment, so we start from 625
+        run: |
+          OFFSET=625
+          NEW_VERSION_CODE=$(( OFFSET + ${{ github.run_number }} ))
+          echo "Calculated new versionCode: $NEW_VERSION_CODE"
+          echo "NEW_VERSION_CODE=$NEW_VERSION_CODE" >> $GITHUB_ENV
+
+      - name: Bump Version Code
+        uses: chkfung/android-version-actions@v1.2.3
+        with:
+          gradlePath: app/build.gradle.kts
+          versionCode: '${{ env.NEW_VERSION_CODE }}'
+
+      - name: Build prodRelease
+        run: ./gradlew bundleProductionUnrestrictedRelease
+
+      - name: Sign AAb
+        id: sign
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: app/build/outputs/bundle/productionUnrestrictedRelease
+          signingKeyBase64: '${{ secrets.KEYSTORE }}'
+          alias: '${{ secrets.SIGNING_KEY_ALIAS }}'
+          keyStorePassword: '${{ secrets.SIGNING_STORE_PASSWORD }}'
+          keyPassword: '${{ secrets.SIGNING_KEY_PASSWORD }}'
+
+      - name: Upload app bundle as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-bundle
+          path: '${{ env.SIGNED_RELEASE_FILE }}'
+
+      - run: 'echo Build status report=${{ job.status }}'
+
+  deploy:
+    name: Job_2 - Deploy AAB to Play Console
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download app bundle from artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-bundle
+
+      - name: Find AAB file
+        id: find-aab
+        run: |
+          AAB_PATH=$(find ./ -name "*.aab" | head -n 1)
+          echo "AAB_PATH=$AAB_PATH" >> $GITHUB_OUTPUT
+          echo "Found AAB file at: $AAB_PATH"
+
+      - name: Publish release to "Internal Testing" in Play Console
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: '${{ secrets.SERVICE_ACCOUNT_JSON }}'
+          packageName: de.tum.cit.aet.artemis
+          releaseFiles: '${{ steps.find-aab.outputs.AAB_PATH }}'
+          track: internal

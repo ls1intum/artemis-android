@@ -63,6 +63,12 @@ fun EmojiPicker(
     }
 
     val coroutineScope = rememberCoroutineScope()
+    fun storeRecentEmoji(emoji: Emoji) {
+        coroutineScope.launch {
+            emojiProvider.storeRecentEmoji(emoji.emojiId)
+        }
+    }
+
     var searchQuery by remember { mutableStateOf("") }
 
     val allEmojis by remember(emojiCategories) {
@@ -101,9 +107,16 @@ fun EmojiPicker(
                 items(
                     count = filteredEmojis.size
                 ) { index ->
+                    val emoji = filteredEmojis[index]
+
                     EmojiLineItem(
-                        modifier = Modifier.fillMaxWidth(),
-                        emoji = filteredEmojis[index]
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                storeRecentEmoji(emoji)
+                                onEmojiClicked(emoji)
+                            },
+                        emoji = emoji
                     )
                 }
             }
@@ -113,10 +126,7 @@ fun EmojiPicker(
         EmojiOverview(
             emojiCategories = emojiCategories,
             onEmojiClicked = {
-                coroutineScope.launch {
-                    emojiProvider.storeRecentEmoji(it.emojiId)
-                }
-
+                storeRecentEmoji(it)
                 onEmojiClicked(it)
             }
         )

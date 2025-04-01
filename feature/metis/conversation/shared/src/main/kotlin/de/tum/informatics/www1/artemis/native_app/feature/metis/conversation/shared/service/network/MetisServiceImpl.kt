@@ -17,7 +17,12 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
+import io.ktor.http.ContentType
 import io.ktor.http.appendPathSegments
+import io.ktor.http.contentType
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
@@ -100,15 +105,19 @@ class MetisServiceImpl(
                 if (standalonePostsContext.courseWideContext != CourseWideContext.ANNOUNCEMENT) {
                     parameter(
                         "filterToUnresolved",
-                        MetisFilter.UNRESOLVED in standalonePostsContext.filter
+                        standalonePostsContext.filter == MetisFilter.UNRESOLVED
                     )
                     parameter(
                         "filterToOwn",
-                        MetisFilter.CREATED_BY_CLIENT in standalonePostsContext.filter
+                        standalonePostsContext.filter == MetisFilter.CREATED_BY_CLIENT
                     )
                     parameter(
                         "filterToAnsweredOrReacted",
-                        MetisFilter.WITH_REACTION in standalonePostsContext.filter
+                         standalonePostsContext.filter == MetisFilter.WITH_REACTION
+                    )
+                    parameter(
+                        "pinnedOnly",
+                        standalonePostsContext.filter == MetisFilter.PINNED
                     )
                 }
 
@@ -134,7 +143,7 @@ class MetisServiceImpl(
         val posts = getPosts(
             standalonePostsContext = MetisService.StandalonePostsContext(
                 metisContext = metisContext,
-                filter = emptyList(),
+                filter = MetisFilter.ALL,
                 query = "#$serverSidePostId",
                 sortingStrategy = MetisSortingStrategy.DATE_DESCENDING,
                 courseWideContext = null
@@ -179,7 +188,7 @@ class MetisServiceImpl(
         }
     }
 
-    // TODO: Use the API object for the following functions once 8.0.0 has been released
+    // TODO: Use the API object for the following functions once 8.0.0 has been released (applies to all functions below)
     // See https://github.com/ls1intum/artemis-android/issues/462
     // The following functions are not compatible with the pre 8.0.0 API structure
     override suspend fun getForwardedMessagesByIds(
@@ -204,6 +213,26 @@ class MetisServiceImpl(
             val messageWrapper: List<ForwardedMessagesResponse> = Json.decodeFromJsonElement(ListSerializer(
                 ForwardedMessagesResponse.serializer()), response.body())
             messageWrapper.flatMap { it.messages }
+        }
+    }
+
+    override suspend fun createForwardedMessage(
+        metisContext: MetisContext,
+        forwardedMessage: ForwardedMessage,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<HttpResponse> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.post(serverUrl) {
+                url {
+                    appendPathSegments("api", "communication", "forwarded-messages")
+                }
+                parameter("courseId", metisContext.courseId.toString())
+
+                contentType(ContentType.Application.Json)
+                setBody(forwardedMessage)
+                cookieAuth(authToken)
+            }
         }
     }
 
