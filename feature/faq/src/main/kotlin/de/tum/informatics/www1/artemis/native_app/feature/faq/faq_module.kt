@@ -11,7 +11,7 @@ import org.koin.dsl.module
 
 val faqModule = module {
     single<FaqRemoteService> { FaqRemoteServiceImpl(get(), get()) }
-    single<FaqRepository> { FaqRepositoryImpl(get(), get(), get(), get()) }
+    single<FaqRepository> { FaqRepositoryImpl(get(), get()) }
 
     viewModel { params ->
         FaqOverviewViewModel(
