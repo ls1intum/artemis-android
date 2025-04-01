@@ -26,8 +26,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.NoSearchResults
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
-import de.tum.informatics.www1.artemis.native_app.feature.courseview.TimeFrame
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
+import de.tum.informatics.www1.artemis.native_app.feature.courseview.TimeFrame
 
 internal const val TEST_TAG_LECTURE_LIST = "lecture list"
 
@@ -62,6 +62,7 @@ internal fun LectureListUi(
             .nestedScroll(collapsingContentState.nestedScrollConnection)
             .testTag(TEST_TAG_LECTURE_LIST),
         timeFrameGroup = lectures,
+        query = query,
         getItemId = { id ?: 0L }
     ) { m, lecture ->
         LectureListItem(
