@@ -29,20 +29,20 @@ const val TAG = "ArtemisContextBasedServiceImpl"
 
 abstract class ArtemisContextBasedServiceImpl(
     val ktorProvider: KtorProvider,
-    artemisContextProvider: ArtemisContextProvider,
+    val artemisContextProvider: ArtemisContextProvider,
     contextClass: KClass<out ArtemisContext> = ArtemisContext.LoggedIn::class,
 ) : ArtemisContextBasedService {
 
-    private val filteredArtemisContextFlow: Flow<ArtemisContext> = artemisContextProvider.stateFlow
+    override val onReloadRequired: Flow<Unit> = artemisContextProvider.stateFlow
         .filterIsInstance(contextClass)
-
-    override val onReloadRequired: Flow<Unit> = filteredArtemisContextFlow
         .distinctUntilChanged()
         .map { Unit }
 
-    suspend fun artemisContext(): ArtemisContext = filteredArtemisContextFlow.first()
+    suspend inline fun <reified T: ArtemisContext> artemisContext(): T = artemisContextProvider.stateFlow
+        .filterIsInstance<T>()
+        .first()
 
-    suspend fun serverUrl(): String = artemisContext().serverUrl
+    suspend fun serverUrl(): String = artemisContext<ArtemisContext>().serverUrl
 
     suspend inline fun <reified T: Any>getRequest(
         contentType: ContentType = ContentType.Application.Json,
@@ -89,7 +89,7 @@ abstract class ArtemisContextBasedServiceImpl(
         crossinline block: HttpRequestBuilder.() -> Unit
     ): NetworkResponse<T> {
         val serverUrl = serverUrl()
-        val authToken = when (val context = artemisContext()) {
+        val authToken = when (val context = artemisContext<ArtemisContext>()) {
             is ArtemisContext.LoggedIn -> context.authToken
             else -> ""
         }

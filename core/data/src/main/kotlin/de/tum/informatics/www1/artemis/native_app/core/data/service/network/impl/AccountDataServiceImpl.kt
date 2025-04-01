@@ -32,7 +32,7 @@ internal class AccountDataServiceImpl(
     private val Context.accountDataCache by preferencesDataStore(ACCOUNT_DATA_CACHE_NAME)
 
     override suspend fun getAccountData(): NetworkResponse<Account> {
-        val authToken = (artemisContext() as ArtemisContext.LoggedIn).authToken
+        val authToken = artemisContext<ArtemisContext.LoggedIn>().authToken
         return getRequest<Account> {
             url {
                 appendPathSegments(*Api.Core.Public.path, "account")
@@ -45,7 +45,7 @@ internal class AccountDataServiceImpl(
     }
 
     override suspend fun getCachedAccountData(): Account? {
-        val authToken = (artemisContext() as ArtemisContext.LoggedIn).authToken
+        val authToken = artemisContext<ArtemisContext.LoggedIn>().authToken
         val cacheData = context.accountDataCache.data.first()
         val cacheKey = getAccountDataCacheKey(authToken)
         val cacheEntry = cacheData[cacheKey]

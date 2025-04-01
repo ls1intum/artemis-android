@@ -103,7 +103,7 @@ class ChannelServiceImpl(
         courseId: Long,
         conversationId: Long,
     ): NetworkResponse<Boolean> {
-        val artemisContext = artemisContext() as ArtemisContext.LoggedIn
+        val artemisContext = artemisContext<ArtemisContext.LoggedIn>()
 
         return performNetworkCall {
             ktorProvider.ktorClient.post(artemisContext.serverUrl) {
