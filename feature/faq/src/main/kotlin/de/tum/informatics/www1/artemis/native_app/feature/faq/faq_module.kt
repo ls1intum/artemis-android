@@ -13,9 +13,8 @@ val faqModule = module {
     single<FaqRemoteService> { FaqRemoteServiceImpl(get(), get()) }
     single<FaqRepository> { FaqRepositoryImpl(get(), get()) }
 
-    viewModel { params ->
+    viewModel { _ ->
         FaqOverviewViewModel(
-            params[0],
             get(),
         )
     }
@@ -23,7 +22,6 @@ val faqModule = module {
     viewModel { params ->
         FaqDetailViewModel(
             params[0],
-            params[1],
             get(),
             get()
         )

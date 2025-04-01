@@ -94,7 +94,7 @@ fun NavGraphBuilder.course(
     onParticipateInQuiz: (courseId: Long, exerciseId: Long, isPractice: Boolean) -> Unit,
     onViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
     onNavigateToLecture: (courseId: Long, lectureId: Long) -> Unit,
-    onNavigateToFaq: (courseId: Long, faqId: Long) -> Unit,
+    onNavigateToFaq: (faqId: Long) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val deepLinks = CourseDeeplinks.ToCourse.generateLinks() +
@@ -139,7 +139,7 @@ fun NavGraphBuilder.course(
             },
             onClickViewQuizResults = onViewQuizResults,
             onNavigateToLecture = { lectureId -> onNavigateToLecture(courseId, lectureId) },
-            onNavigateToFaq = { faqId -> onNavigateToFaq(courseId, faqId) },
+            onNavigateToFaq = onNavigateToFaq,
             onNavigateBack = onNavigateBack
         )
     }
@@ -377,7 +377,6 @@ internal fun CourseUiScreen(
         composable<CourseTab.Faq> {
             FaqOverviewUi(
                 modifier = Modifier.fillMaxSize(),
-                courseId = courseId,
                 scaffold = scaffold,
                 collapsingContentState = collapsingContentState,
                 onNavigateToFaq = onNavigateToFaq

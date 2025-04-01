@@ -4,17 +4,16 @@ import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.Ar
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
-import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.LoggedInBasedServiceImpl
+import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.CourseBasedServiceImpl
 import io.ktor.http.appendPathSegments
 
 class FaqRemoteServiceImpl(
     ktorProvider: KtorProvider,
     artemisContextProvider: ArtemisContextProvider,
-): LoggedInBasedServiceImpl(ktorProvider, artemisContextProvider), FaqRemoteService {
+): CourseBasedServiceImpl(ktorProvider, artemisContextProvider), FaqRemoteService {
 
-    override suspend fun getFaqs(
-        courseId: Long,
-    ): NetworkResponse<List<FaqDto>> {
+    override suspend fun getFaqs(): NetworkResponse<List<FaqDto>> {
+        val courseId = courseId()
         return getRequest {
             url {
                 appendPathSegments(
@@ -28,9 +27,9 @@ class FaqRemoteServiceImpl(
     }
 
     override suspend fun getFaq(
-        courseId: Long,
         faqId: Long,
     ): NetworkResponse<FaqDto> {
+        val courseId = courseId()
         return getRequest {
             url {
                 appendPathSegments(

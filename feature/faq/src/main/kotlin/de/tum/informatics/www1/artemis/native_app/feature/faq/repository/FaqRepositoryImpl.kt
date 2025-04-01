@@ -14,24 +14,19 @@ class FaqRepositoryImpl(
 ) : FaqRepository {
 
     override fun getFaqs(
-        courseId: Long,
     ): Flow<DataState<List<Faq>>> {
         return remoteService.performAutoReloadingNetworkCall(networkStatusProvider) {
-            remoteService.getFaqs(
-                courseId = courseId,
-            ).bind {
+            remoteService.getFaqs().bind {
                 it.map { faqDto -> faqDto.toFaq() }
             }
         }
     }
 
     override fun getFaq(
-        courseId: Long,
         faqId: Long,
     ): Flow<DataState<Faq>> {
         return remoteService.performAutoReloadingNetworkCall(networkStatusProvider) {
             remoteService.getFaq(
-                courseId = courseId,
                 faqId = faqId,
             ).bind {
                 it.toFaq()
