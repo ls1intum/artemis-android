@@ -12,13 +12,11 @@ object ChannelServiceStub : ChannelService {
     override val onReloadRequired: Flow<Unit> = flowOf(Unit)
 
     override suspend fun getChannels(
-        courseId: Long,
     ): NetworkResponse<List<ChannelChat>> {
         return NetworkResponse.Response(listOf(ChannelChat(id = 1, name = "Chat")))
     }
 
     override suspend fun getUnresolvedChannels(
-        courseId: Long,
         channelIds: List<Long>,
     ): NetworkResponse<List<Conversation>> {
         return NetworkResponse.Response(listOf(ChannelChat(id = 1, name = "Chat")))
@@ -26,20 +24,17 @@ object ChannelServiceStub : ChannelService {
 
     override suspend fun getExerciseChannel(
         exerciseId: Long,
-        courseId: Long,
     ): NetworkResponse<ChannelChat> {
         return NetworkResponse.Response(ChannelChat(id = 1, name = "Exercise Chat"))
     }
 
     override suspend fun getLectureChannel(
         lectureId: Long,
-        courseId: Long,
     ): NetworkResponse<ChannelChat> {
         return NetworkResponse.Response(ChannelChat(id = 1, name = "Lecture Chat"))
     }
 
     override suspend fun registerInChannel(
-        courseId: Long,
         conversationId: Long,
     ): NetworkResponse<Boolean> {
         return NetworkResponse.Response(true)

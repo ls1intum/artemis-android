@@ -115,9 +115,8 @@ internal class ExerciseViewModel(
         .flatMapLatest { exerciseState ->
             when (exerciseState) {
                 is DataState.Success -> {
-                    val courseId = exerciseState.data.course?.id.let { it ?: 0L }
                     channelService.performAutoReloadingNetworkCall(networkStatusProvider) {
-                        getExerciseChannel(exerciseId, courseId)
+                        getExerciseChannel(exerciseId)
                     }
                 }
                 else -> flowOf(DataState.Loading())
