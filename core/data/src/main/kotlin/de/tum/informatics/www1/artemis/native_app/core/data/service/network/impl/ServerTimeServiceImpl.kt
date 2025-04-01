@@ -7,7 +7,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.retryNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
-import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.ArtemisContextBasedServiceImpl
+import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.LoggedInBasedServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ServerTimeService
 import io.ktor.http.appendPathSegments
 import kotlinx.coroutines.delay
@@ -29,7 +29,7 @@ import kotlin.time.Duration.Companion.seconds
 internal class ServerTimeServiceImpl(
     ktorProvider: KtorProvider,
     artemisContextProvider: ArtemisContextProvider,
-) : ArtemisContextBasedServiceImpl(ktorProvider, artemisContextProvider),  ServerTimeService {
+) : LoggedInBasedServiceImpl(ktorProvider, artemisContextProvider),  ServerTimeService {
 
     override fun getServerClock(): Flow<ClockWithOffset> = flow {
         // Logic of implementation taken from: https://gamedev.stackexchange.com/a/93662

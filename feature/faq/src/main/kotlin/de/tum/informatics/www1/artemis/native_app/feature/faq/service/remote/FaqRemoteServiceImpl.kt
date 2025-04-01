@@ -4,13 +4,13 @@ import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.Ar
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
-import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.ArtemisContextBasedServiceImpl
+import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.LoggedInBasedServiceImpl
 import io.ktor.http.appendPathSegments
 
 class FaqRemoteServiceImpl(
     ktorProvider: KtorProvider,
     artemisContextProvider: ArtemisContextProvider,
-): ArtemisContextBasedServiceImpl(ktorProvider, artemisContextProvider), FaqRemoteService {
+): LoggedInBasedServiceImpl(ktorProvider, artemisContextProvider), FaqRemoteService {
 
     override suspend fun getFaqs(
         courseId: Long,

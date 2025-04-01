@@ -1,7 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.faq.repository
 
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.data.service.performAutoReloadingNetworkCall
+import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.performAutoReloadingNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.Faq
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.mappers.toFaq

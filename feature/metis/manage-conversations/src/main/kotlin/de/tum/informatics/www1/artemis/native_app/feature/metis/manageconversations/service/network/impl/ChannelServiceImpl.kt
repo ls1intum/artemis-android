@@ -1,13 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.network.impl
 
-import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
-import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.ArtemisContextBasedServiceImpl
+import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.LoggedInBasedServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.network.ChannelService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
@@ -23,7 +22,7 @@ import io.ktor.http.isSuccess
 class ChannelServiceImpl(
     ktorProvider: KtorProvider,
     artemisContextProvider: ArtemisContextProvider,
-) : ArtemisContextBasedServiceImpl(ktorProvider, artemisContextProvider), ChannelService {
+) : LoggedInBasedServiceImpl(ktorProvider, artemisContextProvider), ChannelService {
 
     override suspend fun getChannels(courseId: Long): NetworkResponse<List<ChannelChat>> {
         return getRequest {
@@ -103,7 +102,7 @@ class ChannelServiceImpl(
         courseId: Long,
         conversationId: Long,
     ): NetworkResponse<Boolean> {
-        val artemisContext = artemisContext<ArtemisContext.LoggedIn>()
+        val artemisContext = artemisContext()
 
         return performNetworkCall {
             ktorProvider.ktorClient.post(artemisContext.serverUrl) {

@@ -1,11 +1,11 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.network
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
-import de.tum.informatics.www1.artemis.native_app.core.data.service.ArtemisContextBasedService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.LoggedInBasedService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 
-interface ChannelService : ArtemisContextBasedService {
+interface ChannelService : LoggedInBasedService {
 
     suspend fun getChannels(courseId: Long): NetworkResponse<List<ChannelChat>>
 

@@ -1,5 +1,6 @@
-package de.tum.informatics.www1.artemis.native_app.core.data.service
+package de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context
 
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
@@ -9,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.onStart
 
-interface ArtemisContextBasedService {
+interface ArtemisContextBasedService<T: ArtemisContext> {
     val onReloadRequired: Flow<Unit>
 }
 
@@ -25,11 +26,11 @@ interface ArtemisContextBasedService {
  * @param serviceCall A suspend function representing the network call to be performed.
  * @return A flow emitting `DataState` representing the state of the network call.
  */
-fun <T : Any, S> S.performAutoReloadingNetworkCall(
+fun <T : Any, S, AC> S.performAutoReloadingNetworkCall(
     networkStatusProvider: NetworkStatusProvider,
     manualReloadFlow: Flow<Unit> = emptyFlow(),
     serviceCall: suspend S.() -> NetworkResponse<T>
-): Flow<DataState<T>> where S : ArtemisContextBasedService = flatMapLatest(
+): Flow<DataState<T>> where S : ArtemisContextBasedService<AC> = flatMapLatest(
     this.onReloadRequired,
     manualReloadFlow.onStart { emit(Unit) }
 ) { _, _ ->
