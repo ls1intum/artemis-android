@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.datastore.impl
 
+import android.util.Log
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextImpl
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
@@ -12,6 +13,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+
+const val TAG = "ArtemisContextProviderImpl"
 
 class ArtemisContextProviderImpl(
     serverConfigurationService: ServerConfigurationService,
@@ -64,10 +67,12 @@ class ArtemisContextProviderImpl(
 
 
     override fun setCourseId(courseId: Long) {
+        Log.d(TAG, "Setting the courseId of the ArtemisContext to $courseId")
         _courseId.value = courseId
     }
 
-    override fun resetCourseId() {
+    override fun clearCourseId() {
+        Log.d(TAG, "Clearing the courseId of the ArtemisContext")
         _courseId.value = null
     }
 }

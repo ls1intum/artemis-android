@@ -7,5 +7,5 @@ interface ArtemisContextProvider {
     val stateFlow: StateFlow<ArtemisContext>
 
     fun setCourseId(courseId: Long)
-    fun resetCourseId()
+    fun clearCourseId()
 }

@@ -16,7 +16,7 @@ private object EmptyArtemisContextProvider : ArtemisContextProvider {
     override val stateFlow = MutableStateFlow(ArtemisContextImpl.Empty)
 
     override fun setCourseId(courseId: Long) {}
-    override fun resetCourseId() {}
+    override fun clearCourseId() {}
 }
 
 @Composable
