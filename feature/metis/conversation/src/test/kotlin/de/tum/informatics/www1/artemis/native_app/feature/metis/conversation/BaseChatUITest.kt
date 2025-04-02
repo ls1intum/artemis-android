@@ -14,9 +14,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.ArtemisContextImpl
+import de.tum.informatics.www1.artemis.native_app.core.data.test.TestArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
+import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.test.ArtemisImageProviderStub
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.impl.EmojiServiceStub
@@ -280,8 +284,18 @@ abstract class BaseChatUITest : BaseComposeTest() {
                         courseId = course.id!!,
                         conversationId = conversation.id
                     )))
-                }
+                },
+                LocalArtemisContextProvider provides TestArtemisContextProvider(
+                    artemisContext = ArtemisContextImpl.Course(
+                        serverUrl = "",
+                        authToken = "",
+                        loginName = "",
+                        account = Account(id = clientId),
+                        courseId = course.id!!
+                    )
+                )
             ) {
+
                 val list = posts.map { post ->
                     if (post.hasForwardedMessages == true) {
                         ChatListItem.PostItem.IndexedItem.PostWithForwardedMessage(
