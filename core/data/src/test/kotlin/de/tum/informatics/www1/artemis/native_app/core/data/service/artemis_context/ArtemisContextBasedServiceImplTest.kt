@@ -95,7 +95,7 @@ class ArtemisContextBasedServiceImplTest {
         val courseContext = ArtemisContextImpl.Course(
             serverUrl = initialContext.serverUrl,
             authToken = initialContext.authToken,
-            username = initialContext.username,
+            loginName = initialContext.loginName,
             courseId = 123L
         )
 
@@ -115,7 +115,7 @@ class ArtemisContextBasedServiceImplTest {
         val initialCourseContext = ArtemisContextImpl.Course(
             serverUrl = initialLoggedInContext.serverUrl,
             authToken = initialLoggedInContext.authToken,
-            username = initialLoggedInContext.username,
+            loginName = initialLoggedInContext.loginName,
             courseId = 123L
         )
 

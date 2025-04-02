@@ -5,8 +5,7 @@ sealed interface ArtemisContext {
 
     sealed interface LoggedIn: ArtemisContext {
         val authToken: String
-        /** Also referred to as loginName */
-        val username: String
+        val loginName: String
     }
 
     sealed interface Course: LoggedIn {

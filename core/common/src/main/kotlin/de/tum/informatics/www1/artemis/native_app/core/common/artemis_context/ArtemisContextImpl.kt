@@ -13,13 +13,13 @@ object ArtemisContextImpl {
     data class LoggedIn(
         override val serverUrl: String,
         override val authToken: String,
-        override val username: String,
+        override val loginName: String,
     ) : ArtemisContext.LoggedIn
 
     data class Course(
         override val serverUrl: String,
         override val authToken: String,
-        override val username: String,
+        override val loginName: String,
         override val courseId: Long,
     ) : ArtemisContext.Course
 }
