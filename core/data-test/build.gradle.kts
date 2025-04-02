@@ -1,5 +1,6 @@
 plugins {
     id("artemis.android.library")
+    id("artemis.android.flavor.library.instanceSelection")
 }
 
 android {

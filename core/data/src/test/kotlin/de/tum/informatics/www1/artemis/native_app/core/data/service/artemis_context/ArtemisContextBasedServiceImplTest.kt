@@ -1,10 +1,11 @@
 package de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context
 
+import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.ArtemisContext
 import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.ArtemisContextImpl
-import de.tum.informatics.www1.artemis.native_app.core.common.test.TestArtemisContextProvider
-import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
+import de.tum.informatics.www1.artemis.native_app.core.data.test.TestArtemisContextProvider
+import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -91,6 +92,7 @@ class ArtemisContextBasedServiceImplTest {
             serverUrl = initialContext.serverUrl,
             authToken = initialContext.authToken,
             loginName = initialContext.loginName,
+            account = Account(),
             courseId = 123L
         )
 
@@ -111,6 +113,7 @@ class ArtemisContextBasedServiceImplTest {
             serverUrl = initialLoggedInContext.serverUrl,
             authToken = initialLoggedInContext.authToken,
             loginName = initialLoggedInContext.loginName,
+            account = Account(),
             courseId = 123L
         )
 
