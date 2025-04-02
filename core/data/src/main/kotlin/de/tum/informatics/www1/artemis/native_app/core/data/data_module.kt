@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.core.data
 
 import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.ArtemisContextProvider
+import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.impl.ArtemisContextProviderImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProviderImpl
@@ -12,7 +13,6 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.network.Part
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ServerProfileInfoService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ServerTimeService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl.AccountDataServiceImpl
-import de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl.ArtemisContextProviderImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl.CourseExerciseServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl.CourseServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl.ExerciseServiceImpl

@@ -1,7 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.login.test
 
-import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.ArtemisContextImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.ArtemisContextProvider
+import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.impl.ArtemisContextImpl
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.network.LoginService

@@ -14,6 +14,9 @@ sealed interface ArtemisContext {
 
     sealed interface AccountLoaded: LoggedIn {
         val account: Account
+
+        val clientId: Long
+            get() = account.id
     }
 
     sealed interface Course: AccountLoaded {

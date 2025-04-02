@@ -1,8 +1,7 @@
-package de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl
+package de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.impl
 
 import android.util.Log
 import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.ArtemisContext
-import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.ArtemisContextImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService

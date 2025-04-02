@@ -62,8 +62,7 @@ fun UserProfileDialog(
         parametersOf(courseId, userId)
     }
 
-    val clientId = courseArtemisContext.account.id
-    val isSendMessageAvailable = clientId != userId
+    val isSendMessageAvailable = courseArtemisContext.clientId != userId
     val context = LocalContext.current
 
     UserProfileDialogImpl(

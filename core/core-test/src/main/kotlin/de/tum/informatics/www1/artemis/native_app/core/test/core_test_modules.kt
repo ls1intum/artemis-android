@@ -1,12 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.core.test
 
-import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.common.commonModule
+import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.ArtemisContextProvider
+import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.impl.ArtemisContextProviderImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.dataModule
 import de.tum.informatics.www1.artemis.native_app.core.data.test.testDataModule
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.datastoreModule
-import de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl.ArtemisContextProviderImpl
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.TestServerConfigurationProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.test.uiTestModule
 import de.tum.informatics.www1.artemis.native_app.core.websocket.websocketModule

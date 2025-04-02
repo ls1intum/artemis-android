@@ -1,8 +1,8 @@
 package de.tum.informatics.www1.artemis.native_app.core.data.test
 
 import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.ArtemisContext
-import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.ArtemisContextImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.ArtemisContextProvider
+import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.impl.ArtemisContextImpl
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
