@@ -8,6 +8,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
@@ -98,6 +99,8 @@ class BrowseChannelsE2eTest : ConversationBaseTest() {
             networkStatusProvider = get(),
             coroutineContext = testDispatcher
         )
+
+        get<ArtemisContextProvider>().setCourseId(course.id!!)
 
         composeTestRule.setContent {
             BrowseChannelsScreen(
