@@ -50,12 +50,13 @@ class ChannelServiceImpl(
                 )
             }
 
-            parameter("courseWideChannelIds", channelIds.joinToString(","))
+            parameter("conversationIds", channelIds.joinToString(","))
             parameter("postSortCriterion", "CREATION_DATE")
             parameter("sortingOrder", "DESCENDING")
             parameter("pagingEnabled", "true")
             parameter("page", "0")
             parameter("size", "\\(50)")
+            parameter("filterToCourseWide", "true")
             parameter("filterToUnresolved", "true")
         }.bind {
             it.map { message ->
