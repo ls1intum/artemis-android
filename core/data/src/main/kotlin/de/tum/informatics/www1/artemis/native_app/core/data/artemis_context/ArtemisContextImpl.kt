@@ -1,6 +1,5 @@
-package de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.impl
+package de.tum.informatics.www1.artemis.native_app.core.data.artemis_context
 
-import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.ArtemisContext
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 
 

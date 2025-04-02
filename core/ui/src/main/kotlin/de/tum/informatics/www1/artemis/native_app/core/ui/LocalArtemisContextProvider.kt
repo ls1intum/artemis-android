@@ -4,8 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
+import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.ArtemisContextImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.ArtemisContextProvider
-import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.impl.ArtemisContextImpl
 import kotlinx.coroutines.flow.MutableStateFlow
 
 val LocalArtemisContextProvider: ProvidableCompositionLocal<ArtemisContextProvider> = compositionLocalOf {

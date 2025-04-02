@@ -2,7 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_con
 
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.ArtemisContext
-import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.impl.ArtemisContextImpl
+import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.ArtemisContextImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.test.TestArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account

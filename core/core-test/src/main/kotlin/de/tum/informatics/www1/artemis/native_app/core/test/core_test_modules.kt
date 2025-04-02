@@ -2,7 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.core.test
 
 import de.tum.informatics.www1.artemis.native_app.core.common.commonModule
 import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.ArtemisContextProvider
-import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.impl.ArtemisContextProviderImpl
+import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.ArtemisContextProviderImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.dataModule
 import de.tum.informatics.www1.artemis.native_app.core.data.test.testDataModule
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService

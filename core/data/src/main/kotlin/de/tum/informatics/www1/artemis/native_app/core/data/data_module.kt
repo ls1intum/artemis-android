@@ -1,7 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.core.data
 
 import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.ArtemisContextProvider
-import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.impl.ArtemisContextProviderImpl
+import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.ArtemisContextProviderImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProviderImpl
