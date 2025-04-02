@@ -1,8 +1,8 @@
 package de.tum.informatics.www1.artemis.native_app.feature.login
 
 import androidx.lifecycle.viewModelScope
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ServerProfileInfoService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerProfileInfoService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.defaults.ArtemisInstances
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import kotlinx.coroutines.flow.SharingStarted

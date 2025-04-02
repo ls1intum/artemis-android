@@ -2,7 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.force_update.service
 
 import de.tum.informatics.www1.artemis.native_app.core.common.app_version.NormalizedAppVersion
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
-import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerProfileInfoService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ServerProfileInfoService
 
 interface UpdateService {
     suspend fun getLatestVersion(

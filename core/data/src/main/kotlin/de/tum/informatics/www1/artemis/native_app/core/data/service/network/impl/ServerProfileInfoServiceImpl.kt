@@ -1,9 +1,9 @@
-package de.tum.informatics.www1.artemis.native_app.core.datastore.impl
+package de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
-import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerProfileInfoService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ServerProfileInfoService
 import de.tum.informatics.www1.artemis.native_app.core.model.server_config.ProfileInfo
 import io.ktor.client.call.body
 import io.ktor.client.request.accept

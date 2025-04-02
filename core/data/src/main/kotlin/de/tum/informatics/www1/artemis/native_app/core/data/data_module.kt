@@ -8,12 +8,14 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.network.Cour
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ExerciseService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ParticipationService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ServerProfileInfoService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ServerTimeService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl.AccountDataServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl.CourseExerciseServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl.CourseServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl.ExerciseServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl.ParticipationServiceImpl
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl.ServerProfileInfoServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl.ServerTimeServiceImpl
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.singleOf
@@ -29,4 +31,5 @@ val dataModule = module {
     single<CourseExerciseService> { CourseExerciseServiceImpl(get(), get()) }
     single<ParticipationService> { ParticipationServiceImpl(get(), get()) }
     single<ServerTimeService> { ServerTimeServiceImpl(get(), get()) }
+    single<ServerProfileInfoService> { ServerProfileInfoServiceImpl(get()) }
 }

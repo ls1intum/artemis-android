@@ -18,8 +18,8 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:common"))
     implementation(project(":core:model"))
-    implementation(project(":core:data"))
 
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
@@ -37,5 +37,4 @@ dependencies {
     implementation(libs.kotlinx.datetime)
 
     implementation(libs.auth0.java.jwt)
-    implementation(project(":core:common"))
 }
