@@ -22,7 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.web.WebContent
 import com.google.accompanist.web.WebViewState
-import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.authTokenOrEmptyString
+import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.authTokenOrEmptyString
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.collectArtemisContextAsState
 import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.PdfFile

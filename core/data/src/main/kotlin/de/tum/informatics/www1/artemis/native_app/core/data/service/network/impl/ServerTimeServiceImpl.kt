@@ -1,7 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl
 
 import de.tum.informatics.www1.artemis.native_app.core.common.ClockWithOffset
-import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
+import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.common.offsetBy
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.retryNetworkCall

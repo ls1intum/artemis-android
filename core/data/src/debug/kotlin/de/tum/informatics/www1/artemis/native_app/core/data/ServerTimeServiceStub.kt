@@ -1,7 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.core.data
 
 import de.tum.informatics.www1.artemis.native_app.core.common.ClockWithOffset
-import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
+import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.ArtemisContext
 import de.tum.informatics.www1.artemis.native_app.core.common.offsetBy
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ServerTimeService
 import kotlinx.coroutines.flow.Flow

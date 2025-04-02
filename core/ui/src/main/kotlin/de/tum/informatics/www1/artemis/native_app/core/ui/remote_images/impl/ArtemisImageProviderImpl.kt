@@ -8,9 +8,9 @@ import androidx.compose.ui.platform.LocalContext
 import coil.ImageLoader
 import coil3.request.ImageRequest
 import coil3.request.ImageResult
-import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
-import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
-import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.authTokenOrEmptyString
+import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.ArtemisContext
+import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.ArtemisContextProvider
+import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.authTokenOrEmptyString
 import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.ui.collectArtemisContextAsState
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ArtemisImageProvider

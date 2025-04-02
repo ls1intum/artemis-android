@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.data
 
+import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProviderImpl
@@ -11,6 +12,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.network.Part
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ServerProfileInfoService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ServerTimeService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl.AccountDataServiceImpl
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl.ArtemisContextProviderImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl.CourseExerciseServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl.CourseServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl.ExerciseServiceImpl
@@ -27,9 +29,11 @@ val dataModule = module {
 
     single<CourseService> { CourseServiceImpl(get(), get()) }
     single<ExerciseService> { ExerciseServiceImpl(get(), get()) }
-    single<AccountDataService> { AccountDataServiceImpl(androidContext(), get(), get(), get()) }
+    single<AccountDataService> { AccountDataServiceImpl(androidContext(), get(), get(), get(), get()) }
     single<CourseExerciseService> { CourseExerciseServiceImpl(get(), get()) }
     single<ParticipationService> { ParticipationServiceImpl(get(), get()) }
     single<ServerTimeService> { ServerTimeServiceImpl(get(), get()) }
     single<ServerProfileInfoService> { ServerProfileInfoServiceImpl(get()) }
+
+    single<ArtemisContextProvider> { ArtemisContextProviderImpl(get(), get(), get()) }
 }

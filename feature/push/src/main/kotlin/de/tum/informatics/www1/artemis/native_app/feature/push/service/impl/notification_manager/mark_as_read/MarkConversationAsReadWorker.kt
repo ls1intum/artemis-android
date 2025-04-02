@@ -3,8 +3,8 @@ package de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.not
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
-import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.authTokenOrEmptyString
+import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.ArtemisContextProvider
+import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.authTokenOrEmptyString
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

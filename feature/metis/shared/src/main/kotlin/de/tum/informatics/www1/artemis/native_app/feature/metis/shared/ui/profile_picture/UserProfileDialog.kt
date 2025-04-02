@@ -26,10 +26,12 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.ArtemisContext
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.collectArtemisContextAsState
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.common.UserRoleBadge
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.LocalVisibleMetisContextManager
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -47,10 +49,13 @@ fun UserProfileDialog(
     profilePictureData: ProfilePictureData,
     onDismiss: () -> Unit,
 ) {
-    val metisContext= LocalVisibleMetisContextManager.current.getMostRecentMetisContext()
-    require(metisContext != null) { "No MetisContext provided." }
+    val artemisContext by LocalArtemisContextProvider.current.collectArtemisContextAsState()
+    require(artemisContext is ArtemisContext.Course) {
+        "UserProfileDialog can only be used in a course context"
+    }
 
-    val courseId = metisContext.metisContext.courseId
+    val courseArtemisContext = artemisContext as ArtemisContext.Course
+    val courseId = courseArtemisContext.courseId
 
     val viewModel = koinViewModel<UserProfileDialogViewModel>(
         key = "$courseId|$userId",

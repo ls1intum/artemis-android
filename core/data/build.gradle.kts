@@ -1,5 +1,6 @@
 plugins {
     id("artemis.android.library")
+    id("artemis.android.flavor.library.instanceSelection")
     kotlin("plugin.serialization")
 }
 
@@ -11,6 +12,7 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:model"))
     implementation(project(":core:device"))
+    implementation(project(":core:datastore"))
 
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.core.jvm)

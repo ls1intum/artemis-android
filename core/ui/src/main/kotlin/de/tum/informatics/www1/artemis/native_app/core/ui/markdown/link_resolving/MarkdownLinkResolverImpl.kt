@@ -8,7 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.authTokenOrEmptyString
+import de.tum.informatics.www1.artemis.native_app.core.data.artemis_context.authTokenOrEmptyString
 import de.tum.informatics.www1.artemis.native_app.core.common.markdown.MarkdownUrlUtil
 import de.tum.informatics.www1.artemis.native_app.core.ui.LinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextProvider

@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.core.common.artemis_context
+package de.tum.informatics.www1.artemis.native_app.core.data.artemis_context
 
 fun ArtemisContext.ifLoggedIn(
     block: (ArtemisContext.LoggedIn) -> Unit
