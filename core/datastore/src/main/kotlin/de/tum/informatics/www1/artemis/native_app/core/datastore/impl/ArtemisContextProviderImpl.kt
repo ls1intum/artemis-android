@@ -53,14 +53,14 @@ class ArtemisContextProviderImpl(
             return ArtemisContextImpl.LoggedIn(
                 serverUrl = serverUrl,
                 authToken = authData.authToken,
-                username = authData.username
+                loginName = authData.username
             )
         }
 
         return ArtemisContextImpl.Course(
             serverUrl = serverUrl,
             authToken = authData.authToken,
-            username = authData.username,
+            loginName = authData.username,
             courseId = courseId
         )
     }

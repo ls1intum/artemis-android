@@ -2,14 +2,13 @@ package de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_con
 
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextImpl
-import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
+import de.tum.informatics.www1.artemis.native_app.core.common.test.TestArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -26,11 +25,7 @@ class ArtemisContextBasedServiceImplTest {
 
     private val ktorProvider = mockk<KtorProvider>()
     private val artemisContextFlow = MutableStateFlow<ArtemisContext>(initialContext)
-    private val artemisContextProvider = object : ArtemisContextProvider {
-        override val stateFlow: StateFlow<ArtemisContext> = artemisContextFlow
-        override fun setCourseId(courseId: Long) {}
-        override fun clearCourseId() {}
-    }
+    private val artemisContextProvider = TestArtemisContextProvider(stateFlow = artemisContextFlow)
 
     @Test
     fun `test GIVEN a LoggedInBasedService WHEN emitting a new LoggedIn context THEN onArtemisContextChanged emits`() {
@@ -95,7 +90,7 @@ class ArtemisContextBasedServiceImplTest {
         val courseContext = ArtemisContextImpl.Course(
             serverUrl = initialContext.serverUrl,
             authToken = initialContext.authToken,
-            username = initialContext.username,
+            loginName = initialContext.loginName,
             courseId = 123L
         )
 
@@ -115,7 +110,7 @@ class ArtemisContextBasedServiceImplTest {
         val initialCourseContext = ArtemisContextImpl.Course(
             serverUrl = initialLoggedInContext.serverUrl,
             authToken = initialLoggedInContext.authToken,
-            username = initialLoggedInContext.username,
+            loginName = initialLoggedInContext.loginName,
             courseId = 123L
         )
 
