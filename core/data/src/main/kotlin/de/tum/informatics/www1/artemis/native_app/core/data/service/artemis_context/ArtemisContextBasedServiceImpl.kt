@@ -38,9 +38,8 @@ sealed class ArtemisContextBasedServiceImpl<T: ArtemisContext>(
         .filter { contextClass.isInstance(it) }
         .map { contextClass.cast(it) }
 
-    override val onReloadRequired: Flow<Unit> = filteredArtemisContextFlow
+    override val onArtemisContextChanged: Flow<T> = filteredArtemisContextFlow
         .distinctUntilChanged()
-        .map { Unit }
 
     suspend fun artemisContext(): T = filteredArtemisContextFlow.first()
 

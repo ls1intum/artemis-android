@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.SavedStateHandle
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.ServerTimeServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ParticipationService
@@ -26,7 +27,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.Qui
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizParticipationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.service.QuizExerciseService
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.service.QuizParticipationService
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
 @PlayStoreScreenshots
@@ -74,7 +74,7 @@ private fun `Quiz - Multiple Choice Question`() {
         websocketProvider = WebsocketProviderStub(),
         networkStatusProvider = NetworkStatusProviderStub(),
         participationService = object : ParticipationService {
-            override val onReloadRequired: Flow<Unit> = emptyFlow()
+            override val onArtemisContextChanged = emptyFlow<ArtemisContext.LoggedIn>()
             override suspend fun findParticipation(
                 exerciseId: Long
             ): NetworkResponse<Participation> = NetworkResponse.Response(

@@ -11,13 +11,12 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.onStart
 
 interface ArtemisContextBasedService<T: ArtemisContext> {
-    val onReloadRequired: Flow<Unit>
+    val onArtemisContextChanged: Flow<T>
 }
 
 /**
- * Performs a network call with automatic reloading. The reload happens when the onReloadRequired
- * flow emits (meaning that the required ArtemisContext for this service changed), or when the
- * manualReloadFlow emits.
+ * Performs a network call with automatic reloading. The reload happens when the artemis context for
+ * this service changed or when the manualReloadFlow emits.
  *
  * @param T The type of the response data.
  * @param S The service type which must implement `ArtemisContextBasedService`.
@@ -31,7 +30,7 @@ fun <T : Any, S, AC> S.performAutoReloadingNetworkCall(
     manualReloadFlow: Flow<Unit> = emptyFlow(),
     serviceCall: suspend S.() -> NetworkResponse<T>
 ): Flow<DataState<T>> where S : ArtemisContextBasedService<AC> = flatMapLatest(
-    this.onReloadRequired,
+    this.onArtemisContextChanged,
     manualReloadFlow.onStart { emit(Unit) }
 ) { _, _ ->
     retryOnInternet(networkStatusProvider.currentNetworkStatus) {

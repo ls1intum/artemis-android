@@ -139,7 +139,7 @@ internal class LectureViewModel(
         }
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
-    private val serverClock: Flow<Clock> = serverTimeService.onReloadRequired.flatMapLatest {
+    private val serverClock: Flow<Clock> = serverTimeService.onArtemisContextChanged.flatMapLatest {
         serverTimeService.getServerClock()
     }
         .shareIn(viewModelScope + coroutineContext, SharingStarted.WhileSubscribed(1.seconds), replay = 1)
