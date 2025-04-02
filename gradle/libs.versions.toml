@@ -20,7 +20,7 @@ coil2 = "2.7.0"     # The markwon library still depends on coil2: https://github
 kotlin = "2.1.20"
 kotlinxCoroutines = "1.10.1"
 kotlinxDatetime = "0.6.2"
-kotlinxSerializationJson = "1.8.0"
+kotlinxSerializationJson = "1.8.1"
 koin = "4.0.4"
 koinAndroidxCompose = "4.0.0"
 kover = "0.9.1"
@@ -32,7 +32,7 @@ mockk = "1.13.17"
 ossLicensesPlugin = "0.10.6"
 placeholderMaterial = "2.0.0"
 room = "2.6.1"
-sentry-android = "8.5.0"
+sentry-android = "8.6.0"
 work = "2.10.0"
 
 [libraries]
