@@ -18,7 +18,6 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -28,18 +27,15 @@ import kotlin.reflect.cast
 
 const val TAG = "ArtemisContextBasedServiceImpl"
 
-sealed class ArtemisContextBasedServiceImpl<T: ArtemisContext>(
+abstract class ArtemisContextBasedServiceImpl<T: ArtemisContext>(
     val ktorProvider: KtorProvider,
     val artemisContextProvider: ArtemisContextProvider,
     contextClass: KClass<T>,
 ) : ArtemisContextBasedService<T> {
 
-    private val filteredArtemisContextFlow: Flow<T> = artemisContextProvider.stateFlow
+    protected val filteredArtemisContextFlow: Flow<T> = artemisContextProvider.stateFlow
         .filter { contextClass.isInstance(it) }
         .map { contextClass.cast(it) }
-
-    override val onArtemisContextChanged: Flow<T> = filteredArtemisContextFlow
-        .distinctUntilChanged()
 
     suspend fun artemisContext(): T = filteredArtemisContextFlow.first()
 
