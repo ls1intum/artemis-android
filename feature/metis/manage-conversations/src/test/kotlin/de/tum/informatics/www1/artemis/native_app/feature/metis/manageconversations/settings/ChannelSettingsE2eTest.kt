@@ -211,4 +211,25 @@ internal class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
 
         composeTestRule.waitUntil(DefaultTimeoutMillis) { channelDeleted }
     }
+
+    @Test(timeout = DefaultTestTimeoutMillis)
+    fun `can toggle channel privacy`() {
+        val channel = runBlockingWithTestTimeout {
+            conversationService.createChannel(
+                courseId = course.id!!,
+                name = "toggleprivacychannel",
+                description = "privacy test",
+                isPublic = true,
+                isAnnouncement = false,
+                isCourseWide = false,
+                authToken = accessToken,
+                serverUrl = testServerUrl
+            ).orThrow("Could not create channel")
+        }
+
+        setupUiAndViewModel(channel)
+
+        toggleChannelPrivacyTestImpl(channel)
+
+    }
 }
