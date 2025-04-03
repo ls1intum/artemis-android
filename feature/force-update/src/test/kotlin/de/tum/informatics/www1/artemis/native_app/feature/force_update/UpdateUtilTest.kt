@@ -4,6 +4,7 @@ import de.tum.informatics.www1.artemis.native_app.core.common.app_version.Normal
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.feature.force_update.repository.UpdateUtil
+import de.tum.informatics.www1.artemis.native_app.feature.force_update.service.UpdateServiceResult
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -23,94 +24,116 @@ class UpdateUtilTest {
     private val version1_3_0 = NormalizedAppVersion("1.3.0")
 
     @Test
-    fun `isTimeToCheckUpdate should return true if more than 2 days have passed`() {
-        val lastCheck = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(3) // 3 days ago
+    fun `isTimeToCheckUpdate should return true if more than 60s passed`() {
+        val lastCheck = System.currentTimeMillis() - TimeUnit.SECONDS.toMillis(61)
         val now = System.currentTimeMillis()
 
         assertTrue(UpdateUtil.isTimeToCheckUpdate(lastCheck, now))
     }
 
     @Test
-    fun `isTimeToCheckUpdate should return false if less than 2 days have passed`() {
-        val lastCheck = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1) // 1 day ago
+    fun `isTimeToCheckUpdate should return false if less than 60s passed`() {
+        val lastCheck = System.currentTimeMillis() - TimeUnit.SECONDS.toMillis(30)
         val now = System.currentTimeMillis()
 
         assertFalse(UpdateUtil.isTimeToCheckUpdate(lastCheck, now))
     }
 
     @Test
-    fun `createUpdateResultBasedOnServiceResponse should detect update if server version is newer`() = runBlocking {
-        var detectedVersion: NormalizedAppVersion? = null
-
-        val result = UpdateUtil.createUpdateResultBasedOnServiceResponse(
-            response = NetworkResponse.Response(version1_3_0),
-            currentVersion = version1_2_3,
-            storedServerVersion = version1_2_3,
-            onUpdateDetected = { newVersion ->
-                detectedVersion = newVersion
-            }
+    fun `processUpdateResponse should detect update if server min version is higher`() {
+        val response = NetworkResponse.Response(
+            UpdateServiceResult(
+                minVersion = version1_3_0,
+                recommendedVersion = version1_3_0,
+                features = listOf("new-feature")
+            )
         )
+
+        val result = UpdateUtil.processUpdateResponse(response, currentVersion = version1_2_3)
 
         assertTrue(result.updateAvailable)
         assertTrue(result.forceUpdate)
         assertEquals(version1_2_3, result.currentVersion)
         assertEquals(version1_3_0, result.minVersion)
-        assertEquals(version1_3_0, detectedVersion)
     }
 
-
-
     @Test
-    fun `createUpdateResultBasedOnServiceResponse should not detect update if server version is same`() = runBlocking {
-        var detectedVersion: NormalizedAppVersion? = null
-
-        val result = UpdateUtil.createUpdateResultBasedOnServiceResponse(
-            response = NetworkResponse.Response(version1_2_3),
-            currentVersion = version1_2_3,
-            storedServerVersion = version1_2_3,
-            onUpdateDetected = { detectedVersion = it }
+    fun `processUpdateResponse should not detect update if server min version is equal`() {
+        val response = NetworkResponse.Response(
+            UpdateServiceResult(
+                minVersion = version1_2_3,
+                recommendedVersion = version1_3_0,
+                features = emptyList()
+            )
         )
+
+        val result = UpdateUtil.processUpdateResponse(response, currentVersion = version1_2_3)
 
         assertFalse(result.updateAvailable)
         assertFalse(result.forceUpdate)
-        assertEquals(version1_2_3, result.currentVersion)
         assertEquals(version1_2_3, result.minVersion)
-        assertEquals(null, detectedVersion)
     }
 
     @Test
-    fun `createUpdateResultBasedOnServiceResponse should not detect update if server version is older`() = runBlocking {
-        var detectedVersion: NormalizedAppVersion? = null
-
-        val result = UpdateUtil.createUpdateResultBasedOnServiceResponse(
-            response = NetworkResponse.Response(version1_1_9),
-            currentVersion = version1_2_3,
-            storedServerVersion = version1_2_3,
-            onUpdateDetected = { detectedVersion = it }
+    fun `processUpdateResponse should not detect update if server version is older`() {
+        val response = NetworkResponse.Response(
+            UpdateServiceResult(
+                minVersion = version1_1_9,
+                recommendedVersion = version1_2_3,
+                features = emptyList()
+            )
         )
+
+        val result = UpdateUtil.processUpdateResponse(response, currentVersion = version1_2_3)
 
         assertFalse(result.updateAvailable)
         assertFalse(result.forceUpdate)
-        assertEquals(version1_2_3, result.currentVersion)
         assertEquals(version1_1_9, result.minVersion)
-        assertEquals(null, detectedVersion)
     }
 
     @Test
-    fun `createUpdateResultBasedOnServiceResponse should return no update needed if network failure`() = runBlocking {
-        var detectedVersion: NormalizedAppVersion? = null
-
-        val result = UpdateUtil.createUpdateResultBasedOnServiceResponse(
+    fun `processUpdateResponse should handle network failure`()  = runBlocking {
+        val result = UpdateUtil.processUpdateResponse(
             response = NetworkResponse.Failure(Exception()),
             currentVersion = version1_2_3,
-            storedServerVersion = NormalizedAppVersion.ZERO,
-            onUpdateDetected = { detectedVersion = it }
         )
 
         assertFalse(result.updateAvailable)
         assertFalse(result.forceUpdate)
-        assertEquals(version1_2_3, result.currentVersion)
-        assertEquals(NormalizedAppVersion.ZERO, result.minVersion)
-        assertEquals(null, detectedVersion)
+        assertEquals(version1_2_3, result.minVersion)
+    }
+
+    @Test
+    fun `processUpdateResponse should enable feature flag when present`() {
+        FeatureAvailability.setAvailableFeatures(emptyList()) //reset
+
+        val response = NetworkResponse.Response(
+            UpdateServiceResult(
+                minVersion = version1_3_0,
+                recommendedVersion = version1_3_0,
+                features = listOf("CourseSpecificNotifications")
+            )
+        )
+
+        UpdateUtil.processUpdateResponse(response, version1_2_3)
+
+        assertTrue(FeatureAvailability.isEnabled(Feature.CourseNotifications))
+    }
+
+    @Test
+    fun `processUpdateResponse should not enable feature flag when absent`() {
+        FeatureAvailability.setAvailableFeatures(emptyList()) //reset
+
+        val response = NetworkResponse.Response(
+            UpdateServiceResult(
+                minVersion = version1_2_3,
+                recommendedVersion = version1_3_0,
+                features = emptyList()
+            )
+        )
+
+        UpdateUtil.processUpdateResponse(response, version1_2_3)
+
+        assertFalse(FeatureAvailability.isEnabled(Feature.CourseNotifications))
     }
 }
