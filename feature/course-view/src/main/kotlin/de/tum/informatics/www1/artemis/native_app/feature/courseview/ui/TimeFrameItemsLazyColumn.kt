@@ -16,12 +16,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.SaverScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -29,13 +31,18 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.TimeFrame
+import de.tum.informatics.www1.artemis.native_app.feature.courseview.TimeFrameUtils
+import de.tum.informatics.www1.artemis.native_app.feature.courseview.TimeFrameUtils.toRangeString
 import kotlinx.parcelize.Parcelize
+
+const val MAX_NUMBER_OF_ITEMS_WITHOUT_SUB_LABEL = 5
 
 @Composable
 internal fun <T> TimeFrameItemsLazyColumn(
     modifier: Modifier,
     timeFrameGroup: List<TimeFrame<T>>,
     verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(8.dp),
+    query: String,
     getItemId: T.() -> Long,
     itemContent: @Composable (Modifier, T) -> Unit
 ) {
@@ -55,12 +62,33 @@ internal fun <T> TimeFrameItemsLazyColumn(
         }
     }
 
+    LaunchedEffect(query, timeFrameGroup) {
+        if (query.isNotBlank()) {
+            timeFrameGroup.forEach { frame ->
+                if (frame.items.isNotEmpty()) {
+                    timeFrameGroupExpandedState[frame.key] = true
+                }
+            }
+        } else {
+            timeFrameGroupExpandedState.forEach { (key, _) ->
+                val frame = timeFrameGroup.find { it.key == key } ?: return@forEach
+                val defaultExpanded = when (frame) {
+                    is TimeFrame.Current -> true
+                    is TimeFrame.DueSoon -> true
+                    else -> false
+                }
+                timeFrameGroupExpandedState[key] = defaultExpanded
+            }
+        }
+    }
+
+
     LazyColumn(
         modifier = modifier,
         verticalArrangement = verticalArrangement,
         contentPadding = Spacings.calculateContentPaddingValues()
     ) {
-        timeFrameGroup.forEachIndexed { index, group ->
+        timeFrameGroup.forEach { group ->
             val isExpanded = timeFrameGroupExpandedState[group.key] == true
             item {
                 TimeFrameItemsSectionHeader(
@@ -76,7 +104,37 @@ internal fun <T> TimeFrameItemsLazyColumn(
                 )
             }
 
-            if (isExpanded) {
+            if (!isExpanded) {
+                return@forEach
+            }
+
+            if (group !is TimeFrame.NoDate && group.items.size > MAX_NUMBER_OF_ITEMS_WITHOUT_SUB_LABEL) {
+                val weeklyGroups = TimeFrameUtils.groupByWeek(
+                    items = group.items
+                )
+
+                weeklyGroups.forEach { weeklyGroup ->
+                    item {
+                        // Sub-header: e.g. "21 Oct 2024 - 27 Oct 2024"
+                        Text(
+                            modifier = Modifier
+                                .animateItem()
+                                .padding(horizontal = Spacings.ScreenHorizontalSpacing)
+                                .padding(Spacings.TimeFrameItems.small),
+                            text = weeklyGroup.indicator.toRangeString(),
+                            style = MaterialTheme.typography.titleSmall,
+                            color = Color.Gray
+                        )
+                    }
+
+                    items(
+                        items = weeklyGroup.items,
+                        key = getItemId
+                    ) { subItem ->
+                        itemContent(Modifier.animateItem(), subItem)
+                    }
+                }
+            } else {
                 items(group.items, key = getItemId) { item ->
                     itemContent(Modifier.animateItem(), item)
                 }
