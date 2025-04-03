@@ -10,8 +10,8 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.test.KoinTest
 import org.koin.test.get
 
-val user1Username: String get() = System.getenv("USER_1_USERNAME") ?: "aa01aaa"
-val user1Password: String get() = System.getenv("USER_1_PASSWORD") ?: "test_user_1_password"
+val user1Username: String get() = System.getenv("USER_1_USERNAME") ?: "artemis_admin"
+val user1Password: String get() = System.getenv("USER_1_PASSWORD") ?: "artemis_admin"
 val user1DisplayName: String get() = System.getenv("USER_1_DISPLAY_NAME") ?: "Test User1"
 
 val user2Username: String get() = System.getenv("USER_2_USERNAME") ?: "aa02aaa"
