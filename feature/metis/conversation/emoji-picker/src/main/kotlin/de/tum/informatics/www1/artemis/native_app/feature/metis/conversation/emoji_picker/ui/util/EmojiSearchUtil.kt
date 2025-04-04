@@ -8,30 +8,38 @@ object EmojiSearchUtil {
         return emojis
             .asSequence()
             .map { EmojiSearchResult.fromQuery(it, query) }
-            .filter { it.isMatching }
-            .sortedByDescending { it.score }
-            .sortedBy { it.firstMatchingKeywordIndex }
+            .filterIsInstance<EmojiSearchResult.Match>()
+            .sortedBy { it.score }
             .map { it.emoji }
             .toList()
     }
 
-
-    private data class EmojiSearchResult(
-        val emoji: Emoji,
-        val firstMatchingKeywordIndex: Int,
-        val score: Float
-    ) {
-        val isMatching: Boolean
-            get() = firstMatchingKeywordIndex != -1
+    private sealed class EmojiSearchResult {
 
         companion object {
             fun fromQuery(emoji: Emoji, query: String): EmojiSearchResult {
                 val firstMatchingKeywordIndex = emoji.keywords.indexOfFirst {
                     it.startsWith(query, ignoreCase = true)
                 }
-                val score = query.length.toFloat() / emoji.emojiId.length     // Matches where only a part of the keyword is matched should be ranked lower
-                return EmojiSearchResult(emoji, firstMatchingKeywordIndex, score)
+
+                if (firstMatchingKeywordIndex == -1) {
+                    return NoMatch
+                }
+
+                val matchPortion = query.length.toFloat() / emoji.emojiId.length        // Between 0 and 1
+                return Match(
+                    emoji = emoji,
+                    score = firstMatchingKeywordIndex - matchPortion
+                )
             }
         }
+
+        data object NoMatch: EmojiSearchResult()
+
+        data class Match(
+            val emoji: Emoji,
+            /** Lower is better */
+            val score: Float
+        ) : EmojiSearchResult()
     }
 }
