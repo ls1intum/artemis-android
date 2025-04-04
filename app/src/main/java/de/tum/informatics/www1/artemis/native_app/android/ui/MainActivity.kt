@@ -66,6 +66,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
 import org.koin.compose.koinInject
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Main and only activity used in the android app.
@@ -240,11 +241,9 @@ class MainActivity : AppCompatActivity(),
 
             LaunchedEffect(serverUrl, lifecycleOwner) {
                 lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                    if(isLoggedIn) {
-                        while (true) {
-                            updateRepository.triggerUpdateCheck()
-                            delay(60_000L)
-                        }
+                    while (isLoggedIn) {
+                        updateRepository.triggerUpdateCheck()
+                        delay(60.seconds)
                     }
                 }
             }

@@ -13,7 +13,6 @@ import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.util.concurrent.TimeUnit
 
 @Category(UnitTest::class)
 @RunWith(RobolectricTestRunner::class)
@@ -22,22 +21,6 @@ class UpdateUtilTest {
     private val version1_1_9 = NormalizedAppVersion("1.1.9")
     private val version1_2_3 = NormalizedAppVersion("1.2.3")
     private val version1_3_0 = NormalizedAppVersion("1.3.0")
-
-    @Test
-    fun `isTimeToCheckUpdate should return true if more than 60s passed`() {
-        val lastCheck = System.currentTimeMillis() - TimeUnit.SECONDS.toMillis(61)
-        val now = System.currentTimeMillis()
-
-        assertTrue(UpdateUtil.isTimeToCheckUpdate(lastCheck, now))
-    }
-
-    @Test
-    fun `isTimeToCheckUpdate should return false if less than 60s passed`() {
-        val lastCheck = System.currentTimeMillis() - TimeUnit.SECONDS.toMillis(30)
-        val now = System.currentTimeMillis()
-
-        assertFalse(UpdateUtil.isTimeToCheckUpdate(lastCheck, now))
-    }
 
     @Test
     fun `processUpdateResponse should detect update if server min version is higher`() {

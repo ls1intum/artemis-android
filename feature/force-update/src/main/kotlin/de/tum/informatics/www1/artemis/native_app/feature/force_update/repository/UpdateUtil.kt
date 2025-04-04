@@ -6,14 +6,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.feature.force_update.FeatureAvailability
 import de.tum.informatics.www1.artemis.native_app.feature.force_update.service.UpdateServiceResult
 
-private const val CHECK_INTERVAL_MS = 60_000L // 60 seconds
-
 object UpdateUtil {
-
-    fun isTimeToCheckUpdate(lastCheckTime: Long, now: Long): Boolean {
-        return (now - lastCheckTime) >= CHECK_INTERVAL_MS
-    }
-
     /**
      * Creates an UpdateResult based on the network response.
      *
