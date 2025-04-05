@@ -30,8 +30,7 @@ class SavedPostServiceImpl(
             ktorProvider.ktorClient.get(serverUrl) {
                 url {
                     appendPathSegments(
-                        *Api.Communication.SavedPosts.path,
-                        courseId.toString(),
+                        *Api.Communication.SavedPosts.path
                     )
                 }
                 parameter("status", status.toString())
