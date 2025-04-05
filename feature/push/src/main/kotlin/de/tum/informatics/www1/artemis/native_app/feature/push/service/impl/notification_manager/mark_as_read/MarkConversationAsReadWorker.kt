@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.authTokenOrEmptyString
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -33,7 +34,7 @@ class MarkConversationAsReadWorker(
             conversationService.markConversationAsRead(
                 courseId = courseId,
                 conversationId = conversationId,
-                authToken = artemisContext.authToken,
+                authToken = artemisContext.authTokenOrEmptyString,
                 serverUrl = artemisContext.serverUrl
             )
 

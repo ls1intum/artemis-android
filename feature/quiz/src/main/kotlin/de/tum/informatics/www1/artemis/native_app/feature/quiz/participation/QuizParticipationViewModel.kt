@@ -123,7 +123,7 @@ internal class QuizParticipationViewModel(
      * Use server time for best time approximation.
      * The server time may change multiple times, as new clocks may be emitted regularly
      */
-    val serverClock: Flow<ClockWithOffset> = serverTimeService.onReloadRequired.flatMapLatest {
+    val serverClock: Flow<ClockWithOffset> = serverTimeService.onArtemisContextChanged.flatMapLatest {
         serverTimeService.getServerClock()
     }
         .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)

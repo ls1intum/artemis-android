@@ -4,19 +4,18 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
-import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.data.test.AccountDataServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
-import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
 import de.tum.informatics.www1.artemis.native_app.core.ui.test.ArtemisImageProviderStub
+import de.tum.informatics.www1.artemis.native_app.device.test.NetworkStatusProviderStub
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.BaseChatUITest
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.sharedConversationModule
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.TEST_TAG_PROFILE_PICTURE_IMAGE
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.TEST_TAG_PROFILE_PICTURE_INITIALS
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.TEST_TAG_PROFILE_PICTURE_UNKNOWN
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.TEST_TAG_USER_PROFILE_DIALOG
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.TEST_TAG_USER_PROFILE_DIALOG_SEND_MESSAGE
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.UserProfileDialogViewModel
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -43,10 +42,16 @@ class ConversationProfilePictureUiTest : BaseChatUITest() {
     val koinTestRule = KoinTestRule.create {
         androidContext(context)
 
-        modules(coreTestModules)
-        modules(sharedConversationModule)
         modules(module {
-            single<AccountDataService> { AccountDataServiceStub(Account(id = clientId)) }
+            single<UserProfileDialogViewModel> { params ->
+                UserProfileDialogViewModel(
+                    courseId = params[0],
+                    userId = params[1],
+                    accountDataService = AccountDataServiceStub(Account(id = clientId)),
+                    networkStatusProvider = NetworkStatusProviderStub(),
+                    coroutineContext = testDispatcher
+                )
+            }
         })
     }
 

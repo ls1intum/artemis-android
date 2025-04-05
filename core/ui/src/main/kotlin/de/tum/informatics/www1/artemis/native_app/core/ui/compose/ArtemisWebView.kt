@@ -26,7 +26,9 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.web.AccompanistWebViewClient
 import com.google.accompanist.web.WebView
 import com.google.accompanist.web.WebViewState
-import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.authTokenOrEmptyString
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.collectArtemisContextAsState
 import kotlin.math.roundToInt
 
 @SuppressLint("SetJavaScriptEnabled")
@@ -35,14 +37,15 @@ fun ArtemisWebView(
     modifier: Modifier,
     webViewState: WebViewState,
     webView: WebView?,
-    artemisContext: ArtemisContext,
     adjustHeightForContent: Boolean = false,
     setWebView: (WebView) -> Unit
 ) {
+    val artemisContext by LocalArtemisContextProvider.current.collectArtemisContextAsState()
+
     LaunchedEffect(artemisContext) {
         CookieManager.getInstance().setCookie(
             artemisContext.serverUrl,
-            "jwt=${artemisContext.authToken}"
+            "jwt=${artemisContext.authTokenOrEmptyString}"
         )
     }
 

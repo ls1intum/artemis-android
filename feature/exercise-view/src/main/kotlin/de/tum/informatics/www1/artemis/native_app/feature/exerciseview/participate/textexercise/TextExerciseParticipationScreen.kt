@@ -130,7 +130,6 @@ internal fun TextExerciseParticipationScreen(
                         webViewState = webViewState,
                         webView = webView,
                         setWebView = { webView = it },
-                        artemisContext = artemisContext
                     )
                 } else {
                     Box(modifier = modifier)

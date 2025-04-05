@@ -4,7 +4,7 @@ import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.Ar
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
-import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.ArtemisContextBasedServiceImpl
+import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.LoggedInBasedServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.feature.courseregistration.service.CourseRegistrationService
 import io.ktor.http.HttpStatusCode
@@ -13,7 +13,7 @@ import io.ktor.http.appendPathSegments
 internal class CourseRegistrationServiceImpl(
     ktorProvider: KtorProvider,
     artemisContextProvider: ArtemisContextProvider,
-) : ArtemisContextBasedServiceImpl(ktorProvider, artemisContextProvider), CourseRegistrationService {
+) : LoggedInBasedServiceImpl(ktorProvider, artemisContextProvider), CourseRegistrationService {
 
     override suspend fun fetchRegistrableCourses(): NetworkResponse<List<Course>> {
         return getRequest {

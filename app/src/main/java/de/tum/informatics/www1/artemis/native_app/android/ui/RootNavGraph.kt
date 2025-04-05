@@ -129,8 +129,8 @@ fun NavGraphBuilder.rootNavGraph(
                 lectureId = lectureId
             ) { }
         },
-        onNavigateToFaq = { courseId, faqId ->
-            navController.navigateToFaqDetail(courseId, faqId) { }
+        onNavigateToFaq = { faqId ->
+            navController.navigateToFaqDetail(faqId) { }
         },
         onNavigateBack = navController::navigateUp
     )

@@ -1,24 +1,22 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.network.impl
 
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.network.ChannelService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.emptyFlow
 
 object ChannelServiceStub : ChannelService {
 
-    override val onReloadRequired: Flow<Unit> = flowOf(Unit)
+    override val onArtemisContextChanged = emptyFlow<ArtemisContext.Course>()
 
     override suspend fun getChannels(
-        courseId: Long,
     ): NetworkResponse<List<ChannelChat>> {
         return NetworkResponse.Response(listOf(ChannelChat(id = 1, name = "Chat")))
     }
 
     override suspend fun getUnresolvedChannels(
-        courseId: Long,
         channelIds: List<Long>,
     ): NetworkResponse<List<Conversation>> {
         return NetworkResponse.Response(listOf(ChannelChat(id = 1, name = "Chat")))
@@ -26,20 +24,17 @@ object ChannelServiceStub : ChannelService {
 
     override suspend fun getExerciseChannel(
         exerciseId: Long,
-        courseId: Long,
     ): NetworkResponse<ChannelChat> {
         return NetworkResponse.Response(ChannelChat(id = 1, name = "Exercise Chat"))
     }
 
     override suspend fun getLectureChannel(
         lectureId: Long,
-        courseId: Long,
     ): NetworkResponse<ChannelChat> {
         return NetworkResponse.Response(ChannelChat(id = 1, name = "Lecture Chat"))
     }
 
     override suspend fun registerInChannel(
-        courseId: Long,
         conversationId: Long,
     ): NetworkResponse<Boolean> {
         return NetworkResponse.Response(true)

@@ -212,7 +212,7 @@ class AutoCompletionUseCase(
     private fun produceFaqAutoCompletionHints(query: String): Flow<DataState<List<AutoCompleteHintCollection>>> {
         if (!isFaqEnabled) return flowOf(DataState.Success(emptyList()))
 
-        return faqRepository.getFaqs(courseId).map { faqsDataState ->
+        return faqRepository.getFaqs().map { faqsDataState ->
             faqsDataState.bind { faqs ->
                 val faqAutoCompleteItems = faqs
                     .filter { it.questionTitle.contains(query, ignoreCase = true) }

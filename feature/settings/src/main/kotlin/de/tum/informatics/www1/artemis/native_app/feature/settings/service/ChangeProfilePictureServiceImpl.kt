@@ -4,7 +4,7 @@ import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.Ar
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
-import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.ArtemisContextBasedServiceImpl
+import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.LoggedInBasedServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
@@ -20,7 +20,7 @@ private const val PLACEHOLDER_FILE_NAME = "profile-picture"
 class ChangeProfilePictureServiceImpl(
     ktorProvider: KtorProvider,
     artemisContextProvider: ArtemisContextProvider
-): ArtemisContextBasedServiceImpl(ktorProvider, artemisContextProvider), ChangeProfilePictureService  {
+): LoggedInBasedServiceImpl(ktorProvider, artemisContextProvider), ChangeProfilePictureService  {
 
     @OptIn(InternalAPI::class)
     override suspend fun upload(

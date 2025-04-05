@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.google.accompanist.web.WebViewState
-import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
@@ -22,7 +21,6 @@ internal fun ExerciseScreenBody(
     exerciseDataState: DataState<Exercise>,
     exerciseChannelDataState: DataState<ChannelChat>,
     isLongToolbar: Boolean,
-    artemisContext: ArtemisContext,
     actions: ExerciseActions,
     webViewState: WebViewState?,
     setWebView: (WebView) -> Unit,
@@ -48,7 +46,6 @@ internal fun ExerciseScreenBody(
                     setWebView = setWebView,
                     webView = webView,
                     actions = actions,
-                    artemisContext = artemisContext
                 )
 
             }

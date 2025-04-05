@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.authTokenOrEmptyString
 import de.tum.informatics.www1.artemis.native_app.core.common.markdown.MarkdownUrlUtil
 import de.tum.informatics.www1.artemis.native_app.core.ui.LinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextProvider
@@ -21,8 +22,6 @@ class MarkdownLinkResolverImpl(): MarkdownLinkResolver {
     @Composable
     override fun rememberMarkdownLinkResolver(): LinkResolver {
         val artemisContext by LocalArtemisContextProvider.current.collectArtemisContextAsState()
-        val serverUrl = artemisContext.serverUrl
-        val authToken = artemisContext.authToken
         val context = LocalContext.current
         val localLinkOpener = LocalLinkOpener.current
 
@@ -36,7 +35,6 @@ class MarkdownLinkResolverImpl(): MarkdownLinkResolver {
                 ) else null
             LinkBottomSheet(
                 modifier = Modifier.fillMaxSize(),
-                artemisContext = artemisContext,
                 link = bottomSheetLink,
                 fileName = filename,
                 state = bottomSheetState,
@@ -44,7 +42,7 @@ class MarkdownLinkResolverImpl(): MarkdownLinkResolver {
             )
         }
 
-        return remember(context, localLinkOpener, authToken, serverUrl) {
+        return remember(context, localLinkOpener, artemisContext.serverUrl, artemisContext.authTokenOrEmptyString) {
             BaseMarkdownLinkResolver(localLinkOpener, setLinkToShow, setBottomSheetState)
         }
     }

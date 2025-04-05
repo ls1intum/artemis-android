@@ -28,4 +28,5 @@ dependencies {
     implementation(libs.kotlinx.datetime)
 
     implementation(libs.ktor.client.cio)
+    implementation(project(":core:common"))
 }

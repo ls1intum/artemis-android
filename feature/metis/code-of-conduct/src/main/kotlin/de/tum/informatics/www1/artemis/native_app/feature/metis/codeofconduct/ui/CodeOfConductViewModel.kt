@@ -75,7 +75,7 @@ internal class CodeOfConductViewModel(
         flatMapLatest(
             accountService.authToken,
             serverConfigurationService.serverUrl,
-            courseService.onReloadRequired,
+            courseService.onArtemisContextChanged,
             requestReload.onStart { emit(Unit) }
         ) { authToken, serverUrl, _, _ ->
             retryOnInternet(networkStatusProvider.currentNetworkStatus) {

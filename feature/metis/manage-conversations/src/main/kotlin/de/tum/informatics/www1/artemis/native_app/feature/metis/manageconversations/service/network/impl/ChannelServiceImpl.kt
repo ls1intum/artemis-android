@@ -6,7 +6,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
-import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.ArtemisContextBasedServiceImpl
+import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.CourseBasedServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.network.ChannelService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
@@ -22,9 +22,10 @@ import io.ktor.http.isSuccess
 class ChannelServiceImpl(
     ktorProvider: KtorProvider,
     artemisContextProvider: ArtemisContextProvider,
-) : ArtemisContextBasedServiceImpl(ktorProvider, artemisContextProvider), ChannelService {
+) : CourseBasedServiceImpl(ktorProvider, artemisContextProvider), ChannelService {
 
-    override suspend fun getChannels(courseId: Long): NetworkResponse<List<ChannelChat>> {
+    override suspend fun getChannels(): NetworkResponse<List<ChannelChat>> {
+        val courseId = courseId()
         return getRequest {
             url {
                 appendPathSegments(
@@ -38,9 +39,9 @@ class ChannelServiceImpl(
     }
 
     override suspend fun getUnresolvedChannels(
-        courseId: Long,
         channelIds: List<Long>,
     ): NetworkResponse<List<Conversation>> {
+        val courseId = courseId()
         return getRequest<List<StandalonePost>> {
             url {
                 appendPathSegments(
@@ -66,8 +67,8 @@ class ChannelServiceImpl(
 
     override suspend fun getExerciseChannel(
         exerciseId: Long,
-        courseId: Long
     ): NetworkResponse<ChannelChat> {
+        val courseId = courseId()
         return getRequest {
             url {
                 appendPathSegments(
@@ -83,8 +84,8 @@ class ChannelServiceImpl(
 
     override suspend fun getLectureChannel(
         lectureId: Long,
-        courseId: Long,
     ): NetworkResponse<ChannelChat> {
+        val courseId = courseId()
         return getRequest {
             url {
                 appendPathSegments(
@@ -99,11 +100,13 @@ class ChannelServiceImpl(
     }
 
     override suspend fun registerInChannel(
-        courseId: Long,
         conversationId: Long,
     ): NetworkResponse<Boolean> {
+        val artemisContext = artemisContext()
+        val courseId = artemisContext.courseId
+
         return performNetworkCall {
-            ktorProvider.ktorClient.post(serverUrl) {
+            ktorProvider.ktorClient.post(artemisContext.serverUrl) {
                 url {
                     appendPathSegments(
                         *Api.Communication.Courses.path,
@@ -114,10 +117,10 @@ class ChannelServiceImpl(
                     )
                 }
 
-                setBody(listOf(artemisContext.username))
+                setBody(listOf(artemisContext.loginName))
                 contentType(ContentType.Application.Json)
 
-                cookieAuth(authToken)
+                cookieAuth(artemisContext.authToken)
             }
                 .status
                 .isSuccess()

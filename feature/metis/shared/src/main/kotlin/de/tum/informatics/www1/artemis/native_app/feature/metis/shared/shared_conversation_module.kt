@@ -10,6 +10,11 @@ val sharedConversationModule = module {
     single<ConversationService> { ConversationServiceImpl(get()) }
 
     viewModel { params ->
-        UserProfileDialogViewModel(params[0], params[1], get(), get(), get(), get())
+        UserProfileDialogViewModel(
+            courseId = params[0],
+            userId = params[1],
+            accountDataService = get(),
+            networkStatusProvider = get(),
+        )
     }
 }

@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
-import de.tum.informatics.www1.artemis.native_app.core.data.service.performAutoReloadingNetworkCall
+import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.performAutoReloadingNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.network.ChannelService
@@ -21,7 +21,6 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
 internal class BrowseChannelsViewModel(
-    private val courseId: Long,
     private val channelService: ChannelService,
     networkStatusProvider: NetworkStatusProvider,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
@@ -37,7 +36,7 @@ internal class BrowseChannelsViewModel(
             networkStatusProvider = networkStatusProvider,
             manualReloadFlow = requestRefresh
         ) {
-            getChannels(courseId)
+            getChannels()
         }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
@@ -58,7 +57,6 @@ internal class BrowseChannelsViewModel(
     fun registerInChannel(channelChat: ChannelChat): Deferred<Long?> {
         return viewModelScope.async(coroutineContext) {
             val result = channelService.registerInChannel(
-                courseId = courseId,
                 conversationId = channelChat.id
             )
 

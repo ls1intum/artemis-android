@@ -62,9 +62,8 @@ val manageConversationsModule = module {
         )
     }
 
-    viewModel { params ->
+    viewModel { _ ->
         BrowseChannelsViewModel(
-            params.get(),
             get(),
             get()
         )
