@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.login.saml2_login
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -9,10 +8,10 @@ import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.ReloadableViewModel
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.network.LoginService
 import io.ktor.http.isSuccess
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.onStart
@@ -24,13 +23,11 @@ class Saml2LoginViewModel(
     networkStatusProvider: NetworkStatusProvider,
     loginService: LoginService,
     private val accountService: AccountService
-) : ViewModel() {
-
-    private val retryPerformLogin = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+) : ReloadableViewModel() {
 
     val saml2LoginResponse: StateFlow<DataState<Saml2LoginResponse>> =
         flatMapLatest(
-            retryPerformLogin.onStart { emit(Unit) },
+            requestReload.onStart { emit(Unit) },
             serverConfigurationService.serverUrl
         ) { _, serverUrl ->
             retryOnInternet(networkStatusProvider.currentNetworkStatus) {
@@ -50,10 +47,6 @@ class Saml2LoginViewModel(
             .stateIn(viewModelScope, SharingStarted.Eagerly)
 
     val serverUrl: StateFlow<String> = serverUrlStateFlow(serverConfigurationService)
-
-    fun retryPerformLogin() {
-        retryPerformLogin.tryEmit(Unit)
-    }
 
     fun saveAccessToken(token: String, onDone: () -> Unit) {
         viewModelScope.launch {

@@ -119,7 +119,7 @@ internal fun TextExerciseParticipationScreen(
                     ),
                     onUpdateText = viewModel::updateText,
                     submission = latestSubmission,
-                    requestSubmit = viewModel::retrySync
+                    requestSubmit = viewModel::onRequestReload
                 )
             }
 

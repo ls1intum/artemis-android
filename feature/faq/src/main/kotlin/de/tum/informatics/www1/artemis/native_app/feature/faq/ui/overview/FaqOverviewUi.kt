@@ -103,7 +103,7 @@ fun FaqOverviewUi(
         filterChips = filterChips,
         query = query,
         collapsingContentState = collapsingContentState,
-        onReloadRequest = viewModel::requestReload,
+        onReloadRequest = viewModel::onRequestReload,
         onNavigateToFaq = onNavigateToFaq
     )
 }

@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.exerciseview.participate.textexercise
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -15,11 +14,11 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participat
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.SubmissionType
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.TextSubmission
+import de.tum.informatics.www1.artemis.native_app.core.ui.ReloadableViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.service.TextEditorService
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.service.TextSubmissionService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -48,7 +47,7 @@ internal class TextExerciseParticipationViewModel(
     textEditorService: TextEditorService,
     networkStatusProvider: NetworkStatusProvider,
     coroutineContext: CoroutineContext = EmptyCoroutineContext
-) : ViewModel() {
+) : ReloadableViewModel() {
 
     companion object {
         internal val SyncDelay = 2.seconds
@@ -80,12 +79,11 @@ internal class TextExerciseParticipationViewModel(
     private val _text = MutableStateFlow<String?>(null)
     val text: Flow<String> = _text.map { it.orEmpty() }
 
-    private val retrySync = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val syncState: Flow<SyncState> = transformLatest(
         serverText,
         _text,
         initialSubmission,
-        retrySync.onStart { emit(Unit) }
+        requestReload.onStart { emit(Unit) }
     ) { serverText, text, initialSubmission, _ ->
         if (serverText != text && text != null) {
             emit(SyncState.SyncPending)
@@ -139,10 +137,6 @@ internal class TextExerciseParticipationViewModel(
 
     fun updateText(newText: String) {
         _text.value = newText
-    }
-
-    fun retrySync() {
-        retrySync.tryEmit(Unit)
     }
 
     /**
