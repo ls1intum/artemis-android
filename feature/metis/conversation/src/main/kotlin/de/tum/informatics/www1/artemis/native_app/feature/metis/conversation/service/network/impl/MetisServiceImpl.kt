@@ -207,7 +207,6 @@ internal class MetisServiceImpl(
                 }
                 parameter("postingIds", postIds.joinToString(","))
                 parameter("type", postType.toString())
-                parameter("courseId", metisContext.courseId.toString())
                 cookieAuth(authToken)
             }
 
@@ -228,7 +227,6 @@ internal class MetisServiceImpl(
                 url {
                     appendPathSegments("api", "communication", "forwarded-messages")
                 }
-                parameter("courseId", metisContext.courseId.toString())
 
                 contentType(ContentType.Application.Json)
                 setBody(forwardedMessage)
