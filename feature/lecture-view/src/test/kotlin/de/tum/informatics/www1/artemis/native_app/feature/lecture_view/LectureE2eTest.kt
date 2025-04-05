@@ -240,7 +240,6 @@ class LectureE2eTest : BaseComposeTest() {
             savedStateHandle = SavedStateHandle(),
             channelService = get(),
             serverTimeService = get(),
-            artemisContextProvider = get(),
             courseExerciseService = get(),
             coroutineContext = testDispatcher
         )

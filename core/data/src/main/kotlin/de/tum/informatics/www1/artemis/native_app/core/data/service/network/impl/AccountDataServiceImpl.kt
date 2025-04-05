@@ -37,14 +37,14 @@ internal class AccountDataServiceImpl(
             }
         }.onSuccess { account ->
             context.accountDataCache.edit { data ->
-                data[getAccountDataCacheKey(authToken())] = jsonProvider.applicationJsonConfiguration.encodeToString(account)
+                data[getAccountDataCacheKey(authToken)] = jsonProvider.applicationJsonConfiguration.encodeToString(account)
             }
         }
     }
 
     override suspend fun getCachedAccountData(): Account? {
         val cacheData = context.accountDataCache.data.first()
-        val cacheKey = getAccountDataCacheKey(authToken())
+        val cacheKey = getAccountDataCacheKey(authToken)
         val cacheEntry = cacheData[cacheKey]
         if (cacheEntry != null) {
             try {

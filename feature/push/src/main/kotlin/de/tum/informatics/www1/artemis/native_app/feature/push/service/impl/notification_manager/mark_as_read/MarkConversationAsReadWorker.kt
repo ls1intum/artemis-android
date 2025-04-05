@@ -6,7 +6,6 @@ import androidx.work.WorkerParameters
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
 class MarkConversationAsReadWorker(
@@ -30,7 +29,7 @@ class MarkConversationAsReadWorker(
                 return@withContext Result.failure()
             }
 
-            val artemisContext = artemisContextProvider.flow.first()
+            val artemisContext = artemisContextProvider.stateFlow.value
             conversationService.markConversationAsRead(
                 courseId = courseId,
                 conversationId = conversationId,
