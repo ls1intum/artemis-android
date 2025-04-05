@@ -113,6 +113,7 @@ internal fun ConversationChatListScreen(
 ) {
     val query by viewModel.chatListUseCase.query.collectAsState()
     val filter by viewModel.chatListUseCase.filter.collectAsState()
+    val clientId by viewModel.clientId.collectAsState()
     val conversationDataState by viewModel.latestUpdatedConversation.collectAsState()
     val conversationDataStatus by viewModel.conversationDataStatus.collectAsState()
 
@@ -130,6 +131,7 @@ internal fun ConversationChatListScreen(
         modifier = modifier,
         courseId = courseId,
         conversationId = conversationId,
+        clientId = clientId,
         conversationDataState = conversationDataState,
         conversationDataStatus = conversationDataStatus,
         query = query,
@@ -166,6 +168,7 @@ fun ConversationChatListScreen(
     modifier: Modifier,
     courseId: Long,
     conversationId: Long,
+    clientId: DataState<Long>,
     query: String,
     filter: MetisFilter,
     conversationDataStatus: DataStatus,
@@ -283,6 +286,7 @@ fun ConversationChatListScreen(
                             FilterDropdownMenu(
                                 isFilterDropdownExpanded = isFilterDropdownExpanded,
                                 filter = filter,
+                                clientId = clientId,
                                 onFilterSelected = onUpdateFilter,
                                 onDismissRequest = { isFilterDropdownExpanded = false }
                             )
@@ -425,6 +429,7 @@ private fun InfoDropdownMenu(
 fun FilterDropdownMenu(
     isFilterDropdownExpanded: Boolean,
     filter: MetisFilter,
+    clientId: DataState<Long>,
     onDismissRequest: () -> Unit,
     onFilterSelected: (MetisFilter) -> Unit
 ) {
@@ -440,33 +445,35 @@ fun FilterDropdownMenu(
         onDismissRequest = onDismissRequest
     ) {
         DropdownMenuItem(
-            trailingIcon = if (filter == MetisFilter.ALL) icon else null,
+            trailingIcon = if (filter is MetisFilter.All) icon else null,
             text = { Text(text = stringResource(R.string.conversation_filter_messages_all)) },
-            onClick = { onFilterSelected(MetisFilter.ALL) }
+            onClick = { onFilterSelected(MetisFilter.All) }
         )
 
         DropdownMenuItem(
-            trailingIcon = if (filter == MetisFilter.UNRESOLVED) icon else null,
+            trailingIcon = if (filter is MetisFilter.Unresolved) icon else null,
             text = { Text(text = stringResource(R.string.conversation_filter_messages_unresolved)) },
-            onClick = { onFilterSelected(MetisFilter.UNRESOLVED) }
+            onClick = { onFilterSelected(MetisFilter.Unresolved) }
         )
 
-        DropdownMenuItem(
-            trailingIcon = if (filter == MetisFilter.CREATED_BY_CLIENT) icon else null,
-            text = { Text(text = stringResource(R.string.conversation_filter_messages_own)) },
-            onClick = { onFilterSelected(MetisFilter.CREATED_BY_CLIENT) }
-        )
+        clientId.orNull()?.let {
+            DropdownMenuItem(
+                trailingIcon = if (filter == MetisFilter.CreatedByClient(it)) icon else null,
+                text = { Text(text = stringResource(R.string.conversation_filter_messages_own)) },
+                onClick = { onFilterSelected(MetisFilter.CreatedByClient(it)) }
+            )
+        }
 
         DropdownMenuItem(
-            trailingIcon = if (filter == MetisFilter.WITH_REACTION) icon else null,
+            trailingIcon = if (filter is MetisFilter.WithReaction) icon else null,
             text = { Text(text = stringResource(R.string.conversation_filter_messages_reacted)) },
-            onClick = { onFilterSelected(MetisFilter.WITH_REACTION) }
+            onClick = { onFilterSelected(MetisFilter.WithReaction) }
         )
 
         DropdownMenuItem(
-            trailingIcon = if (filter == MetisFilter.PINNED) icon else null,
+            trailingIcon = if (filter is MetisFilter.Pinned) icon else null,
             text = { Text(text = stringResource(R.string.conversation_filter_messages_pinned)) },
-            onClick = { onFilterSelected(MetisFilter.PINNED) }
+            onClick = { onFilterSelected(MetisFilter.Pinned) }
         )
     }
 }

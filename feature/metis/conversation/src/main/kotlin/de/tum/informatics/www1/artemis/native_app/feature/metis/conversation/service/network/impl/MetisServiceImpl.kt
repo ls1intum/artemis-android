@@ -85,7 +85,7 @@ internal class MetisServiceImpl(
                     }
 
                     is MetisContext.Conversation -> {
-                        parameter("conversationId", metisContext.conversationId)
+                        parameter("conversationIds", metisContext.conversationId)
                     }
 
                     is MetisContext.Course -> {
@@ -107,19 +107,27 @@ internal class MetisServiceImpl(
                 if (standalonePostsContext.courseWideContext != CourseWideContext.ANNOUNCEMENT) {
                     parameter(
                         "filterToUnresolved",
-                        standalonePostsContext.filter == MetisFilter.UNRESOLVED
+                        standalonePostsContext.filter is MetisFilter.Unresolved
                     )
-                    parameter(
-                        "filterToOwn",
-                        standalonePostsContext.filter == MetisFilter.CREATED_BY_CLIENT
-                    )
+                    if (standalonePostsContext.filter is MetisFilter.CreatedByClient) {
+                        parameter(
+                            "authorIds",
+                            standalonePostsContext.filter.userId
+                        )
+                    }
+                    if (standalonePostsContext.filter is MetisFilter.CreatedByAuthors) {
+                        parameter(
+                            "authorIds",
+                            standalonePostsContext.filter.userIds.joinToString(",")
+                        )
+                    }
                     parameter(
                         "filterToAnsweredOrReacted",
-                         standalonePostsContext.filter == MetisFilter.WITH_REACTION
+                         standalonePostsContext.filter is MetisFilter.WithReaction
                     )
                     parameter(
                         "pinnedOnly",
-                        standalonePostsContext.filter == MetisFilter.PINNED
+                        standalonePostsContext.filter is MetisFilter.Pinned
                     )
                 }
 
@@ -145,7 +153,7 @@ internal class MetisServiceImpl(
         val posts = getPosts(
             standalonePostsContext = MetisService.StandalonePostsContext(
                 metisContext = metisContext,
-                filter = MetisFilter.ALL,
+                filter = MetisFilter.All,
                 query = "#$serverSidePostId",
                 sortingStrategy = MetisSortingStrategy.DATE_DESCENDING,
                 courseWideContext = null

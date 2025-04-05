@@ -1,24 +1,35 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content
 
-enum class MetisFilter {
+sealed class MetisFilter {
     /**
      * Disabled filter.
      */
-    ALL,
+    data object All : MetisFilter()
+
     /**
-     * Filter for the courses this user has created.
+     * Filter for the messages this user has created.
+     * @param userId The ID of the user who created the posts
      */
-    CREATED_BY_CLIENT,
+    data class CreatedByClient(val userId: Long) : MetisFilter()
+
+    /**
+     * Filter for the messages this user has created.
+     * @param userId The ID of the user who created the posts
+     */
+    data class CreatedByAuthors(val userIds: List<Long>) : MetisFilter()
+
     /**
      * Filter for posts which already have a reaction.
      */
-    WITH_REACTION,
+    data object WithReaction : MetisFilter()
+
     /**
      * Filter for posts which have not been resolved yet
      */
-    UNRESOLVED,
+    data object Unresolved : MetisFilter()
+
     /**
      * Filter for posts which are pinned
      */
-    PINNED
+    data object Pinned : MetisFilter()
 }

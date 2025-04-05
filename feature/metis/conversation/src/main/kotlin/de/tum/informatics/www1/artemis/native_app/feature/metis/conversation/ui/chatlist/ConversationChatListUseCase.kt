@@ -71,7 +71,7 @@ class ConversationChatListUseCase(
         private const val PAGE_SIZE = 20
     }
 
-    private val _filter = MutableStateFlow(MetisFilter.ALL)
+    private val _filter = MutableStateFlow<MetisFilter>(MetisFilter.All)
     val filter: StateFlow<MetisFilter> = _filter
 
     private val _query = MutableStateFlow<String?>(null)
@@ -142,7 +142,7 @@ class ConversationChatListUseCase(
             )
 
             val isSearchActive = !pagingDataInput.standalonePostsContext.query.isNullOrBlank()
-            val isFilteringActive = pagingDataInput.standalonePostsContext.filter != MetisFilter.ALL
+            val isFilteringActive = pagingDataInput.standalonePostsContext.filter !is MetisFilter.All
             val pagerFlow = if (!isSearchActive && !isFilteringActive) {
                 Pager(
                     config = config,
