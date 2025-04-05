@@ -69,7 +69,7 @@ internal class ConversationMembersViewModel(
     val query: StateFlow<String> = savedStateHandle.getStateFlow(KEY_QUERY, "")
 
     val membersPagingData: Flow<PagingData<ConversationUser>> = flatMapLatest(
-        onRequestReload.onStart { emit(Unit) },
+        requestReload.onStart { emit(Unit) },
         conversationSettings,
         serverConfigurationService.serverUrl,
         accountService.authToken,

@@ -102,7 +102,7 @@ fun NavGraphBuilder.exercise(
                 backStackEntry.savedStateHandle.remove<Boolean>(ExerciseViewDestination.REQUIRE_RELOAD_KEY)
 
             if (isReloadRequested == true) {
-                exerciseViewModel.requestReloadExercise()
+                exerciseViewModel.onRequestReload()
             }
         }
 

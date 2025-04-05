@@ -14,7 +14,6 @@ import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipati
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.TimeFrame
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.TimeFrameUtils.groupByTimeFrame
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -36,8 +35,6 @@ class CourseViewModel(
     coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : BaseExerciseListViewModel(courseExerciseService) {
 
-    private val requestReloadCourse = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-
     private val _exerciseQuery = MutableStateFlow("")
     val exerciseQuery: StateFlow<String> = _exerciseQuery
 
@@ -47,7 +44,7 @@ class CourseViewModel(
     val course: StateFlow<DataState<Course>> = courseService
         .performAutoReloadingNetworkCall(
             networkStatusProvider = networkStatusProvider,
-            manualReloadFlow = requestReloadCourse
+            manualReloadFlow = requestReload
         ) {
             getCourse(courseId)
                 .bind { it.course }
@@ -136,10 +133,6 @@ class CourseViewModel(
         }
             .flowOn(coroutineContext)
             .stateIn(viewModelScope, SharingStarted.Lazily, DataState.Loading())
-
-    fun reloadCourse() {
-        requestReloadCourse.tryEmit(Unit)
-    }
 
     fun onUpdateExerciseQuery(query: String) {
         _exerciseQuery.value = query

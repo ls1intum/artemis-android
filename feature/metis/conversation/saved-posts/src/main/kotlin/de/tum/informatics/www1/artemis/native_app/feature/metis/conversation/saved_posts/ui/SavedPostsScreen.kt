@@ -61,7 +61,7 @@ fun SavedPostsScreen(
     ) { parametersOf(courseId, savedPostStatus) }
 
     LaunchedEffect(viewModel) {
-        viewModel.requestReload()
+        viewModel.onRequestReload()
     }
 
     SavedPostsScreen(
@@ -92,7 +92,7 @@ internal fun SavedPostsScreen (
             modifier = modifier,
             status = status,
             savedPostsDataState = savedPosts,
-            onRequestReload = viewModel::requestReload,
+            onRequestReload = viewModel::onRequestReload,
             onNavigateBack = onNavigateBack,
             onNavigateToPost = onNavigateToPost,
             onChangeStatus = viewModel::changeSavedPostStatus,

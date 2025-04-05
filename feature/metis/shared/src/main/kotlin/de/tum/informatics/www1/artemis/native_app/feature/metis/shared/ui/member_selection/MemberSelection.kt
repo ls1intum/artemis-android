@@ -96,7 +96,7 @@ fun MemberSelection(
                 inclusionList = inclusionList,
                 onAddMemberItem = viewModel::addMemberItem,
                 updateInclusionList = viewModel::updateInclusionList,
-                retryLoadPotentialRecipients = viewModel::retryLoadPotentialRecipients
+                retryLoadPotentialRecipients = viewModel::onRequestReload
             )
             return
         }

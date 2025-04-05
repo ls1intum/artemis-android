@@ -1,13 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.feature.faq.ui.overview
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.FaqRepository
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.Faq
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.FaqCategory
-import kotlinx.coroutines.flow.MutableSharedFlow
+import de.tum.informatics.www1.artemis.native_app.core.ui.ReloadableViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -24,11 +23,9 @@ class FaqOverviewViewModel(
     courseId: Long,
     private val faqRepository: FaqRepository,
     coroutineContext: CoroutineContext = EmptyCoroutineContext
-) : ViewModel() {
+) : ReloadableViewModel() {
 
-    private val onRequestReload = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-
-    private val allFaqs: StateFlow<DataState<List<Faq>>> = onRequestReload.onStart { emit(Unit) }.flatMapLatest {
+    private val allFaqs: StateFlow<DataState<List<Faq>>> = requestReload.onStart { emit(Unit) }.flatMapLatest {
         faqRepository.getFaqs(
             courseId = courseId
         )
@@ -78,10 +75,6 @@ class FaqOverviewViewModel(
         }
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
-
-    fun requestReload() {
-        onRequestReload.tryEmit(Unit)
-    }
 
     fun updateQuery(newQuery: String) {
         _searchQuery.value = newQuery

@@ -78,7 +78,7 @@ internal fun BrowseChannelsScreen(
 ) {
 
     LaunchedEffect(Unit) {
-        viewModel.requestReload()
+        viewModel.onRequestReload()
     }
 
     val channelsDataState by viewModel.channels.collectAsState()
@@ -125,7 +125,7 @@ internal fun BrowseChannelsScreen(
             loadingText = stringResource(id = R.string.browse_channel_list_loading),
             failureText = stringResource(id = R.string.browse_channel_list_failure),
             retryButtonText = stringResource(id = R.string.browse_channel_list_try_again),
-            onClickRetry = viewModel::requestReload
+            onClickRetry = viewModel::onRequestReload
         ) { channels ->
             if (channels.isNotEmpty()) {
                 LazyColumn(

@@ -113,7 +113,7 @@ internal class ConversationSettingsViewModel(
         conversationSettings,
         accountService.authToken,
         serverConfigurationService.serverUrl,
-        onRequestReload.onStart { emit(Unit) }
+        requestReload.onStart { emit(Unit) }
     ) { conversationSettings, authToken, serverUrl, _ ->
         retryOnInternet(networkStatusProvider.currentNetworkStatus) {
             conversationService.getMembers(
@@ -283,7 +283,7 @@ internal class ConversationSettingsViewModel(
                 .or(false)
 
             if (result) {
-                onRequestReload.tryEmit(Unit)
+                requestReload.tryEmit(Unit)
             }
 
             result
@@ -302,8 +302,8 @@ internal class ConversationSettingsViewModel(
         savedStateHandle[KEY_TOPIC] = topic
     }
 
-    override fun requestReload() {
-        super.requestReload()
+    override fun onRequestReload() {
+        super.onRequestReload()
 
         savedName.value = null
         savedDescription.value = null

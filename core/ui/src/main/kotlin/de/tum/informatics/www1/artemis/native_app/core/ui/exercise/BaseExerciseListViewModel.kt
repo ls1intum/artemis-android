@@ -1,11 +1,11 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.exercise
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseExerciseService
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
+import de.tum.informatics.www1.artemis.native_app.core.ui.ReloadableViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.mapNotNull
@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
  */
 abstract class BaseExerciseListViewModel(
     private val courseExerciseService: CourseExerciseService
-) : ViewModel() {
+) : ReloadableViewModel() {
 
     protected companion object {
         fun Flow<Result>.mapFilterToNewParticipationData(): Flow<NewParticipationData> = mapNotNull {

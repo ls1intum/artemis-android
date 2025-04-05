@@ -77,7 +77,7 @@ internal fun ViewQuizResultScreen(
                     NavigationBackButton()
                 },
                 actions = {
-                    IconButton(onClick = viewModel::retryLoadExercise) {
+                    IconButton(onClick = viewModel::onRequestReload) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
                             contentDescription = null
@@ -102,7 +102,7 @@ internal fun ViewQuizResultScreen(
             loadingText = stringResource(id = R.string.quiz_result_loading),
             failureText = stringResource(id = R.string.quiz_result_failure),
             retryButtonText = stringResource(id = R.string.quiz_result_try_again),
-            onClickRetry = viewModel::retryLoadExercise
+            onClickRetry = viewModel::onRequestReload
         ) { data ->
             QuizResultUi(
                 modifier = Modifier.fillMaxSize(),

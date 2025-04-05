@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.user_conversation
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -14,11 +13,11 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
+import de.tum.informatics.www1.artemis.native_app.core.ui.ReloadableViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.UserIdentifier
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -32,9 +31,7 @@ internal class NavigateToUserConversationViewModel(
     conversationService: ConversationService,
     accountDataService: AccountDataService,
     networkStatusProvider: NetworkStatusProvider
-) : ViewModel() {
-
-    private val requestReload = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+) : ReloadableViewModel() {
 
     private val accountData: StateFlow<DataState<Account>> = accountDataService
         .performAutoReloadingNetworkCall(
@@ -104,8 +101,4 @@ internal class NavigateToUserConversationViewModel(
             }
         }
             .stateIn(viewModelScope, SharingStarted.Eagerly)
-
-    fun requestReload() {
-        requestReload.tryEmit(Unit)
-    }
 }

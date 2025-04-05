@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
@@ -8,6 +7,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.CourseWithScore
 import de.tum.informatics.www1.artemis.native_app.core.model.Dashboard
+import de.tum.informatics.www1.artemis.native_app.core.ui.ReloadableViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.DashboardService
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.DashboardStorageService
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -31,12 +31,11 @@ internal class CourseOverviewViewModel(
     private val serverConfigurationService: ServerConfigurationService,
     private val networkStatusProvider: NetworkStatusProvider,
     coroutineContext: CoroutineContext = EmptyCoroutineContext
-) : ViewModel() {
+) : ReloadableViewModel() {
 
     /**
      * Emit a unit to this flow, to reload the dashboard.
      */
-    private val reloadDashboard = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     private val courseAccess = MutableSharedFlow<Long>(extraBufferCapacity = 1)
 
     private val _query = MutableStateFlow("")
@@ -85,7 +84,7 @@ internal class CourseOverviewViewModel(
         }
 
         viewModelScope.launch(coroutineContext) {
-            reloadDashboard.collect {
+            requestReload.collect {
                 loadDashboard(coroutineContext)
             }
         }
@@ -94,7 +93,7 @@ internal class CourseOverviewViewModel(
     }
 
     /**
-     * Always emits the latest dashboard. Automatically updated when [requestReloadDashboard] is requested,
+     * Always emits the latest dashboard. Automatically updated when [requestReload] is requested,
      * the login status changes or the server is updated.
      */
     private fun loadDashboard(context: CoroutineContext) {
@@ -109,13 +108,6 @@ internal class CourseOverviewViewModel(
                 _dashboardState.value = it
             }
         }
-    }
-
-    /**
-     * Request a reload of the dashboard.
-     */
-    fun requestReloadDashboard() {
-        reloadDashboard.tryEmit(Unit)
     }
 
     fun onUpdateQuery(newQuery: String) {

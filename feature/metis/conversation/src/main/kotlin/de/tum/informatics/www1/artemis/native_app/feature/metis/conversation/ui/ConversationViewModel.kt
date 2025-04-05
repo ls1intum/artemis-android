@@ -458,7 +458,7 @@ internal open class ConversationViewModel(
             }
 
             currentlySavingPost = false
-            response.bind { requestReload() }   // Currently changing save status does not trigger a websocket update
+            response.bind { onRequestReload() }   // Currently changing save status does not trigger a websocket update
                 .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
 
         }
@@ -615,8 +615,8 @@ internal open class ConversationViewModel(
     /**
      * Emits to onRequestReload. If the websocket is currently not connected, requests a reconnect to the websocket
      */
-    override fun requestReload() {
-        super.requestReload()
+    override fun onRequestReload() {
+        super.onRequestReload()
 
         viewModelScope.launch(coroutineContext) {
             if (!websocketProvider.isConnected.first()) {

@@ -177,7 +177,7 @@ class ConversationOverviewViewModel(
         flatMapLatest(
             serverConfigurationService.serverUrl,
             accountService.authToken,
-            onRequestReload.onStart { emit(Unit) }
+            requestReload.onStart { emit(Unit) }
         ) { serverUrl, authToken, _ ->
             retryOnInternet(networkStatusProvider.currentNetworkStatus) {
                 conversationService.getConversations(courseId, authToken, serverUrl)
@@ -498,7 +498,7 @@ class ConversationOverviewViewModel(
             )
                 .onSuccess { isSuccessful ->
                     if (isSuccessful) {
-                        onRequestReload.tryEmit(Unit)
+                        requestReload.tryEmit(Unit)
                     }
                 }
                 .or(false)
@@ -516,7 +516,7 @@ class ConversationOverviewViewModel(
             )
                 .onSuccess { isSuccessful ->
                     if (isSuccessful) {
-                        onRequestReload.tryEmit(Unit)
+                        requestReload.tryEmit(Unit)
                     }
                 }
                 .or(false)
@@ -534,7 +534,7 @@ class ConversationOverviewViewModel(
             )
                 .onSuccess { successful ->
                     if (successful) {
-                        onRequestReload.tryEmit(Unit)
+                        requestReload.tryEmit(Unit)
                     }
                 }
                 .or(false)
@@ -550,7 +550,7 @@ class ConversationOverviewViewModel(
             )
                 .onSuccess { isSuccessful ->
                     if (isSuccessful) {
-                        onRequestReload.tryEmit(Unit)
+                        requestReload.tryEmit(Unit)
                     }
                 }
                 .onFailure {
