@@ -28,10 +28,12 @@ internal fun ConversationOtherSettings(
     conversation: Conversation,
     onLeaveConversation: () -> Unit,
     onToggleChannelArchivation: () -> Unit,
+    onToggleChannelPrivacy: () -> Unit,
     onDeleteChannel: () -> Unit
 ) {
     var displayArchiveChannelDialog by remember { mutableStateOf(false) }
     var displayDeleteChannelDialog by remember { mutableStateOf(false) }
+    var displayChannelPrivacyDialog by remember { mutableStateOf(false) }
 
     val buttonModifier = Modifier.fillMaxWidth()
 
@@ -62,8 +64,24 @@ internal fun ConversationOtherSettings(
 
             val canDeleteChannels = !isTutorialGroupChannel && hasChannelModerationRights && isChannelModerator && isCreator
 
-            // Archive/Unarchive and Delete Buttons
+            // Archive/Unarchive, Delete and Toggle Channel Privacy Buttons
             if (hasChannelModerationRights) {
+                OutlinedButton(
+                    modifier = buttonModifier,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                    onClick = { displayChannelPrivacyDialog = true }
+                ) {
+                    Text(
+                        text = stringResource(
+                            id = if (conversation.isPublic) {
+                                R.string.conversation_settings_section_channel_toggle_privacy_private
+                            } else {
+                                R.string.conversation_settings_section_channel_toggle_privacy_public
+                            }
+                        )
+                    )
+                }
+
                 OutlinedButton(
                     modifier = buttonModifier,
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
@@ -116,6 +134,18 @@ internal fun ConversationOtherSettings(
             onDismiss = { displayDeleteChannelDialog = false }
         )
     }
+
+    if (displayChannelPrivacyDialog && conversation is ChannelChat) {
+        ChannelPrivacyToggleDialog(
+            conversation = conversation,
+            onToggleChannelPrivacy = {
+                displayChannelPrivacyDialog = false
+                onToggleChannelPrivacy()
+            },
+            onDismiss = { displayChannelPrivacyDialog = false }
+        )
+    }
+
 }
 
 @Composable
@@ -175,6 +205,42 @@ private fun ArchiveChannelDialog(
         confirmButtonText = stringResource(id = confirmRes),
         dismissButtonText = stringResource(id = dismissRes),
         onPressPositiveButton = onToggleChannelArchivation,
+        onDismissRequest = onDismiss
+    )
+}
+
+@Composable
+private fun ChannelPrivacyToggleDialog(
+    conversation: ChannelChat,
+    onToggleChannelPrivacy: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val makePublic = !conversation.isPublic
+
+    val titleRes = if (makePublic) {
+        R.string.conversation_settings_section_channel_toggle_privacy_title_public
+    } else {
+        R.string.conversation_settings_section_channel_toggle_privacy_title_private
+    }
+
+    val messageRes = if (makePublic) {
+        R.string.conversation_settings_section_channel_toggle_privacy_message_public
+    } else {
+        R.string.conversation_settings_section_channel_toggle_privacy_message_private
+    }
+
+    val confirmRes = if (makePublic) {
+        R.string.conversation_settings_section_channel_toggle_privacy_public_button
+    } else {
+        R.string.conversation_settings_section_channel_toggle_privacy_private_button
+    }
+
+    MarkdownTextAlertDialog(
+        title = stringResource(id = titleRes),
+        text = stringResource(id = messageRes),
+        confirmButtonText = stringResource(id = confirmRes),
+        dismissButtonText = stringResource(id = R.string.conversation_settings_section_channel_toggle_privacy_negative),
+        onPressPositiveButton = onToggleChannelPrivacy,
         onDismissRequest = onDismiss
     )
 }
