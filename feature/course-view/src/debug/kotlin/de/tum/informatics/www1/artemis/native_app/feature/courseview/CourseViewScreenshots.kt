@@ -3,25 +3,20 @@ package de.tum.informatics.www1.artemis.native_app.feature.courseview
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
-import de.tum.informatics.www1.artemis.native_app.core.data.CourseServiceFake
-import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
-import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseExerciseService
-import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProviderStub
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
+import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.PlayStoreScreenshots
+import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotData
 import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotFrame
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
 import de.tum.informatics.www1.artemis.native_app.core.websocket.test.LiveParticipationServiceStub
-import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.CourseViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.CourseUiScreen
-import kotlinx.coroutines.flow.emptyFlow
+import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.CourseScaffold
+import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.CourseTab
+import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.exercise_list.ExerciseListUi
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 
 @PlayStoreScreenshots
-@Preview
 @Composable
 fun `Course View - Exercise List`() {
     startKoin {
@@ -32,31 +27,30 @@ fun `Course View - Exercise List`() {
         )
     }
 
-    val courseViewModel = CourseViewModel(
-        courseId = 0L,
-        courseService = CourseServiceFake(ScreenshotCourse),
-        liveParticipationService = LiveParticipationServiceStub(),
-        courseExerciseService = object : CourseExerciseService {
-            override val onArtemisContextChanged = emptyFlow<ArtemisContext.LoggedIn>()
-            override suspend fun startExercise(exerciseId: Long): NetworkResponse<Participation> =
-                NetworkResponse.Failure(RuntimeException())
-        },
-        networkStatusProvider = NetworkStatusProviderStub()
-    )
-
     ScreenshotFrame("Always have an overview of your exercises at hand") {
-        CourseUiScreen(
-            modifier = Modifier.fillMaxSize(),
-            viewModel = courseViewModel,
-            courseId = 0L,
-            onNavigateToExercise = {},
-            onNavigateToTextExerciseParticipation = { _, _ -> },
-            onNavigateToExerciseResultView = {},
-            onParticipateInQuiz = { _, _ -> },
-            onClickViewQuizResults = { _, _ -> },
-            onNavigateToLecture = {},
-            onNavigateToFaq = {},
-            onNavigateBack = {}
-        )
+        CourseScaffold(
+            modifier = Modifier,
+            courseDataState = DataState.Success(
+                ScreenshotData.course1
+            ),
+            isCourseTabSelected = {
+                it is CourseTab.Exercises
+            },
+            searchConfiguration = ScreenshotData.Util.searchConfiguration("Search for an exercise"),
+            collapsingContentState = CollapsingContentState(),
+            updateSelectedCourseTab = {},
+            onNavigateBack = {},
+            onReloadCourse = {}
+        ) { 
+            ExerciseListUi(
+                modifier = Modifier
+                    .fillMaxSize(),
+                exercises = listOf(TimeFrame.Current(ScreenshotData.exercises)),
+                query = "",
+                collapsingContentState = CollapsingContentState(),
+                actions = ScreenshotData.Util.emptyBoundExerciseActions,
+                onClickExercise = { }
+            )
+        }
     }
 }
