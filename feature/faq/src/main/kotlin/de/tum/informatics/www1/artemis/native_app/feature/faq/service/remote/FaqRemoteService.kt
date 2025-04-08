@@ -1,19 +1,13 @@
 package de.tum.informatics.www1.artemis.native_app.feature.faq.service.remote
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.CourseBasedService
 
-interface FaqRemoteService {
+interface FaqRemoteService: CourseBasedService {
 
-    suspend fun getFaqs(
-        courseId: Long,
-        authToken: String,
-        serverUrl: String,
-    ): NetworkResponse<List<FaqDto>>
+    suspend fun getFaqs(): NetworkResponse<List<FaqDto>>
 
     suspend fun getFaq(
-        courseId: Long,
         faqId: Long,
-        authToken: String,
-        serverUrl: String,
     ): NetworkResponse<FaqDto>
 }

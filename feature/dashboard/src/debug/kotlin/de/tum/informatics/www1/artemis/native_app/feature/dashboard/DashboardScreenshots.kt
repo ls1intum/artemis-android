@@ -12,6 +12,7 @@ import coil3.annotation.ExperimentalCoilApi
 import coil3.asImage
 import coil3.compose.AsyncImagePreviewHandler
 import coil3.compose.LocalAsyncImagePreviewHandler
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProviderStub
@@ -42,7 +43,7 @@ private const val IMAGE_SATURN_5 = "saturn5"
 fun `Dashboard - Exercise List`() {
     val viewModel = CourseOverviewViewModel(
         dashboardService = object : DashboardService {
-            override val onReloadRequired: Flow<Unit> = emptyFlow()
+            override val onArtemisContextChanged = emptyFlow<ArtemisContext.LoggedIn>()
             override suspend fun loadDashboard(): NetworkResponse<Dashboard> = NetworkResponse.Response(
                 Dashboard(
                     courses = mutableListOf(
