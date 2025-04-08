@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -37,7 +39,10 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.dropShadowBelow
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member_selection.MemberSelectionBaseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
 
 const val TEST_TAG_REPLY_AUTO_COMPLETE_POPUP_LIST = "TEST_TAG_REPLY_AUTO_COMPLETE_POPUP_LIST"
@@ -93,12 +98,28 @@ private fun ReplyAutoCompletePopupBody(
             }
 
             category.items.fastForEachIndexed { i, hint ->
-                item(key = "${category.type}_${hint.id}") {
-                    AutoCompleteHintComposable(
-                        modifier = Modifier.fillMaxWidth(),
-                        hint = hint,
-                        onClick = { performAutoComplete(hint.replacementText) }
-                    )
+                when (hint) {
+                    is AutoCompleteHint.UserSearchQueryTooShort -> {
+                        item {
+                            EmptyListHint(
+                                modifier = Modifier.fillMaxWidth(),
+                                imageVector = Icons.Default.Keyboard,
+                                hint = stringResource(id = R.string.conversation_member_selection_query_too_short_popup,
+                                    MemberSelectionBaseViewModel.MINIMUM_QUERY_LENGTH
+                                )
+                            )
+                        }
+                    }
+
+                    is AutoCompleteHint.Data -> {
+                        item(key = "${category.type}_${hint.id}") {
+                            AutoCompleteHintComposable(
+                                modifier = Modifier.fillMaxWidth(),
+                                hint = hint,
+                                onClick = { performAutoComplete(hint.replacementText) }
+                            )
+                        }
+                    }
                 }
 
                 if (i != category.items.lastIndex) {
@@ -138,7 +159,7 @@ private fun AutoCompleteCategoryComposable(modifier: Modifier, name: String) {
 @Composable
 private fun AutoCompleteHintComposable(
     modifier: Modifier,
-    hint: AutoCompleteHint,
+    hint: AutoCompleteHint.Data,
     onClick: () -> Unit
 ) {
     val horizontalPadding = Spacings.Popup.HintHorizontalPadding
@@ -188,7 +209,7 @@ private fun ReplyAutoCompletePopupBodyPreview() {
             AutoCompleteHintCollection(
                 type = AutoCompleteType.USERS,
                 items = (0 until 1).map {
-                    AutoCompleteHint(
+                    AutoCompleteHint.Data(
                         hint = "Hint $it",
                         replacementText = "",
                         id = it.toString() + "a"
@@ -198,7 +219,7 @@ private fun ReplyAutoCompletePopupBodyPreview() {
             AutoCompleteHintCollection(
                 type = AutoCompleteType.USERS,
                 items = (0 until 1).map {
-                    AutoCompleteHint(
+                    AutoCompleteHint.Data(
                         hint = "Hint $it",
                         replacementText = "",
                         id = it.toString() + "b"
@@ -208,7 +229,7 @@ private fun ReplyAutoCompletePopupBodyPreview() {
             AutoCompleteHintCollection(
                 type = AutoCompleteType.USERS,
                 items = (0 until 1).map {
-                    AutoCompleteHint(
+                    AutoCompleteHint.Data(
                         hint = "Hint $it",
                         replacementText = "",
                         id = it.toString() + "c"
