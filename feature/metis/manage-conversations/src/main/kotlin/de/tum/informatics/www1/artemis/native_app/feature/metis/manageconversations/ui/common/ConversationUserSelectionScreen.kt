@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -39,12 +41,12 @@ internal fun <T> ConversationUserSelectionScreen(
     modifier: Modifier = Modifier,
     viewModel: MemberSelectionBaseViewModel,
     displayFailedDialog: Boolean,
-    titleRes: Int,
-    dialogTitleRes: Int,
-    dialogMessageRes: Int,
-    dialogConfirmTextRes: Int,
+    titleRes: Int = R.string.create_personal_conversation_title,
+    dialogTitleRes: Int = R.string.create_personal_conversation_failed_title,
+    dialogMessageRes: Int = R.string.create_personal_conversation_failed_message,
+    dialogConfirmTextRes: Int = R.string.create_personal_conversation_failed_positive,
     fabTestTag: String,
-    fabIcon: ImageVector,
+    fabIcon: ImageVector = Icons.Default.ChevronRight,
     canSubmit: Boolean,
     startJob: () -> Deferred<T?>,
     onJobCompleted: (T?) -> Unit,

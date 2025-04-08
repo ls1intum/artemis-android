@@ -1,7 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_personal_conversation
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -9,7 +7,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.common.ConversationUserSelectionScreen
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -31,12 +28,7 @@ fun CreatePersonalConversationScreen(
         modifier = modifier,
         viewModel = viewModel,
         displayFailedDialog = displayFailedDialog,
-        titleRes = R.string.create_personal_conversation_title,
-        dialogTitleRes = R.string.create_personal_conversation_failed_title,
-        dialogMessageRes = R.string.create_personal_conversation_failed_message,
-        dialogConfirmTextRes = R.string.create_personal_conversation_failed_positive,
         fabTestTag = TEST_TAG_CREATE_PERSONAL_CONVERSATION_BUTTON,
-        fabIcon = Icons.Default.ChevronRight,
         canSubmit = canCreateConversation,
         startJob = viewModel::createConversation,
         onJobCompleted = { conversation ->
