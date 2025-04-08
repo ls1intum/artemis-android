@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.overview
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,6 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisSection
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.ConversationMemberListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
@@ -44,22 +44,14 @@ internal fun ConversationMemberSettings(
 ) {
     // ListItem applies its own padding, therefore, we need to pad the other items ourselves
 
-    val columnItemModifier = Modifier
-        .fillMaxWidth()
-        .padding(horizontal = Spacings.ScreenHorizontalSpacing)
-
-    Column(
+    ArtemisSection(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        title = stringResource(id = R.string.conversation_settings_section_members),
     ) {
-        Text(
-            modifier = columnItemModifier,
-            text = stringResource(id = R.string.conversation_settings_section_members),
-            style = ConversationSettingsSectionTextStyle
-        )
-
         Row(
-            modifier = columnItemModifier,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Spacings.ScreenHorizontalSpacing),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(

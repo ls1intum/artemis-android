@@ -215,7 +215,7 @@ private fun ChannelSettings(
     visibility: CreateChannelViewModel.Visibility,
     scope: CreateChannelViewModel.Scope,
 ) {
-    val selectionModifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
+    val selectionModifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
 
     ArtemisSection(
         modifier = modifier,

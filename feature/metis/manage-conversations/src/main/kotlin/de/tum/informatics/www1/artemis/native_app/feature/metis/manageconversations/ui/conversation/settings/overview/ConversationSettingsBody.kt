@@ -155,26 +155,23 @@ internal fun ConversationSettingsBody(
         retryButtonText = stringResource(id = R.string.conversation_settings_try_again),
         onClickRetry = viewModel::requestReload
     ) { (conversation, members, clientUsername) ->
-        val conversationSectionModifier = Modifier
-            .fillMaxWidth()
-            .padding(top = Spacings.ScreenTopBarSpacing)
-            .padding(horizontal = Spacings.ScreenHorizontalSpacing)
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(horizontal = Spacings.ScreenHorizontalSpacing)
+                .padding(top = Spacings.ScreenTopBarSpacing)
                 .verticalScroll(rememberScrollState())
                 .navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             ConversationInfoSettings(
-                modifier = conversationSectionModifier,
+                modifier = Modifier.fillMaxWidth(),
                 conversation = conversation,
                 editableConversationInfo = editableConversationInfo
             )
 
             SectionMoreInfo(
-                modifier = conversationSectionModifier,
+                modifier = Modifier.fillMaxWidth(),
                 conversation = conversation
             )
 
@@ -201,7 +198,7 @@ internal fun ConversationSettingsBody(
             )
 
             ConversationOtherSettings(
-                modifier = conversationSectionModifier,
+                modifier = Modifier.fillMaxWidth(),
                 conversation = conversation,
                 onLeaveConversation = {
                     leaveConversationJob = viewModel.leaveConversation()
