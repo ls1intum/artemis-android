@@ -15,6 +15,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Programmin
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.UnknownSubmission
 import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotData.Images.IMAGE_MARS
 import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotData.Images.IMAGE_SATURN_5
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseSearchConfiguration
@@ -33,12 +34,19 @@ object ScreenshotData {
         id = 1,
         title = "Designing a rocket engine",
         difficulty = Exercise.Difficulty.EASY,
-        dueDate = Clock.System.now() + 2.days,
+        dueDate = Clock.System.now() + 1.days,
+        maxPoints = 20f,
         studentParticipations = listOf(StudentParticipation.StudentParticipationImpl(
+            testRun = false,
+            submissions = listOf(
+                UnknownSubmission(
+                    submissionDate = Clock.System.now() - 1.days,
+                )
+            ),
             results = listOf(
                 Result(
                     rated = true,
-                    score = 80f,
+                    score = 100f,
                     completionDate = Clock.System.now() - 1.days,
                 )
             ),
