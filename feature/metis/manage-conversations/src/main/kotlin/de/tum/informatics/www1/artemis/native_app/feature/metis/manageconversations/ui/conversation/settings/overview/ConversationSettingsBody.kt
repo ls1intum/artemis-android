@@ -165,12 +165,17 @@ internal fun ConversationSettingsBody(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .navigationBarsPadding(),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             ConversationInfoSettings(
                 modifier = conversationSectionModifier,
                 conversation = conversation,
                 editableConversationInfo = editableConversationInfo
+            )
+
+            SectionMoreInfo(
+                modifier = conversationSectionModifier,
+                conversation = conversation
             )
 
             ConversationMemberSettings(
@@ -193,11 +198,6 @@ internal fun ConversationSettingsBody(
                     userActionData =
                         PerformActionOnUserData(it, UserAction.REVOKE_MODERATION_RIGHTS)
                 }
-            )
-
-            SectionMoreInfo(
-                modifier = conversationSectionModifier,
-                conversation = conversation
             )
 
             ConversationOtherSettings(
