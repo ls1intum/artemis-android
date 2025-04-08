@@ -159,13 +159,14 @@ internal fun ConversationSettingsBody(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = Spacings.ScreenHorizontalSpacing)
-                .padding(top = Spacings.ScreenTopBarSpacing)
                 .verticalScroll(rememberScrollState())
                 .navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             ConversationInfoSettings(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .padding(top = Spacings.ScreenTopBarSpacing)
+                    .fillMaxWidth(),
                 conversation = conversation,
                 editableConversationInfo = editableConversationInfo
             )
