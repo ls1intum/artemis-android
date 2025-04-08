@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
 import de.tum.informatics.www1.artemis.native_app.core.data.CourseServiceFake
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseExerciseService
@@ -15,7 +16,6 @@ import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipati
 import de.tum.informatics.www1.artemis.native_app.core.websocket.test.LiveParticipationServiceStub
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.CourseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.CourseUiScreen
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
@@ -37,7 +37,7 @@ fun `Course View - Exercise List`() {
         courseService = CourseServiceFake(ScreenshotCourse),
         liveParticipationService = LiveParticipationServiceStub(),
         courseExerciseService = object : CourseExerciseService {
-            override val onReloadRequired: Flow<Unit> = emptyFlow()
+            override val onArtemisContextChanged = emptyFlow<ArtemisContext.LoggedIn>()
             override suspend fun startExercise(exerciseId: Long): NetworkResponse<Participation> =
                 NetworkResponse.Failure(RuntimeException())
         },

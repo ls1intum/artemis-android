@@ -48,16 +48,14 @@ import org.koin.core.parameter.parametersOf
 
 @Serializable
 data class FaqDetailUi(
-    val courseId: Long,
     val faqId: Long,
 )
 
 fun NavController.navigateToFaqDetail(
-    courseId: Long,
     faqId: Long,
     builder: NavOptionsBuilder.() -> Unit
 ) {
-    navigate(FaqDetailUi(courseId, faqId), builder)
+    navigate(FaqDetailUi(faqId), builder)
 }
 
 fun NavGraphBuilder.faqDetail() {
@@ -65,11 +63,9 @@ fun NavGraphBuilder.faqDetail() {
         deepLinks = FaqDeeplinks.ToFaq.generateLinks(),
     ) { backStackEntry ->
         val route: FaqDetailUi = backStackEntry.toRoute()
-
-        val courseId = route.courseId
         val faqId = route.faqId
 
-        val viewModel = koinViewModel<FaqDetailViewModel> { parametersOf(courseId, faqId) }
+        val viewModel = koinViewModel<FaqDetailViewModel> { parametersOf(faqId) }
         val faq by viewModel.faq.collectAsState()
 
         val serverUrl by viewModel.serverUrl.collectAsState()

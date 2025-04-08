@@ -1,6 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.login.test
 
-import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextImpl
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -40,7 +40,7 @@ suspend fun KoinTest.performTestLogin(): String {
     // This allows the ArtemisContextProvider to update its state with the new login information
     // so that eg the ArtemisContextBasedServices use the updated token and serverUrl.
     withTimeoutOrNull(1) {
-        get<ArtemisContextProvider>().stateFlow.first { it != ArtemisContext.Empty }
+        get<ArtemisContextProvider>().stateFlow.first { it != ArtemisContextImpl.Empty }
     }
 
     return loginResponse.idToken

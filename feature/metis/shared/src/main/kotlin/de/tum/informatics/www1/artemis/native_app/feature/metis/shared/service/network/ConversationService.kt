@@ -190,6 +190,13 @@ interface ConversationService {
         authToken: String,
         serverUrl: String
     ): NetworkResponse<Boolean>
+
+    suspend fun toggleChannelPrivacy(
+        courseId: Long,
+        conversationId: Long,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<Boolean>
 }
 
 suspend fun ConversationService.getConversation(

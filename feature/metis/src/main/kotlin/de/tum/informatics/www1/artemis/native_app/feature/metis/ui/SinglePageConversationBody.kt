@@ -217,7 +217,6 @@ internal fun SinglePageConversationBody(
                 is BrowseChannelConfiguration -> {
                     BrowseChannelsScreen(
                         modifier = modifier,
-                        courseId = courseId,
                         onNavigateToConversation = openConversation,
                         onNavigateBack = navigateToPrevConfig
                     )

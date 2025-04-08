@@ -74,4 +74,15 @@
     <string name="conversation_settings_section_delete_channel_title">Delete channel?</string>
     <string name="conversation_settings_section_delete_channel_message">**Are you sure to delete the channel %1$s?** This is a permanent action and cannot be undone.</string>
     <string name="conversation_settings_section_delete_channel_negative">@android:string/cancel</string>
+
+    <string name="conversation_settings_section_channel_toggle_privacy_title_public">Change to a public channel?</string>
+    <string name="conversation_settings_section_channel_toggle_privacy_title_private">Change to a private channel?</string>
+    <string name="conversation_settings_section_channel_toggle_privacy_message_public">**Do you really want to change this channel to public?**\n\nKeep in mind that making a channel public allows anyone in the course to join, and new members will be able to see past messages.</string>
+    <string name="conversation_settings_section_channel_toggle_privacy_message_private">**Are you sure you want to make this channel private?**\n\nOnly users with moderation rights will be able to add new members.</string>
+    <string name="conversation_settings_section_channel_toggle_privacy_public">Change to public channel</string>
+    <string name="conversation_settings_section_channel_toggle_privacy_private">Change to private channel</string>
+    <string name="conversation_settings_section_channel_toggle_privacy_public_button">Change to public</string>
+    <string name="conversation_settings_section_channel_toggle_privacy_private_button">Change to private</string>
+    <string name="conversation_settings_section_channel_toggle_privacy_negative">@android:string/cancel</string>
+
 </resources>
