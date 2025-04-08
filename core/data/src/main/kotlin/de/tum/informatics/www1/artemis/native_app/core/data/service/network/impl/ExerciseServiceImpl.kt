@@ -4,7 +4,7 @@ import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.Ar
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
-import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.ArtemisContextBasedServiceImpl
+import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.LoggedInBasedServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ExerciseService
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import io.ktor.http.appendPathSegments
@@ -13,7 +13,7 @@ import kotlinx.serialization.Serializable
 internal class ExerciseServiceImpl(
     ktorProvider: KtorProvider,
     artemisContextProvider: ArtemisContextProvider,
-) : ArtemisContextBasedServiceImpl(ktorProvider, artemisContextProvider), ExerciseService {
+) : LoggedInBasedServiceImpl(ktorProvider, artemisContextProvider), ExerciseService {
 
     // For some reason the API endpoint does not return an exercise directly, but this wrapper.
     @Serializable

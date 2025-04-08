@@ -5,4 +5,7 @@ import kotlinx.coroutines.flow.StateFlow
 interface ArtemisContextProvider {
 
     val stateFlow: StateFlow<ArtemisContext>
+
+    fun setCourseId(courseId: Long)
+    fun clearCourseId()
 }

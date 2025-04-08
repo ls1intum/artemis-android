@@ -25,8 +25,6 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class FaqOverviewUiTest : BaseComposeTest() {
 
-    private val courseId = 123L
-
     private val category1 = FaqCategory(
         color = Color.valueOf(0),
         name = "Category1"
@@ -108,7 +106,6 @@ class FaqOverviewUiTest : BaseComposeTest() {
         faqs: List<Faq>
     ): FaqOverviewViewModel {
         val viewModel = FaqOverviewViewModel(
-            courseId = courseId,
             faqRepository = FaqRepositoryMock(faqs = faqs),
             coroutineContext = testDispatcher
         )

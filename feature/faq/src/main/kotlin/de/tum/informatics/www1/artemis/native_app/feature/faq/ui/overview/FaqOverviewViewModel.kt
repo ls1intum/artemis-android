@@ -21,7 +21,6 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
 class FaqOverviewViewModel(
-    courseId: Long,
     private val faqRepository: FaqRepository,
     coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : ViewModel() {
@@ -29,9 +28,7 @@ class FaqOverviewViewModel(
     private val onRequestReload = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     private val allFaqs: StateFlow<DataState<List<Faq>>> = onRequestReload.onStart { emit(Unit) }.flatMapLatest {
-        faqRepository.getFaqs(
-            courseId = courseId
-        )
+        faqRepository.getFaqs()
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 

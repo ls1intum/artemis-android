@@ -50,20 +50,18 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.common.ChannelChatIcon
 import kotlinx.coroutines.Deferred
 import org.koin.androidx.compose.koinViewModel
-import org.koin.core.parameter.parametersOf
 
 internal fun testTagForBrowsedChannelItem(channelId: Long) = "browsedChannel$channelId"
 
 @Composable
 fun BrowseChannelsScreen(
     modifier: Modifier,
-    courseId: Long,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     BrowseChannelsScreen(
         modifier = modifier,
-        viewModel = koinViewModel { parametersOf(courseId) },
+        viewModel = koinViewModel(),
         onNavigateToConversation = onNavigateToConversation,
         onNavigateBack = onNavigateBack
     )
