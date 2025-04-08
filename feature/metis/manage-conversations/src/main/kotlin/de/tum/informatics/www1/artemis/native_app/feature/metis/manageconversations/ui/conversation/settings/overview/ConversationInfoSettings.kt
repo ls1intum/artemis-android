@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.PotentiallyIllegalTextField
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.common.PotentiallyIllegalTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat

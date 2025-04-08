@@ -49,7 +49,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.Art
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.pagePadding
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.PotentiallyIllegalTextField
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.common.PotentiallyIllegalTextField
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
