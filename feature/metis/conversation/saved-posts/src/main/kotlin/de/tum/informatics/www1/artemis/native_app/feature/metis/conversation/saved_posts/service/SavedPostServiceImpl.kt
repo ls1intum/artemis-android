@@ -98,7 +98,7 @@ class SavedPostServiceImpl(
                         postId.toString()
                     )
                     parameter("type", postType.toString())
-                    parameter("status", status.ordinal)
+                    parameter("status", status.toString())
                 }
 
                 cookieAuth(authToken)
