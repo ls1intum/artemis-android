@@ -8,6 +8,6 @@
     <string name="conversation_members_try_again">Try again</string>
 
     <string name="conversation_members_content_description_kick_user">Remove user</string>
-    <string name="conversation_members_content_description_add_moderator">Add moderator</string>
-    <string name="conversation_members_content_description_remove_moderator">Remove moderator</string>
+    <string name="conversation_members_content_description_add_moderator">Grant Moderator Role</string>
+    <string name="conversation_members_content_description_remove_moderator">Revoke Moderator Role</string>
 </resources>

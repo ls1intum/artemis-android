@@ -24,12 +24,7 @@
     <string name="conversation_settings_section_other_archive_channel">Archive channel</string>
     <string name="conversation_settings_section_other_unarchive_channel">Unarchive channel</string>
 
-    <string name="conversation_settings_section_members">Members</string>
-    <plurals name="conversation_settings_section_members_count">
-        <item quantity="zero">No members</item>
-        <item quantity="one">1 member</item>
-        <item quantity="other">%d members</item>
-    </plurals>
+    <string name="conversation_settings_section_members">Members (%d)</string>
     <string name="conversation_settings_section_members_add_members">Add members</string>
     <string name="conversation_settings_section_members_view_all_members">View all members</string>
 
