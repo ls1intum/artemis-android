@@ -17,7 +17,6 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
 class FaqDetailViewModel(
-    courseId: Long,
     faqId: Long,
     private val faqRepository: FaqRepository,
     serverConfigurationService: ServerConfigurationService,
@@ -25,7 +24,6 @@ class FaqDetailViewModel(
 ) : ReloadableViewModel() {
     val faq: StateFlow<DataState<Faq>> = requestReload.onStart { emit(Unit) }.flatMapLatest {
         faqRepository.getFaq(
-            courseId = courseId,
             faqId = faqId,
         )
     }

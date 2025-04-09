@@ -3,9 +3,9 @@ package de.tum.informatics.www1.artemis.native_app.feature.exerciseview
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
+import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.performAutoReloadingNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseExerciseService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ExerciseService
-import de.tum.informatics.www1.artemis.native_app.core.data.service.performAutoReloadingNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
@@ -113,9 +113,8 @@ internal class ExerciseViewModel(
         .flatMapLatest { exerciseState ->
             when (exerciseState) {
                 is DataState.Success -> {
-                    val courseId = exerciseState.data.course?.id.let { it ?: 0L }
                     channelService.performAutoReloadingNetworkCall(networkStatusProvider) {
-                        getExerciseChannel(exerciseId, courseId)
+                        getExerciseChannel(exerciseId)
                     }
                 }
                 else -> flowOf(DataState.Loading())

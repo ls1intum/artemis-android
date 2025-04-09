@@ -10,6 +10,7 @@ import coil3.request.ImageRequest
 import coil3.request.ImageResult
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.authTokenOrEmptyString
 import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.ui.collectArtemisContextAsState
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ArtemisImageProvider
@@ -33,7 +34,7 @@ class ArtemisImageProviderImpl(
         val request = imageProvider.createImageRequest(
             context = context,
             imageUrl = imageUrl,
-            authorizationToken = artemisContext.authToken,
+            authorizationToken = artemisContext.authTokenOrEmptyString,
         )
 
         val loader = coil3.ImageLoader(context)
@@ -48,7 +49,7 @@ class ArtemisImageProviderImpl(
             .appendPathSegments(*Api.Core.UploadedFile.path)
             .appendPathSegments(imagePath)
             .buildString()
-        val authToken = artemisContext.authToken
+        val authToken = artemisContext.authTokenOrEmptyString
         val context = LocalContext.current
 
         return remember(imageUrl, authToken) {
@@ -63,7 +64,7 @@ class ArtemisImageProviderImpl(
     @Composable
     override fun rememberArtemisImageLoader(): ImageLoader {
         val artemisContext by artemisContextProvider.collectArtemisContextAsState()
-        val authorizationToken = artemisContext.authToken
+        val authorizationToken = artemisContext.authTokenOrEmptyString
         val context = LocalContext.current
 
         return remember(authorizationToken) {

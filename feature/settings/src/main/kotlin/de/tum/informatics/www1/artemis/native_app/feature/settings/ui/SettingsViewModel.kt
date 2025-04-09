@@ -6,8 +6,8 @@ import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.app_version.AppVersionProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.performAutoReloadingNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
-import de.tum.informatics.www1.artemis.native_app.core.data.service.performAutoReloadingNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.isLoggedIn

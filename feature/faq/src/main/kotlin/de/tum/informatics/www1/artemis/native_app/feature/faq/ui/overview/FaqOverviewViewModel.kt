@@ -20,15 +20,12 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
 class FaqOverviewViewModel(
-    courseId: Long,
     private val faqRepository: FaqRepository,
     coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : ReloadableViewModel() {
 
     private val allFaqs: StateFlow<DataState<List<Faq>>> = requestReload.onStart { emit(Unit) }.flatMapLatest {
-        faqRepository.getFaqs(
-            courseId = courseId
-        )
+        faqRepository.getFaqs()
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 

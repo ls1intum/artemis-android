@@ -588,4 +588,28 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
             }.status.isSuccess()
         }
     }
+
+    override suspend fun toggleChannelPrivacy(
+        courseId: Long,
+        conversationId: Long,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<Boolean> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.post(serverUrl) {
+                url {
+                    appendPathSegments(
+                        *Api.Communication.Courses.path,
+                        courseId.toString(),
+                        "channels",
+                        conversationId.toString(),
+                        "toggle-privacy"
+                    )
+                }
+                cookieAuth(authToken)
+                contentType(ContentType.Application.Json)
+            }.status.isSuccess()
+        }
+    }
+
 }

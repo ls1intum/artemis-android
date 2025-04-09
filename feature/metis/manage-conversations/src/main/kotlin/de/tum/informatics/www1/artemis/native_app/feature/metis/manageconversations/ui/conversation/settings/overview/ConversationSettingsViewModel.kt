@@ -386,4 +386,25 @@ internal class ConversationSettingsViewModel(
             result
         }
     }
+
+    fun toggleChannelPrivacy(): Deferred<Boolean> {
+        return viewModelScope.async(coroutineContext) {
+            val result = conversationService.toggleChannelPrivacy(
+                courseId = conversationSettings.value.courseId,
+                conversationId = conversationSettings.value.conversationId,
+                authToken = accountService.authToken.first(),
+                serverUrl = serverConfigurationService.serverUrl.first()
+            ).onFailure {
+                    Log.d(TAG, "Failed to toggle channel privacy", it)
+                }.or(false)
+
+            if (result) {
+                onRequestReload.tryEmit(Unit)
+            }
+
+            result
+        }
+    }
+
+
 }

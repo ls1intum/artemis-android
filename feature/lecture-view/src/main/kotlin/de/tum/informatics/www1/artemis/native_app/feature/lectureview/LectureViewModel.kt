@@ -7,6 +7,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
+import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.performAutoReloadingNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseExerciseService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ServerTimeService
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
@@ -135,7 +136,7 @@ internal class LectureViewModel(
         }
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
-    private val serverClock: Flow<Clock> = serverTimeService.onReloadRequired.flatMapLatest {
+    private val serverClock: Flow<Clock> = serverTimeService.onArtemisContextChanged.flatMapLatest {
         serverTimeService.getServerClock()
     }
         .shareIn(viewModelScope + coroutineContext, SharingStarted.WhileSubscribed(1.seconds), replay = 1)
@@ -198,19 +199,11 @@ internal class LectureViewModel(
         }
     }
 
-    val channelDataState: StateFlow<DataState<ChannelChat>> = combine(
-        lectureDataState,
-        serverConfigurationService.serverUrl,
-        accountService.authToken
-    ) { lectureDataState, serverUrl, authToken ->
-        Triple(lectureDataState, serverUrl, authToken)
-    }
-        .flatMapLatest { (lectureDataState, serverUrl, authToken) ->
-            when (lectureDataState) {
+    val channelDataState: StateFlow<DataState<ChannelChat>> = lectureDataState.flatMapLatest { lecture ->
+            when (lecture) {
                 is DataState.Success -> {
-                    val courseId = lectureDataState.data.course?.id ?: 0L
-                    retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                        channelService.getLectureChannel(lectureId, courseId)
+                    channelService.performAutoReloadingNetworkCall(networkStatusProvider) {
+                        getLectureChannel(lectureId)
                     }
                 }
                 else -> flowOf(DataState.Loading())
