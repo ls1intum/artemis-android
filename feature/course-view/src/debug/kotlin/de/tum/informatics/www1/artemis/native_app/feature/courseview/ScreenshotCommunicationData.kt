@@ -85,12 +85,20 @@ object ScreenshotCommunicationData {
             text = "Hey, Sam! Solid propellants are known for their simplicity and reliability. They're easy to handle.",
             time = firstMessageTime + 3.minutes,
             id = "2",
+            reactions = listOf(
+                PostPojo.Reaction("❤️", 1, "", 0, null),
+                PostPojo.Reaction("❤️", 0, "", 0, null),
+            )
         ),
         generateMessage(
             author = tutor1,
             text = "That's right, Mia. They have a consistent burn rate and a good thrust-to-weight ratio, which makes them handy for various missions.",
             time = firstMessageTime + 12.minutes,
             id = "3",
+            reactions = listOf(
+                PostPojo.Reaction("👍", 1, "", 0, null),
+                PostPojo.Reaction("🚀", 1, "", 0, null),
+            )
         ),
         generateMessage(
             author = student1,
