@@ -19,6 +19,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitText
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitVideo
+import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotData.Images.IMAGE_ASTRONAUT
 import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotData.Images.IMAGE_MARS
 import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotData.Images.IMAGE_SATURN_5
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseSearchConfiguration
@@ -31,6 +32,7 @@ object ScreenshotData {
     object Images {
         const val IMAGE_MARS = "mars"
         const val IMAGE_SATURN_5 = "saturn5"
+        const val IMAGE_ASTRONAUT = "astronaut"
     }
 
     val exercise1 = ModelingExercise(
@@ -146,10 +148,12 @@ object ScreenshotData {
         fun configImagePreviewHandler(): AsyncImagePreviewHandler {
             val marsImage = ImageBitmap.imageResource(R.drawable.mars).asAndroidBitmap().asImage()
             val saturnImage = ImageBitmap.imageResource(R.drawable.saturn5).asAndroidBitmap().asImage()
+            val astronautImage = ImageBitmap.imageResource(R.drawable.astronaut_square).asAndroidBitmap().asImage()
             return AsyncImagePreviewHandler { request ->
                 when (request.data) {
                     IMAGE_MARS -> marsImage
                     IMAGE_SATURN_5 -> saturnImage
+                    IMAGE_ASTRONAUT -> astronautImage
                     else -> null
                 }
             }

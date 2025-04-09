@@ -41,7 +41,8 @@ object ScreenshotCommunicationData {
         username = "u3",
         firstName = "Ethan",
         lastName = "Martin",
-        imageUrl = ScreenshotData.Images.IMAGE_MARS
+        imageUrl = ScreenshotData.Images.IMAGE_ASTRONAUT,
+        isTeachingAssistant = true
     )
 
     val conversations = listOf(
