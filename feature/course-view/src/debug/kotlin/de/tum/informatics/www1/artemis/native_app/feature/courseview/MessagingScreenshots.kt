@@ -14,6 +14,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.test.AccountDataServ
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.ui.PlayStoreScreenshots
+import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotData
 import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotFrame
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseSearchConfiguration
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
@@ -24,11 +25,11 @@ import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_o
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.impl.EmojiServiceStub
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.model.LinkPreview
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationChatListScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.DataStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.PostsDataState
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.ForwardMessageUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.network.impl.ChannelServiceStub
@@ -37,70 +38,22 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversati
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.ConversationOverviewViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ConversationServiceStub
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisFilter
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
+import io.mockk.mockk
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.atTime
-import kotlinx.datetime.toInstant
-import org.koin.compose.koinInject
-import kotlin.time.Duration.Companion.minutes
-
-private val sharedConversation = ChannelChat(
-    id = 1L,
-    name = "Designing a rocket engine - Q&A",
-    unreadMessagesCount = 17,
-)
 
 @PlayStoreScreenshots
 @Composable
 fun `Metis - Conversation Overview`() {
+    val course = ScreenshotData.course1
+
     val viewModel = ConversationOverviewViewModel(
         currentActivityListener = null,
         courseId = 0L,
         conversationService = ConversationServiceStub(
-            conversations = listOf(
-                ChannelChat(
-                    id = 0L,
-                    name = "General Course Questions",
-                    unreadMessagesCount = 8,
-                ),
-                sharedConversation,
-                GroupChat(
-                    id = 2L,
-                    name = "Team Rocket Students"
-                ),
-                OneToOneChat(
-                    id = 3L,
-                    members = listOf(
-                        ConversationUser(
-                            username = "u1",
-                            firstName = "Ethan",
-                            lastName = "Martin"
-                        )
-                    )
-                ),
-                OneToOneChat(
-                    id = 4L,
-                    members = listOf(
-                        ConversationUser(
-                            username = "u2",
-                            firstName = "Sophia",
-                            lastName = "Davis"
-                        )
-                    ),
-                    unreadMessagesCount = 3,
-                )
-            )
+            conversations = ScreenshotCommunicationData.conversations,
         ),
         channelService = ChannelServiceStub,
         serverConfigurationService = ServerConfigurationServiceStub(),
@@ -133,15 +86,13 @@ fun `Metis - Conversation Overview`() {
         websocketProvider = WebsocketProviderStub(),
         networkStatusProvider = NetworkStatusProviderStub(),
         accountDataService = AccountDataServiceStub(),
-        courseService = CourseServiceFake(ScreenshotCourse)
+        courseService = CourseServiceFake(course)
     )
-
-    val course = DataState.Success(ScreenshotCourse)
 
     ScreenshotFrame(title = "Communicate with students and instructors") {
         CourseScaffold(
             modifier = Modifier.fillMaxSize(),
-            courseDataState = course,
+            courseDataState = DataState.Success(course),
             searchConfiguration = CourseSearchConfiguration.Search(
                 query = "",
                 hint = "Search for a conversation",
@@ -174,48 +125,15 @@ fun `Metis - Conversation Overview`() {
 @PlayStoreScreenshots
 @Composable
 fun `Metis - Conversation Channel`() {
-    val date = LocalDate(2023, 7, 29)
-    val firstMessageTime = date.atTime(13, 34).toInstant(TimeZone.UTC)
-
-    val posts = listOf(
-        ChatListItem.DateDivider(date),
-        generateMessage(
-            name = "Sam",
-            text = "Hey, folks! What are the big advantages of solid chemical propellants in rockets?",
-            time = firstMessageTime,
-            id = "1",
-            authorId = 0L
-        ),
-        generateMessage(
-            name = "Mia",
-            text = "Hey, Sam! Solid propellants are known for their simplicity and reliability. They're easy to handle.",
-            time = firstMessageTime + 3.minutes,
-            id = "2",
-            authorId = 1L
-        ),
-        generateMessage(
-            name = "Ethan",
-            text = "That's right, Mia. They have a consistent burn rate and a good thrust-to-weight ratio, which makes them handy for various missions.",
-            time = firstMessageTime + 12.minutes,
-            id = "3",
-            authorId = 2L
-        ),
-        generateMessage(
-            name = "Sam",
-            text = " Thanks, Mia and Ethan! So, they're like the dependable workhorses of rocket propellants, huh?",
-            time = firstMessageTime + 15.minutes,
-            id = "4",
-            authorId = 0L
-        ),
-    ).reversed()
+    val conversation = ScreenshotCommunicationData.conversation
 
     // TODO: Provide artemis image provider
     ScreenshotFrame(title = "Send and receive messages directly from the app") {
         ConversationChatListScreen(
             modifier = Modifier.fillMaxSize(),
-            courseId = ScreenshotCourse.id!!,
-            conversationId = sharedConversation.id,
-            conversationDataState = DataState.Success(sharedConversation),
+            courseId = 0L,
+            conversationId = conversation.id,
+            conversationDataState = DataState.Success(conversation),
             query = "",
             filter = MetisFilter.ALL,
             onUpdateFilter = {},
@@ -237,7 +155,7 @@ fun `Metis - Conversation Channel`() {
                         override fun updateInitialReplyText(text: TextFieldValue) = Unit
                     },
                     posts = PostsDataState.Loaded.WithList(
-                        posts,
+                        ScreenshotCommunicationData.posts,
                         PostsDataState.NotLoading
                     ),
                     clientId = 0L,
@@ -248,7 +166,7 @@ fun `Metis - Conversation Channel`() {
                     ),
                     serverUrl = "",
                     courseId = 0,
-                    forwardMessageUseCase = koinInject(), // This is a only a workaround
+                    forwardMessageUseCase = mockk<ForwardMessageUseCase>(), // This is a only a workaround
                     state = rememberLazyListState(),
                     isReplyEnabled = true,
                     isMarkedAsDeleteList = mutableStateListOf(),
@@ -265,7 +183,7 @@ fun `Metis - Conversation Channel`() {
                     onClickViewPost = {},
                     onRequestRetrySend = {},
                     onFileSelected = { _ -> },
-                    conversationName = "Chat",
+                    conversationName = conversation.name,
                     emojiService = EmojiServiceStub,
                 )
             }
@@ -273,34 +191,3 @@ fun `Metis - Conversation Channel`() {
     }
 }
 
-private fun generateMessage(
-    name: String,
-    text: String,
-    time: Instant,
-    id: String,
-    authorId: Long
-): ChatListItem.PostItem {
-    return ChatListItem.PostItem.IndexedItem.Post(
-        PostPojo(
-            clientPostId = id,
-            serverPostId = 0L,
-            title = null,
-            content = text,
-            authorName = name,
-            authorRole = UserRole.USER,
-            authorId = authorId,
-            authorImageUrl = null,
-            creationDate = time,
-            updatedDate = null,
-            resolved = false,
-            isSaved = false,
-            courseWideContext = null,
-            tags = emptyList(),
-            answers = emptyList(),
-            reactions = emptyList(),
-            displayPriority = null,
-            hasForwardedMessages = false
-        ),
-        emptyList()
-    )
-}
