@@ -142,7 +142,6 @@ fun NavGraphBuilder.rootNavGraph(
     )
 
     lecture(
-        navController = navController,
         onViewExercise = { exerciseId ->
             navController.navigateToExercise(
                 exerciseId,

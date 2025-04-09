@@ -163,6 +163,8 @@ fun CourseUiScreen(
     onNavigateToFaq: (faqId: Long) -> Unit,
     onNavigateBack: () -> Unit
 ) {
+    ReportVisibleMetisContext(VisibleCourse(MetisContext.Course(courseId)))
+
     val courseDataState by viewModel.course.collectAsState()
     val exercisesTimeFrameDataState by viewModel.exercisesTimeFrame.collectAsState()
     val lecturesTimeFrameDataState by viewModel.lecturesTimeFrame.collectAsState()
@@ -244,8 +246,6 @@ internal fun CourseUiScreen(
     onNavigateBack: () -> Unit,
     onReloadCourse: () -> Unit,
 ) {
-    ReportVisibleMetisContext(VisibleCourse(MetisContext.Course(courseId)))
-
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 

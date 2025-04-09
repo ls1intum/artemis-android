@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalCoilApi::class)
+
 package de.tum.informatics.www1.artemis.native_app.core.ui
 
 import androidx.compose.foundation.background
@@ -11,12 +13,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import coil3.annotation.ExperimentalCoilApi
+import coil3.compose.LocalAsyncImagePreviewHandler
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
 
 @Composable
 fun ScreenshotFrame(title: String, content: @Composable () -> Unit) {
@@ -67,7 +73,12 @@ fun ScreenshotFrame(title: String, content: @Composable () -> Unit) {
                                 .fillMaxSize()
                                 .padding(16.dp)
                         ) {
-                            content()
+                            CompositionLocalProvider(
+                                LocalArtemisImageProvider provides ArtemisImageProviderStub(),
+                                LocalAsyncImagePreviewHandler provides ScreenshotData.Util.configImagePreviewHandler(),
+                            ) {
+                                content()
+                            }
                         }
                     }
                 }

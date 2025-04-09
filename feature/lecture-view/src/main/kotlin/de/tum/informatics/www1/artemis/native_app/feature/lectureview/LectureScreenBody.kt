@@ -9,7 +9,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -19,25 +18,25 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavController
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.DefaultTab
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import kotlinx.coroutines.Deferred
 
-@Suppress("UNUSED_PARAMETER")
 @Composable
 internal fun LectureScreenBody(
     modifier: Modifier,
     displayCommunicationOnSide: Boolean,
     lectureDataState: DataState<Lecture>,
-    viewModel: LectureViewModel,
+    lectureChannel: DataState<ChannelChat>,
+    lectureUnits: List<LectureUnit>,
     onViewExercise: (exerciseId: Long) -> Unit,
     onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
     onParticipateInQuiz: (exerciseId: Long, isPractice: Boolean) -> Unit,
@@ -45,11 +44,12 @@ internal fun LectureScreenBody(
     onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
     courseId: Long,
     overviewListState: LazyListState,
-    metisContext: MetisContext.Lecture,
-    navController: NavController,
     onRequestViewLink: (String) -> Unit,
     onRequestOpenAttachment: (Attachment) -> Unit,
-    onDisplaySetCompletedFailureDialog: () -> Unit
+    onDisplaySetCompletedFailureDialog: () -> Unit,
+    onReloadLecture: () -> Unit,
+    onUpdateLectureUnitIsComplete: (lectureUnitId: Long, isCompleted: Boolean) -> Deferred<Boolean>,
+    onStartExercise: (exerciseId: Long, onParticipationId: (Long) -> Unit) -> Unit,
 ) {
     val selectedTabIndexState = rememberSaveable {
         mutableIntStateOf(0)
@@ -64,7 +64,6 @@ internal fun LectureScreenBody(
             overviewTabIndex
         } else selectedTabIndexState.intValue
 
-    val lectureChannel by viewModel.channelDataState.collectAsState()
     val markLectureUnitDeferredMap = remember { SnapshotStateMap<Long, Deferred<Boolean>>() }
 
     markLectureUnitDeferredMap.forEach { (lectureUnitId, deferred) ->
@@ -100,15 +99,6 @@ internal fun LectureScreenBody(
                     textRes = R.string.lecture_view_tab_attachments,
                     selectedTabIndex = selectedTabIndexState
                 )
-
-//            if (!displayCommunicationOnSide) {
-//                DefaultTab(
-//                    index = qnaTabIndex,
-//                    icon = Icons.Default.HelpCenter,
-//                    textRes = R.string.lecture_view_tab_communication,
-//                    selectedTabIndex = selectedTabIndexState
-//                )
-//            }
             }
         }
 
@@ -120,11 +110,10 @@ internal fun LectureScreenBody(
             loadingText = stringResource(id = R.string.lecture_view_lecture_loading),
             failureText = stringResource(id = R.string.lecture_view_lecture_loading_failure),
             retryButtonText = stringResource(id = R.string.lecture_view_lecture_loading_try_again),
-            onClickRetry = viewModel::requestReloadLecture
+            onClickRetry = onReloadLecture,
         ) { lecture ->
             when (selectedTabIndex) {
                 overviewTabIndex -> {
-                    val lectureUnits by viewModel.lectureUnits.collectAsState()
                     val lectureUnitsWithData by remember(lectureUnits, markLectureUnitDeferredMap) {
                         derivedStateOf {
                             lectureUnits.map {
@@ -142,7 +131,7 @@ internal fun LectureScreenBody(
                         lectureUnits = lectureUnitsWithData,
                         onViewExercise = onViewExercise,
                         onMarkAsCompleted = { lectureUnitId, isCompleted ->
-                            val deferred = viewModel.updateLectureUnitIsComplete(
+                            val deferred = onUpdateLectureUnitIsComplete(
                                 lectureUnitId,
                                 isCompleted
                             )
@@ -153,7 +142,7 @@ internal fun LectureScreenBody(
                         onRequestOpenAttachment = onRequestOpenAttachment,
                         exerciseActions = BoundExerciseActions(
                             onClickStartTextExercise = { exerciseId ->
-                                viewModel.startExercise(exerciseId) { participationId ->
+                                onStartExercise(exerciseId) { participationId ->
                                     onNavigateToTextExerciseParticipation(
                                         exerciseId,
                                         participationId
@@ -180,16 +169,6 @@ internal fun LectureScreenBody(
                         ),
                         state = overviewListState
                     )
-                }
-
-                qnaTabIndex -> {
-//                    SmartphoneConversationUi(
-//                        modifier = Modifier
-//                            .fillMaxSize()
-//                            .padding(horizontal = 8.dp),
-//                        metisContext = metisContext,
-//                        navController = navController
-//                    )
                 }
 
                 attachmentsTabIndex -> {

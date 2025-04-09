@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.core.ui.test
+package de.tum.informatics.www1.artemis.native_app.core.ui
 
 import android.content.Context
 import androidx.compose.runtime.Composable

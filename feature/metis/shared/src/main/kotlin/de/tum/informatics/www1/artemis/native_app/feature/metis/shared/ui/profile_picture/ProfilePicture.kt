@@ -27,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -138,6 +139,19 @@ fun ProfilePictureImage(
 
     if (painterState is AsyncImagePainter.State.Error) {
         Log.e("ProfilePicture", "Error loading image: ${(painterState as AsyncImagePainter.State.Error).result.throwable.message}")
+    }
+
+    if (LocalInspectionMode.current) {
+        // In preview mode, we don't want to load the image as we use a static image
+        Image(
+            modifier = modifier
+                .fillMaxWidth()
+                .testTag(TEST_TAG_PROFILE_PICTURE_IMAGE),
+            painter = painter,
+            contentDescription = null,
+            contentScale = ContentScale.Fit
+        )
+        return
     }
 
     when (painterState) {
