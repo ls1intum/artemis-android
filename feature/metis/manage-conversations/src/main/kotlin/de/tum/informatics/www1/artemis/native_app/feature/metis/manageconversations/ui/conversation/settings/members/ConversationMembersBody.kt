@@ -170,6 +170,19 @@ private fun ConversationMembersList(
         }
 
         is LoadState.NotLoading -> {
+            if (members.itemCount == 0 && query.isNotEmpty()) {
+                Box(
+                    modifier = modifier,
+                    contentAlignment = Alignment.Center
+                ) {
+                    NoSearchResults(
+                        modifier = Modifier.fillMaxWidth(),
+                        title = stringResource(id = R.string.conversation_members_no_search_results_title),
+                        details = stringResource(id = R.string.conversation_members_no_search_results_body, query)
+                    )
+                }
+            }
+
             LazyColumn(
                 modifier = modifier
                     .nestedScroll(collapsingContentState.nestedScrollConnection)
@@ -211,16 +224,6 @@ private fun ConversationMembersList(
                                 onRequestRevokeModerationPermission = onRequestRevokeModerationPermission
                             )
                         }
-                    }
-                }
-
-                if (members.itemCount == 0 && query.isNotEmpty()) {
-                    item {
-                        NoSearchResults(
-                            modifier = Modifier.fillMaxWidth(),
-                            title = stringResource(id = R.string.conversation_members_no_search_results_title),
-                            details = stringResource(id = R.string.conversation_members_no_search_results_body, query)
-                        )
                     }
                 }
 

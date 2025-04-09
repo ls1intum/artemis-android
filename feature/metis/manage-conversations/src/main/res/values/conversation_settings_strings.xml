@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="conversation_settings_title">Conversation Settings</string>
+    <string name="conversation_settings_title">Conversation Details</string>
     <string name="conversation_settings_loading">Loading conversation…</string>
     <string name="conversation_settings_failure">Something went wrong while loading your conversation.</string>
     <string name="conversation_settings_try_again">Try again</string>
