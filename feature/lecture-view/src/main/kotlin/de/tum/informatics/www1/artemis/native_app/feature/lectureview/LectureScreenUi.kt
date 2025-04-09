@@ -27,10 +27,8 @@ import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.toRoute
 import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
-import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
-import de.tum.informatics.www1.artemis.native_app.core.ui.collectArtemisContextAsState
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.LinkBottomSheet
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.LinkBottomSheetState
@@ -119,7 +117,6 @@ internal fun LectureScreen(
 
     val lectureDataState by viewModel.lectureDataState.collectAsState()
     val serverUrl by viewModel.serverUrl.collectAsState()
-    val artemisContext by LocalArtemisContextProvider.current.collectArtemisContextAsState()
 
     val lectureTitle = lectureDataState.bind<String?> { it.title }.orElse(null)
 
@@ -194,7 +191,6 @@ internal fun LectureScreen(
 
                 LinkBottomSheet(
                     modifier = Modifier.fillMaxSize(),
-                    artemisContext = artemisContext,
                     link = formattedUrl,
                     fileName = currentPendingOpenFileAttachment.name.orEmpty(),
                     state = LinkBottomSheetState.PDFVIEWSTATE,

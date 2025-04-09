@@ -182,5 +182,12 @@ open class ConversationServiceStub(
         conversationId: Long,
         authToken: String,
         serverUrl: String
-    ): NetworkResponse<Boolean> =  NetworkResponse.Failure(StubException)
+    ): NetworkResponse<Boolean> = NetworkResponse.Failure(StubException)
+
+    override suspend fun toggleChannelPrivacy(
+        courseId: Long,
+        conversationId: Long,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<Boolean> = NetworkResponse.Failure(StubException)
 }

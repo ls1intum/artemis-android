@@ -173,7 +173,6 @@ internal fun ExerciseScreen(
                     setWebView = { savedWebView = it },
                     webView = savedWebView,
                     onClickRetry = viewModel::requestReloadExercise,
-                    artemisContext = artemisContext
                 )
             }
         }
