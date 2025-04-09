@@ -28,7 +28,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.NothingOpened
 import de.tum.informatics.www1.artemis.native_app.feature.metis.OpenedConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.OpenedSavedPosts
 import de.tum.informatics.www1.artemis.native_app.feature.metis.OpenedThread
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.ui.SavedPostsScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.ui.SavedPostsScreenWithChips
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.browse_channels.BrowseChannelsScreen
@@ -197,11 +197,10 @@ internal fun SinglePageConversationBody(
                 is OpenedSavedPosts -> {
                     // TODO: This should potentially be moved into the ConversationScreen. That allows us to still display the ConvOverview on the left.
                     //      https://github.com/ls1intum/artemis-android/issues/288
-                    SavedPostsScreen(
+                    SavedPostsScreenWithChips(
                         modifier = modifier,
                         courseId = courseId,
                         savedPostStatus = config.status,
-                        onNavigateBack = navigateToPrevConfig,
                         onNavigateToPost = { savedPost ->
                             configuration = OpenedConversation(
                                 _prevConfiguration = configuration,
