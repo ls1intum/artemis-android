@@ -24,7 +24,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_o
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.CourseTab
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.impl.EmojiServiceStub
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationChatListScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.DataStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
@@ -41,7 +40,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.M
 import io.mockk.mockk
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 
 @PlayStoreScreenshots
@@ -177,7 +176,7 @@ fun `Metis - Conversation Channel`() {
                     onPinPost = { CompletableDeferred() },
                     onSavePost = { CompletableDeferred() },
                     onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
-                    generateLinkPreviews = { _ -> flowOf(emptyList<LinkPreview>()) as StateFlow<List<LinkPreview>> },
+                    generateLinkPreviews = { _ -> MutableStateFlow(emptyList()) },
                     onRemoveLinkPreview = { _, _, _ -> CompletableDeferred<MetisModificationFailure>() },
                     bottomItem = null,
                     onClickViewPost = {},

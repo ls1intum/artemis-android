@@ -1,7 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.courseview
 
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
@@ -24,6 +23,27 @@ object ScreenshotCommunicationData {
         numberOfMembers = 64
     )
 
+    val student1 = ConversationUser(
+        id = 0,
+        username = "u1",
+        firstName = "Sam",
+        lastName = "Smith"
+    )
+
+    val student2 = ConversationUser(
+        id = 1,
+        username = "u2",
+        firstName = "Mia",
+        lastName = "Johnson"
+    )
+
+    val tutor1 = ConversationUser(
+        id = 3,
+        username = "u3",
+        firstName = "Ethan",
+        lastName = "Martin"
+    )
+
     val conversations = listOf(
         ChannelChat(
             id = 0L,
@@ -38,21 +58,13 @@ object ScreenshotCommunicationData {
         OneToOneChat(
             id = 3L,
             members = listOf(
-                ConversationUser(
-                    username = "u1",
-                    firstName = "Ethan",
-                    lastName = "Martin"
-                )
+                tutor1
             )
         ),
         OneToOneChat(
             id = 4L,
             members = listOf(
-                ConversationUser(
-                    username = "u2",
-                    firstName = "Sophia",
-                    lastName = "Davis"
-                )
+                student2
             ),
             unreadMessagesCount = 3,
         )
@@ -63,41 +75,36 @@ object ScreenshotCommunicationData {
     val posts = listOf(
         ChatListItem.DateDivider(firstMessageTime.toLocalDateTime(TimeZone.currentSystemDefault()).date),
         generateMessage(
-            name = "Sam",
+            author = student1,
             text = "Hey, folks! What are the big advantages of solid chemical propellants in rockets?",
             time = firstMessageTime,
             id = "1",
-            authorId = 0L
         ),
         generateMessage(
-            name = "Mia",
+            author = student2,
             text = "Hey, Sam! Solid propellants are known for their simplicity and reliability. They're easy to handle.",
             time = firstMessageTime + 3.minutes,
             id = "2",
-            authorId = 1L
         ),
         generateMessage(
-            name = "Ethan",
+            author = tutor1,
             text = "That's right, Mia. They have a consistent burn rate and a good thrust-to-weight ratio, which makes them handy for various missions.",
             time = firstMessageTime + 12.minutes,
             id = "3",
-            authorId = 2L
         ),
         generateMessage(
-            name = "Sam",
+            author = student1,
             text = " Thanks, Mia and Ethan! So, they're like the dependable workhorses of rocket propellants, huh?",
             time = firstMessageTime + 15.minutes,
             id = "4",
-            authorId = 0L
         ),
     ).reversed()
 
     private fun generateMessage(
-        name: String,
+        author: ConversationUser = student1,
         text: String,
         time: Instant,
         id: String,
-        authorId: Long
     ): ChatListItem.PostItem {
         return ChatListItem.PostItem.IndexedItem.Post(
             PostPojo(
@@ -105,9 +112,9 @@ object ScreenshotCommunicationData {
                 serverPostId = 0L,
                 title = null,
                 content = text,
-                authorName = name,
-                authorRole = UserRole.USER,
-                authorId = authorId,
+                authorName = author.firstName,
+                authorRole = author.getUserRole(),
+                authorId = author.id,
                 authorImageUrl = null,
                 creationDate = time,
                 updatedDate = null,
