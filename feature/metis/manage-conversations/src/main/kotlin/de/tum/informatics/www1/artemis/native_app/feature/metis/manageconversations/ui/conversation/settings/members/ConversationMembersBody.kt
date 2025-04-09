@@ -3,9 +3,12 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversat
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -34,6 +38,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import de.tum.informatics.www1.artemis.native_app.core.data.join
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.NoSearchResults
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.ConversationMemberListItem
@@ -55,6 +60,7 @@ internal fun ConversationMembersBody(
     modifier: Modifier,
     courseId: Long,
     conversationId: Long,
+    query: String,
     collapsingContentState: CollapsingContentState,
     viewModel: ConversationMembersViewModel = koinViewModel {
         parametersOf(
@@ -90,6 +96,7 @@ internal fun ConversationMembersBody(
             ConversationMembersList(
                 modifier = Modifier.fillMaxSize(),
                 members = members,
+                query = query,
                 clientUsername = clientUsername,
                 conversation = conversation,
                 collapsingContentState = collapsingContentState,
@@ -122,6 +129,7 @@ private fun ConversationMembersList(
     members: LazyPagingItems<ConversationUser>,
     clientUsername: String,
     conversation: Conversation,
+    query: String,
     collapsingContentState: CollapsingContentState,
     onRequestKickMember: (ConversationUser) -> Unit,
     onRequestGrantModerationPermission: (ConversationUser) -> Unit,
@@ -166,7 +174,16 @@ private fun ConversationMembersList(
                 modifier = modifier
                     .nestedScroll(collapsingContentState.nestedScrollConnection)
                     .testTag(TEST_TAG_MEMBERS_LIST),
-                contentPadding = WindowInsets.navigationBars.asPaddingValues(),
+                contentPadding = PaddingValues(
+                    top = 8.dp,
+                    start = WindowInsets.navigationBars.asPaddingValues().calculateStartPadding(
+                        layoutDirection = LocalLayoutDirection.current
+                    ),
+                    end = WindowInsets.navigationBars.asPaddingValues().calculateEndPadding(
+                        layoutDirection = LocalLayoutDirection.current
+                    ),
+                    bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                ),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if (members.loadState.prepend is LoadState.Loading) {
@@ -194,6 +211,16 @@ private fun ConversationMembersList(
                                 onRequestRevokeModerationPermission = onRequestRevokeModerationPermission
                             )
                         }
+                    }
+                }
+
+                if (members.itemCount == 0 && query.isNotEmpty()) {
+                    item {
+                        NoSearchResults(
+                            modifier = Modifier.fillMaxWidth(),
+                            title = stringResource(id = R.string.conversation_members_no_search_results_title),
+                            details = stringResource(id = R.string.conversation_members_no_search_results_body, query)
+                        )
                     }
                 }
 
