@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.overview
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,7 +17,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.join
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
@@ -155,29 +153,30 @@ internal fun ConversationSettingsBody(
         retryButtonText = stringResource(id = R.string.conversation_settings_try_again),
         onClickRetry = viewModel::requestReload
     ) { (conversation, members, clientUsername) ->
+        val sectionModifier = Modifier
+            .fillMaxWidth()
+            .padding(top = Spacings.ScreenTopBarSpacing)
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                 .verticalScroll(rememberScrollState())
-                .navigationBarsPadding(),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .navigationBarsPadding()
         ) {
             ConversationInfoSettings(
-                modifier = Modifier
-                    .padding(top = Spacings.ScreenTopBarSpacing)
-                    .fillMaxWidth(),
+                modifier = sectionModifier,
                 conversation = conversation,
                 editableConversationInfo = editableConversationInfo
             )
 
             SectionMoreInfo(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = sectionModifier,
                 conversation = conversation
             )
 
             ConversationMemberSettings(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = sectionModifier,
                 conversation = conversation,
                 clientUsername = clientUsername,
                 memberCount = conversation.numberOfMembers,
@@ -199,7 +198,7 @@ internal fun ConversationSettingsBody(
             )
 
             ConversationOtherSettings(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = sectionModifier,
                 conversation = conversation,
                 onLeaveConversation = {
                     leaveConversationJob = viewModel.leaveConversation()

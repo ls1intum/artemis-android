@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,6 +26,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.common.getChannelIconImageVector
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import kotlinx.datetime.toJavaInstant
 import java.text.SimpleDateFormat
@@ -36,32 +38,29 @@ internal fun ConversationInfoSettings(
     conversation: Conversation,
     editableConversationInfo: EditableConversationInfo
 ) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        when (conversation) {
-            is ChannelChat -> {
-                SectionBasicData(
-                    modifier = Modifier.fillMaxWidth(),
-                    editableConversationInfo = editableConversationInfo,
-                    displayDescription = true,
-                    displayTopic = true
-                )
-            }
+    when (conversation) {
+        is ChannelChat -> {
+            SectionBasicData(
+                modifier = modifier,
+                conversation = conversation,
+                editableConversationInfo = editableConversationInfo,
+                displayDescription = true,
+                displayTopic = true
+            )
+        }
 
-            is GroupChat -> {
-                SectionBasicData(
-                    modifier = Modifier.fillMaxWidth(),
-                    editableConversationInfo = editableConversationInfo,
-                    displayDescription = false,
-                    displayTopic = false
-                )
-            }
+        is GroupChat -> {
+            SectionBasicData(
+                modifier = modifier,
+                conversation = conversation,
+                editableConversationInfo = editableConversationInfo,
+                displayDescription = false,
+                displayTopic = false
+            )
+        }
 
-            is OneToOneChat -> {
-                // No editable data
-            }
+        is OneToOneChat -> {
+            // No editable data
         }
     }
 }
@@ -72,14 +71,12 @@ internal fun ConversationInfoSettings(
 @Composable
 private fun SectionBasicData(
     modifier: Modifier,
+    conversation: Conversation,
     editableConversationInfo: EditableConversationInfo,
     displayDescription: Boolean,
     displayTopic: Boolean,
 ) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
+    Column(modifier = modifier) {
         val textFieldModifier = Modifier.fillMaxWidth()
 
         PotentiallyIllegalTextField(
@@ -88,6 +85,14 @@ private fun SectionBasicData(
             value = editableConversationInfo.name,
             placeholder = R.string.conversation_settings_basic_data_name_empty,
             updateValue = editableConversationInfo.updateName,
+            leadingIcon = if (conversation is ChannelChat) {
+                {
+                    Icon(
+                        imageVector = getChannelIconImageVector(conversation),
+                        contentDescription = null
+                    )
+                }
+            } else null,
             isIllegal = editableConversationInfo.isNameIllegal,
             illegalStateExplanation = R.string.channel_text_field_name_invalid,
             requiredSupportText = null,
@@ -160,7 +165,7 @@ internal fun SectionMoreInfo(modifier: Modifier, conversation: Conversation) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                    .padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -182,7 +187,7 @@ internal fun SectionMoreInfo(modifier: Modifier, conversation: Conversation) {
             Row(
                 modifier = modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                    .padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {

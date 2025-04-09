@@ -28,7 +28,7 @@ fun ArtemisSection(
         shape = MaterialTheme.shapes.medium
     ) {
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .padding(16.dp)
                 .testTag(testTag ?: getSectionTestTag(title)),
             verticalArrangement = Arrangement.spacedBy(spacing)
