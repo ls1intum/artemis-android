@@ -602,10 +602,6 @@ class ConversationOverviewViewModel(
         expandOrCollapseSection { copy(hiddenExpanded = !hiddenExpanded) }
     }
 
-    fun toggleSavedPostsExpanded() {
-        expandOrCollapseSection { copy(savedPostsExpanded = !savedPostsExpanded) }
-    }
-
     private fun expandOrCollapseSection(update: ConversationPreferenceService.Preferences.() -> ConversationPreferenceService.Preferences) {
         viewModelScope.launch(coroutineContext) {
             conversationPreferenceService.updatePreferences(

@@ -31,7 +31,6 @@ data class OpenedThread(val postId: StandalonePostId) : Parcelable
 
 data class OpenedSavedPosts(
     private val _prevConfiguration: ConversationConfiguration,
-    val status: SavedPostStatus
 )
     : ConversationConfiguration(5, _prevConfiguration)
 /**

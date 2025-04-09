@@ -97,7 +97,6 @@ internal fun tagForConversationOptions(tagForConversation: String) = "${tagForCo
 private sealed class ConversationSectionState(val isExpanded: Boolean) {
     data class Conversations<T : Conversation>(val conversations: ConversationCollections.ConversationCollection<T>)
         : ConversationSectionState(conversations.isExpanded)
-    class SavedPosts(isExpanded: Boolean) : ConversationSectionState(isExpanded)
 }
 
 @Composable
@@ -107,7 +106,7 @@ internal fun ConversationList(
     collapsingContentState: CollapsingContentState,
     conversationCollections: ConversationCollections,
     onNavigateToConversation: (conversationId: Long) -> Unit,
-    onNavigateToSavedPosts: (status: SavedPostStatus) -> Unit,
+    onNavigateToSavedPosts: () -> Unit,
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
     onToggleHidden: (conversationId: Long, hidden: Boolean) -> Unit,
     onToggleMuted: (conversationId: Long, muted: Boolean) -> Unit,
@@ -117,7 +116,6 @@ internal fun ConversationList(
 
     ConversationList(
         modifier = modifier,
-        isSavedPostsSectionExpanded = isSavedPostsExpanded,
         toggleFavoritesExpanded = viewModel::toggleFavoritesExpanded,
         toggleGeneralsExpanded = viewModel::toggleGeneralsExpanded,
         toggleExercisesExpanded = viewModel::toggleExercisesExpanded,
@@ -126,7 +124,6 @@ internal fun ConversationList(
         toggleGroupChatsExpanded = viewModel::toggleGroupChatsExpanded,
         togglePersonalConversationsExpanded = viewModel::togglePersonalConversationsExpanded,
         toggleHiddenExpanded = viewModel::toggleHiddenExpanded,
-        toggleSavedPostsExpanded = viewModel::toggleSavedPostsExpanded,
         conversationCollections = conversationCollections,
         collapsingContentState = collapsingContentState,
         onNavigateToConversation = onNavigateToConversation,
@@ -141,7 +138,6 @@ internal fun ConversationList(
 @Composable
 internal fun ConversationList(
     modifier: Modifier,
-    isSavedPostsSectionExpanded: Boolean,
     toggleFavoritesExpanded: () -> Unit,
     toggleGeneralsExpanded: () -> Unit,
     toggleExercisesExpanded: () -> Unit,
@@ -150,11 +146,10 @@ internal fun ConversationList(
     toggleGroupChatsExpanded: () -> Unit,
     togglePersonalConversationsExpanded: () -> Unit,
     toggleHiddenExpanded: () -> Unit,
-    toggleSavedPostsExpanded: () -> Unit,
     collapsingContentState: CollapsingContentState,
     conversationCollections: ConversationCollections,
     onNavigateToConversation: (conversationId: Long) -> Unit,
-    onNavigateToSavedPosts: (status: SavedPostStatus) -> Unit,
+    onNavigateToSavedPosts: () -> Unit,
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
     onToggleHidden: (conversationId: Long, hidden: Boolean) -> Unit,
     onToggleMuted: (conversationId: Long, muted: Boolean) -> Unit,
@@ -177,7 +172,6 @@ internal fun ConversationList(
                 section = items,
                 allowFavoriteIndicator = key != SECTION_FAVORITES_KEY,
                 onNavigateToConversation = onNavigateToConversation,
-                onNavigateToSavedPosts = onNavigateToSavedPosts,
                 onToggleMarkAsFavourite = onToggleMarkAsFavourite,
                 onToggleHidden = onToggleHidden,
                 onToggleMuted = onToggleMuted
@@ -286,15 +280,9 @@ internal fun ConversationList(
             ) { Icon(imageVector = Icons.Default.Archive, contentDescription = null) }
         }
 
-        listWithHeader(
-            ConversationSectionState.SavedPosts(isExpanded = isSavedPostsSectionExpanded),
-            SECTION_SAVED_POSTS_KEY,
-            KEY_SUFFIX_SAVED_MESSAGES,
-            R.string.conversation_overview_section_saved_posts,
-            null,
-            0,
-            toggleSavedPostsExpanded
-        ) { Icon(imageVector = Icons.Default.Bookmark, contentDescription = null) }
+        savedPostsHeaderRow(
+            onClick = { onNavigateToSavedPosts() }
+        )
 
         trailingContent()
     }
@@ -356,31 +344,13 @@ private fun LazyListScope.conversationList(
     section: ConversationSectionState,
     allowFavoriteIndicator: Boolean,
     onNavigateToConversation: (conversationId: Long) -> Unit,
-    onNavigateToSavedPosts: (status: SavedPostStatus) -> Unit,
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
     onToggleHidden: (conversationId: Long, hidden: Boolean) -> Unit,
     onToggleMuted: (conversationId: Long, muted: Boolean) -> Unit
 ) {
     if (!section.isExpanded) return
 
-
     when(section) {
-        is ConversationSectionState.SavedPosts -> {
-            items(
-                SavedPostStatus.entries
-            ) {
-                SavedPostsListItem(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .animateItem(),
-                    status = it,
-                    onClick = {
-                        onNavigateToSavedPosts(it)
-                    }
-                )
-            }
-        }
-
         is ConversationSectionState.Conversations<*> -> {
             val conversations = section.conversations
             items(
@@ -410,28 +380,6 @@ private fun LazyListScope.conversationList(
             }
         }
     }
-}
-
-@Composable
-private fun SavedPostsListItem(
-    modifier: Modifier = Modifier,
-    status: SavedPostStatus,
-    onClick: () -> Unit,
-) {
-    ListItemBase(
-        modifier = modifier,
-        name = status.getUiText(),
-        unreadMessagesCount = 0,
-        grayedOut = false,
-        onClick = onClick,
-        leadingContent = {
-            Icon(
-                imageVector = status.getIcon(),
-                contentDescription = null
-            )
-        },
-        otherTrailingContent = {}
-    )
 }
 
 @Composable
@@ -697,4 +645,34 @@ private fun String.removeSectionPrefix(): String {
         }
     }
     return result.trim()
+}
+
+private fun LazyListScope.savedPostsHeaderRow(
+    onClick: () -> Unit
+) {
+    item(key = SECTION_SAVED_POSTS_KEY) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(SECTION_SAVED_POSTS_KEY)
+                .clickable { onClick() }
+                .padding(vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(imageVector = Icons.Default.Bookmark, contentDescription = null)
+                Text(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 8.dp),
+                    text = stringResource(R.string.conversation_overview_section_saved_posts),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                )
+            }
+        }
+    }
 }

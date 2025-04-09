@@ -209,11 +209,10 @@ private fun SavedPostsList(
 fun SavedPostsScreenWithChips(
     modifier: Modifier = Modifier,
     courseId: Long,
-    onNavigateToPost: (ISavedPost) -> Unit,
-    savedPostStatus: SavedPostStatus = SavedPostStatus.IN_PROGRESS
+    onNavigateToPost: (ISavedPost) -> Unit
 ) {
     val statuses = SavedPostStatus.entries
-    val initialIndex = statuses.indexOf(savedPostStatus).coerceAtLeast(0)
+    val initialIndex = statuses.indexOf(SavedPostStatus.IN_PROGRESS).coerceAtLeast(0)
     var selectedIndex by rememberSaveable { mutableIntStateOf(initialIndex) }
     val currentStatus = statuses[selectedIndex]
 

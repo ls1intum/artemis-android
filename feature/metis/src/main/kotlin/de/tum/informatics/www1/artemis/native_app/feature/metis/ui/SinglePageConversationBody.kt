@@ -93,7 +93,7 @@ internal fun SinglePageConversationBody(
             collapsingContentState = collapsingContentState,
             onNavigateToConversation = openConversation,
             onNavigateToSavedPosts = {
-                configuration = OpenedSavedPosts(configuration, it)
+                configuration = OpenedSavedPosts(configuration)
             },
             onRequestCreatePersonalConversation = {
                 configuration = CreatePersonalConversation(configuration)
@@ -200,7 +200,6 @@ internal fun SinglePageConversationBody(
                     SavedPostsScreenWithChips(
                         modifier = modifier,
                         courseId = courseId,
-                        savedPostStatus = config.status,
                         onNavigateToPost = { savedPost ->
                             configuration = OpenedConversation(
                                 _prevConfiguration = configuration,
