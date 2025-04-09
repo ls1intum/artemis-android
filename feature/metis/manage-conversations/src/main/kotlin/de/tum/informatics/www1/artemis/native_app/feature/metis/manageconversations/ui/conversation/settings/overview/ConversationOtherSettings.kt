@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversat
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
@@ -45,7 +46,9 @@ internal fun ConversationOtherSettings(
     var displayDeleteChannelDialog by remember { mutableStateOf(false) }
     var displayChannelPrivacyDialog by remember { mutableStateOf(false) }
 
-    val buttonModifier = Modifier.fillMaxWidth()
+    val buttonModifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 16.dp)
 
     val isChannel = conversation is ChannelChat
     val isCreator = (conversation as? ChannelChat)?.isCreator == true
