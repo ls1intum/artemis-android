@@ -49,7 +49,7 @@ object ComponentColors {
         val inProgress: Color
             get() = Color(0xFF005388)
         val archive: Color
-            get() = Color(0xFF9B9B9C)
+            get() = Color(0xFF717070)
         val completed: Color
             get() = Color(0xFF28A745)
     }

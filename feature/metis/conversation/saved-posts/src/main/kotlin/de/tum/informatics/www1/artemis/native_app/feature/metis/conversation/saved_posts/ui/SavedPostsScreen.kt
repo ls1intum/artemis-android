@@ -19,6 +19,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,6 +31,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -48,6 +50,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.sha
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getIcon
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getTintColor
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getUiText
 import kotlinx.coroutines.Deferred
 import org.koin.androidx.compose.koinViewModel
@@ -215,6 +218,7 @@ fun SavedPostsScreenWithChips(
     val initialIndex = statuses.indexOf(SavedPostStatus.IN_PROGRESS).coerceAtLeast(0)
     var selectedIndex by rememberSaveable { mutableIntStateOf(initialIndex) }
     val currentStatus = statuses[selectedIndex]
+    val filterChipColorAlpha = 0.8f
 
     Scaffold(
         topBar = {
@@ -239,20 +243,20 @@ fun SavedPostsScreenWithChips(
                             selectedIndex = index
                         },
                         label = {
-                            Text(text = status.getUiText())
+                            Text(
+                                text = status.getUiText(),
+                                color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface
+                            )
                         },
                         leadingIcon = {
                             Icon(
                                 imageVector = status.getIcon(),
+                                tint = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface,
                                 contentDescription = null
                             )
                         },
                         colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = when (status) {
-                                SavedPostStatus.IN_PROGRESS -> ComponentColors.SavedMessageFilter.inProgress
-                                SavedPostStatus.COMPLETED -> ComponentColors.SavedMessageFilter.completed
-                                SavedPostStatus.ARCHIVED -> ComponentColors.SavedMessageFilter.archive
-                            }
+                            selectedContainerColor = status.getTintColor().copy(alpha = filterChipColorAlpha)
                         )
                     )
                 }

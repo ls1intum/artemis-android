@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui
 
+import android.graphics.Color
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Bookmark
@@ -7,6 +8,7 @@ import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ComponentColors
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 
@@ -29,5 +31,13 @@ fun SavedPostStatus.getStringResId(): Int {
         SavedPostStatus.IN_PROGRESS -> R.string.saved_posts_in_progress
         SavedPostStatus.COMPLETED -> R.string.saved_posts_completed
         SavedPostStatus.ARCHIVED -> R.string.saved_posts_archived
+    }
+}
+
+fun SavedPostStatus.getTintColor(): androidx.compose.ui.graphics.Color {
+    return when (this) {
+        SavedPostStatus.IN_PROGRESS -> ComponentColors.SavedMessageFilter.inProgress
+        SavedPostStatus.COMPLETED -> ComponentColors.SavedMessageFilter.completed
+        SavedPostStatus.ARCHIVED -> ComponentColors.SavedMessageFilter.archive
     }
 }
