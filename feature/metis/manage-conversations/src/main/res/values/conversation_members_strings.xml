@@ -3,7 +3,7 @@
     <string name="conversation_members_title">Members</string>
     <string name="conversation_members_query_placeholder">Search users</string>
 
-    <string name="conversation_members_loading">Loading conversation members…</string>
+    <string name="conversation_members_loading">Loading members…</string>
     <string name="conversation_members_failure">Something went wrong while loading conversation members.</string>
     <string name="conversation_members_try_again">Try again</string>
 

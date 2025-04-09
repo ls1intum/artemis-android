@@ -3,12 +3,15 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversat
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
@@ -24,7 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
@@ -132,11 +134,12 @@ private fun ConversationMembersList(
                 contentAlignment = Alignment.Center
             ) {
                 Column(
+                    modifier = Modifier.fillMaxWidth(0.4f),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = stringResource(id = R.string.conversation_members_loading),
-                        textAlign = TextAlign.Center
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        text = stringResource(id = R.string.conversation_members_loading)
                     )
 
                     LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
@@ -178,15 +181,19 @@ private fun ConversationMembersList(
                 ) { index ->
                     val item = members[index]
                     if (item != null) {
-                        ConversationMemberListItem(
-                            modifier = Modifier.testTag(testTagForMember(item.username.orEmpty())),
-                            member = item,
-                            clientUsername = clientUsername,
-                            conversation = conversation,
-                            onRequestKickMember = onRequestKickMember,
-                            onRequestGrantModerationPermission = onRequestGrantModerationPermission,
-                            onRequestRevokeModerationPermission = onRequestRevokeModerationPermission
-                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Card {
+                            ConversationMemberListItem(
+                                modifier = Modifier.testTag(testTagForMember(item.username.orEmpty())),
+                                member = item,
+                                clientUsername = clientUsername,
+                                conversation = conversation,
+                                onRequestKickMember = onRequestKickMember,
+                                onRequestGrantModerationPermission = onRequestGrantModerationPermission,
+                                onRequestRevokeModerationPermission = onRequestRevokeModerationPermission
+                            )
+                        }
                     }
                 }
 
