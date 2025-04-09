@@ -16,6 +16,9 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExerci
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.UnknownSubmission
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitText
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitVideo
 import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotData.Images.IMAGE_MARS
 import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotData.Images.IMAGE_SATURN_5
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseSearchConfiguration
@@ -110,6 +113,28 @@ object ScreenshotData {
                 0.9f,
                 0f
             )
+        )
+    )
+
+    val lecture = Lecture(
+        id = 1L,
+        title = "Lecture 7 - Rocket Fuel ⛽",
+        description = "In this lecture, you will learn about the most important types of rocket fuel.",
+        lectureUnits = listOf(
+            LectureUnitText(
+                id = 2L,
+                name = "Introduction to Fuel Types",
+                completed = true,
+            ),
+            LectureUnitVideo(
+                id = 1L,
+                name = "Rocket Fuel Types",
+                completed = true,
+            ),
+            LectureUnitText(
+                id = 3L,
+                name = "Solid Chemical Propellants",
+            ),
         )
     )
 
