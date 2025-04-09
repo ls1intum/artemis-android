@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.courseview
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -120,13 +119,11 @@ fun `Metis - Conversation Overview`() {
     }
 }
 
-@SuppressLint("UnrememberedMutableState")
 @PlayStoreScreenshots
 @Composable
 fun `Metis - Conversation Channel`() {
     val conversation = ScreenshotCommunicationData.conversation
 
-    // TODO: Provide artemis image provider
     ScreenshotFrame(title = "Send and receive messages directly from the app") {
         ConversationChatListScreen(
             modifier = Modifier.fillMaxSize(),

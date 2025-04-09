@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.courseview
 
+import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotData
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser
@@ -11,9 +12,7 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Duration.Companion.minutes
-import kotlin.time.ExperimentalTime
 
-@OptIn(ExperimentalTime::class)
 object ScreenshotCommunicationData {
 
     val conversation = ChannelChat(
@@ -41,7 +40,8 @@ object ScreenshotCommunicationData {
         id = 3,
         username = "u3",
         firstName = "Ethan",
-        lastName = "Martin"
+        lastName = "Martin",
+        imageUrl = ScreenshotData.Images.IMAGE_MARS
     )
 
     val conversations = listOf(
@@ -105,6 +105,7 @@ object ScreenshotCommunicationData {
         text: String,
         time: Instant,
         id: String,
+        reactions: List<PostPojo.Reaction> = emptyList()
     ): ChatListItem.PostItem {
         return ChatListItem.PostItem.IndexedItem.Post(
             PostPojo(
@@ -115,7 +116,7 @@ object ScreenshotCommunicationData {
                 authorName = author.firstName,
                 authorRole = author.getUserRole(),
                 authorId = author.id,
-                authorImageUrl = null,
+                authorImageUrl = author.imageUrl,
                 creationDate = time,
                 updatedDate = null,
                 resolved = false,
@@ -123,7 +124,7 @@ object ScreenshotCommunicationData {
                 courseWideContext = null,
                 tags = emptyList(),
                 answers = emptyList(),
-                reactions = emptyList(),
+                reactions = reactions,
                 displayPriority = null,
                 hasForwardedMessages = false
             ),
