@@ -44,4 +44,13 @@ object ComponentColors {
         val unresolved: Color
             get() = Color(0xFF28A745)
     }
+
+    object SavedMessageFilter {
+        val inProgress: Color
+            get() = Color(0xFF005388)
+        val archive: Color
+            get() = Color(0xFF9B9B9C)
+        val completed: Color
+            get() = Color(0xFF28A745)
+    }
 }
