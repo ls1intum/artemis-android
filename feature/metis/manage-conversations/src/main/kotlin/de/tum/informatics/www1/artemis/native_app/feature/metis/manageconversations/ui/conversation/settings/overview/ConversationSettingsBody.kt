@@ -161,7 +161,7 @@ internal fun ConversationSettingsBody(
                 .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                 .verticalScroll(rememberScrollState())
                 .navigationBarsPadding(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             ConversationInfoSettings(
                 modifier = Modifier

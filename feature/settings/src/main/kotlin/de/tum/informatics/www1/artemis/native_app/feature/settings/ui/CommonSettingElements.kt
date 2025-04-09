@@ -70,7 +70,6 @@ fun PreferenceEntry(
                 text = it,
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
             )
-
         }
     }
 }

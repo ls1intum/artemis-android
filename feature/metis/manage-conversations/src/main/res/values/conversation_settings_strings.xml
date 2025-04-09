@@ -16,8 +16,8 @@
     <string name="conversation_settings_basic_data_save">Save changes</string>
 
     <string name="conversation_settings_section_more_info">More info</string>
-    <string name="conversation_settings_section_more_info_created_by">Created by: %1$s (%2$s)</string>
-    <string name="conversation_settings_section_more_info_created_on">Created on: %1$s</string>
+    <string name="conversation_settings_section_more_info_created_by">Created by:</string>
+    <string name="conversation_settings_section_more_info_created_on">Created on:</string>
 
     <string name="conversation_settings_section_other">Other</string>
     <string name="conversation_settings_section_other_leave_conversation">Leave conversation</string>
