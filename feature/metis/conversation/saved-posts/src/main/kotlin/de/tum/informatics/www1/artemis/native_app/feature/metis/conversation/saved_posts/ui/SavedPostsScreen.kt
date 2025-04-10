@@ -214,7 +214,8 @@ fun SavedPostsScreenWithChips(
     onNavigateToPost: (ISavedPost) -> Unit
 ) {
     val statuses = SavedPostStatus.entries
-    val initialIndex = statuses.indexOf(SavedPostStatus.IN_PROGRESS).coerceAtLeast(0)
+    val initialIndex = SavedPostStatus.IN_PROGRESS.ordinal
+
     var selectedIndex by rememberSaveable { mutableIntStateOf(initialIndex) }
     val currentStatus = statuses[selectedIndex]
     val filterChipColorAlpha = 0.8f
