@@ -1,10 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.overview
 
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.test.SemanticsNodeInteraction
-import androidx.compose.ui.test.assert
-import androidx.compose.ui.test.hasAnyChild
-import androidx.compose.ui.test.hasContentDescriptionExactly
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
@@ -13,8 +9,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.Col
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.ConversationList
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getStringResId
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
@@ -25,52 +19,20 @@ class ConversationListUiTest : BaseComposeTest() {
 
 
     @Test
-    fun `test GIVEN the conversationList WHEN always THEN display the saved posts section and its elements`() {
+    fun `test GIVEN the conversationList WHEN always THEN display the saved posts section`() {
         setupUi()
 
         composeTestRule
             .onNodeWithText(context.getString(R.string.conversation_overview_section_saved_posts))
             .assertExists()
-
-        composeTestRule
-            .onNodeWithText(context.getString(SavedPostStatus.IN_PROGRESS.getStringResId()))
-            .assertExists()
-        composeTestRule
-            .onNodeWithText(context.getString(SavedPostStatus.COMPLETED.getStringResId()))
-            .assertExists()
-        composeTestRule
-            .onNodeWithText(context.getString(SavedPostStatus.ARCHIVED.getStringResId()))
-            .assertExists()
     }
-
-    @Test
-    fun `test GIVEN the conversationList WHEN always THEN the saved posts elements should not show the ShowActions IconButton`() {
-        setupUi()
-
-        composeTestRule
-            .onNodeWithText(context.getString(SavedPostStatus.IN_PROGRESS.getStringResId()))
-            .assertDoesNotShowShowActionsIconButton()
-        composeTestRule
-            .onNodeWithText(context.getString(SavedPostStatus.COMPLETED.getStringResId()))
-            .assertDoesNotShowShowActionsIconButton()
-        composeTestRule
-            .onNodeWithText(context.getString(SavedPostStatus.ARCHIVED.getStringResId()))
-            .assertDoesNotShowShowActionsIconButton()
-    }
-
-    private fun SemanticsNodeInteraction.assertDoesNotShowShowActionsIconButton() {
-        assert(!hasAnyChild(hasContentDescriptionExactly(context.getString(R.string.conversation_overview_conversation_item_show_actions))))
-    }
-
 
     private fun setupUi(
-        isSavedPostSectionExpanded: Boolean = true,
         conversations: ConversationCollections = createEmptyConversationCollections()
     ) {
         composeTestRule.setContent {
             ConversationList(
                 modifier = Modifier,
-                isSavedPostsSectionExpanded = isSavedPostSectionExpanded,
                 toggleFavoritesExpanded = {},
                 toggleGeneralsExpanded = {},
                 toggleExercisesExpanded = {},
@@ -79,7 +41,6 @@ class ConversationListUiTest : BaseComposeTest() {
                 toggleGroupChatsExpanded = {},
                 togglePersonalConversationsExpanded = {},
                 toggleHiddenExpanded = {},
-                toggleSavedPostsExpanded = {},
                 conversationCollections = conversations,
                 collapsingContentState = CollapsingContentState(),
                 onNavigateToConversation = {},

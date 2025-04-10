@@ -3,7 +3,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis
 import android.os.Parcelable
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.UserIdentifier
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -31,7 +30,6 @@ data class OpenedThread(val postId: StandalonePostId) : Parcelable
 
 data class OpenedSavedPosts(
     private val _prevConfiguration: ConversationConfiguration,
-    val status: SavedPostStatus
 )
     : ConversationConfiguration(5, _prevConfiguration)
 /**
