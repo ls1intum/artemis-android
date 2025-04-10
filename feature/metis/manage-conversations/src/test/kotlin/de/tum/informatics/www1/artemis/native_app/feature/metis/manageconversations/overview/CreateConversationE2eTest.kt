@@ -19,7 +19,7 @@ import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTi
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2DisplayName
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Username
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user3Username
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_personal_conversation.CreatePersonalConversationScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.common.ConversationUserSelectionScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_personal_conversation.CreatePersonalConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_personal_conversation.TEST_TAG_CREATE_PERSONAL_CONVERSATION_BUTTON
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseUser
@@ -137,11 +137,20 @@ class CreateConversationE2eTest : ConversationBaseTest() {
         )
 
         composeTestRule.setContent {
-            CreatePersonalConversationScreen(
+            ConversationUserSelectionScreen(
                 modifier = Modifier.fillMaxSize(),
                 viewModel = viewModel,
-                onConversationCreated = onConversationCreated,
-                onNavigateBack = {}
+                displayFailedDialog = false,
+                fabTestTag = TEST_TAG_CREATE_PERSONAL_CONVERSATION_BUTTON,
+                canSubmit = true,
+                startJob = viewModel::createConversation,
+                onJobCompleted = { conversation ->
+                    if (conversation != null) {
+                        onConversationCreated(conversation.id)
+                    }
+                },
+                onNavigateBack = {},
+                onDismissFailedDialog = {}
             )
         }
 
