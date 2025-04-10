@@ -3,8 +3,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,14 +15,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Keyboard
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -40,6 +37,7 @@ import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.ArtemisPopupSurface
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member_selection.MemberSelectionBaseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
@@ -79,57 +77,52 @@ private fun ReplyAutoCompletePopupBody(
     autoCompleteCategories: List<AutoCompleteHintCollection>,
     performAutoComplete: (replacement: String) -> Unit
 ) {
-    LazyColumn(
+    ArtemisPopupSurface(
         modifier = modifier
-            .clip(MaterialTheme.shapes.large)
-            .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
-            .padding(8.dp)
-            .testTag(TEST_TAG_REPLY_AUTO_COMPLETE_POPUP_LIST)
     ) {
+        LazyColumn(
+            modifier = Modifier
+                .padding(8.dp)
+                .testTag(TEST_TAG_REPLY_AUTO_COMPLETE_POPUP_LIST)
+        ) {
 
-        autoCompleteCategories.forEachIndexed { categoryIndex, category ->
-            stickyHeader {
-                AutoCompleteCategoryComposable(
-                    modifier = Modifier.fillMaxWidth(),
-                    name = stringResource(id = category.type.title)
-                )
-            }
+            autoCompleteCategories.forEachIndexed { categoryIndex, category ->
+                stickyHeader {
+                    AutoCompleteCategoryComposable(
+                        modifier = Modifier.fillMaxWidth(),
+                        name = stringResource(id = category.type.title)
+                    )
+                }
 
-            category.items.fastForEachIndexed { i, hint ->
-                when (hint) {
-                    is AutoCompleteHint.UserSearchQueryTooShort -> {
-                        item {
-                            EmptyListHint(
-                                modifier = Modifier.fillMaxWidth(),
-                                imageVector = Icons.Default.Keyboard,
-                                hint = stringResource(id = R.string.conversation_member_selection_query_too_short_popup,
-                                    MemberSelectionBaseViewModel.MINIMUM_QUERY_LENGTH
+                category.items.fastForEachIndexed { i, hint ->
+                    when (hint) {
+                        is AutoCompleteHint.UserSearchQueryTooShort -> {
+                            item {
+                                EmptyListHint(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    imageVector = Icons.Default.Keyboard,
+                                    hint = stringResource(
+                                        id = R.string.conversation_member_selection_query_too_short_popup,
+                                        MemberSelectionBaseViewModel.MINIMUM_QUERY_LENGTH
+                                    )
                                 )
-                            )
+                            }
                         }
-                    }
 
-                    is AutoCompleteHint.Data -> {
-                        item(key = "${category.type}_${hint.id}") {
-                            AutoCompleteHintComposable(
-                                modifier = Modifier.fillMaxWidth(),
-                                hint = hint,
-                                onClick = { performAutoComplete(hint.replacementText) }
-                            )
+                        is AutoCompleteHint.Data -> {
+                            item(key = "${category.type}_${hint.id}") {
+                                AutoCompleteHintComposable(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    hint = hint,
+                                    onClick = { performAutoComplete(hint.replacementText) }
+                                )
+                            }
                         }
                     }
                 }
 
-                if (i != category.items.lastIndex) {
-                    item { HorizontalDivider() }
-                }
-            }
-
-            if (categoryIndex != autoCompleteCategories.lastIndex) {
-                item {
-                    Column {
-                        HorizontalDivider()
-
+                if (categoryIndex != autoCompleteCategories.lastIndex) {
+                    item {
                         Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
@@ -140,18 +133,16 @@ private fun ReplyAutoCompletePopupBody(
 
 @Composable
 private fun AutoCompleteCategoryComposable(modifier: Modifier, name: String) {
-    Box(modifier) {
-        Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
-                .padding(horizontal = Spacings.Popup.HintHorizontalPadding, vertical = 4.dp),
-            text = name,
-            color = MaterialTheme.colorScheme.primary,
-            style = MaterialTheme.typography.labelLarge,
-            textAlign = TextAlign.Center
-        )
-    }
+    Text(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(Spacings.Popup.tonalElevation))
+            .padding(horizontal = Spacings.Popup.HintHorizontalPadding, vertical = 4.dp),
+        text = name,
+        color = MaterialTheme.colorScheme.primary,
+        style = MaterialTheme.typography.labelLarge,
+        textAlign = TextAlign.Center
+    )
 }
 
 @Composable
