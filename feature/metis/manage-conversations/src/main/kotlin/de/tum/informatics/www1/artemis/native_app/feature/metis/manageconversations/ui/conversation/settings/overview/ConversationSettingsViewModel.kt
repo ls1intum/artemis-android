@@ -399,7 +399,7 @@ internal class ConversationSettingsViewModel(
                 }.or(false)
 
             if (result) {
-                onRequestReload.tryEmit(Unit)
+                requestReload.tryEmit(Unit)
             }
 
             result
