@@ -40,7 +40,6 @@ import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.dropShadowBelow
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member_selection.MemberSelectionBaseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
@@ -67,8 +66,7 @@ internal fun ReplyAutoCompletePopup(
             modifier = Modifier
                 .padding(vertical = verticalPadding, horizontal = 8.dp)
                 .heightIn(max = maxHeight - verticalPadding * 2)
-                .width(targetWidth)
-                .dropShadowBelow(),
+                .width(targetWidth),
             autoCompleteCategories = autoCompleteCategories,
             performAutoComplete = performAutoComplete
         )
