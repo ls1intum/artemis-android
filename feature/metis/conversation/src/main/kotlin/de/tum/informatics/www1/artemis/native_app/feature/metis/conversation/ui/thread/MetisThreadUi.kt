@@ -159,7 +159,7 @@ internal fun MetisThreadUi(
             onDeletePost = viewModel::deletePost,
             onUndoDeletePost = viewModel::undoDeletePost,
             onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
-            onRequestReload = viewModel::requestReload,
+            onRequestReload = viewModel::onRequestReload,
             onRequestRetrySend = viewModel::retryCreateReply,
             generateLinkPreviews = viewModel::generateLinkPreviews,
             onRemoveLinkPreview = viewModel::removeLinkPreview,

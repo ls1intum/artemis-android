@@ -140,7 +140,7 @@ internal fun ConversationChatListScreen(
         onNavigateToSettings = onNavigateToSettings,
         onUpdateFilter = viewModel.chatListUseCase::updateFilter,
         onUpdateQuery = viewModel.chatListUseCase::updateQuery,
-        onRequestSoftReload = viewModel::requestReload
+        onRequestSoftReload = viewModel::onRequestReload
     ) { padding ->
         val isReplyEnabled = isReplyEnabled(conversationDataState = conversationDataState)
 

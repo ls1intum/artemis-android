@@ -75,7 +75,7 @@ fun NavGraphBuilder.faqDetail() {
             FaqDetailUi(
                 modifier = Modifier.fillMaxSize(),
                 faqDataState = faq,
-                onReloadRequest = viewModel::requestReload
+                onReloadRequest = viewModel::onRequestReload
             )
         }
     }

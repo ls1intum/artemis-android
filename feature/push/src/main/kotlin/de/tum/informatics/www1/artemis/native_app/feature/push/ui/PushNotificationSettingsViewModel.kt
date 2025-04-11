@@ -1,7 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push.ui
 
 import android.util.Log
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -13,6 +12,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.ReloadableViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.network.NotificationSettingsService
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.PushNotificationSetting
@@ -23,7 +23,6 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -48,7 +47,7 @@ class PushNotificationSettingsViewModel internal constructor(
     private val accountDataService: AccountDataService,
     private val pushNotificationConfigurationService: PushNotificationConfigurationService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
-) : ViewModel() {
+) : ReloadableViewModel() {
 
     companion object {
         private const val TAG = "PushNotificationSettingsViewModel"
@@ -63,10 +62,9 @@ class PushNotificationSettingsViewModel internal constructor(
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
 
-    private val requestReloadSettings = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     private val loadedSettings: StateFlow<DataState<List<PushNotificationSetting>>> =
         transformLatest(
-            requestReloadSettings.onStart { emit(Unit) },
+            requestReload.onStart { emit(Unit) },
             serverConfigurationService.serverUrl,
             accountService.authToken.filterNot { it.isBlank() }
         ) { _, serverUrl, authToken ->
@@ -175,10 +173,6 @@ class PushNotificationSettingsViewModel internal constructor(
                 )
             )
         }
-    }
-
-    fun requestReloadSettings() {
-        requestReloadSettings.tryEmit(Unit)
     }
 
     fun saveSettings(): Deferred<Boolean> {
