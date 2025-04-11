@@ -3,11 +3,14 @@
     <string name="conversation_members_title">Members</string>
     <string name="conversation_members_query_placeholder">Search users</string>
 
-    <string name="conversation_members_loading">Loading conversation members…</string>
+    <string name="conversation_members_loading">Loading members…</string>
     <string name="conversation_members_failure">Something went wrong while loading conversation members.</string>
     <string name="conversation_members_try_again">Try again</string>
 
     <string name="conversation_members_content_description_kick_user">Remove user</string>
-    <string name="conversation_members_content_description_add_moderator">Add moderator</string>
-    <string name="conversation_members_content_description_remove_moderator">Remove moderator</string>
+    <string name="conversation_members_content_description_add_moderator">Grant Moderator Role</string>
+    <string name="conversation_members_content_description_remove_moderator">Revoke Moderator Role</string>
+
+    <string name="conversation_members_no_search_results_title">No members found</string>
+    <string name="conversation_members_no_search_results_body">\"%s\" did not match any member.</string>
 </resources>

@@ -203,6 +203,7 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
                 modifier = Modifier.fillMaxSize(),
                 courseId = course.id!!,
                 conversationId = channel.id,
+                query = "",
                 viewModel = viewModel,
                 collapsingContentState = CollapsingContentState()
             )
