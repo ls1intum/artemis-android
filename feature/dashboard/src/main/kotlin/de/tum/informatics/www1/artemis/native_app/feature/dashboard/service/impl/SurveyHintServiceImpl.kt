@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 
 
-private val SURVEY_START_DATE = LocalDate.of(2024, 11, 28)
-private val SURVEY_END_DATE = LocalDate.of(2025, 1, 31)
+private val SURVEY_START_DATE = LocalDate.of(2025, 4, 21)
+private val SURVEY_END_DATE = LocalDate.of(2025, 5, 11)
 
 class SurveyHintServiceImpl(
     private val context: Context,
@@ -20,7 +20,7 @@ class SurveyHintServiceImpl(
     private companion object {
         private const val DATA_STORE_KEY = "survey_hint_store"
 
-        private val KEY_SHOW_SURVEY = booleanPreferencesKey("showSurvey1")  // Change this to "showSurvey2" for the second survey
+        private val KEY_SHOW_SURVEY = booleanPreferencesKey("showSurvey2")
     }
 
     private val Context.storage by preferencesDataStore(DATA_STORE_KEY)
@@ -30,7 +30,7 @@ class SurveyHintServiceImpl(
 
     private fun isSurveyActive(): Boolean {
         val currentDate = LocalDate.now()
-        return currentDate.isAfter(SURVEY_START_DATE) && currentDate.isBefore(SURVEY_END_DATE)
+        return currentDate in SURVEY_START_DATE..SURVEY_END_DATE
     }
 
     override suspend fun dismissSurveyHintPermanently() {

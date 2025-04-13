@@ -115,7 +115,7 @@ fun ConversationOverviewBody(
     val isConnected by viewModel.isConnected.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.requestReload()
+        viewModel.onRequestReload()
     }
 
     Box(modifier = Modifier
@@ -130,7 +130,7 @@ fun ConversationOverviewBody(
             failureText = stringResource(id = R.string.conversation_overview_loading_failed),
             retryButtonText = stringResource(id = R.string.conversation_overview_loading_try_again),
             enablePullToRefresh = false,
-            onClickRetry = viewModel::requestReload
+            onClickRetry = viewModel::onRequestReload
         ) { conversationCollection ->
             Column(
                 modifier = Modifier.fillMaxSize(),

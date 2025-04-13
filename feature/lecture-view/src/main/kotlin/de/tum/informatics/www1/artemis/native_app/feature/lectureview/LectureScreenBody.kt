@@ -120,7 +120,7 @@ internal fun LectureScreenBody(
             loadingText = stringResource(id = R.string.lecture_view_lecture_loading),
             failureText = stringResource(id = R.string.lecture_view_lecture_loading_failure),
             retryButtonText = stringResource(id = R.string.lecture_view_lecture_loading_try_again),
-            onClickRetry = viewModel::requestReloadLecture
+            onClickRetry = viewModel::onRequestReload,
         ) { lecture ->
             when (selectedTabIndex) {
                 overviewTabIndex -> {

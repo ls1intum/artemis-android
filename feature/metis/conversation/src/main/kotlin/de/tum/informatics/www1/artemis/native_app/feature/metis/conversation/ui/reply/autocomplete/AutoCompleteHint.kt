@@ -3,12 +3,16 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 import androidx.compose.ui.graphics.vector.ImageVector
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureData
 
-data class AutoCompleteHint(
-    val hint: String,
-    val replacementText: String,
-    val id: String,
-    val icon: AutoCompleteIcon? = null
-)
+interface AutoCompleteHint {
+    data class Data(
+        val hint: String,
+        val replacementText: String,
+        val id: String,
+        val icon: AutoCompleteIcon? = null
+    ) : AutoCompleteHint
+
+    data object UserSearchQueryTooShort : AutoCompleteHint
+}
 
 sealed class AutoCompleteIcon {
     data class ProfilePicture(val pictureData: ProfilePictureData) : AutoCompleteIcon()
