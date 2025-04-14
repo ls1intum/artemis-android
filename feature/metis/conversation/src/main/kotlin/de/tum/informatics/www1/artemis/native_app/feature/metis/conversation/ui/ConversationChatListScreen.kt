@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuOpen
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.FilterList
@@ -56,6 +57,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
+import de.tum.informatics.www1.artemis.native_app.core.ui.ArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.BuildConfig
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicSearchTextField
@@ -63,6 +65,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateU
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.innerShadow
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
+import de.tum.informatics.www1.artemis.native_app.core.ui.getArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ComponentColors
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
@@ -88,7 +91,8 @@ internal fun ConversationChatListScreen(
     viewModel: ConversationViewModel,
     onNavigateBack: () -> Unit,
     onNavigateToSettings: () -> Unit,
-    onClickViewPost: (StandalonePostId) -> Unit
+    onClickViewPost: (StandalonePostId) -> Unit,
+    onSidebarToggle: () -> Unit
 ) {
     ConversationChatListScreen(
         modifier = modifier,
@@ -97,7 +101,8 @@ internal fun ConversationChatListScreen(
         viewModel = viewModel,
         onNavigateBack = onNavigateBack,
         onNavigateToSettings = onNavigateToSettings,
-        onClickViewPost = onClickViewPost
+        onClickViewPost = onClickViewPost,
+        onSidebarToggle = onSidebarToggle
     )
 }
 
@@ -109,7 +114,8 @@ internal fun ConversationChatListScreen(
     viewModel: ConversationViewModel,
     onNavigateBack: () -> Unit,
     onNavigateToSettings: () -> Unit,
-    onClickViewPost: (StandalonePostId) -> Unit
+    onClickViewPost: (StandalonePostId) -> Unit,
+    onSidebarToggle: () -> Unit = {}
 ) {
     val query by viewModel.chatListUseCase.query.collectAsState()
     val filter by viewModel.chatListUseCase.filter.collectAsState()
@@ -140,7 +146,8 @@ internal fun ConversationChatListScreen(
         onNavigateToSettings = onNavigateToSettings,
         onUpdateFilter = viewModel.chatListUseCase::updateFilter,
         onUpdateQuery = viewModel.chatListUseCase::updateQuery,
-        onRequestSoftReload = viewModel::onRequestReload
+        onRequestSoftReload = viewModel::onRequestReload,
+        onSidebarToggle  = onSidebarToggle
     ) { padding ->
         val isReplyEnabled = isReplyEnabled(conversationDataState = conversationDataState)
 
@@ -178,6 +185,7 @@ fun ConversationChatListScreen(
     onUpdateQuery: (String) -> Unit,
     onUpdateFilter: (MetisFilter) -> Unit,
     onRequestSoftReload: () -> Unit,
+    onSidebarToggle: () -> Unit,
     content: @Composable (PaddingValues) -> Unit
 ) {
     var isSearchBarOpen by rememberSaveable(courseId, conversationId) { mutableStateOf(false) }
@@ -188,6 +196,8 @@ fun ConversationChatListScreen(
     val conversation = conversationDataState.orNull()
     val hasExercise = conversation?.filterPredicate(FILTER_EXERCISE) == true
     val hasLecture = conversation?.filterPredicate(FILTER_LECTURE) == true
+
+    val layout = getArtemisAppLayout()
 
     val closeSearch = {
         isSearchBarOpen = false
@@ -236,13 +246,22 @@ fun ConversationChatListScreen(
                     }
                 },
                 navigationIcon = {
-                    NavigationBackButton(onNavigateBack = {
-                        if (isSearchBarOpen) {
-                            closeSearch()
-                        } else {
-                            onNavigateBack()
+                    if (layout == ArtemisAppLayout.Tablet) {
+                        IconButton(onClick = onSidebarToggle) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.MenuOpen,
+                                contentDescription = null
+                            )
                         }
-                    })
+                    } else {
+                        NavigationBackButton(onNavigateBack = {
+                            if (isSearchBarOpen) {
+                                closeSearch()
+                            } else {
+                                onNavigateBack()
+                            }
+                        })
+                    }
                 },
                 actions = {
                     if (!isSearchBarOpen) {

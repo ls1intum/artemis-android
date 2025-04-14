@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.ui
 
+import android.content.res.Configuration
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
@@ -11,6 +12,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import de.tum.informatics.www1.artemis.native_app.core.ui.ArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseSearchConfiguration
@@ -59,7 +61,13 @@ internal fun SinglePageConversationBody(
         mutableStateOf(initialConfiguration)
     }
 
+    val layout = getArtemisAppLayout()
+    val isPortrait = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
+    val isTabletPortrait = layout == ArtemisAppLayout.Tablet && isPortrait
+    var isSidebarOpen by rememberSaveable { mutableStateOf(true) }
+
     val openConversation = { conversationId: Long ->
+        if (isTabletPortrait) isSidebarOpen = false
         configuration = OpenedConversation(
             _prevConfiguration = configuration,
             conversationId = conversationId,
@@ -131,15 +139,19 @@ internal fun SinglePageConversationBody(
         AnimatedContent(
             targetState = configuration,
             transitionSpec = {
-                val navigationLevelDiff = targetState.navigationLevel - initialState.navigationLevel
-                when {
-                    navigationLevelDiff > 0 -> DefaultTransition.navigateForward
-                    navigationLevelDiff < 0 -> DefaultTransition.navigateBack
-                    else -> DefaultTransition.navigateNeutral
+                if (doAlwaysShowScaffold) {
+                    DefaultTransition.navigateNeutral
+                } else {
+                    val navigationLevelDiff = targetState.navigationLevel - initialState.navigationLevel
+                    when {
+                        navigationLevelDiff > 0 -> DefaultTransition.navigateForward
+                        navigationLevelDiff < 0 -> DefaultTransition.navigateBack
+                        else -> DefaultTransition.navigateNeutral
+                    }
+                        .using(
+                            SizeTransform(clip = false)
+                        )
                 }
-                    .using(
-                        SizeTransform(clip = false)
-                    )
             },
             contentKey = {
                 it.javaClass        // Eg no recomposition of the ChatList when navigating to a thread.
@@ -159,7 +171,20 @@ internal fun SinglePageConversationBody(
             when (config) {
                 NothingOpened -> {
                     if (doAlwaysShowScaffold) {
-                        conversationOverview(modifier)
+                        ConversationScreen(
+                            modifier = modifier,
+                            conversationId = -1L, // "fake" conversation
+                            threadPostId = null,
+                            courseId = courseId,
+                            onOpenThread = { },
+                            onCloseThread = { },
+                            onCloseConversation = { },
+                            onNavigateToSettings = { },
+                            conversationsOverview = { mod -> conversationOverview(mod) },
+                            showEmptyMessage = true,
+                            isSidebarOpen = isSidebarOpen,
+                            onSidebarToggle = { isSidebarOpen = !isSidebarOpen }
+                        )
                     } else {
                         scaffold(searchConfiguration) {
                             conversationOverview(modifier)
@@ -190,7 +215,9 @@ internal fun SinglePageConversationBody(
                                 _prevConfiguration = config
                             )
                         },
-                        conversationsOverview = { mod -> conversationOverview(mod) }
+                        conversationsOverview = { mod -> conversationOverview(mod) },
+                        isSidebarOpen = isSidebarOpen,
+                        onSidebarToggle = { isSidebarOpen = !isSidebarOpen },
                     )
                 }
 
