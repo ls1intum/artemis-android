@@ -84,7 +84,7 @@ fun ConversationScreen(
         modifier = modifier,
         isSidebarOpen = isSidebarOpen,
         onSidebarToggle = onSidebarToggle,
-        optionalColumn = { sidebarMod, ->
+        optionalColumn = { sidebarMod ->
             conversationsOverview(sidebarMod)
         },
         priorityColumn = { contentMod ->
@@ -148,8 +148,6 @@ fun ConversationScreen(
 @Composable
 fun LayoutAwareTwoColumnLayout(
     modifier: Modifier = Modifier,
-    optionalColumnWeight: Float = 1f,
-    priorityColumnWeight: Float = 2f,
     isSidebarOpen: Boolean,
     onSidebarToggle: () -> Unit,
     optionalColumn: @Composable (Modifier) -> Unit,
@@ -199,20 +197,26 @@ fun LayoutAwareTwoColumnLayout(
                 modifier = modifier.fillMaxSize(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .weight(optionalColumnWeight)
-                        .fillMaxHeight()
+                AnimatedVisibility(
+                    visible = isSidebarOpen,
+                    enter = slideInHorizontally { fullWidth -> -fullWidth } + fadeIn(),
+                    exit = slideOutHorizontally { fullWidth -> -fullWidth } + fadeOut(),
                 ) {
-                    optionalColumn(Modifier.fillMaxSize())
+                    Box(
+                        modifier = Modifier
+                            .width(400.dp)
+                            .fillMaxHeight()
+                            .zIndex(2f)
+                            .background(MaterialTheme.colorScheme.surface)
+                    ) {
+                        optionalColumn(Modifier.fillMaxSize())
+                    }
                 }
 
                 VerticalDivider()
 
                 Box(
                     modifier = Modifier
-                        .padding(bottom = 4.dp)
-                        .weight(priorityColumnWeight)
                         .fillMaxHeight()
                 ) {
                     priorityColumn(Modifier.fillMaxSize())
