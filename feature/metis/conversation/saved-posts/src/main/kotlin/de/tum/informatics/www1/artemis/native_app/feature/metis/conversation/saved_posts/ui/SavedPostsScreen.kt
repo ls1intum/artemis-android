@@ -251,12 +251,18 @@ fun SavedPostsScreenWithChips(
                         leadingIcon = {
                             Icon(
                                 imageVector = status.getIcon(),
-                                tint = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface,
+                                tint = if (isSelected) Color.White else MaterialTheme.colorScheme.primary,
                                 contentDescription = null
                             )
                         },
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = status.getTintColor().copy(alpha = filterChipColorAlpha)
+                        ),
+                        border = FilterChipDefaults.filterChipBorder(
+                            borderColor = MaterialTheme.colorScheme.outlineVariant,
+                            selectedBorderColor = MaterialTheme.colorScheme.primary,
+                            enabled = true,
+                            selected = isSelected,
                         )
                     )
                 }
