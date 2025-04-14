@@ -72,7 +72,7 @@ private data class CourseUiScreen(
 )
 
 @Serializable
-internal sealed class CourseTab {
+sealed class CourseTab {
     @Serializable
     data object Exercises : CourseTab()
     @Serializable
