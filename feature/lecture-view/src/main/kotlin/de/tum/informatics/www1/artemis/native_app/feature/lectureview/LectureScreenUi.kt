@@ -129,7 +129,7 @@ internal fun LectureScreen(
         onParticipateInQuiz = onParticipateInQuiz,
         onNavigateToExerciseResultView = onNavigateToExerciseResultView,
         onClickViewQuizResults = onClickViewQuizResults,
-        onReloadLecture = viewModel::requestReloadLecture,
+        onReloadLecture = viewModel::onRequestReload,
         onUpdateLectureUnitIsComplete = viewModel::updateLectureUnitIsComplete,
         onStartExercise = { exerciseId, onParticipationId ->
             viewModel.startExercise(

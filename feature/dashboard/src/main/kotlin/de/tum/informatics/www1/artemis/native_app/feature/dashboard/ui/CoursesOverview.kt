@@ -126,7 +126,7 @@ internal fun CoursesOverview(
         surveyHintService = surveyHintService,
         onUpdateQuery = viewModel::onUpdateQuery,
         onUpdateSorting = viewModel::onUpdateSorting,
-        onRequestReloadDashboard = viewModel::requestReloadDashboard,
+        onRequestReloadDashboard = viewModel::onRequestReload,
         onViewCourse = {
             scope.launch {
                 viewModel.onCourseAccessed(it)
@@ -251,7 +251,7 @@ fun CoursesOverview(
                 loadingText = stringResource(id = R.string.courses_loading_loading),
                 failureText = stringResource(id = R.string.courses_loading_failure),
                 retryButtonText = stringResource(id = R.string.courses_loading_try_again),
-                onClickRetry = viewModel::onRequestReload
+                onClickRetry = onRequestReloadDashboard,
             ) { dashboard: Dashboard ->
                 if (dashboard.courses.isEmpty() && dashboard.recentCourses.isEmpty()) {
                     if (query.isNotBlank()) {
