@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.courseview
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -88,7 +89,7 @@ fun `Metis - Conversation Overview`() {
         courseService = CourseServiceFake(course)
     )
 
-    ScreenshotFrame(title = "Communicate with students and instructors") {
+    ScreenshotFrame(title = "Communicate with students and instructors ...") {
         CourseScaffold(
             modifier = Modifier.fillMaxSize(),
             courseDataState = DataState.Success(course),
@@ -126,7 +127,7 @@ fun `Metis - Conversation Overview`() {
 fun `Metis - Conversation Channel`() {
     val conversation = ScreenshotCommunicationData.conversation
 
-    ScreenshotFrame(title = "Send and receive messages directly from the app") {
+    ScreenshotFrame(title = "... by sending and receiving messages directly from the app") {
         ConversationChatListScreen(
             modifier = Modifier.fillMaxSize(),
             courseId = 0L,
@@ -144,7 +145,8 @@ fun `Metis - Conversation Channel`() {
                 MetisChatList(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(padding),
+                        .padding(padding)
+                        .consumeWindowInsets(padding),
                     initialReplyTextProvider = object : InitialReplyTextProvider {
                         override val newMessageText: Flow<TextFieldValue> = flowOf(
                             TextFieldValue()

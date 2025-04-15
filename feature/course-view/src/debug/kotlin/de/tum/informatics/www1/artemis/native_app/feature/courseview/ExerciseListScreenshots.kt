@@ -27,7 +27,7 @@ fun `Course View - Exercise List`() {
         )
     }
 
-    ScreenshotFrame("Always have an overview of your exercises at hand") {
+    ScreenshotFrame("Always have an overview of your exercises at hand ...") {
         CourseScaffold(
             modifier = Modifier,
             courseDataState = DataState.Success(

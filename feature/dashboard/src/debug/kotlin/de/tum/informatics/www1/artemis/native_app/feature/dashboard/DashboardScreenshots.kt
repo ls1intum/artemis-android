@@ -14,7 +14,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui.CoursesOv
 @PlayStoreScreenshots
 @Composable
 fun `Dashboard - Exercise List`() {
-    ScreenshotFrame(title = "Manage all of your courses in one app") {
+    ScreenshotFrame(
+        title = "Manage all of your courses\nin one app",
+    ) {
         CoursesOverview(
             modifier = Modifier.fillMaxSize(),
             coursesDataState = DataState.Success(

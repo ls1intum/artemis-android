@@ -32,8 +32,8 @@ import de.drick.compose.edgetoedgepreviewlib.EdgeToEdgeTemplate
 import de.drick.compose.edgetoedgepreviewlib.NavigationMode
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
 
-val backgroundColor1 = Color(0xff89cff0)
-val backgroundColor2 = Color(0xFF2394C9)
+val backgroundColor1 = Color(0xFF58BDEC)
+val backgroundColor2 = Color(0xFF115BDA)
 
 object Phone {
     val frameWidth = 13.dp
@@ -42,7 +42,11 @@ object Phone {
 }
 
 @Composable
-fun ScreenshotFrame(title: String, content: @Composable () -> Unit) {
+fun ScreenshotFrame(
+    title: String,
+    textAlign: TextAlign = TextAlign.Center,
+    content: @Composable () -> Unit
+) {
     ScreenshotTheme {
         Surface {
             Column(
@@ -50,23 +54,23 @@ fun ScreenshotFrame(title: String, content: @Composable () -> Unit) {
                     .fillMaxSize()
                     .background(
                         Brush.linearGradient(
-                            colors = listOf(backgroundColor1, backgroundColor2),
+                            colors = listOf(
+                                backgroundColor1,
+                                backgroundColor2,
+                            ),
                         )
                     ),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
                     modifier = Modifier
-                        .padding(16.dp)
-                        .background(
-                            Color.White,
-                            RoundedCornerShape(25)
-                        )
-                        .padding(16.dp),
+                        .padding(32.dp),
                     text = title,
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = MaterialTheme.typography.headlineLarge.copy(
+                        color = Color.White,
+                    ),
                     fontWeight = FontWeight.Medium,
-                    textAlign = TextAlign.Center
+                    textAlign = textAlign
                 )
 
                 PhoneFrame(
@@ -117,7 +121,7 @@ private fun PhoneFrame(
 @Composable
 @PlayStoreScreenshots
 private fun Preview() {
-    ScreenshotFrame(title = "Manage all of your courses in one app") {
+    ScreenshotFrame(title = "Manage all of your courses\nin one app") {
         Box(
             modifier = Modifier
                 .fillMaxSize()

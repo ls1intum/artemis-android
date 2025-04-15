@@ -13,7 +13,7 @@ import kotlinx.coroutines.CompletableDeferred
 @PlayStoreScreenshots
 @Composable
 fun `Lecture - Overview`() {
-    ScreenshotFrame(title = "Directly interact with your lectures within the app") {
+    ScreenshotFrame(title = "... and directly interact with your lectures within the app") {
         LectureScreen(
             modifier = Modifier.fillMaxSize(),
             courseId = 1,
