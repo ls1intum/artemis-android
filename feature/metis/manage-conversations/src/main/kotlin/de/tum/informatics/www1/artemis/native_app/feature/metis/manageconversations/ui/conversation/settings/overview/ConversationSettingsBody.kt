@@ -65,6 +65,7 @@ internal fun ConversationSettingsBody(
     var leaveConversationJob: Deferred<Boolean>? by remember { mutableStateOf(null) }
     var archiveChannelJob: Deferred<Boolean>? by remember { mutableStateOf(null) }
     var deleteChannelJob: Deferred<Boolean>? by remember { mutableStateOf(null) }
+    var togglePrivacyJob: Deferred<Boolean>? by remember { mutableStateOf(null) }
 
     var displaySaveFailedDialog by remember { mutableStateOf(false) }
 
@@ -118,6 +119,15 @@ internal fun ConversationSettingsBody(
         }
     )
 
+    AwaitDeferredCompletion(
+        job = togglePrivacyJob,
+        onComplete = { successful ->
+            togglePrivacyJob = null
+
+            onSaveResult(successful)
+        }
+    )
+
     val editableConversationInfo = rememberEditableConversationInfo(
         name = name,
         description = description,
@@ -143,7 +153,7 @@ internal fun ConversationSettingsBody(
         loadingText = stringResource(id = R.string.conversation_settings_loading),
         failureText = stringResource(id = R.string.conversation_settings_failure),
         retryButtonText = stringResource(id = R.string.conversation_settings_try_again),
-        onClickRetry = viewModel::requestReload
+        onClickRetry = viewModel::onRequestReload
     ) { (conversation, members, clientUsername) ->
         val conversationSectionModifier = Modifier
             .fillMaxWidth()
@@ -201,6 +211,9 @@ internal fun ConversationSettingsBody(
                 },
                 onDeleteChannel = {
                     deleteChannelJob = viewModel.deleteConversation()
+                },
+                onToggleChannelPrivacy = {
+                    togglePrivacyJob = viewModel.toggleChannelPrivacy()
                 }
             )
         }

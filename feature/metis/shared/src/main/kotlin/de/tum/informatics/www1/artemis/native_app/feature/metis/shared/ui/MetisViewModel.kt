@@ -1,20 +1,19 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.withPrevious
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.join
+import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.performAutoReloadingNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseService
-import de.tum.informatics.www1.artemis.native_app.core.data.service.performAutoReloadingNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
+import de.tum.informatics.www1.artemis.native_app.core.ui.ReloadableViewModel
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -37,13 +36,11 @@ abstract class MetisViewModel(
     websocketProvider: WebsocketProvider,
     coroutineContext: CoroutineContext,
     private val courseId: Long
-) : ViewModel() {
-
-    protected val onRequestReload = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+) : ReloadableViewModel() {
 
     val course: StateFlow<DataState<Course>> = courseService.performAutoReloadingNetworkCall(
         networkStatusProvider = networkStatusProvider,
-        manualReloadFlow = onRequestReload
+        manualReloadFlow = requestReload
     ) {
         getCourse(courseId).bind { it.course }
     }
@@ -52,7 +49,7 @@ abstract class MetisViewModel(
     private val accountDataStateFlow: Flow<DataState<Account>> = accountDataService
         .performAutoReloadingNetworkCall(
             networkStatusProvider = networkStatusProvider,
-            manualReloadFlow = onRequestReload
+            manualReloadFlow = requestReload
         ) {
             getAccountData()
         }
@@ -70,7 +67,7 @@ abstract class MetisViewModel(
 
     // Emits when a reload is manually requested or when we have a websocket reconnect
     val onReloadRequestAndWebsocketReconnect = merge(
-        onRequestReload,
+        requestReload,
         websocketProvider
             .connectionState
             .withPrevious()
@@ -84,7 +81,7 @@ abstract class MetisViewModel(
 
     val clientId: StateFlow<DataState<Long>> = accountDataService.performAutoReloadingNetworkCall(
         networkStatusProvider = networkStatusProvider,
-        manualReloadFlow = onRequestReload
+        manualReloadFlow = requestReload
     ) {
         getAccountData().bind { it.id }
     }
@@ -93,8 +90,4 @@ abstract class MetisViewModel(
     val clientIdOrDefault: StateFlow<Long> = clientId
         .map { it.orElse(0L) }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Lazily, 0L)
-
-    open fun requestReload() {
-        onRequestReload.tryEmit(Unit)
-    }
 }

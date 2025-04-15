@@ -77,7 +77,6 @@ internal fun ViewResultScreen(
                         modifier = Modifier.align(Alignment.Center),
                         webViewState = webViewState,
                         webView = webView,
-                        artemisContext = artemisContext,
                         setWebView = { webView = it }
                     )
                 }

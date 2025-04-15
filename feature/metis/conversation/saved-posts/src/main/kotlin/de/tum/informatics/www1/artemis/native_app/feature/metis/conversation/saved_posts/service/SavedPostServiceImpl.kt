@@ -30,11 +30,11 @@ class SavedPostServiceImpl(
             ktorProvider.ktorClient.get(serverUrl) {
                 url {
                     appendPathSegments(
-                        *Api.Communication.SavedPosts.path,
-                        courseId.toString(),
-                        status.ordinal.toString()
+                        *Api.Communication.SavedPosts.path
                     )
                 }
+                parameter("status", status.toString())
+                parameter("courseId", courseId.toString())
 
                 cookieAuth(authToken)
             }.body()
@@ -52,10 +52,10 @@ class SavedPostServiceImpl(
                 url {
                     appendPathSegments(
                         *Api.Communication.SavedPosts.path,
-                        postId.toString(),
-                        postType.ordinal.toString(),
+                        postId.toString()
                     )
                 }
+                parameter("type", postType.toString())
 
                 cookieAuth(authToken)
             }.body()
@@ -73,10 +73,10 @@ class SavedPostServiceImpl(
                 url {
                     appendPathSegments(
                         *Api.Communication.SavedPosts.path,
-                        postId.toString(),
-                        postType.ordinal.toString(),
+                        postId.toString()
                     )
                 }
+                parameter("type", postType.toString())
 
                 cookieAuth(authToken)
             }.body()
@@ -95,11 +95,10 @@ class SavedPostServiceImpl(
                 url {
                     appendPathSegments(
                         *Api.Communication.SavedPosts.path,
-                        postId.toString(),
-                        postType.ordinal.toString()
+                        postId.toString()
                     )
-
-                    parameter("status", status.ordinal)
+                    parameter("type", postType.toString())
+                    parameter("status", status.toString())
                 }
 
                 cookieAuth(authToken)

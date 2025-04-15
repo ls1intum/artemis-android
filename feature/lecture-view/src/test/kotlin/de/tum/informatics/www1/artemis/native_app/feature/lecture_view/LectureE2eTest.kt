@@ -240,7 +240,6 @@ class LectureE2eTest : BaseComposeTest() {
             savedStateHandle = SavedStateHandle(),
             channelService = get(),
             serverTimeService = get(),
-            artemisContextProvider = get(),
             courseExerciseService = get(),
             coroutineContext = testDispatcher
         )
@@ -252,7 +251,6 @@ class LectureE2eTest : BaseComposeTest() {
                 lectureId = lecture.id!!,
                 viewModel = viewModel,
                 navController = rememberNavController(),
-                onNavigateBack = { },
                 onViewExercise = {},
                 onNavigateToExerciseResultView = {},
                 onNavigateToTextExerciseParticipation = { _, _ -> },

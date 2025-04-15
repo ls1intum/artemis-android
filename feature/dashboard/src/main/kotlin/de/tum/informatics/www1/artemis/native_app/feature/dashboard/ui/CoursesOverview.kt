@@ -44,6 +44,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import de.tum.informatics.www1.artemis.native_app.core.model.Dashboard
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicSearchTextField
@@ -76,6 +77,11 @@ fun NavGraphBuilder.dashboard(
     onViewCourse: (courseId: Long) -> Unit
 ) {
     animatedComposable<DashboardScreen> {
+        val artemisContextProvider = LocalArtemisContextProvider.current
+        LaunchedEffect(true) {
+            artemisContextProvider.clearCourseId()
+        }
+
         CoursesOverview(
             modifier = Modifier.fillMaxSize(),
             viewModel = koinViewModel(),
@@ -203,7 +209,7 @@ internal fun CoursesOverview(
                 loadingText = stringResource(id = R.string.courses_loading_loading),
                 failureText = stringResource(id = R.string.courses_loading_failure),
                 retryButtonText = stringResource(id = R.string.courses_loading_try_again),
-                onClickRetry = viewModel::requestReloadDashboard
+                onClickRetry = viewModel::onRequestReload
             ) { dashboard: Dashboard ->
                 if (dashboard.courses.isEmpty() && dashboard.recentCourses.isEmpty()) {
                     if (query.isNotBlank()) {

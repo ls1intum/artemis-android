@@ -1,12 +1,12 @@
-package de.tum.informatics.www1.artemis.native_app.core.data.service.impl
+package de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context
 
 import android.util.Log
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ifLoggedIn
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
-import de.tum.informatics.www1.artemis.native_app.core.data.service.ArtemisContextBasedService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import io.ktor.client.call.body
 import io.ktor.client.request.HttpRequestBuilder
@@ -18,22 +18,28 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlin.reflect.KClass
+import kotlin.reflect.cast
 
 
 const val TAG = "ArtemisContextBasedServiceImpl"
 
-abstract class ArtemisContextBasedServiceImpl(
+abstract class ArtemisContextBasedServiceImpl<T: ArtemisContext>(
     val ktorProvider: KtorProvider,
-    private val artemisContextProvider: ArtemisContextProvider,
-) : ArtemisContextBasedService {
+    val artemisContextProvider: ArtemisContextProvider,
+    contextClass: KClass<T>,
+) : ArtemisContextBasedService<T> {
 
-    override val onReloadRequired: Flow<Unit> = artemisContextProvider.flow.map { Unit }
+    protected val filteredArtemisContextFlow: Flow<T> = artemisContextProvider.stateFlow
+        .filter { contextClass.isInstance(it) }
+        .map { contextClass.cast(it) }
 
-    suspend fun artemisContext(): ArtemisContext = artemisContextProvider.flow.first()
+    suspend fun artemisContext(): T = filteredArtemisContextFlow.first()
+
     suspend fun serverUrl(): String = artemisContext().serverUrl
-    suspend fun authToken(): String = artemisContext().authToken
 
     suspend inline fun <reified T: Any>getRequest(
         contentType: ContentType = ContentType.Application.Json,
@@ -79,11 +85,16 @@ abstract class ArtemisContextBasedServiceImpl(
         contentType: ContentType = ContentType.Application.Json,
         crossinline block: HttpRequestBuilder.() -> Unit
     ): NetworkResponse<T> {
+        val artemisContext = artemisContext()
+
         return performNetworkCall {
-            val response = ktorProvider.ktorClient.request(serverUrl()) {
+            val response = ktorProvider.ktorClient.request(artemisContext.serverUrl) {
                 block()
                 contentType(contentType)
-                cookieAuth(authToken())
+
+                artemisContext.ifLoggedIn {
+                    cookieAuth(it.authToken)
+                }
             }
 
             val requestString = "${response.request.method} ${response.request.url}"

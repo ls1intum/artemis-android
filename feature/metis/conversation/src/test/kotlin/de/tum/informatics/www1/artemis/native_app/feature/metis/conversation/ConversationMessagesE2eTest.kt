@@ -48,7 +48,7 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
             val downloadedPosts = metisService.getPosts(
                 MetisService.StandalonePostsContext(
                     metisContext,
-                    MetisFilter.ALL,
+                    MetisFilter.All,
                     "",
                     MetisSortingStrategy.DATE_ASCENDING,
                     null
@@ -85,7 +85,7 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
                 metisService.getPosts(
                     MetisService.StandalonePostsContext(
                         metisContext,
-                        MetisFilter.ALL,
+                        MetisFilter.All,
                         null,
                         MetisSortingStrategy.DATE_DESCENDING,
                         null

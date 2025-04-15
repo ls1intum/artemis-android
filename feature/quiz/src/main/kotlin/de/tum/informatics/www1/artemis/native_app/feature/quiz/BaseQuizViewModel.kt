@@ -1,13 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.feature.quiz
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
+import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.performAutoReloadingNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ParticipationService
-import de.tum.informatics.www1.artemis.native_app.core.data.service.performAutoReloadingNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -19,10 +18,10 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragA
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.MultipleChoiceQuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.QuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.ShortAnswerQuizQuestion
+import de.tum.informatics.www1.artemis.native_app.core.ui.ReloadableViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizQuestionData
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.service.QuizExerciseService
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -50,10 +49,7 @@ internal abstract class BaseQuizViewModel<
     accountService: AccountService,
     participationService: ParticipationService,
     private val coroutineContext: CoroutineContext
-) : ViewModel() {
-
-    protected val retryLoadExercise = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-
+) : ReloadableViewModel() {
     /**
      * In live quizzes, a participation is loaded to get the exercise.
      */
@@ -62,7 +58,7 @@ internal abstract class BaseQuizViewModel<
             QuizType.Live, QuizType.ViewResults ->
                 participationService.performAutoReloadingNetworkCall(
                     networkStatusProvider = networkStatusProvider,
-                    manualReloadFlow = retryLoadExercise
+                    manualReloadFlow = requestReload
                 ) {
                     findParticipation(exerciseId)
                 }
@@ -91,7 +87,7 @@ internal abstract class BaseQuizViewModel<
             transformLatest(
                 serverConfigurationService.serverUrl,
                 accountService.authToken,
-                retryLoadExercise.onStart { emit(Unit) }
+                requestReload.onStart { emit(Unit) }
             ) { serverUrl, authToken, _ ->
                 emitAll(
                     retryOnInternet(
@@ -167,9 +163,9 @@ internal abstract class BaseQuizViewModel<
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Lazily)
 
-    fun retryLoadExercise() {
+    override fun onRequestReload() {
         viewModelScope.launch(coroutineContext) {
-            retryLoadExercise.emit(Unit)
+            requestReload.emit(Unit)
         }
     }
 

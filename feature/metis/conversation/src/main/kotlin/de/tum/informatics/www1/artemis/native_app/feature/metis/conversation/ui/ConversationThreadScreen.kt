@@ -72,7 +72,7 @@ internal fun ConversationThreadScreen(
                     if (BuildConfig.DEBUG) {
                         ConversationDataStatusButton(
                             dataStatus = dataStatus,
-                            onRequestSoftReload = viewModel::requestReload
+                            onRequestSoftReload = viewModel::onRequestReload
                         )
                     }
                 }

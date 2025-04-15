@@ -13,13 +13,17 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
@@ -54,6 +58,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visibleme
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleStandalonePostDetails
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.unsubscribeFromNotifications
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -61,6 +66,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
 import org.koin.compose.koinInject
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Main and only activity used in the android app.
@@ -225,14 +231,29 @@ class MainActivity : AppCompatActivity(),
             LocalMarkdownLinkResolver provides koinInject(),
             LocalArtemisContextProvider provides koinInject()
         ) {
-
+            val lifecycleOwner = LocalLifecycleOwner.current
             val updateRepository = koinInject<UpdateRepository>()
+            val updateResult by updateRepository.updateResultFlow.collectAsState()
+            val isLoggedIn by accountService.authenticationData
+                .map { it is AccountService.AuthenticationData.LoggedIn }
+                .collectAsState(initial = false)
+            val serverUrl by serverConfigurationService.serverUrl.collectAsState(initial = "")
 
-            LaunchedEffect(Unit) {
-                updateRepository.updateResultFlow.collect { updateResult ->
-                    if (updateResult.updateAvailable) {
-                        navController.navigateToUpdateScreen(updateResult.currentVersion, updateResult.minVersion)
+            LaunchedEffect(serverUrl, lifecycleOwner) {
+                lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                    while (isLoggedIn) {
+                        updateRepository.triggerUpdateCheck()
+                        delay(60.seconds)
                     }
+                }
+            }
+
+            LaunchedEffect(updateResult?.minVersion) {
+                if (updateResult?.updateAvailable == true) {
+                    navController.navigateToUpdateScreen(
+                        updateResult!!.currentVersion,
+                        updateResult!!.minVersion
+                    )
                 }
             }
 

@@ -50,7 +50,7 @@ internal fun Saml2LoginScreen(
         loadingText = stringResource(id = R.string.login_saml_screen_login_response_loading),
         failureText = stringResource(id = R.string.login_saml_screen_login_response_failure),
         retryButtonText = stringResource(id = R.string.login_saml_screen_login_response_try_again),
-        onClickRetry = viewModel::retryPerformLogin
+        onClickRetry = viewModel::onRequestReload
     ) { loginResponse ->
         when (loginResponse) {
             Saml2LoginViewModel.Saml2LoginResponse.Success -> {
@@ -81,7 +81,7 @@ internal fun Saml2LoginScreen(
                                 id = R.string.login_saml_screen_login_response_forbidden,
                                 loginResponse.errorHeader
                             ),
-                            onRequestTryAgain = viewModel::retryPerformLogin
+                            onRequestTryAgain = viewModel::onRequestReload
                         )
                     }
 
@@ -91,7 +91,7 @@ internal fun Saml2LoginScreen(
                             errorText = stringResource(
                                 id = R.string.login_saml_screen_login_response_unexpected_error
                             ),
-                            onRequestTryAgain = viewModel::retryPerformLogin
+                            onRequestTryAgain = viewModel::onRequestReload
                         )
                     }
                 }

@@ -59,6 +59,7 @@ internal fun ExerciseListUi(
             .nestedScroll(collapsingContentState.nestedScrollConnection)
             .testTag(TEST_TAG_EXERCISE_LIST_LAZY_COLUMN),
         timeFrameGroup = exercises,
+        query = query,
         getItemId = { id ?: 0 }
     ) { m, exercise ->
         ExerciseListItem(

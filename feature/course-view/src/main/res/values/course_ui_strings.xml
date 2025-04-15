@@ -36,4 +36,7 @@
 
     <!--  Communication  -->
     <string name="course_ui_communication_disabled">Course communication is disabled.</string>
+
+    <!--  Listing  -->
+    <string name="course_ui_sub_title_no_date">No Date Associated</string>
 </resources>
