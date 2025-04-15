@@ -76,7 +76,7 @@ fun ScreenshotFrame(
                 PhoneFrame(
                     modifier = Modifier
                         .padding(vertical = 16.dp)
-                        .padding(horizontal = 64.dp)
+                        .padding(horizontal = 48.dp)
                         .aspectRatio(9f / 19f)
                 ) {
                     CompositionLocalProvider(
