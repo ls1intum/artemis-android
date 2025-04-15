@@ -15,5 +15,7 @@
 
     <string name="saved_posts_action_change_status">Mark as \'%1$s\'</string>
     <string name="saved_posts_action_mark_as_completed">Complete</string>
+    <string name="saved_posts_action_mark_as_archive">Archive</string>
+    <string name="saved_posts_action_mark_as_in_progress">In Progress</string>
     <string name="saved_posts_action_remove">Remove from Saved Messages</string>
 </resources>

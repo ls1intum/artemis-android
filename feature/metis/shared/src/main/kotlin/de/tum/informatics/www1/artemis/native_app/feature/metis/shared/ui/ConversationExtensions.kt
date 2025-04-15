@@ -25,5 +25,5 @@ val OneToOneChat.humanReadableTitle: String
 
 val BaseAccount.humanReadableName: String
     get() {
-        return "$firstName $lastName"
+        return name ?: "$firstName $lastName"
     }

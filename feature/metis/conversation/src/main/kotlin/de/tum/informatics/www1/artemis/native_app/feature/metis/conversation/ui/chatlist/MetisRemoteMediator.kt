@@ -98,7 +98,7 @@ internal class MetisRemoteMediator(
             return metisService.getPosts(
                 standalonePostsContext = StandalonePostsContext(
                     metisContext = context,
-                    filter = MetisFilter.ALL,
+                    filter = MetisFilter.All,
                     query = null,
                     sortingStrategy = MetisSortingStrategy.DATE_DESCENDING,
                     courseWideContext = null

@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.login
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
@@ -8,7 +7,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerProfileInfoService
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.server_config.ProfileInfo
-import kotlinx.coroutines.flow.MutableSharedFlow
+import de.tum.informatics.www1.artemis.native_app.core.ui.ReloadableViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -19,9 +18,7 @@ abstract class BaseAccountViewModel(
     serverConfigurationService: ServerConfigurationService,
     networkStatusProvider: NetworkStatusProvider,
     serverProfileInfoService: ServerProfileInfoService
-) : ViewModel() {
-
-    private val requestReload = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+) : ReloadableViewModel() {
 
     val serverProfileInfo: StateFlow<DataState<ProfileInfo>> =
         requestReload
@@ -37,7 +34,4 @@ abstract class BaseAccountViewModel(
             }
             .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
 
-    fun requestReloadServerProfileInfo() {
-        requestReload.tryEmit(Unit)
-    }
 }

@@ -51,7 +51,7 @@ internal fun NavigateToUserConversationUi(
             loadingText = stringResource(id = R.string.navigate_to_user_conversation_ui_loading),
             failureText = stringResource(id = R.string.navigate_to_user_conversation_ui_failed),
             retryButtonText = stringResource(id = R.string.navigate_to_user_conversation_ui_try_again),
-            onClickRetry = viewModel::requestReload
+            onClickRetry = viewModel::onRequestReload
         ) { conversationId ->
             LaunchedEffect(key1 = conversationId) {
                 if (conversationId != null) {

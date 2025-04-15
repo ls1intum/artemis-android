@@ -41,6 +41,8 @@ object Spacings {
         val HintHorizontalPadding = 16.dp
         val ContentVerticalPadding = 8.dp
 
+        val tonalElevation = 2.dp
+        val shadowElevation = 3.dp
     }
 
 

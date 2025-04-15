@@ -2,7 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.membe
 
 import android.os.Parcelable
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -12,6 +11,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.ReloadableViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseUser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
@@ -21,7 +21,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member_selection.util.MemberSelectionItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member_selection.util.toMemberSelectionItem
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -44,7 +43,7 @@ abstract class MemberSelectionBaseViewModel(
     protected val networkStatusProvider: NetworkStatusProvider,
     private val savedStateHandle: SavedStateHandle,
     coroutineContext: CoroutineContext
-) : ViewModel() {
+) : ReloadableViewModel() {
 
     companion object {
         private const val KEY_QUERY = "query"
@@ -56,9 +55,6 @@ abstract class MemberSelectionBaseViewModel(
         /** The minimum length of the query to trigger a search */
         const val MINIMUM_QUERY_LENGTH = 3
     }
-
-    private val onRequestReloadPotentialRecipients =
-        MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     val query: StateFlow<String> = savedStateHandle.getStateFlow(KEY_QUERY, "")
 
@@ -90,7 +86,7 @@ abstract class MemberSelectionBaseViewModel(
         inclusionList,
         accountService.authToken,
         serverConfigurationService.serverUrl,
-        onRequestReloadPotentialRecipients.onStart { emit(Unit) }
+        requestReload.onStart { emit(Unit) }
     ) { query, isQueryToShort, inclusionList, authToken, serverUrl, _ ->
         if (isQueryToShort) {
             flowOf(DataState.Success(emptyList()))
@@ -125,7 +121,7 @@ abstract class MemberSelectionBaseViewModel(
     private val conversationsFromServer: StateFlow<DataState<List<Conversation>>> = combine(
         accountService.authToken,
         serverConfigurationService.serverUrl,
-        onRequestReloadPotentialRecipients.onStart { emit(Unit) }
+        requestReload.onStart { emit(Unit) }
     ) { authToken, serverUrl, _ ->
         retryOnInternet(networkStatusProvider.currentNetworkStatus) {
             conversationService.getConversations(courseId, authToken, serverUrl).bind { conversations ->
@@ -210,10 +206,6 @@ abstract class MemberSelectionBaseViewModel(
 
     fun updateInclusionList(inclusionList: InclusionList) {
         savedStateHandle[KEY_INCLUSION_LIST] = inclusionList
-    }
-
-    fun retryLoadPotentialRecipients() {
-        onRequestReloadPotentialRecipients.tryEmit(Unit)
     }
 
     protected fun reset() {
