@@ -151,7 +151,7 @@ internal fun ConversationSettingsBody(
         loadingText = stringResource(id = R.string.conversation_settings_loading),
         failureText = stringResource(id = R.string.conversation_settings_failure),
         retryButtonText = stringResource(id = R.string.conversation_settings_try_again),
-        onClickRetry = viewModel::requestReload
+        onClickRetry = viewModel::onRequestReload
     ) { (conversation, members, clientUsername) ->
         val sectionModifier = Modifier
             .fillMaxWidth()

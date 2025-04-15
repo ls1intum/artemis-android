@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,7 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
@@ -55,7 +55,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicSearchTextField
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.NoSearchResults
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.dropShadowBelow
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.ArtemisPopupSurface
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member_selection.util.MemberSelectionItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
@@ -183,80 +183,84 @@ private fun PopupContent(
     onDismissRequest: () -> Unit,
     onAddMemberItem: (MemberSelectionItem) -> Unit
 ) {
-    LazyColumn(
+    ArtemisPopupSurface(
         modifier = modifier
-            .dropShadowBelow()
-            .clip(MaterialTheme.shapes.large)
-            .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
-            .padding(8.dp)
     ) {
-        stickyHeader {
-            PopupHeader(
-                modifier = Modifier.fillMaxWidth(),
-                title = stringResource(id = R.string.conversation_member_selection_channels)
-            )
-        }
-
-        if (conversations.isEmpty()) {
-            item {
-                NoSearchResults(
+        LazyColumn(
+            modifier = Modifier.padding(8.dp)
+        ) {
+            stickyHeader {
+                PopupHeader(
                     modifier = Modifier.fillMaxWidth(),
-                    title = stringResource(id = R.string.conversation_member_selection_channels_no_search_results_title),
-                    details = stringResource(
-                        id = R.string.conversation_member_selection_channels_no_search_results_details,
-                        query
-                    ),
-                    showIcon = false
+                    title = stringResource(id = R.string.conversation_member_selection_channels)
                 )
             }
-        } else {
-            conversations.forEach { item ->
+
+            if (conversations.isEmpty()) {
                 item {
-                    PopupItem(
+                    NoSearchResults(
                         modifier = Modifier.fillMaxWidth(),
-                        item = item,
-                        onAddMemberItem = onAddMemberItem,
-                        onDismissRequest = onDismissRequest
+                        title = stringResource(id = R.string.conversation_member_selection_channels_no_search_results_title),
+                        details = stringResource(
+                            id = R.string.conversation_member_selection_channels_no_search_results_details,
+                            query
+                        ),
+                        showIcon = false
                     )
                 }
+            } else {
+                conversations.forEach { item ->
+                    item {
+                        PopupItem(
+                            modifier = Modifier.fillMaxWidth(),
+                            item = item,
+                            onAddMemberItem = onAddMemberItem,
+                            onDismissRequest = onDismissRequest
+                        )
+                    }
+                }
             }
-        }
 
-        stickyHeader {
-            PopupHeader(
-                modifier = Modifier.fillMaxWidth(),
-                title = stringResource(id = R.string.conversation_member_selection_users)
-            )
-        }
-
-        if (recipients.isEmpty() && query.length < MemberSelectionBaseViewModel.MINIMUM_QUERY_LENGTH) {
-            item {
-                EmptyListHint(
+            stickyHeader {
+                PopupHeader(
                     modifier = Modifier.fillMaxWidth(),
-                    imageVector = Icons.Default.Keyboard,
-                    hint = stringResource(id = R.string.conversation_member_selection_query_too_short_popup,
-                        MemberSelectionBaseViewModel.MINIMUM_QUERY_LENGTH
-                    )
+                    title = stringResource(id = R.string.conversation_member_selection_users)
                 )
             }
-        } else if (recipients.isEmpty()) {
-            item {
-                NoSearchResults(
-                    modifier = Modifier.fillMaxWidth(),
-                    title = stringResource(id = R.string.conversation_member_selection_recipients_no_search_results_title),
-                    details = stringResource(id = R.string.conversation_member_selection_recipients_no_search_results_details, query),
-                    showIcon = false
-                )
-            }
-        } else {
-            recipients.forEach { item ->
+
+            if (recipients.isEmpty() && query.length < MemberSelectionBaseViewModel.MINIMUM_QUERY_LENGTH) {
                 item {
-                    PopupItem(
+                    EmptyListHint(
                         modifier = Modifier.fillMaxWidth(),
-                        item = item,
-                        onAddMemberItem = onAddMemberItem,
-                        onDismissRequest = onDismissRequest
+                        imageVector = Icons.Default.Keyboard,
+                        hint = stringResource(
+                            id = R.string.conversation_member_selection_query_too_short_popup,
+                            MemberSelectionBaseViewModel.MINIMUM_QUERY_LENGTH
+                        )
                     )
+                }
+            } else if (recipients.isEmpty()) {
+                item {
+                    NoSearchResults(
+                        modifier = Modifier.fillMaxWidth(),
+                        title = stringResource(id = R.string.conversation_member_selection_recipients_no_search_results_title),
+                        details = stringResource(
+                            id = R.string.conversation_member_selection_recipients_no_search_results_details,
+                            query
+                        ),
+                        showIcon = false
+                    )
+                }
+            } else {
+                recipients.forEach { item ->
+                    item {
+                        PopupItem(
+                            modifier = Modifier.fillMaxWidth(),
+                            item = item,
+                            onAddMemberItem = onAddMemberItem,
+                            onDismissRequest = onDismissRequest
+                        )
+                    }
                 }
             }
         }
@@ -272,7 +276,7 @@ private fun PopupHeader(
         Text(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
+                .background(color = MaterialTheme.colorScheme.surfaceColorAtElevation(Spacings.Popup.tonalElevation))
                 .padding(horizontal = Spacings.Popup.HintHorizontalPadding, vertical = 4.dp),
             text = title,
             color = MaterialTheme.colorScheme.primary,

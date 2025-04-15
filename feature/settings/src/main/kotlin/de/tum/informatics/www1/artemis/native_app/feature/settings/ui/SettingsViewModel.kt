@@ -2,7 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.settings.ui
 
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.app_version.AppVersionProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -14,6 +13,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.isLoggedIn
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
+import de.tum.informatics.www1.artemis.native_app.core.ui.ReloadableViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
 import de.tum.informatics.www1.artemis.native_app.feature.push.unsubscribeFromNotifications
@@ -43,9 +43,7 @@ class SettingsViewModel(
     private val changeProfilePictureService: ChangeProfilePictureService,
     appVersionProvider: AppVersionProvider,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
-) : ViewModel() {
-    private val onRequestReload = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-
+) : ReloadableViewModel() {
     val appVersion = appVersionProvider.appVersion
 
     val isLoggedIn: StateFlow<Boolean> = accountService.authenticationData.map { it.isLoggedIn }
@@ -59,7 +57,7 @@ class SettingsViewModel(
         viewModelScope.launch(coroutineContext) {
             accountDataService.performAutoReloadingNetworkCall(
                 networkStatusProvider = networkStatusProvider,
-                manualReloadFlow = onRequestReload
+                manualReloadFlow = requestReload
             ) {
                 getAccountData()
             }.collectLatest {
@@ -80,16 +78,16 @@ class SettingsViewModel(
         }
     }
 
-    fun requestReload() {
+    override fun onRequestReload() {
         viewModelScope.launch(coroutineContext) {
-            onRequestReload.emit(Unit)
+            requestReload.emit(Unit)
         }
     }
 
     fun onDeleteProfilePicture() {
         viewModelScope.launch(coroutineContext) {
             changeProfilePictureService.delete()
-            requestReload()
+            onRequestReload()
         }
     }
 

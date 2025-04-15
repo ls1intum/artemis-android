@@ -207,7 +207,7 @@ fun CourseUiScreen(
         onNavigateToLecture = onNavigateToLecture,
         onNavigateToFaq = onNavigateToFaq,
         postId = postId,
-        onReloadCourse = viewModel::reloadCourse,
+        onReloadCourse = viewModel::onRequestReload,
         onClickStartTextExercise = { exerciseId: Long ->
             viewModel.startExercise(exerciseId) { participationId ->
                 onNavigateToTextExerciseParticipation(

@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.ui
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -17,9 +16,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.sha
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.asMetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
+import de.tum.informatics.www1.artemis.native_app.core.ui.ReloadableViewModel
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -36,9 +35,7 @@ class SavedPostsViewModel(
     private val accountService: AccountService,
     private val networkStatusProvider: NetworkStatusProvider,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
-) : ViewModel() {
-
-    private val onRequestReload = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+) : ReloadableViewModel() {
 
     val serverUrl: StateFlow<String> = serverConfigurationService.serverUrl
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, "")
@@ -46,7 +43,7 @@ class SavedPostsViewModel(
     val savedPosts: StateFlow<DataState<List<ISavedPost>>> = flatMapLatest(
         serverUrl,
         accountService.authToken,
-        onRequestReload
+        requestReload
     ) { serverUrl, authToken, _ ->
         retryOnInternet(networkStatusProvider.currentNetworkStatus) {
             savedPostService.getSavedPosts(
@@ -65,12 +62,6 @@ class SavedPostsViewModel(
         .keepSuccess()
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
-
-
-    fun requestReload() {
-        onRequestReload.tryEmit(Unit)
-    }
-
     fun changeSavedPostStatus(
         savedPost: ISavedPost,
         newStatus: SavedPostStatus
@@ -82,7 +73,7 @@ class SavedPostsViewModel(
                 authToken = accountService.authToken.first(),
                 serverUrl = serverUrl.first()
             )
-                .onSuccess { requestReload() }
+                .onSuccess { onRequestReload() }
                 .asMetisModificationFailure(MetisModificationFailure.CHANGE_SAVED_POST_STATUS)
         }
     }
@@ -94,7 +85,7 @@ class SavedPostsViewModel(
                 authToken = accountService.authToken.first(),
                 serverUrl = serverUrl.first()
             )
-                .onSuccess { requestReload() }
+                .onSuccess { onRequestReload() }
                 .asMetisModificationFailure(MetisModificationFailure.CHANGE_SAVED_POST_STATUS)
         }
     }

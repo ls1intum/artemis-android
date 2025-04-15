@@ -28,7 +28,6 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.WhileSubscribed
@@ -70,12 +69,11 @@ internal class LectureViewModel(
     private val lectureUnitCompletedMap: Flow<Map<Long, Boolean>> =
         savedStateHandle.getStateFlow(LECTURE_UNIT_COMPLETED_MAP_TAG, emptyMap())
 
-    private val onReloadLecture = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val lectureDataState: StateFlow<DataState<Lecture>> =
         combine(
             serverConfigurationService.serverUrl,
             accountService.authToken,
-            onReloadLecture.onStart { emit(Unit) }
+            requestReload.onStart { emit(Unit) }
         ) { a, b, _ -> a to b }
             .flatMapLatest { (serverUrl, authToken) ->
                 retryOnInternet(networkStatusProvider.currentNetworkStatus) {
@@ -87,7 +85,6 @@ internal class LectureViewModel(
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
 
     val serverUrl: StateFlow<String> = serverUrlStateFlow(serverConfigurationService)
-
 
     /**
      * The lecture with updated participations as they arrive.
@@ -213,10 +210,6 @@ internal class LectureViewModel(
             }
         }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
-
-    fun requestReloadLecture() {
-        onReloadLecture.tryEmit(Unit)
-    }
 
     fun updateLectureUnitIsComplete(
         lectureUnitId: Long,

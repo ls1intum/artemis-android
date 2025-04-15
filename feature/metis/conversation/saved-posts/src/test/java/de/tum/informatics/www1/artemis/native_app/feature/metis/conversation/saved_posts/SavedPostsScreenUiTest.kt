@@ -112,7 +112,6 @@ class SavedPostsScreenUiTest : BaseComposeTest() {
                 status = forStatus,
                 savedPostsDataState = DataState.Success(listOf(savedPost)),
                 onRequestReload = {},
-                onNavigateBack = {},
                 onNavigateToPost = { _ -> },
                 onChangeStatus = onChangeStatus,
                 onRemoveFromSavedPosts = onRemoveFromSavedPosts

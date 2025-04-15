@@ -22,7 +22,7 @@ jobs:
         run: echo "sdk.dir=/usr/lib/android-sdk" > local.properties
 
       - name: Gradle Wrapper Verification
-        uses: gradle/wrapper-validation-action@v1
+        uses: gradle/actions/wrapper-validation@v3
 
       - name: JDK setup
         uses: actions/setup-java@v3

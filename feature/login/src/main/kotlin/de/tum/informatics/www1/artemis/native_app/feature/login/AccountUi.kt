@@ -271,7 +271,7 @@ private fun AccountScreen(
         serverProfileInfo = serverProfileInfo,
         selectedInstance = selectedInstance,
         canSwitchInstance = canSwitchInstance,
-        retryLoadServerProfileInfo = viewModel::requestReloadServerProfileInfo,
+        retryLoadServerProfileInfo = viewModel::onRequestReload,
         onNavigateToLoginScreen = onNavigateToLoginScreen,
         onNavigateToRegisterScreen = onNavigateToRegisterScreen,
         onNavigateToInstanceSelection = onNavigateToInstanceSelection,

@@ -66,7 +66,7 @@ fun AccountSettingsScreen(
         onDeleteProfilePicture = viewModel::onDeleteProfilePicture,
         onUploadProfilePicture = viewModel::onUploadProfilePicture,
         onLogout = viewModel::onRequestLogout,
-        onRequestReload = viewModel::requestReload)
+        onRequestReload = viewModel::onRequestReload)
 }
 
 

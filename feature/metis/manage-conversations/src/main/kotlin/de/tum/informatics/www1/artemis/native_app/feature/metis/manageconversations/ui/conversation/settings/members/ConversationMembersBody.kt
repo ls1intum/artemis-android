@@ -86,7 +86,7 @@ internal fun ConversationMembersBody(
         loadingText = stringResource(id = R.string.conversation_members_loading),
         failureText = stringResource(id = R.string.conversation_members_failure),
         retryButtonText = stringResource(id = R.string.conversation_members_try_again),
-        onClickRetry = viewModel::requestReload
+        onClickRetry = viewModel::onRequestReload
     ) { (conversation, clientUsername) ->
         Column(
             modifier = Modifier.fillMaxSize(),
