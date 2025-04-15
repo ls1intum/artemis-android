@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -32,6 +33,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.common.CourseUserListItem
+
+internal fun getUserOptionsTestTag(username: String) = "userOptions$username"
 
 @Composable
 internal fun ConversationMemberListItem(
@@ -55,6 +58,7 @@ internal fun ConversationMemberListItem(
                     modifier = Modifier
                         .clip(CircleShape)
                         .size(32.dp)
+                        .testTag(getUserOptionsTestTag(member.username ?: ""))
                         .background(MaterialTheme.colorScheme.surfaceContainer)
                         .onGloballyPositioned { coordinates ->
                             iconButtonRef = coordinates
@@ -105,6 +109,7 @@ private fun UserOptionsDropdownMenu(
         offset = DpOffset(0.dp, 4.dp)
     ) {
         DropdownMenuItem(
+            modifier = Modifier.testTag(getUserOptionsTestTag(member.username ?: "") + "_kick"),
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.PersonRemove,
@@ -122,6 +127,7 @@ private fun UserOptionsDropdownMenu(
 
         if (conversation is ChannelChat) {
             DropdownMenuItem(
+                modifier = Modifier.testTag(getUserOptionsTestTag(member.username ?: "") + "_grant_moderator"),
                 leadingIcon = {
                     Icon(
                         imageVector = moderatorIcon,
