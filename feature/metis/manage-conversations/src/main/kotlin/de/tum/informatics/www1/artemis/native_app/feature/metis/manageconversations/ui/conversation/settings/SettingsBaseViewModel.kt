@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -14,13 +13,13 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.ReloadableViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -38,17 +37,15 @@ abstract class SettingsBaseViewModel(
     protected val networkStatusProvider: NetworkStatusProvider,
     accountDataService: AccountDataService,
     private val coroutineContext: CoroutineContext
-) : ViewModel() {
+) : ReloadableViewModel() {
 
     protected val conversationSettings = MutableStateFlow(ConversationSettings(initialCourseId, initialConversationId))
-
-    protected val onRequestReload = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     protected val loadedConversation: StateFlow<DataState<Conversation>> = flatMapLatest(
         conversationSettings,
         accountService.authToken,
         serverConfigurationService.serverUrl,
-        onRequestReload.onStart { emit(Unit) }
+        requestReload.onStart { emit(Unit) }
     ) { convSettings, authToken, serverUrl, _ ->
         retryOnInternet(networkStatusProvider.currentNetworkStatus) {
             conversationService
@@ -59,7 +56,7 @@ abstract class SettingsBaseViewModel(
 
     val clientUsername: StateFlow<DataState<String>> = accountDataService.performAutoReloadingNetworkCall(
         networkStatusProvider = networkStatusProvider,
-        manualReloadFlow = onRequestReload
+        manualReloadFlow = requestReload
     ) {
         getAccountData().bind { it.username.orEmpty() }
     }
@@ -94,14 +91,10 @@ abstract class SettingsBaseViewModel(
                 .or(false)
                 .also { successful ->
                     if (successful) {
-                        onRequestReload.tryEmit(Unit)
+                        onRequestReload()
                     }
                 }
         }
-    }
-
-    open fun requestReload() {
-        onRequestReload.tryEmit(Unit)
     }
 
     open fun updateConversation(courseId: Long, conversationId: Long) {

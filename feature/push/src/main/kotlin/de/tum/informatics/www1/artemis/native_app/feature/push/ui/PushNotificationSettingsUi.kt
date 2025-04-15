@@ -83,7 +83,7 @@ fun PushNotificationSettingsUi(
                         push
                     )
                 },
-                onRequestReload = viewModel::requestReloadSettings
+                onRequestReload = viewModel::onRequestReload
             )
         }
     }

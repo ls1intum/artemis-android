@@ -75,25 +75,6 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         }
     }
 
-    override suspend fun searchForCourseMembers(
-        courseId: Long,
-        query: String,
-        authToken: String,
-        serverUrl: String
-    ): NetworkResponse<List<ConversationUser>> {
-        return performNetworkCall {
-            ktorProvider.ktorClient.get(serverUrl) {
-                url {
-                    appendPathSegments(*Api.Core.Courses.path, courseId.toString(), "members", "search")
-
-                    parameter("loginOrName", query)
-                }
-
-                cookieAuth(authToken)
-            }.body()
-        }
-    }
-
     override suspend fun createGroupChat(
         courseId: Long,
         groupMembers: List<String>,

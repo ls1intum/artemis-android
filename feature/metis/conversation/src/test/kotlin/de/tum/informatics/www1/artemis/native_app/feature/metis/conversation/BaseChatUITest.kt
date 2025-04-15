@@ -336,9 +336,9 @@ abstract class BaseChatUITest : BaseComposeTest() {
         AutoCompleteHintCollection(
             type = AutoCompleteType.USERS,
             items = listOf(
-                AutoCompleteHint("User1", "<User1>", "1"),
-                AutoCompleteHint("User2", "<User2>", "2"),
-                AutoCompleteHint("User3", "<User3>", "3"),
+                AutoCompleteHint.Data("User1", "<User1>", "1"),
+                AutoCompleteHint.Data("User2", "<User2>", "2"),
+                AutoCompleteHint.Data("User3", "<User3>", "3"),
             )
         )
     )

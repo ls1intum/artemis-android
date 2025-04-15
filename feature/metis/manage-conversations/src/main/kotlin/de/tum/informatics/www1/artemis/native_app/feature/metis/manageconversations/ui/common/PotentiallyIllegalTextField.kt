@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation
+package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.common
 
 import androidx.annotation.StringRes
 import androidx.compose.material3.MaterialTheme

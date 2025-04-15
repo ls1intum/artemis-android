@@ -251,7 +251,7 @@ fun CoursesOverview(
                 loadingText = stringResource(id = R.string.courses_loading_loading),
                 failureText = stringResource(id = R.string.courses_loading_failure),
                 retryButtonText = stringResource(id = R.string.courses_loading_try_again),
-                onClickRetry = onRequestReloadDashboard
+                onClickRetry = viewModel::onRequestReload
             ) { dashboard: Dashboard ->
                 if (dashboard.courses.isEmpty() && dashboard.recentCourses.isEmpty()) {
                     if (query.isNotBlank()) {
