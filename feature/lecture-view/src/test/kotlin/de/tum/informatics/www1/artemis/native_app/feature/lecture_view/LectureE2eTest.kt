@@ -10,7 +10,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToKey
 import androidx.lifecycle.SavedStateHandle
-import androidx.navigation.compose.rememberNavController
 import androidx.test.platform.app.InstrumentationRegistry
 import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
@@ -248,9 +247,7 @@ class LectureE2eTest : BaseComposeTest() {
             LectureScreen(
                 modifier = Modifier.fillMaxSize(),
                 courseId = course.id!!,
-                lectureId = lecture.id!!,
                 viewModel = viewModel,
-                navController = rememberNavController(),
                 onViewExercise = {},
                 onNavigateToExerciseResultView = {},
                 onNavigateToTextExerciseParticipation = { _, _ -> },
