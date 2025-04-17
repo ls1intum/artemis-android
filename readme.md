@@ -11,8 +11,8 @@ It is available on the [Google PlayStore](https://play.google.com/store/apps/det
   <img src="playStoreScreenshots/smartphone/dashboard.png" width="250"/>
   <img src="playStoreScreenshots/smartphone/exerciseList.png" width="250"/>
   <img src="playStoreScreenshots/smartphone/lecture.png" width="250"/>
-  <img src="playStoreScreenshots/smartphone/quiz.png" width="250"/>
   <img src="playStoreScreenshots/smartphone/conversationOverview.png" width="250"/>
+  <img src="playStoreScreenshots/smartphone/conversation.png" width="250"/>
 </p>
 
 ## Project structure
