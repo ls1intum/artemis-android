@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assert
-import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -25,6 +25,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Userna
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user3DisplayName
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user3Username
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.getUserOptionsTestTag
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.members.ConversationMembersBody
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.members.ConversationMembersViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.members.TEST_TAG_MEMBERS_LIST
@@ -49,6 +50,11 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
     private val isModeratorCheck = hasContentDescription(
         context.getString(R_shared.string.user_role_moderator)
     )
+
+    private fun getModeratorConfirmButtonText(grantModerator: Boolean) =
+        if (grantModerator) context.getString(R.string.conversation_settings_dialog_grant_moderation_rights_positive) else context.getString(
+            R.string.conversation_settings_dialog_revoke_moderation_rights_positive
+        )
 
     override fun setup() {
         super.setup()
@@ -131,20 +137,16 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
     fun `can kick member`() {
         setupUiAndViewModel()
 
+        clickOptionsButton(user2Username)
+
         composeTestRule
-            .onNode(
-                hasAnyAncestor(hasTestTag(testTagForMember(user2Username))) and
-                        hasContentDescription(
-                            context.getString(R.string.conversation_members_content_description_kick_user)
-                        )
-            )
-            .performScrollTo()
+            .onNodeWithTag(getUserOptionsTestTag(user2Username) + "_kick")
+            .assertExists()
             .performClick()
 
         composeTestRule
-            .onNodeWithText(
-                context.getString(R.string.conversation_settings_dialog_kick_member_positive)
-            )
+            .onNodeWithText(context.getString(R.string.conversation_settings_dialog_kick_member_positive))
+            .assertIsDisplayed()
             .performClick()
 
         composeTestRule.waitUntilDoesNotExist(
@@ -154,35 +156,34 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
     }
 
     private fun changeModeratorStatusTestImpl(makeModerator: Boolean) {
+
+        clickOptionsButton(user2Username)
+
         composeTestRule
-            .onNode(
-                hasAnyAncestor(hasTestTag(testTagForMember(user2Username))) and
-                        hasContentDescription(
-                            context.getString(
-                                if (makeModerator) {
-                                    R.string.conversation_members_content_description_add_moderator
-                                } else {
-                                    R.string.conversation_members_content_description_remove_moderator
-                                }
-                            )
-                        )
-            )
-            .performScrollTo()
+            .onNodeWithTag(getUserOptionsTestTag(user2Username) + "_grant_moderator")
             .performClick()
 
         composeTestRule
-            .onNodeWithText(
-                context.getString(
-                    if (makeModerator) R.string.conversation_settings_dialog_grant_moderation_rights_positive
-                    else R.string.conversation_settings_dialog_revoke_moderation_rights_positive
-                )
-            )
+            .onNodeWithText(getModeratorConfirmButtonText(makeModerator))
+            .assertIsDisplayed()
             .performClick()
+
+        clickOptionsButton(user2Username)
 
         composeTestRule.waitUntilExactlyOneExists(
             hasTestTag(testTagForMember(user2Username)) and if (makeModerator) isModeratorCheck else !isModeratorCheck,
             DefaultTimeoutMillis
         )
+    }
+
+    private fun clickOptionsButton(userName: String) {
+        composeTestRule
+            .onNodeWithTag(testTagForMember(userName))
+            .performScrollTo()
+
+        composeTestRule
+            .onNodeWithTag(getUserOptionsTestTag(userName))
+            .performClick()
     }
 
     private fun setupUiAndViewModel() {
@@ -203,6 +204,7 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
                 modifier = Modifier.fillMaxSize(),
                 courseId = course.id!!,
                 conversationId = channel.id,
+                query = "",
                 viewModel = viewModel,
                 collapsingContentState = CollapsingContentState()
             )
