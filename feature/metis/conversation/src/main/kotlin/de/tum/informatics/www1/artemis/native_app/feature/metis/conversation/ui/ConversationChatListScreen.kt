@@ -47,6 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -265,7 +266,7 @@ fun ConversationChatListScreen(
                 },
                 actions = {
                     if (!isSearchBarOpen) {
-                        if (BuildConfig.DEBUG) {
+                        if (BuildConfig.DEBUG && !LocalInspectionMode.current) {
                             ConversationDataStatusButton(
                                 dataStatus = conversationDataStatus,
                                 onRequestSoftReload = onRequestSoftReload

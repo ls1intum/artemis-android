@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.ui
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,7 +15,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,10 +27,12 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
@@ -42,18 +49,17 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.sha
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getIcon
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getTintColor
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getUiText
 import kotlinx.coroutines.Deferred
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
-
 
 @Composable
 fun SavedPostsScreen(
     modifier: Modifier = Modifier,
     courseId: Long,
     savedPostStatus: SavedPostStatus,
-    onNavigateBack: (() -> Unit),
     onNavigateToPost: (ISavedPost) -> Unit
 ) {
     val viewModel = koinViewModel<SavedPostsViewModel>(
@@ -67,17 +73,15 @@ fun SavedPostsScreen(
     SavedPostsScreen(
         modifier = modifier,
         viewModel = viewModel,
-        onNavigateBack = onNavigateBack,
         onNavigateToPost = onNavigateToPost
     )
 }
 
 
 @Composable
-internal fun SavedPostsScreen (
+internal fun SavedPostsScreen(
     modifier: Modifier,
     viewModel: SavedPostsViewModel,
-    onNavigateBack: (() -> Unit),
     onNavigateToPost: (ISavedPost) -> Unit
 ) {
     val savedPosts by viewModel.savedPosts.collectAsState()
@@ -93,7 +97,6 @@ internal fun SavedPostsScreen (
             status = status,
             savedPostsDataState = savedPosts,
             onRequestReload = viewModel::onRequestReload,
-            onNavigateBack = onNavigateBack,
             onNavigateToPost = onNavigateToPost,
             onChangeStatus = viewModel::changeSavedPostStatus,
             onRemoveFromSavedPosts = viewModel::removeFromSavedPosts
@@ -102,64 +105,53 @@ internal fun SavedPostsScreen (
 }
 
 @Composable
-internal fun SavedPostsScreen (
+internal fun SavedPostsScreen(
     modifier: Modifier,
     status: SavedPostStatus,
     savedPostsDataState: DataState<List<ISavedPost>>,
     onRequestReload: () -> Unit,
-    onNavigateBack: (() -> Unit),
     onNavigateToPost: (ISavedPost) -> Unit,
     onChangeStatus: (ISavedPost, SavedPostStatus) -> Deferred<MetisModificationFailure?>,
     onRemoveFromSavedPosts: (ISavedPost) -> Deferred<MetisModificationFailure?>
 ) {
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            ArtemisTopAppBar(
-                title = { TopBarTitle(status = status) },
-                navigationIcon = { NavigationBackButton(onNavigateBack) }
+    Column(
+        modifier = modifier
+            .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top))
+            .padding(horizontal = Spacings.ScreenHorizontalSpacing)
+    ) {
+        if (status == SavedPostStatus.ARCHIVED || status == SavedPostStatus.COMPLETED) {
+            InfoMessageCard(
+                modifier = Modifier
+                    .padding(top = Spacings.ScreenTopBarSpacing)
+                    .padding(bottom = 8.dp),
+                infoText = stringResource(R.string.saved_posts_removal_notice)
             )
         }
-    ) { paddingValues ->
-        Column(
-            modifier = modifier
-                .padding(top = paddingValues.calculateTopPadding())
-                .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top))
-                .padding(horizontal = Spacings.ScreenHorizontalSpacing)
-        ) {
-            if (status == SavedPostStatus.ARCHIVED || status == SavedPostStatus.COMPLETED) {
-                InfoMessageCard(
-                    modifier = Modifier
-                        .padding(top = Spacings.ScreenTopBarSpacing)
-                        .padding(bottom = 8.dp),
-                    infoText = stringResource(R.string.saved_posts_removal_notice)
+
+        BasicDataStateUi(
+            modifier = Modifier.fillMaxSize(),
+            dataState = savedPostsDataState,
+            loadingText = stringResource(R.string.saved_posts_loading_posts_loading),
+            failureText = stringResource(R.string.saved_posts_loading_posts_failed),
+            retryButtonText = stringResource(R.string.saved_posts_loading_posts_try_again),
+            onClickRetry = onRequestReload,
+            enablePullToRefresh = false
+        ) { savedPosts ->
+
+            ProvideMarkwon {
+                SavedPostsList(
+                    modifier = Modifier.fillMaxSize(),
+                    status = status,
+                    savedPosts = savedPosts,
+                    onNavigateToPost = onNavigateToPost,
+                    onChangeStatus = onChangeStatus,
+                    onRemoveFromSavedPosts = onRemoveFromSavedPosts
                 )
-            }
-
-            BasicDataStateUi(
-                modifier = Modifier.fillMaxSize(),
-                dataState = savedPostsDataState,
-                loadingText = stringResource(R.string.saved_posts_loading_posts_loading),
-                failureText = stringResource(R.string.saved_posts_loading_posts_failed),
-                retryButtonText = stringResource(R.string.saved_posts_loading_posts_try_again),
-                onClickRetry = onRequestReload,
-                enablePullToRefresh = false
-            ) { savedPosts ->
-
-                ProvideMarkwon {
-                    SavedPostsList(
-                        modifier = Modifier.fillMaxSize(),
-                        status = status,
-                        savedPosts = savedPosts,
-                        onNavigateToPost = onNavigateToPost,
-                        onChangeStatus = onChangeStatus,
-                        onRemoveFromSavedPosts = onRemoveFromSavedPosts
-                    )
-                }
             }
         }
     }
 }
+
 
 @Composable
 private fun SavedPostsList(
@@ -215,29 +207,73 @@ private fun SavedPostsList(
     }
 }
 
-
 @Composable
-private fun TopBarTitle(
+fun SavedPostsScreenWithChips(
     modifier: Modifier = Modifier,
-    status: SavedPostStatus
+    courseId: Long,
+    onNavigateToPost: (ISavedPost) -> Unit
 ) {
-    val textPrefix = stringResource(R.string.saved_posts_title_prefix)
-    val text = "$textPrefix (${status.getUiText()})"
+    val statuses = SavedPostStatus.entries
+    val initialIndex = SavedPostStatus.IN_PROGRESS.ordinal
 
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Icon(
-            imageVector = status.getIcon(),
-            contentDescription = null,
-        )
+    var selectedIndex by rememberSaveable { mutableIntStateOf(initialIndex) }
+    val currentStatus = statuses[selectedIndex]
+    val filterChipColorAlpha = 0.8f
 
-        Text(
-            text = text,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+    Scaffold(
+        topBar = {
+            ArtemisTopAppBar(
+                title = { Text(stringResource(R.string.saved_posts_title_prefix)) },
+                navigationIcon = { NavigationBackButton() }
+            )
+        }
+    ) { paddingValues ->
+        Column(modifier = modifier.padding(paddingValues)) {
+            Row(
+                modifier = Modifier
+                    .horizontalScroll(rememberScrollState())
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                statuses.forEachIndexed { index, status ->
+                    val isSelected = (index == selectedIndex)
+                    FilterChip(
+                        selected = isSelected,
+                        onClick = {
+                            selectedIndex = index
+                        },
+                        label = {
+                            Text(
+                                text = status.getUiText(),
+                                color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface
+                            )
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = status.getIcon(),
+                                tint = if (isSelected) Color.White else MaterialTheme.colorScheme.primary,
+                                contentDescription = null
+                            )
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = status.getTintColor().copy(alpha = filterChipColorAlpha)
+                        ),
+                        border = FilterChipDefaults.filterChipBorder(
+                            borderColor = MaterialTheme.colorScheme.outlineVariant,
+                            selectedBorderColor = MaterialTheme.colorScheme.primary,
+                            enabled = true,
+                            selected = isSelected,
+                        )
+                    )
+                }
+            }
+
+            SavedPostsScreen(
+                modifier = modifier.fillMaxSize(),
+                courseId = courseId,
+                savedPostStatus = currentStatus,
+                onNavigateToPost = onNavigateToPost
+            )
+        }
     }
 }
