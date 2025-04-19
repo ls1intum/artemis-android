@@ -36,6 +36,7 @@ fun `Lecture - Overview`() {
             onReloadLecture = {},
             onUpdateLectureUnitIsComplete = { _, _ -> CompletableDeferred(true) },
             onStartExercise = { _, _ -> },
+            onSidebarToggle = {}
         )
     }
 }

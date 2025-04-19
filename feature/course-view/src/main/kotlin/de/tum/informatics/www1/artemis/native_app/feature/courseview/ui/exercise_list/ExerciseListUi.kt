@@ -17,9 +17,9 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.NoSearchResults
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseListItem
-import de.tum.informatics.www1.artemis.native_app.feature.courseview.TimeFrame
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.timeframe.TimeFrame
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
-import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.TimeFrameItemsLazyColumn
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.timeframe.TimeFrameItemsLazyColumn
 
 internal const val TEST_TAG_EXERCISE_LIST_LAZY_COLUMN = "exercise list lazy column"
 

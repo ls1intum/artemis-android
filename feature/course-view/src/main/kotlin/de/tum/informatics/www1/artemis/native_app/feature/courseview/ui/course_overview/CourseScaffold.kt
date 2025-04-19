@@ -28,6 +28,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
+import de.tum.informatics.www1.artemis.native_app.core.ui.ArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseSearchConfiguration
@@ -35,6 +36,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.Art
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
+import de.tum.informatics.www1.artemis.native_app.core.ui.getArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
 import io.github.fornewid.placeholder.material3.placeholder
 
@@ -50,22 +52,34 @@ internal fun CourseScaffold(
     onReloadCourse: () -> Unit,
     content: @Composable () -> Unit
 ) {
+    val layout = getArtemisAppLayout()
     Scaffold(
         modifier = modifier,
         topBar = {
-            CourseTopAppBar(
-                courseDataState = courseDataState,
-                searchConfiguration = searchConfiguration,
-                collapsingContentState = collapsingContentState,
-                onNavigateBack = onNavigateBack,
-            )
+            if (layout == ArtemisAppLayout.Phone) {
+                CourseTopAppBar(
+                    courseDataState = courseDataState,
+                    searchConfiguration = searchConfiguration,
+                    collapsingContentState = collapsingContentState,
+                    onNavigateBack = onNavigateBack,
+                )
+            } else {
+                CourseTabletNavigation(
+                    courseDataState = courseDataState,
+                    isSelected = isCourseTabSelected,
+                    onUpdateSelectedTab = updateSelectedCourseTab,
+                    onNavigateBack = onNavigateBack
+                )
+            }
         },
         bottomBar = {
-            BottomNavigationBar(
-                courseDataState = courseDataState,
-                isSelected = isCourseTabSelected,
-                onUpdateSelectedTab = updateSelectedCourseTab
-            )
+            if (layout == ArtemisAppLayout.Phone) {
+                BottomNavigationBar(
+                    courseDataState = courseDataState,
+                    isSelected = isCourseTabSelected,
+                    onUpdateSelectedTab = updateSelectedCourseTab
+                )
+            }
         }
     ) { padding ->
         BasicDataStateUi(
@@ -130,13 +144,7 @@ private fun BottomNavigationBar(
     isSelected: (CourseTab) -> Boolean,
     onUpdateSelectedTab: (CourseTab) -> Unit
 ) {
-    val navItems = BottomNavigationItem.defaults.toMutableList()
-    if (courseDataState.isSuccess) {
-        val course = (courseDataState as DataState.Success).data
-        if (course.faqEnabled) {
-            navItems += BottomNavigationItem.faq
-        }
-    }
+    val navItems = getNavigationItems(courseDataState)
 
     Surface(
         shadowElevation = Spacings.AppBarElevation
@@ -171,31 +179,31 @@ private fun BottomNavigationBar(
 }
 
 
-private data class BottomNavigationItem(
+data class NavigationItem(
     val labelStringId: Int,
     val icon: ImageVector = Icons.Filled.Home,
     val route: CourseTab,
 ) {
     companion object {
-        val exercise = BottomNavigationItem(
+        val exercise = NavigationItem(
             labelStringId =R.string.course_ui_tab_exercises,
             icon = Icons.AutoMirrored.Filled.ListAlt,
             route = CourseTab.Exercises
         )
 
-        val lecture = BottomNavigationItem(
+        val lecture = NavigationItem(
             labelStringId = R.string.course_ui_tab_lectures,
             icon = Icons.Default.School,
             route = CourseTab.Lectures
         )
 
-        val communication = BottomNavigationItem(
+        val communication = NavigationItem(
             labelStringId = R.string.course_ui_tab_communication,
             icon = Icons.AutoMirrored.Filled.Chat,
             route = CourseTab.Communication
         )
 
-        val faq = BottomNavigationItem(
+        val faq = NavigationItem(
             labelStringId = R.string.course_ui_tab_faq,
             icon = Icons.Default.QuestionMark,
             route = CourseTab.Faq
@@ -203,4 +211,13 @@ private data class BottomNavigationItem(
 
         val defaults = listOf(exercise, lecture, communication)
     }
+}
+
+@Composable
+fun getNavigationItems(courseDataState: DataState<Course>): List<NavigationItem> {
+    val items = NavigationItem.defaults.toMutableList()
+    if (courseDataState.isSuccess && (courseDataState as DataState.Success).data.faqEnabled) {
+        items += NavigationItem.faq
+    }
+    return items
 }

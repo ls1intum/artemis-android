@@ -7,6 +7,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.PlayStoreScreenshots
 import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotData
 import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotFrame
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.timeframe.TimeFrame
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
 import de.tum.informatics.www1.artemis.native_app.core.websocket.test.LiveParticipationServiceStub

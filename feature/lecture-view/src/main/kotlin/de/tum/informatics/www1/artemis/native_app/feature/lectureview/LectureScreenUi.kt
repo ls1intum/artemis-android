@@ -9,6 +9,10 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuOpen
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,6 +34,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
+import de.tum.informatics.www1.artemis.native_app.core.ui.ArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
@@ -37,6 +42,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.compose.LinkBottomShee
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.LinkBottomSheetState
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.LectureDeeplinks
+import de.tum.informatics.www1.artemis.native_app.core.ui.getArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.canDisplayMetisOnDisplaySide
@@ -102,6 +108,41 @@ fun NavGraphBuilder.lecture(
 }
 
 @Composable
+fun LectureDetailContent(
+    lectureId: Long,
+    onViewExercise: (exerciseId: Long) -> Unit,
+    onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
+    onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
+    onParticipateInQuiz: (exerciseId: Long, isPractice: Boolean) -> Unit,
+    onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
+    onSidebarToggle: () -> Unit
+) {
+
+    val viewModel: LectureViewModel = koinViewModel { parametersOf(lectureId) }
+    val lectureDataState by viewModel.lectureDataState.collectAsState()
+    val courseId by remember(lectureDataState) {
+        derivedStateOf { lectureDataState.bind { it.course?.id ?: 0 }.orElse(0) }
+    }
+
+    LectureScreen(
+        modifier = Modifier.fillMaxSize(),
+        courseId = courseId,
+        viewModel = viewModel,
+        onViewExercise = onViewExercise,
+        onNavigateToExerciseResultView = onNavigateToExerciseResultView,
+        onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
+        onParticipateInQuiz = { exerciseId, isPractice ->
+            onParticipateInQuiz(
+                exerciseId,
+                isPractice
+            )
+        },
+        onClickViewQuizResults = onClickViewQuizResults,
+        onSidebarToggle = onSidebarToggle
+    )
+}
+
+@Composable
 internal fun LectureScreen(
     modifier: Modifier,
     courseId: Long,
@@ -110,7 +151,8 @@ internal fun LectureScreen(
     onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
     onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
     onParticipateInQuiz: (exerciseId: Long, isPractice: Boolean) -> Unit,
-    onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit
+    onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
+    onSidebarToggle: () -> Unit = {},
 ) {
     val lectureDataState by viewModel.lectureDataState.collectAsState()
     val serverUrl by viewModel.serverUrl.collectAsState()
@@ -137,7 +179,8 @@ internal fun LectureScreen(
             ) {
                 onParticipationId(it)
             }
-        }
+        },
+        onSidebarToggle = onSidebarToggle
     )
 }
 
@@ -157,6 +200,7 @@ internal fun LectureScreen(
     onReloadLecture: () -> Unit,
     onUpdateLectureUnitIsComplete: (lectureUnitId: Long, isCompleted: Boolean) -> Deferred<Boolean>,
     onStartExercise: (exerciseId: Long, onParticipationId: (Long) -> Unit) -> Unit,
+    onSidebarToggle: () -> Unit
 ) {
     val linkOpener = LocalLinkOpener.current
 
@@ -170,6 +214,7 @@ internal fun LectureScreen(
     var displaySetCompletedFailureDialog: Boolean by remember { mutableStateOf(false) }
 
     val overviewListState = rememberLazyListState()
+    val layout = getArtemisAppLayout()
 
     BoxWithConstraints(modifier = modifier) {
         val displayCommunicationOnSide = canDisplayMetisOnDisplaySide(
@@ -189,7 +234,16 @@ internal fun LectureScreen(
                             overflow = TextOverflow.Ellipsis
                         )
                     },
-                    navigationIcon = { NavigationBackButton() },
+                    navigationIcon = {
+                        if (layout == ArtemisAppLayout.Tablet) {
+                            IconButton(onClick = onSidebarToggle) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.MenuOpen,
+                                    contentDescription = null
+                                )
+                            }
+                        } else NavigationBackButton()
+                    },
                     isElevated = false
                 )
             }
