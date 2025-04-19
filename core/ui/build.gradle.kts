@@ -30,11 +30,11 @@ dependencies {
     api(libs.coil2.base)
     api(libs.coil.compose)
     api(libs.coil.network)
-    debugApi(libs.coil.compose.core)
-    debugApi(libs.coil.test)
     api(libs.accompanist.webview)
     api(libs.noties.markwon.core)
 
+    implementation(libs.coil.compose.core)
+    implementation(libs.coil.test)
     implementation(libs.kotlinx.datetime)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.androidx.browser)
@@ -45,4 +45,6 @@ dependencies {
     implementation(libs.noties.markwon.simple.ext)
     implementation(libs.noties.markwon.linkify)
     implementation(libs.noties.markwon.image.coil)
+
+    debugImplementation(libs.edge2edge.preview)
 }

@@ -324,7 +324,9 @@ private fun CourseItemContent(
                 text = nextExercise?.title ?: stringResource(R.string.course_overview_course_no_exercise_planned),
                 style = MaterialTheme.typography.bodyLarge,
                 color = if (nextExercise == null) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }

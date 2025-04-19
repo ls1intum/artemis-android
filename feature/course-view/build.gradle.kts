@@ -20,6 +20,8 @@ dependencies {
     implementation(libs.placeholder.material)
     implementation(project(":core:device-test"))
     debugImplementation(project(":core:data-test"))
+    debugImplementation(libs.mockk.android)
+    debugImplementation(libs.mockk.agent)
 
     testImplementation(project(":feature:login"))
     testImplementation(project(":feature:login-test"))

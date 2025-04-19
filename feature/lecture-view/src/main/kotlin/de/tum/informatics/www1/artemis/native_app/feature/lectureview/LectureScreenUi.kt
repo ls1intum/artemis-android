@@ -30,9 +30,12 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.ui.ArtemisAppLayout
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
@@ -42,11 +45,12 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBack
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.LectureDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.getArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.canDisplayMetisOnDisplaySide
 import io.github.fornewid.placeholder.material3.placeholder
 import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
+import kotlinx.coroutines.Deferred
 import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -65,7 +69,6 @@ fun NavController.navigateToLecture(
 }
 
 fun NavGraphBuilder.lecture(
-    navController: NavController,
     onViewExercise: (exerciseId: Long) -> Unit,
     onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
     onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
@@ -89,9 +92,7 @@ fun NavGraphBuilder.lecture(
         LectureScreen(
             modifier = Modifier.fillMaxSize(),
             courseId = courseId,
-            lectureId = lectureId,
             viewModel = viewModel,
-            navController = navController,
             onViewExercise = onViewExercise,
             onNavigateToExerciseResultView = onNavigateToExerciseResultView,
             onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
@@ -149,9 +150,7 @@ fun LectureDetailContent(
 internal fun LectureScreen(
     modifier: Modifier,
     courseId: Long,
-    lectureId: Long,
     viewModel: LectureViewModel,
-    navController: NavController,
     onViewExercise: (exerciseId: Long) -> Unit,
     onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
     onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
@@ -159,10 +158,53 @@ internal fun LectureScreen(
     onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
     onSidebarToggle: () -> Unit = {},
 ) {
-    val linkOpener = LocalLinkOpener.current
-
     val lectureDataState by viewModel.lectureDataState.collectAsState()
     val serverUrl by viewModel.serverUrl.collectAsState()
+    val lectureChannel by viewModel.channelDataState.collectAsState()
+    val lectureUnits by viewModel.lectureUnits.collectAsState()
+
+    LectureScreen(
+        modifier = modifier,
+        courseId = courseId,
+        serverUrl = serverUrl,
+        lectureDataState = lectureDataState,
+        lectureChannel = lectureChannel,
+        lectureUnits = lectureUnits,
+        onViewExercise = onViewExercise,
+        onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
+        onParticipateInQuiz = onParticipateInQuiz,
+        onNavigateToExerciseResultView = onNavigateToExerciseResultView,
+        onClickViewQuizResults = onClickViewQuizResults,
+        onReloadLecture = viewModel::onRequestReload,
+        onUpdateLectureUnitIsComplete = viewModel::updateLectureUnitIsComplete,
+        onStartExercise = { exerciseId, onParticipationId ->
+            viewModel.startExercise(
+                exerciseId = exerciseId
+            ) {
+                onParticipationId(it)
+            }
+        }
+    )
+}
+
+@Composable
+internal fun LectureScreen(
+    lectureDataState: DataState<Lecture>,
+    modifier: Modifier,
+    courseId: Long,
+    serverUrl: String,
+    lectureChannel: DataState<ChannelChat>,
+    lectureUnits: List<LectureUnit>,
+    onViewExercise: (exerciseId: Long) -> Unit,
+    onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
+    onParticipateInQuiz: (exerciseId: Long, isPractice: Boolean) -> Unit,
+    onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
+    onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
+    onReloadLecture: () -> Unit,
+    onUpdateLectureUnitIsComplete: (lectureUnitId: Long, isCompleted: Boolean) -> Deferred<Boolean>,
+    onStartExercise: (exerciseId: Long, onParticipationId: (Long) -> Unit) -> Unit,
+) {
+    val linkOpener = LocalLinkOpener.current
 
     val lectureTitle = lectureDataState.bind<String?> { it.title }.orElse(null)
 
@@ -172,10 +214,6 @@ internal fun LectureScreen(
     var pendingOpenLink: String? by remember { mutableStateOf(null) }
 
     var displaySetCompletedFailureDialog: Boolean by remember { mutableStateOf(false) }
-
-    val metisContext = remember(courseId, lectureId) {
-        MetisContext.Lecture(courseId = courseId, lectureId = lectureId)
-    }
 
     val overviewListState = rememberLazyListState()
     val layout = getArtemisAppLayout()
@@ -219,7 +257,8 @@ internal fun LectureScreen(
                     .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top)),
                 displayCommunicationOnSide = displayCommunicationOnSide,
                 lectureDataState = lectureDataState,
-                viewModel = viewModel,
+                lectureChannel = lectureChannel,
+                lectureUnits = lectureUnits,
                 onViewExercise = onViewExercise,
                 onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
                 onParticipateInQuiz = onParticipateInQuiz,
@@ -227,13 +266,14 @@ internal fun LectureScreen(
                 onClickViewQuizResults = onClickViewQuizResults,
                 courseId = courseId,
                 overviewListState = overviewListState,
-                metisContext = metisContext,
-                navController = navController,
                 onDisplaySetCompletedFailureDialog = {
                     displaySetCompletedFailureDialog = true
                 },
                 onRequestOpenAttachment = { pendingOpenFileAttachment = it },
-                onRequestViewLink = { pendingOpenLink = it }
+                onRequestViewLink = { pendingOpenLink = it },
+                onReloadLecture = onReloadLecture,
+                onUpdateLectureUnitIsComplete = onUpdateLectureUnitIsComplete,
+                onStartExercise = onStartExercise,
             )
 
             val currentPendingOpenFileAttachment = pendingOpenFileAttachment
@@ -297,11 +337,7 @@ private fun buildOpenAttachmentLink(
 
 // Necessary to encode the file name for the attachment URL, see
 // https://github.com/ls1intum/Artemis/blob/develop/src/main/webapp/app/shared/http/file.service.ts
-private fun createAttachmentFileUrl(
-    downloadUrl: String,
-    downloadName: String,
-    encodeName: Boolean
-): String {
+private fun createAttachmentFileUrl(downloadUrl: String, downloadName: String, encodeName: Boolean): String {
     val downloadUrlComponents = downloadUrl.split("/")
     val extension = downloadUrlComponents.lastOrNull()?.substringAfterLast('.', "") ?: ""
     val restOfUrl = downloadUrlComponents.dropLast(1).joinToString("/")

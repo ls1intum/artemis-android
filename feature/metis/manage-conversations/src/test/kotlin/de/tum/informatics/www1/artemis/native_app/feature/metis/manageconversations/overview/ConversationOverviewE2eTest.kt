@@ -92,7 +92,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
                 description = "some description",
                 isPublic = true,
                 isAnnouncement = false,
-                isCourseWide = true,
+                isCourseWide = false,
                 authToken = accessToken,
                 serverUrl = testServerUrl
             )
