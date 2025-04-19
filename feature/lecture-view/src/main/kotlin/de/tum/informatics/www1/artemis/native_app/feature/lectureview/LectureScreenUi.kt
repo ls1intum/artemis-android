@@ -9,6 +9,10 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuOpen
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,6 +32,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
+import de.tum.informatics.www1.artemis.native_app.core.ui.ArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
@@ -35,6 +40,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.compose.LinkBottomShee
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.LinkBottomSheetState
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.LectureDeeplinks
+import de.tum.informatics.www1.artemis.native_app.core.ui.getArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.canDisplayMetisOnDisplaySide
@@ -109,6 +115,7 @@ fun LectureDetailContent(
     onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
     onParticipateInQuiz: (exerciseId: Long, isPractice: Boolean) -> Unit,
     onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
+    onSidebarToggle: () -> Unit
 ) {
     val navController: NavController = rememberNavController()
 
@@ -133,7 +140,8 @@ fun LectureDetailContent(
                 isPractice
             )
         },
-        onClickViewQuizResults = onClickViewQuizResults
+        onClickViewQuizResults = onClickViewQuizResults,
+        onSidebarToggle = onSidebarToggle
     )
 }
 
@@ -148,7 +156,8 @@ internal fun LectureScreen(
     onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
     onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
     onParticipateInQuiz: (exerciseId: Long, isPractice: Boolean) -> Unit,
-    onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit
+    onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
+    onSidebarToggle: () -> Unit = {},
 ) {
     val linkOpener = LocalLinkOpener.current
 
@@ -169,6 +178,7 @@ internal fun LectureScreen(
     }
 
     val overviewListState = rememberLazyListState()
+    val layout = getArtemisAppLayout()
 
     BoxWithConstraints(modifier = modifier) {
         val displayCommunicationOnSide = canDisplayMetisOnDisplaySide(
@@ -188,7 +198,16 @@ internal fun LectureScreen(
                             overflow = TextOverflow.Ellipsis
                         )
                     },
-                    navigationIcon = { NavigationBackButton() },
+                    navigationIcon = {
+                        if (layout == ArtemisAppLayout.Tablet) {
+                            IconButton(onClick = onSidebarToggle) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.MenuOpen,
+                                    contentDescription = null
+                                )
+                            }
+                        } else NavigationBackButton()
+                    },
                     isElevated = false
                 )
             }
@@ -278,7 +297,11 @@ private fun buildOpenAttachmentLink(
 
 // Necessary to encode the file name for the attachment URL, see
 // https://github.com/ls1intum/Artemis/blob/develop/src/main/webapp/app/shared/http/file.service.ts
-private fun createAttachmentFileUrl(downloadUrl: String, downloadName: String, encodeName: Boolean): String {
+private fun createAttachmentFileUrl(
+    downloadUrl: String,
+    downloadName: String,
+    encodeName: Boolean
+): String {
     val downloadUrlComponents = downloadUrl.split("/")
     val extension = downloadUrlComponents.lastOrNull()?.substringAfterLast('.', "") ?: ""
     val restOfUrl = downloadUrlComponents.dropLast(1).joinToString("/")
