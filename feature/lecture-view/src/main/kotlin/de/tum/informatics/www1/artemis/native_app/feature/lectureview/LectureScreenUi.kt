@@ -28,14 +28,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
-import de.tum.informatics.www1.artemis.native_app.core.ui.ArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
+import de.tum.informatics.www1.artemis.native_app.core.ui.ArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
@@ -118,7 +117,6 @@ fun LectureDetailContent(
     onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
     onSidebarToggle: () -> Unit
 ) {
-    val navController: NavController = rememberNavController()
 
     val viewModel: LectureViewModel = koinViewModel { parametersOf(lectureId) }
     val lectureDataState by viewModel.lectureDataState.collectAsState()
@@ -129,9 +127,7 @@ fun LectureDetailContent(
     LectureScreen(
         modifier = Modifier.fillMaxSize(),
         courseId = courseId,
-        lectureId = lectureId,
         viewModel = viewModel,
-        navController = navController,
         onViewExercise = onViewExercise,
         onNavigateToExerciseResultView = onNavigateToExerciseResultView,
         onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
@@ -183,7 +179,8 @@ internal fun LectureScreen(
             ) {
                 onParticipationId(it)
             }
-        }
+        },
+        onSidebarToggle = onSidebarToggle
     )
 }
 
@@ -203,6 +200,7 @@ internal fun LectureScreen(
     onReloadLecture: () -> Unit,
     onUpdateLectureUnitIsComplete: (lectureUnitId: Long, isCompleted: Boolean) -> Deferred<Boolean>,
     onStartExercise: (exerciseId: Long, onParticipationId: (Long) -> Unit) -> Unit,
+    onSidebarToggle: () -> Unit
 ) {
     val linkOpener = LocalLinkOpener.current
 
