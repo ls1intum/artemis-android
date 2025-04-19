@@ -40,11 +40,11 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ExerciseDeep
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
-import de.tum.informatics.www1.artemis.native_app.feature.courseview.TimeFrame
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.timeframe.TimeFrame
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.CourseViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.LectureListUi
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.exercise_list.ExerciseListUi
 import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.overview.FaqOverviewUi
+import de.tum.informatics.www1.artemis.native_app.feature.lectureview.SinglePageLectureBody
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationConfiguration
 import de.tum.informatics.www1.artemis.native_app.feature.metis.IgnoreCustomBackHandling
 import de.tum.informatics.www1.artemis.native_app.feature.metis.NavigateToUserConversation
@@ -328,12 +328,18 @@ internal fun CourseUiScreen(
         composable<CourseTab.Lectures> {
             scaffold(lectureSearchConfiguration) {
                 EmptyDataStateUi(dataState = lecturesTimeFrameDataState) { lectures ->
-                    LectureListUi(
+                    SinglePageLectureBody(
                         modifier = Modifier.fillMaxSize(),
                         lectures = lectures,
+                        query = if (lectureSearchConfiguration is CourseSearchConfiguration.Search)
+                            lectureSearchConfiguration.query else "",
                         collapsingContentState = collapsingContentState,
-                        query = if (lectureSearchConfiguration is CourseSearchConfiguration.Search) lectureSearchConfiguration.query else "",
-                        onClickLecture = { onNavigateToLecture(it.id ?: 0L) }
+                        onViewExercise = onNavigateToExercise,
+                        onNavigateToExerciseResultView = onNavigateToExerciseResultView,
+                        onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
+                        onParticipateInQuiz = onParticipateInQuiz,
+                        onClickViewQuizResults = onClickViewQuizResults,
+                        onNavigateToLectureScreen = { id -> onNavigateToLecture(id ?: 0L) }
                     )
                 }
             }

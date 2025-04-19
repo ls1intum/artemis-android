@@ -24,6 +24,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
+import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
@@ -98,6 +99,42 @@ fun NavGraphBuilder.lecture(
             onClickViewQuizResults = onClickViewQuizResults
         )
     }
+}
+
+@Composable
+fun LectureDetailContent(
+    lectureId: Long,
+    onViewExercise: (exerciseId: Long) -> Unit,
+    onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
+    onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
+    onParticipateInQuiz: (exerciseId: Long, isPractice: Boolean) -> Unit,
+    onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
+) {
+    val navController: NavController = rememberNavController()
+
+    val viewModel: LectureViewModel = koinViewModel { parametersOf(lectureId) }
+    val lectureDataState by viewModel.lectureDataState.collectAsState()
+    val courseId by remember(lectureDataState) {
+        derivedStateOf { lectureDataState.bind { it.course?.id ?: 0 }.orElse(0) }
+    }
+
+    LectureScreen(
+        modifier = Modifier.fillMaxSize(),
+        courseId = courseId,
+        lectureId = lectureId,
+        viewModel = viewModel,
+        navController = navController,
+        onViewExercise = onViewExercise,
+        onNavigateToExerciseResultView = onNavigateToExerciseResultView,
+        onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
+        onParticipateInQuiz = { exerciseId, isPractice ->
+            onParticipateInQuiz(
+                exerciseId,
+                isPractice
+            )
+        },
+        onClickViewQuizResults = onClickViewQuizResults
+    )
 }
 
 @Composable
