@@ -49,7 +49,6 @@ fun `Course View - Exercise List`() {
                 exercises = listOf(TimeFrame.Current(ScreenshotData.exercises)),
                 query = "",
                 collapsingContentState = CollapsingContentState(),
-                actions = ScreenshotData.Util.emptyBoundExerciseActions,
                 onClickExercise = { }
             )
         }

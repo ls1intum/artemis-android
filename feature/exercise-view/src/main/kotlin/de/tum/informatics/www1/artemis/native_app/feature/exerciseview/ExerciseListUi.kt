@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
@@ -14,13 +13,12 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.NoSearchResults
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseListItem
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.timeframe.TimeFrame
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.timeframe.TimeFrameItemsLazyColumn
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseListItem
 
-internal const val TEST_TAG_EXERCISE_LIST_LAZY_COLUMN = "exercise list lazy column"
+const val TEST_TAG_EXERCISE_LIST_LAZY_COLUMN = "exercise list lazy column"
 
 /**
  * Display a list of all exercises with section headers.
@@ -32,7 +30,6 @@ internal fun ExerciseListUi(
     exercises: List<TimeFrame<Exercise>>,
     query: String,
     collapsingContentState: CollapsingContentState,
-    actions: BoundExerciseActions,
     onClickExercise: (exerciseId: Long) -> Unit
 ) {
     if (exercises.isEmpty()) {

@@ -51,8 +51,7 @@ fun SinglePageExerciseBody(
                 exercises = exercises,
                 query = query,
                 collapsingContentState = collapsingContentState,
-                onClickExercise = onClickExercise,
-                actions = actions
+                onClickExercise = onClickExercise
             )
         }
 
@@ -67,8 +66,7 @@ fun SinglePageExerciseBody(
                         exercises = exercises,
                         query = query,
                         collapsingContentState = collapsingContentState,
-                        onClickExercise = openExercise,
-                        actions = actions
+                        onClickExercise = openExercise
                     )
                 },
                 priorityColumn = { contentMod ->
@@ -113,8 +111,7 @@ fun ExerciseOverviewBody(
     exercises: List<TimeFrame<Exercise>>,
     query: String,
     collapsingContentState: CollapsingContentState,
-    onClickExercise: (Long) -> Unit,
-    actions: BoundExerciseActions
+    onClickExercise: (Long) -> Unit
 ) {
     ExerciseListUi(
         modifier = modifier,
@@ -122,6 +119,5 @@ fun ExerciseOverviewBody(
         query = query,
         collapsingContentState = collapsingContentState,
         onClickExercise = onClickExercise,
-        actions = actions
     )
 }

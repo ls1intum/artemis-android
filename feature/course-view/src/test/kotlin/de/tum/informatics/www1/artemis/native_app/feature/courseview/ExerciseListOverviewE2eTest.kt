@@ -15,7 +15,6 @@ import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_cr
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createModelingExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createProgramingExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createTextExercise
-import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.TEST_TAG_EXERCISE_LIST_LAZY_COLUMN
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import org.junit.Ignore
 import org.junit.Test
