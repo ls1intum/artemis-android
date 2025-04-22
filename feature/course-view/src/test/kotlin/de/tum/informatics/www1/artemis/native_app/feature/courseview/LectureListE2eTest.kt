@@ -30,10 +30,6 @@ class LectureListE2eTest : BaseCourseTest() {
         composeTestRule.onNodeWithText(context.getString(R.string.course_ui_tab_lectures))
             .performClick()
 
-        composeTestRule
-            .onNodeWithTag("noDate-header")
-            .performClick()
-
         composeTestRule.onNodeWithTag(TEST_TAG_LECTURE_LIST).performScrollToKey(lecture.id!!)
         composeTestRule.onNodeWithText(lecture.title).assertExists()
     }

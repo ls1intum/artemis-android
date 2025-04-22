@@ -248,11 +248,7 @@ class LectureE2eTest : BaseComposeTest() {
                 modifier = Modifier.fillMaxSize(),
                 courseId = course.id!!,
                 viewModel = viewModel,
-                onViewExercise = {},
-                onNavigateToExerciseResultView = {},
-                onNavigateToTextExerciseParticipation = { _, _ -> },
-                onParticipateInQuiz = { _, _ -> },
-                onClickViewQuizResults = { _, _ -> }
+                onViewExercise = {}
             )
         }
 
