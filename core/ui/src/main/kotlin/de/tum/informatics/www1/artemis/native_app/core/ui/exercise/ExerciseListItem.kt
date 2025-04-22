@@ -40,9 +40,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.Exerci
 fun ExerciseListItem(
     modifier: Modifier,
     exercise: Exercise,
-    displayActionButtons: Boolean = getWindowSizeClass().widthSizeClass >= WindowWidthSizeClass.Expanded,
-    onClickExercise: () -> Unit,
-    exerciseActions: ExerciseActions
+    onClickExercise: () -> Unit
 ) {
     Card(
         modifier = modifier,
@@ -53,7 +51,7 @@ fun ExerciseListItem(
                 .fillMaxWidth()
                 .height(IntrinsicSize.Min)
         ) {
-            exercise.difficulty?.let { DifficultyRectangle(modifier = Modifier, difficulty = it)}
+            exercise.difficulty?.let { DifficultyRectangle(modifier = Modifier, difficulty = it) }
 
             Column(
                 modifier = Modifier
@@ -87,9 +85,7 @@ fun ExerciseListItem(
 
                 ExerciseDataText(
                     modifier = Modifier,
-                    exercise = exercise,
-                    displayActionButtons = displayActionButtons,
-                    exerciseActions = exerciseActions
+                    exercise = exercise
                 )
 
                 //Display a row of chips
@@ -109,21 +105,22 @@ fun ExerciseListItem(
  */
 @Composable
 private fun DifficultyRectangle(modifier: Modifier, difficulty: Exercise.Difficulty) {
-    Box(modifier = modifier
-        .fillMaxHeight()
-        .width(10.dp)
-        .background(
-            color = when (difficulty) {
-                Exercise.Difficulty.EASY ->
-                    ExerciseColors.Difficulty.easy
+    Box(
+        modifier = modifier
+            .fillMaxHeight()
+            .width(10.dp)
+            .background(
+                color = when (difficulty) {
+                    Exercise.Difficulty.EASY ->
+                        ExerciseColors.Difficulty.easy
 
-                Exercise.Difficulty.MEDIUM ->
-                    ExerciseColors.Difficulty.medium
+                    Exercise.Difficulty.MEDIUM ->
+                        ExerciseColors.Difficulty.medium
 
-                Exercise.Difficulty.HARD ->
-                    ExerciseColors.Difficulty.hard
-            }
-        )
+                    Exercise.Difficulty.HARD ->
+                        ExerciseColors.Difficulty.hard
+                }
+            )
     )
 }
 
@@ -133,9 +130,7 @@ private fun DifficultyRectangle(modifier: Modifier, difficulty: Exercise.Difficu
 @Composable
 private fun ExerciseDataText(
     modifier: Modifier,
-    exercise: Exercise,
-    displayActionButtons: Boolean,
-    exerciseActions: ExerciseActions
+    exercise: Exercise
 ) {
     // Format a relative time if the distant is
     val dueDate = exercise.dueDate
@@ -161,17 +156,6 @@ private fun ExerciseDataText(
                     modifier = Modifier,
                     exercise = exercise,
                     showLargeIcon = true
-                )
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            if (displayActionButtons) {
-                ExerciseActionButtons(
-                    modifier = Modifier,
-                    exercise = exercise,
-                    showResult = true,
-                    actions = exerciseActions
                 )
             }
         }

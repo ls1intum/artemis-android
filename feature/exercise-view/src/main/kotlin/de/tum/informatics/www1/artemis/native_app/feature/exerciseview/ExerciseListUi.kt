@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.exercise_list
+package de.tum.informatics.www1.artemis.native_app.feature.exerciseview
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,7 +18,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.Col
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseListItem
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.timeframe.TimeFrame
-import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.timeframe.TimeFrameItemsLazyColumn
 
 internal const val TEST_TAG_EXERCISE_LIST_LAZY_COLUMN = "exercise list lazy column"
@@ -40,15 +39,15 @@ internal fun ExerciseListUi(
         if (query.isNotBlank()) {
             NoSearchResults(
                 modifier = modifier,
-                title = stringResource(id = R.string.course_ui_exercises_no_search_results_title),
-                details = stringResource(id = R.string.course_ui_exercises_no_search_results_body, query)
+                title = stringResource(id = R.string.exercise_list_exercises_no_search_results_title),
+                details = stringResource(id = R.string.exercise_list_exercises_no_search_results_body, query)
             )
             return
         }
 
         EmptyListHint(
             modifier = modifier,
-            hint = stringResource(id = R.string.course_ui_exercises_no_search_results_title),
+            hint = stringResource(id = R.string.exercise_list_exercises_no_search_results_title),
             imageVector = Icons.Default.ListAlt
         )
         return
@@ -67,10 +66,6 @@ internal fun ExerciseListUi(
                 .fillMaxWidth()
                 .padding(horizontal = Spacings.ScreenHorizontalSpacing),
             exercise = exercise,
-            exerciseActions = remember(
-                exercise,
-                actions
-            ) { actions.getUnbound(exerciseId = exercise.id ?: 0) },
             onClickExercise = { onClickExercise(exercise.id ?: 0) }
         )
     }

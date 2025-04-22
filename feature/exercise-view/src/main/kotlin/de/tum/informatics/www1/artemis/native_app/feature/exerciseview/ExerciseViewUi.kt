@@ -22,6 +22,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ExerciseDeeplinks
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.KSerializableNavType
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.home.ExerciseScreen
@@ -215,3 +216,80 @@ internal val DataState<Exercise>.courseId: Long?
             bind { it.course?.id }.orNull()
         }
     }.value
+
+@Composable
+fun ExerciseDetailContent(
+    exerciseId: Long,
+    viewMode: ExerciseViewMode = ExerciseViewMode.Overview,
+    onNavigateBack: () -> Unit,
+    actions: BoundExerciseActions,
+    onSidebarToggle: () -> Unit = {}
+) {
+    val vm: ExerciseViewModel = koinViewModel(key = "exercise|$exerciseId") {
+        parametersOf(exerciseId)
+    }
+
+    val nestedNav = rememberNavController()
+
+    val startDestination = when (viewMode) {
+        ExerciseViewMode.Overview              -> ExerciseViewUiNestedNavigation.Home
+        is ExerciseViewMode.TextParticipation  ->
+            ExerciseViewUiNestedNavigation.ParticipateTextExercise(viewMode.participationId)
+        ExerciseViewMode.ViewResult            -> ExerciseViewUiNestedNavigation.Result
+    }
+
+    NavHost(
+        navController    = nestedNav,
+        startDestination = startDestination
+    ) {
+        animatedComposable<ExerciseViewUiNestedNavigation.Home> {
+            ExerciseScreen(
+                modifier = Modifier.fillMaxSize(),
+                viewModel = vm,
+                onViewResult = { nestedNav.navigate(ExerciseViewUiNestedNavigation.Result) },
+                onViewTextExerciseParticipationScreen = { pid ->
+                    nestedNav.navigate(
+                        ExerciseViewUiNestedNavigation.ParticipateTextExercise(pid)
+                    )
+                },
+                onParticipateInQuiz = { courseId, isPractice ->
+                    actions.onClickPracticeQuiz(exerciseId)
+                },
+                onClickViewQuizResults = { courseId ->
+                    actions.onClickViewQuizResults(exerciseId)
+                },
+                onSidebarToggle = onSidebarToggle
+            )
+        }
+
+        animatedComposable<ExerciseViewUiNestedNavigation.Result> {
+            ViewResultScreen(
+                modifier = Modifier.fillMaxSize(),
+                viewModel = vm,
+                onCloseResult = {
+                    if (!nestedNav.navigateUp()) onNavigateBack()
+                }
+            )
+        }
+
+        animatedComposable<ExerciseViewUiNestedNavigation.ParticipateTextExercise> { entry ->
+            val route: ExerciseViewUiNestedNavigation.ParticipateTextExercise = entry.toRoute()
+            val participationId = route.participationId
+
+            val exerciseState by vm.exerciseDataState.collectAsState()
+
+            EmptyDataStateUi(dataState = exerciseState) { exercise ->
+                TextExerciseParticipationScreen(
+                    modifier = Modifier.fillMaxSize(),
+                    viewModel = koinViewModel {
+                        parametersOf(exerciseId, participationId)
+                    },
+                    exercise = exercise,
+                    onNavigateUp = {
+                        if (!nestedNav.navigateUp()) onNavigateBack()
+                    }
+                )
+            }
+        }
+    }
+}

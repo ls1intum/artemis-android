@@ -13,6 +13,7 @@ dependencies {
     implementation(project(":core:device"))
     implementation(project(":feature:metis"))
     implementation(project(":feature:lecture-view"))
+    implementation(project(":feature:exercise-view"))
     implementation(project(":feature:metis:conversation:emoji-picker"))
     implementation(project(":feature:faq"))
 

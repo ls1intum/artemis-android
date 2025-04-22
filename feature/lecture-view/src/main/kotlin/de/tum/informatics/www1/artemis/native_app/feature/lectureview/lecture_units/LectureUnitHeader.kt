@@ -60,10 +60,7 @@ internal fun LectureUnitHeader(
             ExerciseListItem(
                 modifier = modifier,
                 exercise = exercise,
-                onClickExercise = { onClickExercise(exerciseId) },
-                exerciseActions = remember(exerciseActions, exercise) {
-                    exerciseActions.getUnbound(exerciseId = exerciseId)
-                }
+                onClickExercise = { onClickExercise(exerciseId) }
             )
             return
         }

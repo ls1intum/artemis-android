@@ -13,7 +13,7 @@ import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipati
 import de.tum.informatics.www1.artemis.native_app.core.websocket.test.LiveParticipationServiceStub
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.CourseScaffold
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.CourseTab
-import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.exercise_list.ExerciseListUi
+import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseOverviewBody
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 
@@ -42,8 +42,8 @@ fun `Course View - Exercise List`() {
             updateSelectedCourseTab = {},
             onNavigateBack = {},
             onReloadCourse = {}
-        ) { 
-            ExerciseListUi(
+        ) {
+            ExerciseOverviewBody(
                 modifier = Modifier
                     .fillMaxSize(),
                 exercises = listOf(TimeFrame.Current(ScreenshotData.exercises)),

@@ -15,7 +15,7 @@ import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_cr
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createModelingExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createProgramingExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createTextExercise
-import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.exercise_list.TEST_TAG_EXERCISE_LIST_LAZY_COLUMN
+import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.TEST_TAG_EXERCISE_LIST_LAZY_COLUMN
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import org.junit.Ignore
 import org.junit.Test
@@ -88,7 +88,7 @@ class ExerciseListOverviewE2eTest : BaseCourseTest() {
 
         composeTestRule
             .waitUntilExactlyOneExists(
-                hasTestTag(TEST_TAG_EXERCISE_LIST_LAZY_COLUMN),
+                hasTestTag(de.tum.informatics.www1.artemis.native_app.feature.exerciseview.TEST_TAG_EXERCISE_LIST_LAZY_COLUMN),
                 DefaultTimeoutMillis
             )
 
@@ -97,7 +97,7 @@ class ExerciseListOverviewE2eTest : BaseCourseTest() {
             .performClick()
 
         composeTestRule
-            .onNodeWithTag(TEST_TAG_EXERCISE_LIST_LAZY_COLUMN)
+            .onNodeWithTag(de.tum.informatics.www1.artemis.native_app.feature.exerciseview.TEST_TAG_EXERCISE_LIST_LAZY_COLUMN)
             .performScrollToKey(exercise.id!!)
 
         composeTestRule

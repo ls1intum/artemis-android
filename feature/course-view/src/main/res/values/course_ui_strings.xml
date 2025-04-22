@@ -11,8 +11,6 @@
     <string name="course_ui_loading_course_loading">Fetching your course from server…</string>
     <string name="course_ui_loading_course_try_again">Try again</string>
     <string name="course_ui_exercises_search_hint">Search for an exercise</string>
-    <string name="course_ui_exercises_no_search_results_title">No exercises found</string>
-    <string name="course_ui_exercises_no_search_results_body">\"%s\" did not match any exercises.</string>
 
     <!--  Communication  -->
     <string name="course_ui_communication_disabled">Course communication is disabled.</string>

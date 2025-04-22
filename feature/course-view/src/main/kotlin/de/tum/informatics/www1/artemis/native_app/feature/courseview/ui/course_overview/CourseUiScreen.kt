@@ -33,6 +33,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseSearchConfiguration
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.timeframe.TimeFrame
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CommunicationDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CourseDeeplinks
@@ -40,9 +41,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ExerciseDeep
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.timeframe.TimeFrame
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.CourseViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.exercise_list.ExerciseListUi
+import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.SinglePageExerciseBody
 import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.overview.FaqOverviewUi
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.SinglePageLectureBody
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationConfiguration
@@ -294,7 +294,7 @@ internal fun CourseUiScreen(
         composable<CourseTab.Exercises> {
             scaffold(exerciseSearchConfiguration) {
                 EmptyDataStateUi(dataState = exercisesTimeFrameDataState) { exercises ->
-                    ExerciseListUi(
+                    SinglePageExerciseBody(
                         modifier = Modifier.fillMaxSize(),
                         exercises = exercises,
                         query = if (exerciseSearchConfiguration is CourseSearchConfiguration.Search) exerciseSearchConfiguration.query else "",
@@ -319,7 +319,7 @@ internal fun CourseUiScreen(
                                     exerciseId
                                 )
                             }
-                        )
+                        ),
                     )
                 }
             }
