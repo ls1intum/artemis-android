@@ -315,7 +315,6 @@ private fun LazyListScope.lectureUnitSection(
                     .animateItem(),
                 lectureUnit = lectureUnitWithData.lectureUnit,
                 onClickExercise = onViewExercise,
-                exerciseActions = exerciseActions,
                 onMarkAsCompleted = { isCompleted ->
                     onMarkAsCompleted(lectureUnitWithData.lectureUnit.id, isCompleted)
                 },

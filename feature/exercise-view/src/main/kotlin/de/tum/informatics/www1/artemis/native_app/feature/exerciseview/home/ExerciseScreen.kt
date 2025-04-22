@@ -125,7 +125,8 @@ internal fun ExerciseScreen(
                 topBar = {
                     ExerciseScreenTopAppBar(
                         modifier = Modifier.fillMaxWidth(),
-                        exerciseDataState = exerciseDataState
+                        exerciseDataState = exerciseDataState,
+                        onSidebarToggle = onSidebarToggle
                     )
                 },
                 floatingActionButton = floatingActionButton

@@ -45,7 +45,6 @@ internal fun LectureUnitHeader(
     modifier: Modifier,
     lectureUnit: LectureUnit,
     onClickExercise: (exerciseId: Long) -> Unit,
-    exerciseActions: BoundExerciseActions,
     isUploadingMarkedAsCompleted: Boolean,
     onMarkAsCompleted: (isCompleted: Boolean) -> Unit,
     onRequestOpenAttachment: (Attachment) -> Unit,

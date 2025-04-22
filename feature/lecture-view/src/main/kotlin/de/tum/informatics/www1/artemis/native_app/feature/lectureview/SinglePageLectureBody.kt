@@ -41,6 +41,7 @@ fun SinglePageLectureBody(
 
     var config: LectureConfiguration by rememberSaveable { mutableStateOf(NothingOpened) }
     var isSidebarOpen by rememberSaveable { mutableStateOf(true) }
+    val onSidebarToggle: () -> Unit = { isSidebarOpen = !isSidebarOpen }
 
     val openLecture: (Long) -> Unit = { id ->
         if (isTabletPortrait) isSidebarOpen = false
@@ -62,7 +63,7 @@ fun SinglePageLectureBody(
             LayoutAwareTwoColumnLayout(
                 modifier = modifier,
                 isSidebarOpen = isSidebarOpen,
-                onSidebarToggle = { isSidebarOpen = !isSidebarOpen },
+                onSidebarToggle = onSidebarToggle,
                 optionalColumn = { sideMod ->
                     LectureOverviewBody(
                         modifier = sideMod,
@@ -75,16 +76,16 @@ fun SinglePageLectureBody(
                 priorityColumn = { contentMod ->
                     when (val conf = config) {
                         NothingOpened -> {
+                            IconButton(onClick = onSidebarToggle) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.MenuOpen,
+                                    contentDescription = "Open sidebar"
+                                )
+                            }
                             Box(
                                 modifier = contentMod.fillMaxSize(),
                                 contentAlignment = Alignment.Center
                             ) {
-                                IconButton(onClick = { isSidebarOpen = !isSidebarOpen }) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.MenuOpen,
-                                        contentDescription = "Open sidebar"
-                                    )
-                                }
                                 Text(
                                     modifier = Modifier.align(Alignment.Center),
                                     text = stringResource(R.string.lecture_list_lecture_item_not_selected)
@@ -100,7 +101,7 @@ fun SinglePageLectureBody(
                                 onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
                                 onParticipateInQuiz = onParticipateInQuiz,
                                 onClickViewQuizResults = onClickViewQuizResults,
-                                onSidebarToggle = { isSidebarOpen = !isSidebarOpen }
+                                onSidebarToggle = onSidebarToggle
                             )
                         }
                     }

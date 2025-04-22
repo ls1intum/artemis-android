@@ -38,6 +38,7 @@ fun SinglePageExerciseBody(
 
     var config: ExerciseConfiguration by remember { mutableStateOf(NothingOpened) }
     var isSidebarOpen by remember { mutableStateOf(true) }
+    val onSidebarToggle: () -> Unit = { isSidebarOpen = !isSidebarOpen }
 
     val openExercise: (Long) -> Unit = { id ->
         if (isTabletPortrait) isSidebarOpen = false
@@ -55,11 +56,12 @@ fun SinglePageExerciseBody(
             )
         }
 
+
         ArtemisAppLayout.Tablet -> {
             LayoutAwareTwoColumnLayout(
                 modifier = modifier,
                 isSidebarOpen = isSidebarOpen,
-                onSidebarToggle = { isSidebarOpen = !isSidebarOpen },
+                onSidebarToggle = onSidebarToggle,
                 optionalColumn = { sideMod ->
                     ExerciseOverviewBody(
                         modifier = sideMod,
@@ -72,16 +74,16 @@ fun SinglePageExerciseBody(
                 priorityColumn = { contentMod ->
                     when (val conf = config) {
                         NothingOpened -> {
+                            IconButton(onClick = onSidebarToggle) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.MenuOpen,
+                                    contentDescription = "Open sidebar"
+                                )
+                            }
                             Box(
                                 modifier = contentMod.fillMaxSize(),
                                 contentAlignment = Alignment.Center
                             ) {
-                                IconButton(onClick = { isSidebarOpen = true }) {
-                                    Icon(
-                                        Icons.AutoMirrored.Filled.MenuOpen,
-                                        contentDescription = null
-                                    )
-                                }
                                 Text(stringResource(id = R.string.exercise_list_exercise_item_not_selected))
                             }
                         }
@@ -95,7 +97,7 @@ fun SinglePageExerciseBody(
                                     config = NothingOpened
                                 },
                                 actions = actions,
-                                onSidebarToggle = { isSidebarOpen = !isSidebarOpen }
+                                onSidebarToggle = onSidebarToggle
                             )
                         }
                     }
