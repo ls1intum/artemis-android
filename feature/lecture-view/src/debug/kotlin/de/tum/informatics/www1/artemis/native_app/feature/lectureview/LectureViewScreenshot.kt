@@ -29,13 +29,8 @@ fun `Lecture - Overview`() {
             ),
             lectureUnits = ScreenshotData.lecture.lectureUnits,
             onViewExercise = {},
-            onNavigateToTextExerciseParticipation = { _, _ -> },
-            onParticipateInQuiz = { _, _ -> },
-            onNavigateToExerciseResultView = {},
-            onClickViewQuizResults = { _, _ -> },
             onReloadLecture = {},
             onUpdateLectureUnitIsComplete = { _, _ -> CompletableDeferred(true) },
-            onStartExercise = { _, _ -> },
             onSidebarToggle = {}
         )
     }

@@ -335,10 +335,6 @@ internal fun CourseUiScreen(
                             lectureSearchConfiguration.query else "",
                         collapsingContentState = collapsingContentState,
                         onViewExercise = onNavigateToExercise,
-                        onNavigateToExerciseResultView = onNavigateToExerciseResultView,
-                        onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
-                        onParticipateInQuiz = onParticipateInQuiz,
-                        onClickViewQuizResults = onClickViewQuizResults,
                         onNavigateToLectureScreen = { id -> onNavigateToLecture(id ?: 0L) }
                     )
                 }

@@ -80,7 +80,6 @@ internal fun LectureOverviewTab(
     onMarkAsCompleted: (lectureUnitId: Long, isCompleted: Boolean) -> Unit,
     onRequestViewLink: (String) -> Unit,
     onRequestOpenAttachment: (Attachment) -> Unit,
-    exerciseActions: BoundExerciseActions,
     state: LazyListState
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
@@ -134,7 +133,6 @@ internal fun LectureOverviewTab(
                 modifier = Modifier.fillMaxWidth(),
                 lectureUnits = lectureUnits,
                 onViewExercise = onViewExercise,
-                exerciseActions = exerciseActions,
                 onMarkAsCompleted = onMarkAsCompleted,
                 onRequestOpenAttachment = onRequestOpenAttachment,
                 onHeaderClick = { lectureUnit ->
@@ -291,7 +289,6 @@ private fun LazyListScope.lectureUnitSection(
     modifier: Modifier,
     lectureUnits: List<LectureUnitData>,
     onViewExercise: (exerciseId: Long) -> Unit,
-    exerciseActions: BoundExerciseActions,
     onRequestOpenAttachment: (Attachment) -> Unit,
     onMarkAsCompleted: (lectureUnitId: Long, isCompleted: Boolean) -> Unit,
     onHeaderClick: (LectureUnit) -> Unit

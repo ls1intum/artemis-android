@@ -39,6 +39,7 @@ internal fun ExerciseScreenTopAppBar(
     modifier: Modifier,
     exerciseDataState: DataState<Exercise>,
     onSidebarToggle: () -> Unit = {},
+    showSideBarIcon: Boolean
 ) {
     val layout = getArtemisAppLayout()
 
@@ -53,7 +54,7 @@ internal fun ExerciseScreenTopAppBar(
                 )
             },
             navigationIcon = {
-                if (layout == ArtemisAppLayout.Tablet) {
+                if (layout == ArtemisAppLayout.Tablet && showSideBarIcon) {
                     IconButton(onClick = onSidebarToggle) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.MenuOpen,

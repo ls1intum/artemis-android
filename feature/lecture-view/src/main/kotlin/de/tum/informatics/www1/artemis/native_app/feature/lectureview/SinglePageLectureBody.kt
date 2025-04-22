@@ -30,10 +30,6 @@ fun SinglePageLectureBody(
     query: String,
     collapsingContentState: CollapsingContentState,
     onViewExercise: (Long) -> Unit,
-    onNavigateToExerciseResultView: (Long) -> Unit,
-    onNavigateToTextExerciseParticipation: (Long, Long) -> Unit,
-    onParticipateInQuiz: (Long, Boolean) -> Unit,
-    onClickViewQuizResults: (Long, Long) -> Unit,
     onNavigateToLectureScreen: (Long) -> Unit,
 ) {
     val layout = getArtemisAppLayout()
@@ -97,10 +93,6 @@ fun SinglePageLectureBody(
                             LectureDetailContent(
                                 lectureId = conf.lectureId,
                                 onViewExercise = onViewExercise,
-                                onNavigateToExerciseResultView = onNavigateToExerciseResultView,
-                                onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
-                                onParticipateInQuiz = onParticipateInQuiz,
-                                onClickViewQuizResults = onClickViewQuizResults,
                                 onSidebarToggle = onSidebarToggle
                             )
                         }
