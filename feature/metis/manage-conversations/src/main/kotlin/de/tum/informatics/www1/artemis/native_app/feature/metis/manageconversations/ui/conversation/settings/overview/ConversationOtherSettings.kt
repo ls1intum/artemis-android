@@ -1,10 +1,19 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.overview
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.Archive
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Numbers
+import androidx.compose.material.icons.filled.Unarchive
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -18,9 +27,11 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.MarkdownTextAlertDialog
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisSection
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 
 @Composable
 internal fun ConversationOtherSettings(
@@ -35,42 +46,54 @@ internal fun ConversationOtherSettings(
     var displayDeleteChannelDialog by remember { mutableStateOf(false) }
     var displayChannelPrivacyDialog by remember { mutableStateOf(false) }
 
-    val buttonModifier = Modifier.fillMaxWidth()
+    val buttonModifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 16.dp)
 
-    Column(
+    val isChannel = conversation is ChannelChat
+    val isCreator = (conversation as? ChannelChat)?.isCreator == true
+    val hasChannelModerationRights = (conversation as? ChannelChat)?.hasChannelModerationRights == true
+    val isChannelModerator = (conversation as? ChannelChat)?.isChannelModerator == true
+    val isTutorialGroupChannel = (conversation as? ChannelChat)?.tutorialGroupId != null ||
+            (conversation as? ChannelChat)?.tutorialGroupTitle != null
+    val canDeleteChannels = isChannel && !isTutorialGroupChannel && hasChannelModerationRights && isChannelModerator && isCreator
+    val hasButtons = conversation !is ChannelChat || canDeleteChannels || hasChannelModerationRights
+
+    if (!hasButtons || conversation is OneToOneChat) {
+        return
+    }
+
+    ArtemisSection(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        title = stringResource(id = R.string.conversation_settings_section_other)
     ) {
-        Text(
-            text = stringResource(id = R.string.conversation_settings_section_other),
-            style = ConversationSettingsSectionTextStyle
-        )
-
-        if (conversation !is ChannelChat || !conversation.isCreator) {
+        if (!isChannel) {
             OutlinedButton(
                 modifier = buttonModifier,
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                 onClick = onLeaveConversation
             ) {
+                Icon(imageVector = Icons.AutoMirrored.Filled.Logout, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(text = stringResource(id = R.string.conversation_settings_section_other_leave_conversation))
             }
         }
 
         if (conversation is ChannelChat) {
-            val isCreator = conversation.isCreator
-            val hasChannelModerationRights = conversation.hasChannelModerationRights
-            val isChannelModerator = conversation.isChannelModerator
-            val isTutorialGroupChannel = conversation.tutorialGroupId != null || conversation.tutorialGroupTitle != null
-
-            val canDeleteChannels = !isTutorialGroupChannel && hasChannelModerationRights && isChannelModerator && isCreator
-
             // Archive/Unarchive, Delete and Toggle Channel Privacy Buttons
-            if (hasChannelModerationRights) {
+            if (conversation.hasChannelModerationRights) {
                 OutlinedButton(
                     modifier = buttonModifier,
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                     onClick = { displayChannelPrivacyDialog = true }
                 ) {
+                    Icon(
+                        imageVector = if (conversation.isPublic) Icons.Default.Lock else Icons.Default.Numbers,
+                        contentDescription = null
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
                     Text(
                         text = stringResource(
                             id = if (conversation.isPublic) {
@@ -87,6 +110,13 @@ internal fun ConversationOtherSettings(
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                     onClick = { displayArchiveChannelDialog = true }
                 ) {
+                    Icon(
+                        imageVector = if (conversation.isArchived) Icons.Default.Unarchive else Icons.Default.Archive,
+                        contentDescription = null
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
                     Text(
                         text = stringResource(
                             id = if (conversation.isArchived) {
@@ -108,6 +138,10 @@ internal fun ConversationOtherSettings(
                     ),
                     border = BorderStroke(1.dp, SolidColor(MaterialTheme.colorScheme.error))
                 ) {
+                    Icon(imageVector = Icons.Filled.Delete, contentDescription = null)
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
                     Text(
                         text = stringResource(R.string.conversation_settings_section_delete_channel)
                     )
