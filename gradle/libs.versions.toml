@@ -79,7 +79,7 @@ coil-test = { group = "io.coil-kt.coil3", name = "coil-test", version.ref = "coi
 coil-network = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 coil2-base = { group = "io.coil-kt", name = "coil-base", version.ref = "coil2" }
 edge2edge-preview = { group = "de.drick.compose", name = "edge-to-edge-preview", version = "0.6.0" }
-google-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version = "33.12.0" }
+google-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version = "33.13.0" }
 google-firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
