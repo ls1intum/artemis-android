@@ -63,8 +63,8 @@ fun SavedPostsScreen(
     onNavigateToPost: (ISavedPost) -> Unit
 ) {
     val viewModel = koinViewModel<SavedPostsViewModel>(
-        key = "$courseId|$savedPostStatus"
-    ) { parametersOf(courseId, savedPostStatus) }
+        key = "$courseId"
+    ) { parametersOf(courseId) }
 
     LaunchedEffect(viewModel) {
         viewModel.onRequestReload()
