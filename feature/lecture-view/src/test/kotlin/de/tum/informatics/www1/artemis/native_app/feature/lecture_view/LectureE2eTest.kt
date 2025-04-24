@@ -49,6 +49,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.test.testLoginMo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.communicationModule
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -147,6 +148,7 @@ class LectureE2eTest : BaseComposeTest() {
     }
 
     @Test(timeout = DefaultTestTimeoutMillis)
+    @Ignore("Lecture attachment creation has been deprecated in https://github.com/ls1intum/Artemis/pull/10708")
     fun `shows attachments`() {
         val attachments = runBlocking {
             (0 until 3).map {
