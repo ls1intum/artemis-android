@@ -27,8 +27,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -110,12 +110,7 @@ internal fun SavedPostsScreen(
     onChangeStatus: (ISavedPost, SavedPostStatus) -> Deferred<MetisModificationFailure?>,
     onRemoveFromSavedPosts: (ISavedPost) -> Deferred<MetisModificationFailure?>
 ) {
-    val statuses = SavedPostStatus.entries
-    val initialIndex = SavedPostStatus.IN_PROGRESS.ordinal
-
-    var selectedIndex by rememberSaveable { mutableIntStateOf(initialIndex) }
-    val currentStatus = statuses[selectedIndex]
-    val filterChipColorAlpha = 0.8f
+    var status by remember { mutableStateOf(SavedPostStatus.IN_PROGRESS) }
 
     Scaffold(
         modifier = modifier,
@@ -130,58 +125,18 @@ internal fun SavedPostsScreen(
             modifier = modifier
                 .padding(top = paddingValues.calculateTopPadding())
                 .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top))
-                .padding(horizontal = Spacings.ScreenHorizontalSpacing)
+                .padding(top = Spacings.ScreenTopBarSpacing)
         ) {
-            Row(
-                modifier = Modifier
-                    .horizontalScroll(rememberScrollState())
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                statuses.forEachIndexed { index, status ->
-                    val isSelected = (index == selectedIndex)
-                    FilterChip(
-                        selected = isSelected,
-                        onClick = {
-                            selectedIndex = index
-                        },
-                        label = {
-                            Text(
-                                text = status.getUiText(),
-                                color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface
-                            )
-                        },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = status.getIcon(),
-                                tint = if (isSelected) Color.White else MaterialTheme.colorScheme.primary,
-                                contentDescription = null
-                            )
-                        },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = status.getTintColor().copy(alpha = filterChipColorAlpha)
-                        ),
-                        border = FilterChipDefaults.filterChipBorder(
-                            borderColor = MaterialTheme.colorScheme.outlineVariant,
-                            selectedBorderColor = MaterialTheme.colorScheme.primary,
-                            enabled = true,
-                            selected = isSelected,
-                        )
-                    )
-                }
-            }
-
-            if (currentStatus == SavedPostStatus.ARCHIVED || currentStatus == SavedPostStatus.COMPLETED) {
-                InfoMessageCard(
-                    modifier = Modifier
-                        .padding(top = Spacings.ScreenTopBarSpacing)
-                        .padding(bottom = 8.dp),
-                    infoText = stringResource(R.string.saved_posts_removal_notice)
-                )
-            }
+            StatusSelectionRow(
+                selectedStatus = status,
+                onStatusSelected = { status = it }
+            )
 
             BasicDataStateUi(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = Spacings.ScreenHorizontalSpacing)
+                ,
                 dataState = savedPostsDataState,
                 loadingText = stringResource(R.string.saved_posts_loading_posts_loading),
                 failureText = stringResource(R.string.saved_posts_loading_posts_failed),
@@ -189,18 +144,65 @@ internal fun SavedPostsScreen(
                 onClickRetry = onRequestReload,
                 enablePullToRefresh = false
             ) { savedPosts ->
-
                 ProvideMarkwon {
                     SavedPostsList(
                         modifier = Modifier.fillMaxSize(),
-                        status = currentStatus,
-                        savedPosts = savedPosts.filter { it.savedPostStatus == currentStatus },
+                        status = status,
+                        savedPosts = savedPosts.filter { it.savedPostStatus == status },
                         onNavigateToPost = onNavigateToPost,
                         onChangeStatus = onChangeStatus,
                         onRemoveFromSavedPosts = onRemoveFromSavedPosts
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun StatusSelectionRow(
+    selectedStatus: SavedPostStatus,
+    onStatusSelected: (SavedPostStatus) -> Unit,
+) {
+    val filterChipColorAlpha = 0.8f
+
+    Row(
+        modifier = Modifier
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = Spacings.ScreenHorizontalSpacing),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        SavedPostStatus.entries.forEach { status ->
+            val isSelected = status == selectedStatus
+            FilterChip(
+                selected = isSelected,
+                onClick = {
+                    onStatusSelected(status)
+                },
+                label = {
+                    Text(
+                        text = status.getUiText(),
+                        color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = status.getIcon(),
+                        tint = if (isSelected) Color.White else MaterialTheme.colorScheme.primary,
+                        contentDescription = null
+                    )
+                },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = status.getTintColor()
+                        .copy(alpha = filterChipColorAlpha)
+                ),
+                border = FilterChipDefaults.filterChipBorder(
+                    borderColor = MaterialTheme.colorScheme.outlineVariant,
+                    selectedBorderColor = MaterialTheme.colorScheme.primary,
+                    enabled = true,
+                    selected = isSelected,
+                )
+            )
         }
     }
 }
@@ -215,27 +217,44 @@ private fun SavedPostsList(
     onChangeStatus: (ISavedPost, SavedPostStatus) -> Deferred<MetisModificationFailure?>,
     onRemoveFromSavedPosts: (ISavedPost) -> Deferred<MetisModificationFailure?>
 ) {
+    val removalNotice = @Composable {
+        if (status == SavedPostStatus.ARCHIVED || status == SavedPostStatus.COMPLETED) {
+            InfoMessageCard(
+                modifier = Modifier.padding(vertical = 8.dp),
+                infoText = stringResource(R.string.saved_posts_removal_notice)
+            )
+        }
+    }
+
     AnimatedContent(
         targetState = savedPosts.isEmpty(),
         label = "Animated saved posts list: empty <-> not empty"
     ) { isEmpty ->
         if (isEmpty) {
-            EmptyListHint(
+            Column(
                 modifier = modifier,
-                hint = stringResource(
-                    id = R.string.saved_posts_empty_state_title,
-                    status.getUiText()
-                ),
-                imageVector = status.getIcon()
-            )
+            ) {
+                removalNotice()
+
+                EmptyListHint(
+                    modifier = Modifier.fillMaxSize(),
+                    hint = stringResource(
+                        id = R.string.saved_posts_empty_state_title,
+                        status.getUiText()
+                    ),
+                    imageVector = status.getIcon()
+                )
+            }
             return@AnimatedContent
         }
 
         LazyColumn(
             modifier = modifier,
             verticalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = Spacings.calculateContentPaddingValues()
+            contentPadding = Spacings.calculateEndOfPagePaddingValues()
         ) {
+            item { removalNotice() }
+
             items(
                 items = savedPosts,
                 key = { it.key }
