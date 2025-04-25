@@ -1,7 +1,9 @@
 package de.tum.informatics.www1.artemis.native_app.feature.faq.ui.overview
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,6 +22,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -231,41 +235,63 @@ private fun FaqPreviewItem(
 ) {
     Card(
         modifier = modifier
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick)
     ) {
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-        ) {
-            Text(
-                text = faq.questionTitle,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            FaqCategoryChipFlowRow(categories = faq.categories)
-
-            MarkdownText(
-                modifier = Modifier.padding(vertical = 8.dp),
-                markdown = faq.questionAnswer,
-                style = MaterialTheme.typography.bodyLarge,
-                maxLines = 8,
-                onClick = onClick
-            )
-
-            TextButton(
-                modifier = Modifier.align(Alignment.End),
-                onClick = onClick,
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
             ) {
-                Text(stringResource(R.string.faq_overview_read_more))
+                Text(
+                    text = faq.questionTitle,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                
+                FaqCategoryChipFlowRow(categories = faq.categories)
+                
+                MarkdownText(
+                    modifier = Modifier.padding(vertical = 8.dp).padding(bottom = 0.dp),
+                    markdown = faq.questionAnswer + "\n\n\n.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    maxLines = 8,
+                    onClick = onClick
+                )
+            }
+            
+            // Overlay fading background with read more button, inspired by the iOS app
+            val color = MaterialTheme.colorScheme.surfaceContainer
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                color.copy(alpha = 0.8f),
+                                color,
+                                color,
+                            )
+                        )
+                    )
+            ) {
+                TextButton(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .padding(16.dp)
+                        .padding(top = 8.dp),
+                    onClick = onClick
+                ) {
+                    Text(stringResource(R.string.faq_overview_read_more))
+                }
             }
         }
     }
 }
-
 
 @Preview(showBackground = true, widthDp = 380, heightDp = 700)
 @Composable
@@ -295,6 +321,3 @@ private fun FaqListPreview() {
         )
     }
 }
-
-
-
