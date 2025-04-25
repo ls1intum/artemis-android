@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
@@ -71,7 +72,19 @@ internal fun ExerciseOverviewTab(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Spacings.ScreenHorizontalSpacing),
+            text = stringResource(id = R.string.exercise_view_overview_problem_statement),
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.Medium
+            )
+        )
+
         if (exercise !is QuizExercise && webViewState != null) {
+            Spacer(modifier = Modifier.height(8.dp))
+
             ArtemisWebView(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -86,7 +99,9 @@ internal fun ExerciseOverviewTab(
                 text = stringResource(id = R.string.exercise_view_overview_problem_statement_not_available),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(horizontal = Spacings.ScreenHorizontalSpacing),
+                color = MaterialTheme.colorScheme.secondary,
+                style = MaterialTheme.typography.bodyMedium
             )
         }
     }

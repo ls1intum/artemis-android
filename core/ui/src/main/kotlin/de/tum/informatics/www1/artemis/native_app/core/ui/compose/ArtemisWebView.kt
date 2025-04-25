@@ -137,6 +137,18 @@ private class ThemeClient(
             if (adjustHeightForContent) {
                 val delay = 750L
 
+                view.evaluateJavascript(
+                    """
+                        (function applyBackgroundColorToAllDivs(color) {
+                            const allDivs = document.querySelectorAll('div');
+                            allDivs.forEach(el => {
+                                el.style.backgroundColor = color;
+                            });
+                        })('transparent');
+                    """.trimIndent(),
+                    null
+                )
+
                 view.postDelayed({
                     view.evaluateJavascript(
                         """
