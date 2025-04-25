@@ -101,7 +101,6 @@ class SavedPostsScreenUiTest : BaseComposeTest() {
     }
 
     private fun setupUi(
-        forStatus: SavedPostStatus = SavedPostStatus.IN_PROGRESS,
         savedPost: ISavedPost = createSavedPost(),
         onChangeStatus: (ISavedPost, SavedPostStatus) -> Deferred<MetisModificationFailure?> = { _, _ -> CompletableDeferred() },
         onRemoveFromSavedPosts: (ISavedPost) -> Deferred<MetisModificationFailure?> = { CompletableDeferred() }
@@ -109,7 +108,6 @@ class SavedPostsScreenUiTest : BaseComposeTest() {
         composeTestRule.setContent {
             SavedPostsScreen(
                 modifier = Modifier,
-                status = forStatus,
                 savedPostsDataState = DataState.Success(listOf(savedPost)),
                 onRequestReload = {},
                 onNavigateToPost = { _ -> },
