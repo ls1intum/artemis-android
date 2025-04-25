@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl
+package de.tum.informatics.www1.artemis.native_app.core.data.service.passkey
 
 import android.content.Context
 import android.util.Log
@@ -22,9 +22,9 @@ import androidx.credentials.exceptions.publickeycredential.CreatePublicKeyCreden
 
 // From: https://developer.android.com/identity/sign-in/credential-manager#kotlin
 
-private const val TAG = "PasskeyService"
+private const val TAG = "CredentialManager"
 
-class PasskeyService(
+class CredentialManager(
     private val context: Context,
 ) {
 
@@ -120,7 +120,7 @@ class PasskeyService(
         }
     }
 
-    fun handleSignIn(result: GetCredentialResponse) {
+    private fun handleSignIn(result: GetCredentialResponse) {
         // Handle the successfully returned credential.
         val credential = result.credential
 
@@ -137,7 +137,7 @@ class PasskeyService(
                 // and authenticate
             } else -> {
                 // Catch any unrecognized credential type here.
-                Log.e(TAG, "Unexpected type of credential")
+            Log.e(TAG, "Unexpected type of credential")
             }
         }
     }
