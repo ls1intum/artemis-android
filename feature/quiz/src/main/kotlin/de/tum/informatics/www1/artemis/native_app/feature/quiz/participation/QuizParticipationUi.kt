@@ -98,7 +98,7 @@ internal fun QuizParticipationUi(
         loadingText = stringResource(id = R.string.quiz_participation_loading),
         failureText = stringResource(id = R.string.quiz_participation_failure),
         retryButtonText = stringResource(id = R.string.quiz_participation_retry),
-        onClickRetry = viewModel::retryLoadExercise
+        onClickRetry = viewModel::onRequestReload
     ) { quizExercise ->
         if (isWaitingForQuizStart) {
             WaitForQuizStartScreen(
@@ -109,7 +109,7 @@ internal fun QuizParticipationUi(
                 clock = serverClock,
                 isStartingOrJoiningQuiz = startBatchDeferred != null || joinBatchDeferred != null,
                 onRequestRefresh = {
-                    viewModel.retryLoadExercise()
+                    viewModel.onRequestReload()
                     viewModel.reconnectWebsocket()
                 },
                 onClickStartQuiz = {

@@ -44,19 +44,17 @@ import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.Configur
 import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.FaqCategoryChipConfig
 import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.FaqCategoryChipFlowRow
 import org.koin.androidx.compose.koinViewModel
-import org.koin.core.parameter.parametersOf
 
 internal fun testTagForFaq(faq: Faq) = "TEST_TAG_FAQ_${faq.id}"
 
 @Composable
 fun FaqOverviewUi(
     modifier: Modifier = Modifier,
-    courseId: Long,
     collapsingContentState: CollapsingContentState,
     scaffold: @Composable (searchConfiguration: CourseSearchConfiguration, content: @Composable () -> Unit) -> Unit,
     onNavigateToFaq: (faqId: Long) -> Unit
 ) {
-    val viewModel = koinViewModel<FaqOverviewViewModel> { parametersOf(courseId) }
+    val viewModel = koinViewModel<FaqOverviewViewModel>()
     val query by viewModel.searchQuery.collectAsState()
 
     val searchConfiguration = CourseSearchConfiguration.Search(
@@ -103,7 +101,7 @@ fun FaqOverviewUi(
         filterChips = filterChips,
         query = query,
         collapsingContentState = collapsingContentState,
-        onReloadRequest = viewModel::requestReload,
+        onReloadRequest = viewModel::onRequestReload,
         onNavigateToFaq = onNavigateToFaq
     )
 }

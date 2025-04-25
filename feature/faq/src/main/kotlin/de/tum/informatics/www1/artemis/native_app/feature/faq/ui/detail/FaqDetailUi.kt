@@ -48,30 +48,24 @@ import org.koin.core.parameter.parametersOf
 
 @Serializable
 data class FaqDetailUi(
-    val courseId: Long,
     val faqId: Long,
 )
 
 fun NavController.navigateToFaqDetail(
-    courseId: Long,
     faqId: Long,
     builder: NavOptionsBuilder.() -> Unit
 ) {
-    navigate(FaqDetailUi(courseId, faqId), builder)
+    navigate(FaqDetailUi(faqId), builder)
 }
 
-fun NavGraphBuilder.faqDetail(
-    onNavigateBack: () -> Unit,
-) {
+fun NavGraphBuilder.faqDetail() {
     animatedComposable<FaqDetailUi>(
         deepLinks = FaqDeeplinks.ToFaq.generateLinks(),
     ) { backStackEntry ->
         val route: FaqDetailUi = backStackEntry.toRoute()
-
-        val courseId = route.courseId
         val faqId = route.faqId
 
-        val viewModel = koinViewModel<FaqDetailViewModel> { parametersOf(courseId, faqId) }
+        val viewModel = koinViewModel<FaqDetailViewModel> { parametersOf(faqId) }
         val faq by viewModel.faq.collectAsState()
 
         val serverUrl by viewModel.serverUrl.collectAsState()
@@ -81,8 +75,7 @@ fun NavGraphBuilder.faqDetail(
             FaqDetailUi(
                 modifier = Modifier.fillMaxSize(),
                 faqDataState = faq,
-                onReloadRequest = viewModel::requestReload,
-                onNavigateBack = onNavigateBack
+                onReloadRequest = viewModel::onRequestReload
             )
         }
     }
@@ -92,15 +85,16 @@ fun NavGraphBuilder.faqDetail(
 fun FaqDetailUi(
     modifier: Modifier = Modifier,
     faqDataState: DataState<Faq>,
-    onReloadRequest: () -> Unit,
-    onNavigateBack: () -> Unit
+    onReloadRequest: () -> Unit
 ) {
     Scaffold(
         modifier = modifier,
         topBar = {
             ArtemisTopAppBar(
-                title = {},
-                navigationIcon = { NavigationBackButton(onNavigateBack) }
+                title = {
+                    Text(stringResource(R.string.faq_details_title))
+                },
+                navigationIcon = { NavigationBackButton() }
             )
         }
     ) { paddingValues ->

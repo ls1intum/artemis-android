@@ -35,6 +35,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextPro
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.collectArtemisContextAsState
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.AnimatedDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisSection
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.pagePadding
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
@@ -54,7 +55,6 @@ import org.koin.compose.koinInject
 internal fun SettingsScreen(
     modifier: Modifier,
     viewModel: SettingsViewModel = koinInject(),
-    onNavigateUp: () -> Unit,
     onDisplayThirdPartyLicenses: () -> Unit,
     onRequestOpenAccountSettings: () -> Unit,
     onRequestOpenNotificationSettings: () -> Unit
@@ -72,7 +72,6 @@ internal fun SettingsScreen(
         serverUrl = artemisContext.serverUrl,
         appVersion = viewModel.appVersion,
         linkOpener = linkOpener,
-        onNavigateUp = onNavigateUp,
         onRequestLogout = viewModel::onRequestLogout,
         onRequestOpenAccountSettings = onRequestOpenAccountSettings,
         onRequestOpenNotificationSettings = onRequestOpenNotificationSettings,
@@ -88,7 +87,6 @@ fun SettingsScreen(
     serverUrl: String,
     appVersion: AppVersion,
     linkOpener: LinkOpener,
-    onNavigateUp: () -> Unit,
     onRequestLogout: () -> Unit,
     onRequestOpenAccountSettings: () -> Unit,
     onRequestOpenNotificationSettings: () -> Unit,
@@ -101,7 +99,7 @@ fun SettingsScreen(
                 title = {
                     Text(text = stringResource(id = R.string.settings_screen_title))
                 },
-                navigationIcon = { NavigationBackButton(onNavigateUp) }
+                navigationIcon = { NavigationBackButton() }
             )
         }
     ) { padding ->
@@ -159,7 +157,7 @@ private fun UserInformationSection(
     onRequestLogout: () -> Unit,
     onNavigateToAccountSettings: () -> Unit
 ) {
-    PreferenceSection(
+    ArtemisSection(
         modifier = modifier,
         title = stringResource(id = R.string.settings_account_information_section)
     ) {
@@ -203,7 +201,7 @@ private fun UserInformationSection(
 
 @Composable
 private fun NotificationSection(modifier: Modifier, onOpenNotificationSettings: () -> Unit) {
-    PreferenceSection(
+    ArtemisSection (
         modifier = modifier,
         title = stringResource(id = R.string.settings_notification_section)
     ) {
@@ -223,19 +221,12 @@ private fun AboutSection(
     onOpenImprint: () -> Unit,
     onOpenThirdPartyLicenses: () -> Unit
 ) {
-    PreferenceSection(
+    ArtemisSection(
         modifier = modifier,
-        title = stringResource(id = R.string.settings_about_section)
+        title = stringResource(id = R.string.settings_about_section),
+        description = if (!BuildConfig.hasInstanceRestriction) stringResource(id = R.string.settings_server_specifics_information) else null
     ) {
         val linkOpener = LocalLinkOpener.current
-
-        if (!BuildConfig.hasInstanceRestriction) {
-            Text(
-                modifier = Modifier.padding(bottom = 8.dp),
-                text = stringResource(id = R.string.settings_server_specifics_information),
-                style = MaterialTheme.typography.labelMedium
-            )
-        }
 
         if (serverUrl.isNotEmpty()) {
             ServerURLEntry(
@@ -282,7 +273,7 @@ private fun BuildInformationSection(
     versionCode: Int,
     versionName: String,
 ) {
-    PreferenceSection(
+    ArtemisSection(
         modifier = modifier,
         title = stringResource(id = R.string.settings_build_section)
     ) {

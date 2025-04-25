@@ -27,13 +27,6 @@ interface ConversationService {
         serverUrl: String
     ): NetworkResponse<List<CourseUser>>
 
-    suspend fun searchForCourseMembers(
-        courseId: Long,
-        query: String,
-        authToken: String,
-        serverUrl: String
-    ): NetworkResponse<List<ConversationUser>>
-
     suspend fun createOneToOneConversation(
         courseId: Long,
         partnerUserIdentifier: UserIdentifier,
@@ -185,6 +178,13 @@ interface ConversationService {
     ): NetworkResponse<Boolean>
 
     suspend fun deleteChannel(
+        courseId: Long,
+        conversationId: Long,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<Boolean>
+
+    suspend fun toggleChannelPrivacy(
         courseId: Long,
         conversationId: Long,
         authToken: String,

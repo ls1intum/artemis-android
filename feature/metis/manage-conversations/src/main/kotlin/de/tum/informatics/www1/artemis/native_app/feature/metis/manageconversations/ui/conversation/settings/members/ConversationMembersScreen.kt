@@ -62,6 +62,7 @@ fun ConversationMembersScreen(
                 .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top))
                 .padding(horizontal = Spacings.ScreenHorizontalSpacing),
             courseId = courseId,
+            query = query,
             collapsingContentState = collapsingContentState,
             conversationId = conversationId
         )

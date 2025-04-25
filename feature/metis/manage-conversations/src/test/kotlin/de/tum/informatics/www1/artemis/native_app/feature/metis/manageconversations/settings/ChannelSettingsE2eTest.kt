@@ -12,8 +12,6 @@ import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTi
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
-import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
-import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -25,38 +23,6 @@ import kotlin.test.assertEquals
 @Category(EndToEndTest::class)
 @RunWith(RobolectricTestRunner::class)
 internal class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
-
-
-    /**
-     * Tests if we can leave a channel not created by ourselfes
-     */
-    @Test(timeout = DefaultTestTimeoutMillis)
-    fun `can leave channel`() {
-        val channel = runBlockingWithTestTimeout {
-            conversationService.createChannel(
-                courseId = course.id!!,
-                name = "clcchannel",
-                description = "",
-                isPublic = true,
-                isAnnouncement = true,
-                isCourseWide = false,
-                authToken = getAdminAccessToken(),
-                serverUrl = testServerUrl
-            )
-                .orThrow("Could not create channel")
-                .apply {
-                    conversationService.registerMembers(
-                        courseId = course.id!!,
-                        conversation = this,
-                        users = listOf(user1Username),
-                        authToken = accessToken,
-                        serverUrl = testServerUrl
-                    )
-                }
-        }
-
-        canLeaveConversationTestImpl(channel)
-    }
 
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can archive channel`() {
@@ -210,5 +176,26 @@ internal class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
         deleteChannelTestImpl()
 
         composeTestRule.waitUntil(DefaultTimeoutMillis) { channelDeleted }
+    }
+
+    @Test(timeout = DefaultTestTimeoutMillis)
+    fun `can toggle channel privacy`() {
+        val channel = runBlockingWithTestTimeout {
+            conversationService.createChannel(
+                courseId = course.id!!,
+                name = "toggleprivacychannel",
+                description = "privacy test",
+                isPublic = true,
+                isAnnouncement = false,
+                isCourseWide = false,
+                authToken = accessToken,
+                serverUrl = testServerUrl
+            ).orThrow("Could not create channel")
+        }
+
+        setupUiAndViewModel(channel)
+
+        toggleChannelPrivacyTestImpl(channel)
+
     }
 }

@@ -1,17 +1,17 @@
 package de.tum.informatics.www1.artemis.native_app.feature.exerciseview
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
+import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.performAutoReloadingNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseExerciseService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ExerciseService
-import de.tum.informatics.www1.artemis.native_app.core.data.service.performAutoReloadingNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
+import de.tum.informatics.www1.artemis.native_app.core.ui.ReloadableViewModel
 import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.network.ChannelService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
@@ -42,14 +42,12 @@ internal class ExerciseViewModel(
     private val channelService: ChannelService,
     private val networkStatusProvider: NetworkStatusProvider,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
-) : ViewModel() {
-
-    private val requestReloadExercise = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+) : ReloadableViewModel() {
 
     private val fetchedExercise: Flow<DataState<Exercise>> = exerciseService
         .performAutoReloadingNetworkCall(
             networkStatusProvider = networkStatusProvider,
-            manualReloadFlow = requestReloadExercise
+            manualReloadFlow = requestReload
         ) {
             getExerciseDetails(exerciseId)
         }
@@ -115,20 +113,14 @@ internal class ExerciseViewModel(
         .flatMapLatest { exerciseState ->
             when (exerciseState) {
                 is DataState.Success -> {
-                    val courseId = exerciseState.data.course?.id.let { it ?: 0L }
                     channelService.performAutoReloadingNetworkCall(networkStatusProvider) {
-                        getExerciseChannel(exerciseId, courseId)
+                        getExerciseChannel(exerciseId)
                     }
                 }
                 else -> flowOf(DataState.Loading())
             }
         }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
-
-
-    fun requestReloadExercise() {
-        requestReloadExercise.tryEmit(Unit)
-    }
 
     /**
      * Deferred returns the participation id if starting was successful.

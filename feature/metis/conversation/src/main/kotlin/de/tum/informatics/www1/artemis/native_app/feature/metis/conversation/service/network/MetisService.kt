@@ -79,7 +79,7 @@ interface MetisService {
      */
     data class StandalonePostsContext(
         val metisContext: MetisContext,
-        val filter: List<MetisFilter>,
+        val filter: MetisFilter,
         val query: String?,
         val sortingStrategy: MetisSortingStrategy = MetisSortingStrategy.DATE_DESCENDING,
         val courseWideContext: CourseWideContext? = null

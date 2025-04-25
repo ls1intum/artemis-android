@@ -19,6 +19,7 @@ import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.overview.ConversationSettingsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.overview.ConversationSettingsViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metistest.ConversationBaseTest
@@ -182,6 +183,60 @@ internal abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest()
             )
             .assertExists()
             .performClick()
+    }
+
+    protected fun toggleChannelPrivacyTestImpl(conversation: Conversation) {
+        val isPublic = (conversation as ChannelChat).isPublic
+        val toggleButtonText = context.getString(
+            if (isPublic)
+                R.string.conversation_settings_section_channel_toggle_privacy_private
+            else
+                R.string.conversation_settings_section_channel_toggle_privacy_public
+        )
+
+        val expectedTitle = context.getString(
+            if (isPublic)
+                R.string.conversation_settings_section_channel_toggle_privacy_title_private
+            else
+                R.string.conversation_settings_section_channel_toggle_privacy_title_public
+        )
+
+        val expectedButton = context.getString(
+            if (isPublic)
+                R.string.conversation_settings_section_channel_toggle_privacy_private_button
+            else
+                R.string.conversation_settings_section_channel_toggle_privacy_public_button
+        )
+
+        composeTestRule.waitUntilAtLeastOneExists(
+            hasText(toggleButtonText),
+            DefaultTimeoutMillis
+        )
+
+        composeTestRule
+            .onNodeWithText(toggleButtonText)
+            .performScrollTo()
+            .assertIsDisplayed()
+            .performClick()
+
+        composeTestRule
+            .onNode(
+                hasAnyAncestor(isDialog()) and hasText(expectedTitle)
+            )
+            .assertExists()
+
+        composeTestRule
+            .onNode(
+                hasAnyAncestor(isDialog()) and hasText(expectedButton)
+            )
+            .assertExists()
+            .performClick()
+
+        composeTestRule
+            .waitUntilExactlyOneExists(
+                hasText(toggleButtonText),
+                DefaultTimeoutMillis
+            )
     }
 
 }

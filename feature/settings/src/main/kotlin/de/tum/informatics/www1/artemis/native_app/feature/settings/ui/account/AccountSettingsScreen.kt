@@ -38,6 +38,7 @@ import com.attafitamim.krop.core.crop.rememberImageCropper
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisSection
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.pagePadding
@@ -46,19 +47,16 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profil
 import de.tum.informatics.www1.artemis.native_app.feature.settings.R
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.LogoutButtonEntry
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.PreferenceEntry
-import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.PreferenceSection
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.SettingsViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.util.ProfilePictureUploadResult
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.util.getMessage
 import kotlinx.coroutines.Deferred
 import org.koin.compose.koinInject
 
-
 @Composable
 fun AccountSettingsScreen(
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = koinInject(),
-    onNavigateUp: () -> Unit,
 ) {
     val account by viewModel.account.collectAsState()
 
@@ -68,9 +66,7 @@ fun AccountSettingsScreen(
         onDeleteProfilePicture = viewModel::onDeleteProfilePicture,
         onUploadProfilePicture = viewModel::onUploadProfilePicture,
         onLogout = viewModel::onRequestLogout,
-        onRequestReload = viewModel::requestReload,
-        onNavigateUp = onNavigateUp
-    )
+        onRequestReload = viewModel::onRequestReload)
 }
 
 
@@ -81,8 +77,7 @@ internal fun AccountSettingsScreen(
     onDeleteProfilePicture: () -> Unit,
     onUploadProfilePicture: (ImageBitmap) -> Deferred<ProfilePictureUploadResult>,
     onLogout: () -> Unit,
-    onRequestReload: () -> Unit,
-    onNavigateUp: () -> Unit,
+    onRequestReload: () -> Unit
 ) {
     var showChangeActionsBottomSheet by remember { mutableStateOf(false) }
     var uploadJob: Deferred<ProfilePictureUploadResult>? by remember { mutableStateOf(null) }
@@ -118,7 +113,7 @@ internal fun AccountSettingsScreen(
         topBar = {
             TopAppBar(
                 navigationIcon = {
-                    NavigationBackButton(onNavigateUp)
+                    NavigationBackButton()
                 },
                 title = {
                     Text(text = stringResource(id = R.string.account_settings_title))
@@ -259,7 +254,7 @@ private fun DetailsSection(
 ) {
     val childModifier = Modifier.fillMaxWidth()
 
-    PreferenceSection(
+    ArtemisSection(
         modifier = Modifier.fillMaxWidth(),
         title = stringResource(R.string.account_settings_section),
     ) {

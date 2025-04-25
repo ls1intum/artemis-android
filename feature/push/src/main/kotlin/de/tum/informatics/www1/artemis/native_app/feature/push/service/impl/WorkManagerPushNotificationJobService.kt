@@ -5,9 +5,9 @@ import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.WorkManager
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.authTokenOrEmptyString
 import de.tum.informatics.www1.artemis.native_app.core.common.defaultInternetWorkRequest
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.guava.await
 
 internal class WorkManagerPushNotificationJobService(
@@ -43,12 +43,12 @@ internal class WorkManagerPushNotificationJobService(
     }
 
     override suspend fun scheduleUnsubscribeFromNotifications(firebaseToken: String) {
-        val artemisContext = artemisContextProvider.flow.first()
+        val artemisContext = artemisContextProvider.stateFlow.value
         val request = defaultInternetWorkRequest<UnsubscribeFromNotificationsWorker>(
             Data
                 .Builder()
                 .putString(UnsubscribeFromNotificationsWorker.SERVER_URL_KEY, artemisContext.serverUrl)
-                .putString(UnsubscribeFromNotificationsWorker.AUTH_TOKEN_KEY, artemisContext.authToken)
+                .putString(UnsubscribeFromNotificationsWorker.AUTH_TOKEN_KEY, artemisContext.authTokenOrEmptyString)
                 .putString(UnsubscribeFromNotificationsWorker.FIREBASE_TOKEN_KEY, firebaseToken)
                 .build()
         )

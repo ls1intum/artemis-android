@@ -6,12 +6,9 @@ import kotlinx.coroutines.flow.Flow
 
 interface FaqRepository {
 
-    fun getFaqs(
-        courseId: Long,
-    ): Flow<DataState<List<Faq>>>
+    fun getFaqs(): Flow<DataState<List<Faq>>>
 
     fun getFaq(
-        courseId: Long,
         faqId: Long,
     ): Flow<DataState<Faq>>
 }

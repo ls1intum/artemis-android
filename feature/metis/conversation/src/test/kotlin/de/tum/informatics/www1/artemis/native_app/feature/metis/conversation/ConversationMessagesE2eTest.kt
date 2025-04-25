@@ -8,6 +8,7 @@ import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.predefinedEmojiIds
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisFilter
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
@@ -47,7 +48,7 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
             val downloadedPosts = metisService.getPosts(
                 MetisService.StandalonePostsContext(
                     metisContext,
-                    emptyList(),
+                    MetisFilter.All,
                     "",
                     MetisSortingStrategy.DATE_ASCENDING,
                     null
@@ -84,7 +85,7 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
                 metisService.getPosts(
                     MetisService.StandalonePostsContext(
                         metisContext,
-                        emptyList(),
+                        MetisFilter.All,
                         null,
                         MetisSortingStrategy.DATE_DESCENDING,
                         null

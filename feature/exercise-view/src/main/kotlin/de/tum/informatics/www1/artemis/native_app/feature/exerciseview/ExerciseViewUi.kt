@@ -74,7 +74,6 @@ fun NavController.navigateToExercise(
 }
 
 fun NavGraphBuilder.exercise(
-    navController: NavController,
     onNavigateBack: () -> Unit,
     onParticipateInQuiz: (courseId: Long, exerciseId: Long, isPractice: Boolean) -> Unit,
     onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit
@@ -103,7 +102,7 @@ fun NavGraphBuilder.exercise(
                 backStackEntry.savedStateHandle.remove<Boolean>(ExerciseViewDestination.REQUIRE_RELOAD_KEY)
 
             if (isReloadRequested == true) {
-                exerciseViewModel.requestReloadExercise()
+                exerciseViewModel.onRequestReload()
             }
         }
 
@@ -129,11 +128,9 @@ fun NavGraphBuilder.exercise(
                 ExerciseScreen(
                     modifier = Modifier.fillMaxSize(),
                     viewModel = exerciseViewModel,
-                    onNavigateBack = nestedNavigateUp,
                     onViewResult = {
                         nestedNavController.navigate(ExerciseViewUiNestedNavigation.Result)
                     },
-                    navController = navController,
                     onViewTextExerciseParticipationScreen = { participationId ->
                         nestedNavController.navigate(
                             ExerciseViewUiNestedNavigation.ParticipateTextExercise(

@@ -47,7 +47,6 @@ fun NavGraphBuilder.settingsNavGraph(
         ) {
             SettingsScreen(
                 modifier = Modifier.fillMaxSize(),
-                onNavigateUp = navController::navigateUp,
                 onDisplayThirdPartyLicenses = onDisplayThirdPartyLicenses,
                 onRequestOpenAccountSettings = {
                     navController.navigate(Settings.AccountDetails)
@@ -67,8 +66,7 @@ fun NavGraphBuilder.settingsNavGraph(
 
         animatedComposable<Settings.AccountDetails> {
             AccountSettingsScreen(
-                modifier = Modifier.fillMaxSize(),
-                onNavigateUp = navController::navigateUp
+                modifier = Modifier.fillMaxSize()
             )
         }
     }

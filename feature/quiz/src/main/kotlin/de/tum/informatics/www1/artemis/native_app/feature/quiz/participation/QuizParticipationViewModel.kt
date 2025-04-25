@@ -123,7 +123,7 @@ internal class QuizParticipationViewModel(
      * Use server time for best time approximation.
      * The server time may change multiple times, as new clocks may be emitted regularly
      */
-    val serverClock: Flow<ClockWithOffset> = serverTimeService.onReloadRequired.flatMapLatest {
+    val serverClock: Flow<ClockWithOffset> = serverTimeService.onArtemisContextChanged.flatMapLatest {
         serverTimeService.getServerClock()
     }
         .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
@@ -465,7 +465,7 @@ internal class QuizParticipationViewModel(
                         && !connectionStatus.isConnected
                     ) {
                         // we may have missed the exercise start, trigger reload now
-                        retryLoadExercise.tryEmit(Unit)
+                        requestReload.tryEmit(Unit)
                     }
                 }
         }
@@ -491,7 +491,7 @@ internal class QuizParticipationViewModel(
 
     private suspend fun reloadUntilQuizQuestionsAreLoaded() {
         while (true) {
-            retryLoadExercise.tryEmit(Unit)
+            requestReload.tryEmit(Unit)
             delay(1.seconds)
 
             val questions = quizQuestionsRandomOrder.first()
@@ -708,7 +708,7 @@ internal class QuizParticipationViewModel(
                     joinBatchFlow.emit(quizBatch)
 
                     if (quizBatch.started == true) {
-                        retryLoadExercise.emit(Unit)
+                        requestReload.emit(Unit)
                     }
                 }
                 .bind { true }

@@ -26,9 +26,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
@@ -40,8 +37,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.courseId
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.getProblemStatementWebViewState
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.canDisplayMetisOnDisplaySide
 import kotlinx.coroutines.Deferred
 
 val LocalExerciseScreenFloatingActionButton =
@@ -54,8 +49,6 @@ val LocalExerciseScreenFloatingActionButton =
 internal fun ExerciseScreen(
     modifier: Modifier,
     viewModel: ExerciseViewModel,
-    navController: NavController,
-    onNavigateBack: () -> Unit,
     onViewResult: () -> Unit,
     onViewTextExerciseParticipationScreen: (participationId: Long) -> Unit,
     onParticipateInQuiz: (courseId: Long, isPractice: Boolean) -> Unit,
@@ -85,15 +78,6 @@ internal fun ExerciseScreen(
         }
     }
 
-    val metisContext by remember(courseId, exerciseId) {
-        derivedStateOf {
-            val currentExerciseId = exerciseId
-            if (courseId != null && currentExerciseId != null) {
-                MetisContext.Exercise(courseId = courseId, exerciseId = currentExerciseId)
-            } else null
-        }
-    }
-
     val webViewState: WebViewState? = getProblemStatementWebViewState(
         serverUrl = artemisContext.serverUrl,
         courseId = courseId,
@@ -115,13 +99,6 @@ internal fun ExerciseScreen(
 
     Box(modifier = modifier) {
         val windowSizeClass = getWindowSizeClass()
-        // If true, the communication is not displayed in a tab but in a window on the right
-        val displayCommunicationOnSide = canDisplayMetisOnDisplaySide(
-            windowSizeClass = windowSizeClass,
-            parentWidth = LocalConfiguration.current.screenWidthDp.dp,
-            metisContentRatio = METIS_RATIO
-        )
-
         val isLongToolbar = windowSizeClass.widthSizeClass >= WindowWidthSizeClass.Medium
 
         val currentExerciseScreenFloatingActionButton =
@@ -147,7 +124,6 @@ internal fun ExerciseScreen(
                 topBar = {
                     ExerciseScreenTopAppBar(
                         modifier = Modifier.fillMaxWidth(),
-                        onNavigateBack = onNavigateBack,
                         exerciseDataState = exerciseDataState
                     )
                 },
@@ -192,15 +168,11 @@ internal fun ExerciseScreen(
                     exerciseDataState = exerciseDataState,
                     exerciseChannelDataState = channelDataState,
                     isLongToolbar = isLongToolbar,
-                    displayCommunicationOnSide = displayCommunicationOnSide,
-                    navController = navController,
-                    metisContext = metisContext,
                     actions = actions,
                     webViewState = webViewState,
                     setWebView = { savedWebView = it },
                     webView = savedWebView,
-                    onClickRetry = viewModel::requestReloadExercise,
-                    artemisContext = artemisContext
+                    onClickRetry = viewModel::onRequestReload
                 )
             }
         }

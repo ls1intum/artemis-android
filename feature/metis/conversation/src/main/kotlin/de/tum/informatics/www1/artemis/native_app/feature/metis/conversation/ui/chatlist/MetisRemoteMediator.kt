@@ -3,7 +3,9 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 import android.util.Log
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
-import androidx.paging.LoadType.*
+import androidx.paging.LoadType.APPEND
+import androidx.paging.LoadType.PREPEND
+import androidx.paging.LoadType.REFRESH
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
@@ -11,6 +13,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService.StandalonePostsContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisFilter
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
@@ -95,7 +98,7 @@ internal class MetisRemoteMediator(
             return metisService.getPosts(
                 standalonePostsContext = StandalonePostsContext(
                     metisContext = context,
-                    filter = emptyList(),
+                    filter = MetisFilter.All,
                     query = null,
                     sortingStrategy = MetisSortingStrategy.DATE_DESCENDING,
                     courseWideContext = null

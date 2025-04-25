@@ -19,7 +19,7 @@ import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTi
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Username
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user3Username
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.add_members.ConversationAddMembersScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.common.ConversationUserSelectionScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.add_members.ConversationAddMembersViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.add_members.TEST_TAG_ADD_MEMBERS_BUTTON
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.R
@@ -50,8 +50,8 @@ class ConversationAddMemberSettingsE2eTest : ConversationBaseTest() {
                 name = "testchannel",
                 description = "",
                 isPublic = true,
-                isAnnouncement = true,
-                isCourseWide = true,
+                isAnnouncement = false,
+                isCourseWide = false,
                 authToken = accessToken,
                 serverUrl = testServerUrl
             ).orThrow("Could not create channel")
@@ -89,10 +89,18 @@ class ConversationAddMemberSettingsE2eTest : ConversationBaseTest() {
         var isDone = false
 
         composeTestRule.setContent {
-            ConversationAddMembersScreen(
+            ConversationUserSelectionScreen(
                 modifier = Modifier.fillMaxSize(),
                 viewModel = viewModel,
-                onNavigateBack = { isDone = true }
+                displayFailedDialog = false,
+                fabTestTag = TEST_TAG_ADD_MEMBERS_BUTTON,
+                canSubmit = true,
+                startJob = viewModel::addMembers,
+                onJobCompleted = {
+                    isDone = it == true
+                },
+                onNavigateBack = { isDone = true },
+                onDismissFailedDialog = {}
             )
         }
 

@@ -2,13 +2,12 @@ package de.tum.informatics.www1.artemis.native_app.feature.lectureview
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
-import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
+import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.performAutoReloadingNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseExerciseService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ServerTimeService
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
@@ -29,7 +28,6 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.WhileSubscribed
@@ -59,7 +57,6 @@ internal class LectureViewModel(
     private val liveParticipationService: LiveParticipationService,
     private val savedStateHandle: SavedStateHandle,
     private val channelService: ChannelService,
-    private val artemisContextProvider: ArtemisContextProvider,
     serverTimeService: ServerTimeService,
     courseExerciseService: CourseExerciseService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
@@ -72,12 +69,11 @@ internal class LectureViewModel(
     private val lectureUnitCompletedMap: Flow<Map<Long, Boolean>> =
         savedStateHandle.getStateFlow(LECTURE_UNIT_COMPLETED_MAP_TAG, emptyMap())
 
-    private val onReloadLecture = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val lectureDataState: StateFlow<DataState<Lecture>> =
         combine(
             serverConfigurationService.serverUrl,
             accountService.authToken,
-            onReloadLecture.onStart { emit(Unit) }
+            requestReload.onStart { emit(Unit) }
         ) { a, b, _ -> a to b }
             .flatMapLatest { (serverUrl, authToken) ->
                 retryOnInternet(networkStatusProvider.currentNetworkStatus) {
@@ -89,9 +85,6 @@ internal class LectureViewModel(
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
 
     val serverUrl: StateFlow<String> = serverUrlStateFlow(serverConfigurationService)
-    val artemisContext: StateFlow<ArtemisContext> = artemisContextProvider.flow
-        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, ArtemisContext.Empty)
-
 
     /**
      * The lecture with updated participations as they arrive.
@@ -143,7 +136,7 @@ internal class LectureViewModel(
         }
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
-    private val serverClock: Flow<Clock> = serverTimeService.onReloadRequired.flatMapLatest {
+    private val serverClock: Flow<Clock> = serverTimeService.onArtemisContextChanged.flatMapLatest {
         serverTimeService.getServerClock()
     }
         .shareIn(viewModelScope + coroutineContext, SharingStarted.WhileSubscribed(1.seconds), replay = 1)
@@ -206,29 +199,17 @@ internal class LectureViewModel(
         }
     }
 
-    val channelDataState: StateFlow<DataState<ChannelChat>> = combine(
-        lectureDataState,
-        serverConfigurationService.serverUrl,
-        accountService.authToken
-    ) { lectureDataState, serverUrl, authToken ->
-        Triple(lectureDataState, serverUrl, authToken)
-    }
-        .flatMapLatest { (lectureDataState, serverUrl, authToken) ->
-            when (lectureDataState) {
+    val channelDataState: StateFlow<DataState<ChannelChat>> = lectureDataState.flatMapLatest { lecture ->
+            when (lecture) {
                 is DataState.Success -> {
-                    val courseId = lectureDataState.data.course?.id ?: 0L
-                    retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                        channelService.getLectureChannel(lectureId, courseId)
+                    channelService.performAutoReloadingNetworkCall(networkStatusProvider) {
+                        getLectureChannel(lectureId)
                     }
                 }
                 else -> flowOf(DataState.Loading())
             }
         }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
-
-    fun requestReloadLecture() {
-        onReloadLecture.tryEmit(Unit)
-    }
 
     fun updateLectureUnitIsComplete(
         lectureUnitId: Long,

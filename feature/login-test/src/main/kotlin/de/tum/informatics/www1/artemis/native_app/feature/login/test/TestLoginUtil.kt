@@ -1,9 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.feature.login.test
 
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextImpl
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.network.LoginService
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.test.KoinTest
 import org.koin.test.get
 
@@ -33,6 +36,12 @@ suspend fun KoinTest.performTestLogin(): String {
     )
     val loginResponse = response.orThrow("Login not successful")
     accountService.storeAccessToken(loginResponse.idToken, true)
+
+    // This allows the ArtemisContextProvider to update its state with the new login information
+    // so that eg the ArtemisContextBasedServices use the updated token and serverUrl.
+    withTimeoutOrNull(1) {
+        get<ArtemisContextProvider>().stateFlow.first { it != ArtemisContextImpl.Empty }
+    }
 
     return loginResponse.idToken
 }

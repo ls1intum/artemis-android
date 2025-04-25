@@ -50,20 +50,18 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.common.ChannelChatIcon
 import kotlinx.coroutines.Deferred
 import org.koin.androidx.compose.koinViewModel
-import org.koin.core.parameter.parametersOf
 
 internal fun testTagForBrowsedChannelItem(channelId: Long) = "browsedChannel$channelId"
 
 @Composable
 fun BrowseChannelsScreen(
     modifier: Modifier,
-    courseId: Long,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     BrowseChannelsScreen(
         modifier = modifier,
-        viewModel = koinViewModel { parametersOf(courseId) },
+        viewModel = koinViewModel(),
         onNavigateToConversation = onNavigateToConversation,
         onNavigateBack = onNavigateBack
     )
@@ -78,7 +76,7 @@ internal fun BrowseChannelsScreen(
 ) {
 
     LaunchedEffect(Unit) {
-        viewModel.requestReload()
+        viewModel.onRequestReload()
     }
 
     val channelsDataState by viewModel.channels.collectAsState()
@@ -125,7 +123,7 @@ internal fun BrowseChannelsScreen(
             loadingText = stringResource(id = R.string.browse_channel_list_loading),
             failureText = stringResource(id = R.string.browse_channel_list_failure),
             retryButtonText = stringResource(id = R.string.browse_channel_list_try_again),
-            onClickRetry = viewModel::requestReload
+            onClickRetry = viewModel::onRequestReload
         ) { channels ->
             if (channels.isNotEmpty()) {
                 LazyColumn(

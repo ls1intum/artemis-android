@@ -85,7 +85,7 @@ internal class MetisServiceImpl(
                     }
 
                     is MetisContext.Conversation -> {
-                        parameter("conversationId", metisContext.conversationId)
+                        parameter("conversationIds", metisContext.conversationId)
                     }
 
                     is MetisContext.Course -> {
@@ -107,15 +107,27 @@ internal class MetisServiceImpl(
                 if (standalonePostsContext.courseWideContext != CourseWideContext.ANNOUNCEMENT) {
                     parameter(
                         "filterToUnresolved",
-                        MetisFilter.UNRESOLVED in standalonePostsContext.filter
+                        standalonePostsContext.filter is MetisFilter.Unresolved
                     )
-                    parameter(
-                        "filterToOwn",
-                        MetisFilter.CREATED_BY_CLIENT in standalonePostsContext.filter
-                    )
+                    if (standalonePostsContext.filter is MetisFilter.CreatedByClient) {
+                        parameter(
+                            "authorIds",
+                            standalonePostsContext.filter.userId
+                        )
+                    }
+                    if (standalonePostsContext.filter is MetisFilter.CreatedByAuthors) {
+                        parameter(
+                            "authorIds",
+                            standalonePostsContext.filter.userIds.joinToString(",")
+                        )
+                    }
                     parameter(
                         "filterToAnsweredOrReacted",
-                        MetisFilter.WITH_REACTION in standalonePostsContext.filter
+                         standalonePostsContext.filter is MetisFilter.WithReaction
+                    )
+                    parameter(
+                        "pinnedOnly",
+                        standalonePostsContext.filter is MetisFilter.Pinned
                     )
                 }
 
@@ -141,7 +153,7 @@ internal class MetisServiceImpl(
         val posts = getPosts(
             standalonePostsContext = MetisService.StandalonePostsContext(
                 metisContext = metisContext,
-                filter = emptyList(),
+                filter = MetisFilter.All,
                 query = "#$serverSidePostId",
                 sortingStrategy = MetisSortingStrategy.DATE_DESCENDING,
                 courseWideContext = null
@@ -203,7 +215,6 @@ internal class MetisServiceImpl(
                 }
                 parameter("postingIds", postIds.joinToString(","))
                 parameter("type", postType.toString())
-                parameter("courseId", metisContext.courseId.toString())
                 cookieAuth(authToken)
             }
 
@@ -224,7 +235,6 @@ internal class MetisServiceImpl(
                 url {
                     appendPathSegments("api", "communication", "forwarded-messages")
                 }
-                parameter("courseId", metisContext.courseId.toString())
 
                 contentType(ContentType.Application.Json)
                 setBody(forwardedMessage)

@@ -25,7 +25,11 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.toRoute
+import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
@@ -34,11 +38,12 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.compose.LinkBottomShee
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.LectureDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.canDisplayMetisOnDisplaySide
 import io.github.fornewid.placeholder.material3.placeholder
 import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
+import kotlinx.coroutines.Deferred
 import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -57,8 +62,6 @@ fun NavController.navigateToLecture(
 }
 
 fun NavGraphBuilder.lecture(
-    navController: NavController,
-    onNavigateBack: () -> Unit,
     onViewExercise: (exerciseId: Long) -> Unit,
     onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
     onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
@@ -82,10 +85,7 @@ fun NavGraphBuilder.lecture(
         LectureScreen(
             modifier = Modifier.fillMaxSize(),
             courseId = courseId,
-            lectureId = lectureId,
             viewModel = viewModel,
-            navController = navController,
-            onNavigateBack = onNavigateBack,
             onViewExercise = onViewExercise,
             onNavigateToExerciseResultView = onNavigateToExerciseResultView,
             onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
@@ -105,21 +105,60 @@ fun NavGraphBuilder.lecture(
 internal fun LectureScreen(
     modifier: Modifier,
     courseId: Long,
-    lectureId: Long,
     viewModel: LectureViewModel,
-    navController: NavController,
-    onNavigateBack: () -> Unit,
     onViewExercise: (exerciseId: Long) -> Unit,
     onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
     onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
     onParticipateInQuiz: (exerciseId: Long, isPractice: Boolean) -> Unit,
     onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit
 ) {
-    val linkOpener = LocalLinkOpener.current
-
     val lectureDataState by viewModel.lectureDataState.collectAsState()
     val serverUrl by viewModel.serverUrl.collectAsState()
-    val artemisContext by viewModel.artemisContext.collectAsState()
+    val lectureChannel by viewModel.channelDataState.collectAsState()
+    val lectureUnits by viewModel.lectureUnits.collectAsState()
+
+    LectureScreen(
+        modifier = modifier,
+        courseId = courseId,
+        serverUrl = serverUrl,
+        lectureDataState = lectureDataState,
+        lectureChannel = lectureChannel,
+        lectureUnits = lectureUnits,
+        onViewExercise = onViewExercise,
+        onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
+        onParticipateInQuiz = onParticipateInQuiz,
+        onNavigateToExerciseResultView = onNavigateToExerciseResultView,
+        onClickViewQuizResults = onClickViewQuizResults,
+        onReloadLecture = viewModel::onRequestReload,
+        onUpdateLectureUnitIsComplete = viewModel::updateLectureUnitIsComplete,
+        onStartExercise = { exerciseId, onParticipationId ->
+            viewModel.startExercise(
+                exerciseId = exerciseId
+            ) {
+                onParticipationId(it)
+            }
+        }
+    )
+}
+
+@Composable
+internal fun LectureScreen(
+    lectureDataState: DataState<Lecture>,
+    modifier: Modifier,
+    courseId: Long,
+    serverUrl: String,
+    lectureChannel: DataState<ChannelChat>,
+    lectureUnits: List<LectureUnit>,
+    onViewExercise: (exerciseId: Long) -> Unit,
+    onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
+    onParticipateInQuiz: (exerciseId: Long, isPractice: Boolean) -> Unit,
+    onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
+    onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
+    onReloadLecture: () -> Unit,
+    onUpdateLectureUnitIsComplete: (lectureUnitId: Long, isCompleted: Boolean) -> Deferred<Boolean>,
+    onStartExercise: (exerciseId: Long, onParticipationId: (Long) -> Unit) -> Unit,
+) {
+    val linkOpener = LocalLinkOpener.current
 
     val lectureTitle = lectureDataState.bind<String?> { it.title }.orElse(null)
 
@@ -130,10 +169,6 @@ internal fun LectureScreen(
 
     var displaySetCompletedFailureDialog: Boolean by remember { mutableStateOf(false) }
 
-    val metisContext = remember(courseId, lectureId) {
-        MetisContext.Lecture(courseId = courseId, lectureId = lectureId)
-    }
-
     val overviewListState = rememberLazyListState()
 
     BoxWithConstraints(modifier = modifier) {
@@ -141,28 +176,6 @@ internal fun LectureScreen(
             parentWidth = maxWidth,
             metisContentRatio = METIS_RATIO
         )
-
-        // The lecture UI with tabs
-        val contentBody = @Composable { modifier: Modifier ->
-            LectureScreenBody(
-                modifier = modifier,
-                displayCommunicationOnSide = displayCommunicationOnSide,
-                lectureDataState = lectureDataState,
-                viewModel = viewModel,
-                onViewExercise = onViewExercise,
-                onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
-                onParticipateInQuiz = onParticipateInQuiz,
-                onNavigateToExerciseResultView = onNavigateToExerciseResultView,
-                onClickViewQuizResults = onClickViewQuizResults,
-                courseId = courseId,
-                overviewListState = overviewListState,
-                metisContext = metisContext,
-                navController = navController,
-                onDisplaySetCompletedFailureDialog = { displaySetCompletedFailureDialog = true },
-                onRequestOpenAttachment = { pendingOpenFileAttachment = it },
-                onRequestViewLink = { pendingOpenLink = it }
-            )
-        }
 
         Scaffold(
             modifier = Modifier.fillMaxSize(),
@@ -176,57 +189,48 @@ internal fun LectureScreen(
                             overflow = TextOverflow.Ellipsis
                         )
                     },
-                    navigationIcon = { NavigationBackButton(onNavigateBack) },
+                    navigationIcon = { NavigationBackButton() },
                     isElevated = false
                 )
             }
         ) { padding ->
-            val bodyModifier = Modifier
-                .fillMaxSize()
-                .padding(top = padding.calculateTopPadding())
-                .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top))
-
-            contentBody(
-                bodyModifier
+            LectureScreenBody(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = padding.calculateTopPadding())
+                    .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top)),
+                displayCommunicationOnSide = displayCommunicationOnSide,
+                lectureDataState = lectureDataState,
+                lectureChannel = lectureChannel,
+                lectureUnits = lectureUnits,
+                onViewExercise = onViewExercise,
+                onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
+                onParticipateInQuiz = onParticipateInQuiz,
+                onNavigateToExerciseResultView = onNavigateToExerciseResultView,
+                onClickViewQuizResults = onClickViewQuizResults,
+                courseId = courseId,
+                overviewListState = overviewListState,
+                onDisplaySetCompletedFailureDialog = {
+                    displaySetCompletedFailureDialog = true
+                },
+                onRequestOpenAttachment = { pendingOpenFileAttachment = it },
+                onRequestViewLink = { pendingOpenLink = it },
+                onReloadLecture = onReloadLecture,
+                onUpdateLectureUnitIsComplete = onUpdateLectureUnitIsComplete,
+                onStartExercise = onStartExercise,
             )
-
-            // Commented out as we may need to add this functionality again later if communication is also available for lectures.
-
-//            if (displayCommunicationOnSide) {
-//                Row(
-//                    modifier = bodyModifier,
-//                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-//                ) {
-//                    contentBody(
-//                        Modifier
-//                            .weight(1f - METIS_RATIO)
-//                            .fillMaxHeight()
-//                    )
-//
-//                    SideBarMetisUi(
-//                        modifier = Modifier
-//                            .weight(METIS_RATIO)
-//                            .fillMaxHeight(),
-//                        metisContext = metisContext,
-//                        navController = navController,
-//                        title = { Text(text = stringResource(id = R.string.lecture_view_tab_communication)) }
-//                    )
-//                }
-//            } else {
-//                contentBody(
-//                    bodyModifier
-//                )
-//            }
 
             val currentPendingOpenFileAttachment = pendingOpenFileAttachment
             if (currentPendingOpenFileAttachment != null) {
                 val fileName = currentPendingOpenFileAttachment.name.orEmpty()
-                val url = buildOpenAttachmentLink(serverUrl, currentPendingOpenFileAttachment.link.orEmpty())
+                val url = buildOpenAttachmentLink(
+                    serverUrl,
+                    currentPendingOpenFileAttachment.link.orEmpty()
+                )
                 val formattedUrl = createAttachmentFileUrl(url, fileName, true)
 
                 LinkBottomSheet(
                     modifier = Modifier.fillMaxSize(),
-                    artemisContext = artemisContext,
                     link = formattedUrl,
                     fileName = currentPendingOpenFileAttachment.name.orEmpty(),
                     state = LinkBottomSheetState.PDFVIEWSTATE,
@@ -270,6 +274,7 @@ private fun buildOpenAttachmentLink(
     attachmentLink: String
 ): String {
     return URLBuilder(serverUrl).apply {
+        appendPathSegments(*Api.Core.UploadedFile.path)
         appendPathSegments(attachmentLink)
     }.buildString()
 }

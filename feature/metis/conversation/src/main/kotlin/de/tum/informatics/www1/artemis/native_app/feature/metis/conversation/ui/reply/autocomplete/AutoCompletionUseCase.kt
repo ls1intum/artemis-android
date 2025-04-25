@@ -29,6 +29,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.common.getChannelIconImageVector
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member_selection.MemberSelectionBaseViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -101,16 +103,25 @@ class AutoCompletionUseCase(
         }
     }
 
-    private fun produceUserMentionAutoCompleteHints(query: String): Flow<DataState<List<AutoCompleteHintCollection>>> =
-        flatMapLatest(
+    private fun produceUserMentionAutoCompleteHints(query: String): Flow<DataState<List<AutoCompleteHintCollection>>> {
+        val queryToShortCollection = AutoCompleteHintCollection(
+            type = AutoCompleteType.USERS,
+            items = listOf(AutoCompleteHint.UserSearchQueryTooShort)
+        )
+        if (query.length < MemberSelectionBaseViewModel.MINIMUM_QUERY_LENGTH) return flowOf(DataState.Success(listOf(queryToShortCollection)))
+
+        return flatMapLatest(
             accountService.authToken,
             serverConfigurationService.serverUrl
         ) { authToken, serverUrl ->
             retryOnInternet(networkStatusProvider.currentNetworkStatus) {
                 conversationService
-                    .searchForCourseMembers(
+                    .searchForPotentialCommunicationParticipants(
                         courseId = metisContext.courseId,
                         query = query,
+                        includeStudents = true,
+                        includeTutors = true,
+                        includeInstructors = true,
                         authToken = authToken,
                         serverUrl = serverUrl
                     )
@@ -118,16 +129,22 @@ class AutoCompletionUseCase(
                         AutoCompleteHintCollection(
                             type = AutoCompleteType.USERS,
                             items = users.map {
-                                AutoCompleteHint(
+                                AutoCompleteHint.Data(
                                     it.name.orEmpty(),
                                     replacementText = "[user]${it.name}(${it.username})[/user]",
-                                    id = it.username.orEmpty()
+                                    id = it.username.orEmpty(),
+                                    icon = AutoCompleteIcon.ProfilePicture(
+                                        ProfilePictureData.fromAccount(
+                                            it
+                                        )
+                                    )
                                 )
                             }
                         ).let(::listOf)
                     }
             }
         }
+    }
 
     private fun produceExerciseAndLectureAutoCompleteHints(query: String): Flow<DataState<List<AutoCompleteHintCollection>>> =
         course.map { courseDataState ->
@@ -148,7 +165,7 @@ class AutoCompletionUseCase(
                         val exerciseId = exercise.id ?: return@mapNotNull null
                         val link = ExerciseDeeplinks.ToExercise.markdownLink(courseId, exerciseId)
 
-                        AutoCompleteHint(
+                        AutoCompleteHint.Data(
                             hint = exerciseTitle,
                             replacementText = "[$exerciseTag]${exercise.title}($link)[/$exerciseTag]",
                             id = "Exercise:$exerciseId",
@@ -162,7 +179,7 @@ class AutoCompletionUseCase(
                         val lectureId = lecture.id ?: return@mapNotNull null
                         val link = LectureDeeplinks.ToLecture.markdownLink(courseId, lectureId)
 
-                        AutoCompleteHint(
+                        AutoCompleteHint.Data(
                             hint = lecture.title,
                             replacementText = "[lecture]${lecture.title}($link)[/lecture]",
                             id = "Lecture:$lectureId",
@@ -190,7 +207,7 @@ class AutoCompletionUseCase(
                     .filterIsInstance<ChannelChat>()
                     .filter { it.name.contains(query, ignoreCase = true) }
                     .map { channel ->
-                        AutoCompleteHint(
+                        AutoCompleteHint.Data(
                             hint = channel.name,
                             replacementText = "[channel]${channel.name}(${channel.id})[/channel]",
                             id = "Channel:${channel.id}",
@@ -212,13 +229,13 @@ class AutoCompletionUseCase(
     private fun produceFaqAutoCompletionHints(query: String): Flow<DataState<List<AutoCompleteHintCollection>>> {
         if (!isFaqEnabled) return flowOf(DataState.Success(emptyList()))
 
-        return faqRepository.getFaqs(courseId).map { faqsDataState ->
+        return faqRepository.getFaqs().map { faqsDataState ->
             faqsDataState.bind { faqs ->
                 val faqAutoCompleteItems = faqs
                     .filter { it.questionTitle.contains(query, ignoreCase = true) }
                     .map { faq ->
                         val link = FaqDeeplinks.ToFaq.markdownLink(courseId, faq.id)
-                        AutoCompleteHint(
+                        AutoCompleteHint.Data(
                             hint = faq.questionTitle,
                             replacementText = "[faq]${faq.questionTitle}($link)[/faq]",
                             id = "Faq:${faq.id}",

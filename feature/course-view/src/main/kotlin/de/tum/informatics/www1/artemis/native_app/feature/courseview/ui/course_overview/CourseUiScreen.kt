@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -29,6 +30,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseSearchConfiguration
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
@@ -37,8 +39,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CourseDeepli
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ExerciseDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
-import de.tum.informatics.www1.artemis.native_app.feature.courseview.TimeFrame
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
+import de.tum.informatics.www1.artemis.native_app.feature.courseview.TimeFrame
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.CourseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.LectureListUi
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.exercise_list.ExerciseListUi
@@ -92,7 +94,7 @@ fun NavGraphBuilder.course(
     onParticipateInQuiz: (courseId: Long, exerciseId: Long, isPractice: Boolean) -> Unit,
     onViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
     onNavigateToLecture: (courseId: Long, lectureId: Long) -> Unit,
-    onNavigateToFaq: (courseId: Long, faqId: Long) -> Unit,
+    onNavigateToFaq: (faqId: Long) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val deepLinks = CourseDeeplinks.ToCourse.generateLinks() +
@@ -106,6 +108,11 @@ fun NavGraphBuilder.course(
     ) { backStackEntry ->
         val route: CourseUiScreen = backStackEntry.toRoute()
         val courseId = route.courseId
+
+        val artemisContextProvider = LocalArtemisContextProvider.current
+        LaunchedEffect(courseId) {
+            artemisContextProvider.setCourseId(courseId)
+        }
 
         val conversationId = route.conversationId
         val postId = route.postId
@@ -132,7 +139,7 @@ fun NavGraphBuilder.course(
             },
             onClickViewQuizResults = onViewQuizResults,
             onNavigateToLecture = { lectureId -> onNavigateToLecture(courseId, lectureId) },
-            onNavigateToFaq = { faqId -> onNavigateToFaq(courseId, faqId) },
+            onNavigateToFaq = onNavigateToFaq,
             onNavigateBack = onNavigateBack
         )
     }
@@ -156,6 +163,8 @@ fun CourseUiScreen(
     onNavigateToFaq: (faqId: Long) -> Unit,
     onNavigateBack: () -> Unit
 ) {
+    ReportVisibleMetisContext(VisibleCourse(MetisContext.Course(courseId)))
+
     val courseDataState by viewModel.course.collectAsState()
     val exercisesTimeFrameDataState by viewModel.exercisesTimeFrame.collectAsState()
     val lecturesTimeFrameDataState by viewModel.lecturesTimeFrame.collectAsState()
@@ -200,7 +209,7 @@ fun CourseUiScreen(
         onNavigateToLecture = onNavigateToLecture,
         onNavigateToFaq = onNavigateToFaq,
         postId = postId,
-        onReloadCourse = viewModel::reloadCourse,
+        onReloadCourse = viewModel::onRequestReload,
         onClickStartTextExercise = { exerciseId: Long ->
             viewModel.startExercise(exerciseId) { participationId ->
                 onNavigateToTextExerciseParticipation(
@@ -237,8 +246,6 @@ internal fun CourseUiScreen(
     onNavigateBack: () -> Unit,
     onReloadCourse: () -> Unit,
 ) {
-    ReportVisibleMetisContext(VisibleCourse(MetisContext.Course(courseId)))
-
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
@@ -370,7 +377,6 @@ internal fun CourseUiScreen(
         composable<CourseTab.Faq> {
             FaqOverviewUi(
                 modifier = Modifier.fillMaxSize(),
-                courseId = courseId,
                 scaffold = scaffold,
                 collapsingContentState = collapsingContentState,
                 onNavigateToFaq = onNavigateToFaq

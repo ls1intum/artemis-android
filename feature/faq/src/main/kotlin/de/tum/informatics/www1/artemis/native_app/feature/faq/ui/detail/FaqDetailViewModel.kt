@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.faq.ui.detail
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
@@ -8,7 +7,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.FaqRepository
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.Faq
-import kotlinx.coroutines.flow.MutableSharedFlow
+import de.tum.informatics.www1.artemis.native_app.core.ui.ReloadableViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -18,18 +17,13 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
 class FaqDetailViewModel(
-    courseId: Long,
     faqId: Long,
     private val faqRepository: FaqRepository,
     serverConfigurationService: ServerConfigurationService,
     coroutineContext: CoroutineContext = EmptyCoroutineContext
-) : ViewModel() {
-
-    private val onRequestReload = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-
-    val faq: StateFlow<DataState<Faq>> = onRequestReload.onStart { emit(Unit) }.flatMapLatest {
+) : ReloadableViewModel() {
+    val faq: StateFlow<DataState<Faq>> = requestReload.onStart { emit(Unit) }.flatMapLatest {
         faqRepository.getFaq(
-            courseId = courseId,
             faqId = faqId,
         )
     }
@@ -37,7 +31,4 @@ class FaqDetailViewModel(
 
     val serverUrl: StateFlow<String> = serverUrlStateFlow(serverConfigurationService)
 
-    fun requestReload() {
-        onRequestReload.tryEmit(Unit)
-    }
 }

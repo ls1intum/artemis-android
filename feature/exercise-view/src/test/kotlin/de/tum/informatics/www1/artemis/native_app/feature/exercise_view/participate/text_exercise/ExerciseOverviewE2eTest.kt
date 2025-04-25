@@ -8,7 +8,6 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.navigation.compose.rememberNavController
 import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
@@ -70,8 +69,6 @@ class ExerciseOverviewE2eTest : BaseExerciseTest() {
             ExerciseScreen(
                 modifier = Modifier.fillMaxSize(),
                 viewModel = viewModel,
-                navController = rememberNavController(),
-                onNavigateBack = { },
                 onViewResult = { },
                 onViewTextExerciseParticipationScreen = onViewTextExerciseParticipationScreen,
                 onParticipateInQuiz = { _, _ -> },

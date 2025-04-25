@@ -28,6 +28,8 @@ fun ProvideEmojis(
 
 @Composable
 fun getUnicodeForEmojiId(emojiId: String): String {
+    if (LocalInspectionMode.current) return emojiId     // This way we can pass emoji unicodes as emojiId in the preview
+
     val unicode by LocalEmojiServiceProvider.current.emojiIdToUnicode(emojiId).collectAsState(
         initial = UNKNOWN_EMOJI_REPLACEMENT
     )

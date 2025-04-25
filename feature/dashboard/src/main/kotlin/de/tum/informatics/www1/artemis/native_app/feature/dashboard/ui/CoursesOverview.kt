@@ -43,7 +43,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
+import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.Dashboard
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicSearchTextField
@@ -76,6 +78,11 @@ fun NavGraphBuilder.dashboard(
     onViewCourse: (courseId: Long) -> Unit
 ) {
     animatedComposable<DashboardScreen> {
+        val artemisContextProvider = LocalArtemisContextProvider.current
+        LaunchedEffect(true) {
+            artemisContextProvider.clearCourseId()
+        }
+
         CoursesOverview(
             modifier = Modifier.fillMaxSize(),
             viewModel = koinViewModel(),
@@ -101,14 +108,55 @@ internal fun CoursesOverview(
     betaHintService: BetaHintService = koinInject(),
     surveyHintService: SurveyHintService = koinInject()
 ) {
+    val scope = rememberCoroutineScope()
+
     val coursesDataState by viewModel.dashboard.collectAsState()
+    val query by viewModel.query.collectAsState()
+    val sorting by viewModel.sorting.collectAsState()
+
+    CoursesOverview(
+        coursesDataState = coursesDataState,
+        sorting = sorting,
+        query = query,
+        modifier = modifier,
+        isBeta = isBeta,
+        onClickRegisterForCourse = onClickRegisterForCourse,
+        onOpenSettings = onOpenSettings,
+        betaHintService = betaHintService,
+        surveyHintService = surveyHintService,
+        onUpdateQuery = viewModel::onUpdateQuery,
+        onUpdateSorting = viewModel::onUpdateSorting,
+        onRequestReloadDashboard = viewModel::onRequestReload,
+        onViewCourse = {
+            scope.launch {
+                viewModel.onCourseAccessed(it)
+            }
+            onViewCourse(it)
+        }
+    )
+}
+
+@Composable
+fun CoursesOverview(
+    modifier: Modifier,
+    coursesDataState: DataState<Dashboard>,
+    sorting: CourseSorting,
+    query: String,
+    isBeta: Boolean,
+    surveyHintService: SurveyHintService,
+    betaHintService: BetaHintService,
+    onOpenSettings: () -> Unit,
+    onViewCourse: (courseId: Long) -> Unit,
+    onClickRegisterForCourse: () -> Unit,
+    onUpdateQuery: (String) -> Unit,
+    onUpdateSorting: (CourseSorting) -> Unit,
+    onRequestReloadDashboard: () -> Unit,
+) {
     val scope = rememberCoroutineScope()
 
     val shouldDisplayBetaDialog by betaHintService.shouldShowBetaHint.collectAsState(initial = false)
     var displayBetaDialog by rememberSaveable { mutableStateOf(false) }
 
-    val query by viewModel.query.collectAsState()
-    val sorting by viewModel.sorting.collectAsState()
 
     val courseListState = rememberLazyGridState()
     var lastIndex by remember { mutableIntStateOf(0) }
@@ -189,8 +237,8 @@ internal fun CoursesOverview(
                 modifier = Modifier.fillMaxWidth(),
                 query = query,
                 sorting = sorting,
-                onUpdateQuery = viewModel::onUpdateQuery,
-                onUpdateSorting = viewModel::onUpdateSorting,
+                onUpdateQuery = onUpdateQuery,
+                onUpdateSorting = onUpdateSorting,
                 captureListPosition = {
                     lastIndex = courseListState.firstVisibleItemIndex
                     lastOffset = courseListState.firstVisibleItemScrollOffset
@@ -203,7 +251,7 @@ internal fun CoursesOverview(
                 loadingText = stringResource(id = R.string.courses_loading_loading),
                 failureText = stringResource(id = R.string.courses_loading_failure),
                 retryButtonText = stringResource(id = R.string.courses_loading_try_again),
-                onClickRetry = viewModel::requestReloadDashboard
+                onClickRetry = onRequestReloadDashboard,
             ) { dashboard: Dashboard ->
                 if (dashboard.courses.isEmpty() && dashboard.recentCourses.isEmpty()) {
                     if (query.isNotBlank()) {
@@ -234,9 +282,6 @@ internal fun CoursesOverview(
                     courses = dashboard.courses,
                     recentCourses = dashboard.recentCourses,
                     onClickOnCourse = { course ->
-                        scope.launch{
-                            viewModel.onCourseAccessed(course.id ?: 0L)
-                        }
                         onViewCourse(course.id ?: 0L)
                     }
                 )
@@ -249,7 +294,6 @@ internal fun CoursesOverview(
             if (dismissPermanently) {
                 scope.launch {
                     betaHintService.dismissBetaHintPermanently()
-
                     displayBetaDialog = false
                 }
             } else {

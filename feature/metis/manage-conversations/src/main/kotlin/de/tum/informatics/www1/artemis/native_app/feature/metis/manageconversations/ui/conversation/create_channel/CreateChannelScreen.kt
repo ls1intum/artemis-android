@@ -20,7 +20,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -45,11 +44,12 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Scaling
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisSection
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.pagePadding
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.PotentiallyIllegalTextField
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.common.PotentiallyIllegalTextField
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -215,57 +215,47 @@ private fun ChannelSettings(
     visibility: CreateChannelViewModel.Visibility,
     scope: CreateChannelViewModel.Scope,
 ) {
-    val selectionModifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
+    val selectionModifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
 
-    Card(
+    ArtemisSection(
         modifier = modifier,
-        shape = MaterialTheme.shapes.medium
+        title = stringResource(id = R.string.create_channel_settings_section_title),
+        spacing = 16.dp
     ) {
-        Column(
-            modifier = modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.create_channel_settings_section_title),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
+        SegmentedSelection(
+            modifier = selectionModifier,
+            title = stringResource(id = R.string.create_channel_channel_accessibility_type),
+            description = stringResource(id = R.string.create_channel_channel_accessibility_type_hint),
+            buttonLabelOption = listOf(
+                stringResource(id = R.string.create_channel_channel_accessibility_type_public),
+                stringResource(id = R.string.create_channel_channel_accessibility_type_private)
+            ),
+            selectedOption = visibility.ordinal,
+            onCheckedChange = { viewModel.updateVisibility(CreateChannelViewModel.Visibility.entries[it]) },
+            testTag = TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH,
+        )
 
-            SegmentedSelection(
-                modifier = selectionModifier,
-                title = stringResource(id = R.string.create_channel_channel_accessibility_type),
-                description = stringResource(id = R.string.create_channel_channel_accessibility_type_hint),
-                buttonLabelOption = listOf(
-                    stringResource(id = R.string.create_channel_channel_accessibility_type_public),
-                    stringResource(id = R.string.create_channel_channel_accessibility_type_private)
-                ),
-                selectedOption = visibility.ordinal,
-                onCheckedChange = { viewModel.updateVisibility(CreateChannelViewModel.Visibility.entries[it]) },
-                testTag = TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH,
-            )
+        SegmentedSelection(
+            modifier = selectionModifier,
+            title = stringResource(id = R.string.create_channel_channel_type),
+            description = stringResource(id = R.string.create_channel_channel_course_wide_type_hint),
+            selectedOption = scope.ordinal,
+            onCheckedChange = { viewModel.updateScope(CreateChannelViewModel.Scope.entries[it]) },
+            testTag = TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH,
+            buttonLabelOption = listOf(
+                stringResource(id = R.string.create_channel_channel_course_wide_type_announcement),
+                stringResource(id = R.string.create_channel_channel_course_wide_type_unrestricted)
+            ),
+        )
 
-            SegmentedSelection(
-                modifier = selectionModifier,
-                title = stringResource(id = R.string.create_channel_channel_type),
-                description = stringResource(id = R.string.create_channel_channel_course_wide_type_hint),
-                selectedOption = scope.ordinal,
-                onCheckedChange = { viewModel.updateScope(CreateChannelViewModel.Scope.entries[it]) },
-                testTag = TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH,
-                buttonLabelOption = listOf(
-                    stringResource(id = R.string.create_channel_channel_course_wide_type_announcement),
-                    stringResource(id = R.string.create_channel_channel_course_wide_type_unrestricted)
-                ),
-            )
-
-            BinarySelection(
-                modifier = selectionModifier,
-                title = stringResource(id = R.string.create_channel_channel_announcement_type),
-                description = stringResource(id = R.string.create_channel_channel_announcement_type_hint),
-                isChecked = isAnnouncement,
-                onCheckedChange = { viewModel.updateAnnouncement(it) },
-                switchTestTag = TEST_TAG_SET_ANNOUNCEMENT_UNRESTRICTED_SWITCH,
-            )
-        }
+        BinarySelection(
+            modifier = selectionModifier,
+            title = stringResource(id = R.string.create_channel_channel_announcement_type),
+            description = stringResource(id = R.string.create_channel_channel_announcement_type_hint),
+            isChecked = isAnnouncement,
+            onCheckedChange = { viewModel.updateAnnouncement(it) },
+            switchTestTag = TEST_TAG_SET_ANNOUNCEMENT_UNRESTRICTED_SWITCH,
+        )
     }
 }
 

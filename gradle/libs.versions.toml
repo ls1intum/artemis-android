@@ -9,9 +9,9 @@ androidDesugarJdkLibs = "2.1.5"
 androidGradlePlugin = "8.7.1"
 androidxActivity = "1.10.1"
 androidxAppCompat = "1.7.0"
-androidxComposeBom = "2025.03.00"
+androidxComposeBom = "2025.04.00"
 androidxCredentials = "1.5.0"
-androidxDataStore = "1.1.3"
+androidxDataStore = "1.1.4"
 androidxLifecycle = "2.8.7"
 androidxNavigation = "2.8.9"
 androidxPaging = "3.3.6"
@@ -19,22 +19,22 @@ androidxPagingCompose = "3.3.6"
 coil = "3.1.0"
 coil2 = "2.7.0"     # The markwon library still depends on coil2: https://github.com/ls1intum/artemis-android/issues/171
 kotlin = "2.1.20"
-kotlinxCoroutines = "1.10.1"
+kotlinxCoroutines = "1.10.2"
 kotlinxDatetime = "0.6.2"
-kotlinxSerializationJson = "1.8.0"
-koin = "4.0.2"
+kotlinxSerializationJson = "1.8.1"
+koin = "4.0.4"
 koinAndroidxCompose = "4.0.0"
 kover = "0.9.1"
 krop = "0.1.6"
-krossbow = "9.2.0"
-ktor = "3.1.1"
+krossbow = "9.3.0"
+ktor = "3.1.2"
 markwon = "4.6.2"
-mockk = "1.13.17"
+mockk = "1.14.0"
 ossLicensesPlugin = "0.10.6"
 placeholderMaterial = "2.0.0"
 room = "2.6.1"
-sentry-android = "8.5.0"
-work = "2.10.0"
+sentry-android = "8.9.0"
+work = "2.10.1"
 
 [libraries]
 accompanist-placeholder-material = { group = "com.google.accompanist", name = "accompanist-placeholder-material", version.ref = "accompanist" }
@@ -73,7 +73,7 @@ androidx-room-runtime = { group = "androidx.room", name = "room-runtime", versio
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 androidx-room-paging = { group = "androidx.room", name = "room-paging", version.ref = "room" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
-androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version = "1.1.0-alpha06" }
+androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version = "1.1.0-alpha07" }
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work" }
 auth0-java-jwt = { group = "com.auth0.android", name = "jwtdecode", version = "2.0.2" }
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
@@ -81,7 +81,8 @@ coil-compose-core = { group = "io.coil-kt.coil3", name = "coil-compose-core", ve
 coil-test = { group = "io.coil-kt.coil3", name = "coil-test", version.ref = "coil" }
 coil-network = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 coil2-base = { group = "io.coil-kt", name = "coil-base", version.ref = "coil2" }
-google-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version = "33.11.0" }
+edge2edge-preview = { group = "de.drick.compose", name = "edge-to-edge-preview", version = "0.6.0" }
+google-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version = "33.13.0" }
 google-firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
@@ -138,7 +139,7 @@ android-application = { id = "com.android.application", version.ref = "androidGr
 android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "5.1.1" }
-google-ksp = { id = "com.google.devtools.ksp", version = "2.1.20-1.0.31" }
+google-ksp = { id = "com.google.devtools.ksp", version = "2.1.20-1.0.32" }
 google-services = { id = "com.google.gms.google-services", version = "4.4.2" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

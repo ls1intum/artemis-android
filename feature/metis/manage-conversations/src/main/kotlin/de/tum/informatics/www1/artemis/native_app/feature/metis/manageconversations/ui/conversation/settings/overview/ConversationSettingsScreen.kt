@@ -61,7 +61,7 @@ internal fun ConversationSettingsScreen(
     }
 
     LaunchedEffect(key1 = Unit) {
-        viewModel.requestReload()
+        viewModel.onRequestReload()
     }
 
     Scaffold(

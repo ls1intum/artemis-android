@@ -20,11 +20,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -66,6 +71,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.LocalReplyAutoCompleteHintProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.ConversationDataStatusButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.isReplyEnabled
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisFilter
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
@@ -107,6 +113,8 @@ internal fun ConversationChatListScreen(
     onClickViewPost: (StandalonePostId) -> Unit
 ) {
     val query by viewModel.chatListUseCase.query.collectAsState()
+    val filter by viewModel.chatListUseCase.filter.collectAsState()
+    val clientId by viewModel.clientId.collectAsState()
     val conversationDataState by viewModel.latestUpdatedConversation.collectAsState()
     val conversationDataStatus by viewModel.conversationDataStatus.collectAsState()
 
@@ -124,13 +132,16 @@ internal fun ConversationChatListScreen(
         modifier = modifier,
         courseId = courseId,
         conversationId = conversationId,
+        clientId = clientId,
         conversationDataState = conversationDataState,
         conversationDataStatus = conversationDataStatus,
         query = query,
+        filter = filter,
         onNavigateBack = onNavigateBack,
         onNavigateToSettings = onNavigateToSettings,
+        onUpdateFilter = viewModel.chatListUseCase::updateFilter,
         onUpdateQuery = viewModel.chatListUseCase::updateQuery,
-        onRequestSoftReload = viewModel::requestReload
+        onRequestSoftReload = viewModel::onRequestReload
     ) { padding ->
         val isReplyEnabled = isReplyEnabled(conversationDataState = conversationDataState)
 
@@ -158,23 +169,26 @@ fun ConversationChatListScreen(
     modifier: Modifier,
     courseId: Long,
     conversationId: Long,
+    clientId: DataState<Long>,
     query: String,
+    filter: MetisFilter,
     conversationDataStatus: DataStatus,
     conversationDataState: DataState<Conversation>,
     onNavigateBack: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onUpdateQuery: (String) -> Unit,
+    onUpdateFilter: (MetisFilter) -> Unit,
     onRequestSoftReload: () -> Unit,
     content: @Composable (PaddingValues) -> Unit
 ) {
     var isSearchBarOpen by rememberSaveable(courseId, conversationId) { mutableStateOf(false) }
     var isInfoDropdownExpanded by remember { mutableStateOf(false) }
+    var isFilterDropdownExpanded by remember { mutableStateOf(false) }
 
     val searchBarFocusRequester = remember { FocusRequester() }
     val conversation = conversationDataState.orNull()
     val hasExercise = conversation?.filterPredicate(FILTER_EXERCISE) == true
     val hasLecture = conversation?.filterPredicate(FILTER_LECTURE) == true
-    val hasInfoDropdown = hasExercise || hasLecture
 
     val closeSearch = {
         isSearchBarOpen = false
@@ -233,7 +247,7 @@ fun ConversationChatListScreen(
                 },
                 actions = {
                     if (!isSearchBarOpen) {
-                        if (BuildConfig.DEBUG) {
+                        if (BuildConfig.DEBUG && !LocalInspectionMode.current) {
                             ConversationDataStatusButton(
                                 dataStatus = conversationDataStatus,
                                 onRequestSoftReload = onRequestSoftReload
@@ -250,14 +264,11 @@ fun ConversationChatListScreen(
 
                         IconButton(
                             onClick = {
-                                isInfoDropdownExpanded = hasInfoDropdown
-                                if (!hasInfoDropdown) {
-                                    onNavigateToSettings()
-                                }
+                                isInfoDropdownExpanded = true
                             }
                         ) {
                             Icon(
-                                imageVector = Icons.Outlined.Info,
+                                imageVector = Icons.Default.MoreVert,
                                 tint = MaterialTheme.colorScheme.primary,
                                 contentDescription = null
                             )
@@ -267,9 +278,18 @@ fun ConversationChatListScreen(
                                 hasExercise = hasExercise,
                                 hasLecture = hasLecture,
                                 courseId = courseId,
-                                conversation = if (conversation is ChannelChat) conversation else return@IconButton,
+                                conversation = conversation ?: return@IconButton,
                                 onDismissRequest = { isInfoDropdownExpanded = false },
+                                onOpenFilterDropdown = { isFilterDropdownExpanded = true },
                                 onNavigateToSettings = onNavigateToSettings
+                            )
+
+                            FilterDropdownMenu(
+                                isFilterDropdownExpanded = isFilterDropdownExpanded,
+                                filter = filter,
+                                clientId = clientId,
+                                onFilterSelected = onUpdateFilter,
+                                onDismissRequest = { isFilterDropdownExpanded = false }
                             )
                         }
                     }
@@ -338,9 +358,10 @@ private fun InfoDropdownMenu(
     hasExercise: Boolean,
     hasLecture: Boolean,
     courseId: Long,
-    conversation: ChannelChat,
+    conversation: Conversation,
     onDismissRequest: () -> Unit,
-    onNavigateToSettings: () -> Unit
+    onNavigateToSettings: () -> Unit,
+    onOpenFilterDropdown: () -> Unit,
 ) {
     val isParameterCombinationIllegal = hasExercise && hasLecture
     require(!isParameterCombinationIllegal)
@@ -371,6 +392,7 @@ private fun InfoDropdownMenu(
         )
 
         referenceType?.let { referenceType ->
+            val channel = conversation as ChannelChat
             DropdownMenuItem(
                 leadingIcon = {
                     Icon(
@@ -380,9 +402,79 @@ private fun InfoDropdownMenu(
                 },
                 text = { Text(text = stringResource) },
                 onClick = {
-                    localLinkOpener.openLink("artemis://courses/${courseId}/${referenceType}/${conversation.subTypeReferenceId}")
+                    localLinkOpener.openLink("artemis://courses/${courseId}/${referenceType}/${channel.subTypeReferenceId}")
                 }
             )
+
+            HorizontalDivider()
         }
+
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.FilterList,
+                    contentDescription = null
+                )
+            },
+            text = { Text(text = stringResource(R.string.conversation_filter_messages)) },
+            onClick = {
+                onDismissRequest()
+                onOpenFilterDropdown()
+            }
+        )
+    }
+}
+
+
+@Composable
+fun FilterDropdownMenu(
+    isFilterDropdownExpanded: Boolean,
+    filter: MetisFilter,
+    clientId: DataState<Long>,
+    onDismissRequest: () -> Unit,
+    onFilterSelected: (MetisFilter) -> Unit
+) {
+    val icon = @Composable {
+        Icon(
+            imageVector = Icons.Default.Check,
+            contentDescription = null
+        )
+    }
+
+    DropdownMenu(
+        expanded = isFilterDropdownExpanded,
+        onDismissRequest = onDismissRequest
+    ) {
+        DropdownMenuItem(
+            trailingIcon = if (filter is MetisFilter.All) icon else null,
+            text = { Text(text = stringResource(R.string.conversation_filter_messages_all)) },
+            onClick = { onFilterSelected(MetisFilter.All) }
+        )
+
+        DropdownMenuItem(
+            trailingIcon = if (filter is MetisFilter.Unresolved) icon else null,
+            text = { Text(text = stringResource(R.string.conversation_filter_messages_unresolved)) },
+            onClick = { onFilterSelected(MetisFilter.Unresolved) }
+        )
+
+        clientId.orNull()?.let {
+            DropdownMenuItem(
+                trailingIcon = if (filter == MetisFilter.CreatedByClient(it)) icon else null,
+                text = { Text(text = stringResource(R.string.conversation_filter_messages_own)) },
+                onClick = { onFilterSelected(MetisFilter.CreatedByClient(it)) }
+            )
+        }
+
+        DropdownMenuItem(
+            trailingIcon = if (filter is MetisFilter.WithReaction) icon else null,
+            text = { Text(text = stringResource(R.string.conversation_filter_messages_reacted)) },
+            onClick = { onFilterSelected(MetisFilter.WithReaction) }
+        )
+
+        DropdownMenuItem(
+            trailingIcon = if (filter is MetisFilter.Pinned) icon else null,
+            text = { Text(text = stringResource(R.string.conversation_filter_messages_pinned)) },
+            onClick = { onFilterSelected(MetisFilter.Pinned) }
+        )
     }
 }

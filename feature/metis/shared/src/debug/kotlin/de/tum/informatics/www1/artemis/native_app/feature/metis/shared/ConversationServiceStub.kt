@@ -34,13 +34,6 @@ open class ConversationServiceStub(
         serverUrl: String
     ): NetworkResponse<List<CourseUser>> = NetworkResponse.Response(emptyList())
 
-    override suspend fun searchForCourseMembers(
-        courseId: Long,
-        query: String,
-        authToken: String,
-        serverUrl: String
-    ): NetworkResponse<List<ConversationUser>> = NetworkResponse.Response(emptyList())
-
     override suspend fun createOneToOneConversation(
         courseId: Long,
         partner: String,
@@ -182,5 +175,12 @@ open class ConversationServiceStub(
         conversationId: Long,
         authToken: String,
         serverUrl: String
-    ): NetworkResponse<Boolean> =  NetworkResponse.Failure(StubException)
+    ): NetworkResponse<Boolean> = NetworkResponse.Failure(StubException)
+
+    override suspend fun toggleChannelPrivacy(
+        courseId: Long,
+        conversationId: Long,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<Boolean> = NetworkResponse.Failure(StubException)
 }

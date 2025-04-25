@@ -30,6 +30,8 @@ dependencies {
     implementation(libs.androidx.dataStore.preferences)
 
     testImplementation(libs.ktor.client.cio)
+    testImplementation(libs.mockk.android)
+    testImplementation(libs.mockk.agent)
 
     // Supporting passkeys
     implementation(libs.androidx.credentials)

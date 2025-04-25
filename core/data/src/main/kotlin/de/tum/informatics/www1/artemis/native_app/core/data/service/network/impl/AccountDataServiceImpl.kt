@@ -9,7 +9,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
-import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.ArtemisContextBasedServiceImpl
+import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.LoggedInBasedServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
@@ -22,7 +22,7 @@ internal class AccountDataServiceImpl(
     ktorProvider: KtorProvider,
     artemisContextProvider: ArtemisContextProvider,
     private val jsonProvider: JsonProvider,
-) : AccountDataService, ArtemisContextBasedServiceImpl(ktorProvider, artemisContextProvider) {
+) : AccountDataService, LoggedInBasedServiceImpl(ktorProvider, artemisContextProvider) {
 
     companion object {
         private const val ACCOUNT_DATA_CACHE_NAME = "account_data_cache"

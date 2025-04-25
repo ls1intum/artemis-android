@@ -119,7 +119,7 @@ internal fun TextExerciseParticipationScreen(
                     ),
                     onUpdateText = viewModel::updateText,
                     submission = latestSubmission,
-                    requestSubmit = viewModel::retrySync
+                    requestSubmit = viewModel::onRequestReload
                 )
             }
 
@@ -130,7 +130,6 @@ internal fun TextExerciseParticipationScreen(
                         webViewState = webViewState,
                         webView = webView,
                         setWebView = { webView = it },
-                        artemisContext = artemisContext
                     )
                 } else {
                     Box(modifier = modifier)
