@@ -117,7 +117,7 @@ internal fun LectureUnitHeader(
 }
 
 @Composable
-fun UploadingCheckbox(
+private fun UploadingCheckbox(
     modifier: Modifier = Modifier,
     isUploading: Boolean,
     checked: Boolean,
