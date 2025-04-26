@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -33,9 +34,17 @@ fun LayoutAwareTwoColumnLayout(
     priorityColumn: @Composable (Modifier) -> Unit
 ) {
     val layout = getArtemisAppLayout()
+    val (isTabletLandscape, isTabletPortrait) = layout.let { it.isTabletLandscape to it.isTabletPortrait }
+
+    // Automatically open sidebar in landscape mode
+    LaunchedEffect(isTabletLandscape) {
+        if (isTabletLandscape && !isSidebarOpen) {
+            onSidebarToggle()
+        }
+    }
 
     when {
-        layout.isTabletPortrait -> {
+        isTabletPortrait -> {
             Box(modifier = modifier.fillMaxSize()) {
                 priorityColumn(Modifier.fillMaxSize())
 
@@ -71,7 +80,7 @@ fun LayoutAwareTwoColumnLayout(
             }
         }
 
-        layout.isTabletLandscape -> {
+        isTabletLandscape -> {
             Row(
                 modifier = modifier.fillMaxSize(),
             ) {
