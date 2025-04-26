@@ -26,6 +26,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.NoSearchResults
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.timeframe.TimeFrame
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.timeframe.TimeFrameItemsLazyColumn
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.selectionBorder
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 
@@ -37,14 +38,16 @@ fun LectureOverviewBody(
     lectures: List<TimeFrame<Lecture>>,
     collapsingContentState: CollapsingContentState,
     query: String,
-    onSelectLecture: (Long) -> Unit
+    onSelectLecture: (Long) -> Unit,
+    selectedLectureId: Long?
 ) {
     LectureListUi(
         modifier = modifier,
         lectures = lectures,
         collapsingContentState = collapsingContentState,
         query = query,
-        onClickLecture = { lec -> onSelectLecture(lec.id ?: 0L) }
+        onClickLecture = { lec -> onSelectLecture(lec.id ?: 0L) },
+        selectedLectureId = selectedLectureId
     )
 }
 
@@ -54,7 +57,8 @@ internal fun LectureListUi(
     lectures: List<TimeFrame<Lecture>>,
     collapsingContentState: CollapsingContentState,
     query: String,
-    onClickLecture: (Lecture) -> Unit
+    onClickLecture: (Lecture) -> Unit,
+    selectedLectureId: Long?
 ) {
     if (lectures.isEmpty()) {
         if (query.isNotBlank()) {
@@ -89,13 +93,19 @@ internal fun LectureListUi(
                 .fillMaxWidth()
                 .padding(horizontal = Spacings.ScreenHorizontalSpacing),
             lecture = lecture,
-            onClick = { onClickLecture(lecture) }
+            onClick = { onClickLecture(lecture) },
+            selected = selectedLectureId == lecture.id
         )
     }
 }
 
 @Composable
-private fun LectureListItem(modifier: Modifier, lecture: Lecture, onClick: () -> Unit) {
+private fun LectureListItem(
+    modifier: Modifier,
+    lecture: Lecture,
+    onClick: () -> Unit,
+    selected: Boolean
+) {
     val startTime = lecture.startDate
     val startTimeText = if (startTime != null) {
         stringResource(
@@ -105,7 +115,7 @@ private fun LectureListItem(modifier: Modifier, lecture: Lecture, onClick: () ->
     } else stringResource(id = R.string.lecture_list_lecture_item_start_date_not_set)
 
     Card(
-        modifier = modifier,
+        modifier = modifier.selectionBorder(selected),
         onClick = onClick
     ) {
         Column(

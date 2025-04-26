@@ -26,6 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.selectionBorder
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ExerciseColors
 
@@ -37,10 +38,11 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.Exerci
 fun ExerciseListItem(
     modifier: Modifier,
     exercise: Exercise,
+    selected: Boolean = false,
     onClickExercise: () -> Unit
 ) {
     Card(
-        modifier = modifier,
+        modifier = modifier.selectionBorder(selected),
         onClick = onClickExercise
     ) {
         Row(

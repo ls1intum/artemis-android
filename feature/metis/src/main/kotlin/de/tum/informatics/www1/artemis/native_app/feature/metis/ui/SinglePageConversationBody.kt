@@ -114,7 +114,8 @@ internal fun SinglePageConversationBody(
             onRequestBrowseChannel = {
                 configuration = BrowseChannelConfiguration(configuration)
             },
-            canCreateChannel = canCreateChannel
+            canCreateChannel = canCreateChannel,
+            selectedConversationId =  (configuration as? OpenedConversation)?.conversationId,
         )
     }
 

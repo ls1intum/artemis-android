@@ -52,7 +52,8 @@ fun SinglePageExerciseBody(
                 exercises = exercises,
                 query = query,
                 collapsingContentState = collapsingContentState,
-                onClickExercise = onClickExercise
+                onClickExercise = onClickExercise,
+                selectedExerciseId = null // No selection in phone mode
             )
         }
 
@@ -67,7 +68,8 @@ fun SinglePageExerciseBody(
                         exercises = exercises,
                         query = query,
                         collapsingContentState = collapsingContentState,
-                        onClickExercise = openExercise
+                        onClickExercise = openExercise,
+                        selectedExerciseId = (config as? OpenedExercise)?.exerciseId
                     )
                 },
                 priorityColumn = { contentMod ->
@@ -112,7 +114,8 @@ fun ExerciseOverviewBody(
     exercises: List<TimeFrame<Exercise>>,
     query: String,
     collapsingContentState: CollapsingContentState,
-    onClickExercise: (Long) -> Unit
+    onClickExercise: (Long) -> Unit,
+    selectedExerciseId: Long?
 ) {
     ExerciseListUi(
         modifier = modifier,
@@ -120,5 +123,6 @@ fun ExerciseOverviewBody(
         query = query,
         collapsingContentState = collapsingContentState,
         onClickExercise = onClickExercise,
+        selectedExerciseId = selectedExerciseId
     )
 }

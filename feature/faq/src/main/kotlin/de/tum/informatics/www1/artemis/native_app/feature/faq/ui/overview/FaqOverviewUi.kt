@@ -33,6 +33,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateU
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.NoSearchResults
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseSearchConfiguration
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.selectionBorder
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
@@ -52,7 +53,8 @@ fun FaqOverviewUi(
     modifier: Modifier = Modifier,
     viewModel: FaqOverviewViewModel,
     collapsingContentState: CollapsingContentState,
-    onNavigateToFaq: (faqId: Long) -> Unit
+    onNavigateToFaq: (faqId: Long) -> Unit,
+    selectedFaqId: Long? = null,
 ) {
     val faqs by viewModel.displayedFaqs.collectAsState()
     val query by viewModel.searchQuery.collectAsState()
@@ -76,7 +78,8 @@ fun FaqOverviewUi(
         query = query,
         collapsingContentState = collapsingContentState,
         onReloadRequest = viewModel::onRequestReload,
-        onNavigateToFaq = onNavigateToFaq
+        onNavigateToFaq = onNavigateToFaq,
+        selectedFaqId = selectedFaqId
     )
 }
 
@@ -89,7 +92,8 @@ fun FaqOverviewUi(
     query: String,
     collapsingContentState: CollapsingContentState,
     onReloadRequest: () -> Unit,
-    onNavigateToFaq: (faqId: Long) -> Unit
+    onNavigateToFaq: (faqId: Long) -> Unit,
+    selectedFaqId: Long? = null,
 ) {
     BasicDataStateUi(
         modifier = modifier
@@ -110,7 +114,8 @@ fun FaqOverviewUi(
                 filterChips = filterChips,
                 collapsingContentState = collapsingContentState,
                 query = query,
-                onNavigateToFaq = onNavigateToFaq
+                onNavigateToFaq = onNavigateToFaq,
+                selectedFaqId = selectedFaqId
             )
         }
     }
@@ -124,7 +129,8 @@ private fun FaqOverviewBody(
     filterChips: List<ConfiguredFaqCategoryChip>,
     collapsingContentState: CollapsingContentState,
     query: String,
-    onNavigateToFaq: (Long) -> Unit
+    onNavigateToFaq: (Long) -> Unit,
+    selectedFaqId: Long? = null,
 ) {
     val isSearching = query.isNotBlank()
 
@@ -163,7 +169,8 @@ private fun FaqOverviewBody(
                 .fillMaxSize()
                 .nestedScroll(collapsingContentState.nestedScrollConnection),
             faqs = faqs,
-            onNavigateToFaq = onNavigateToFaq
+            onNavigateToFaq = onNavigateToFaq,
+            selectedFaqId = selectedFaqId
         )
     }
 }
@@ -173,7 +180,8 @@ private fun FaqOverviewBody(
 private fun FaqList(
     modifier: Modifier = Modifier,
     faqs: List<Faq>,
-    onNavigateToFaq: (Long) -> Unit
+    onNavigateToFaq: (Long) -> Unit,
+    selectedFaqId: Long? = null,
 ) {
     LazyColumn(
         modifier = modifier,
@@ -190,7 +198,8 @@ private fun FaqList(
                     .animateItem()
                     .testTag(testTagForFaq(faq)),
                 faq = faq,
-                onClick = { onNavigateToFaq(faq.id) }
+                onClick = { onNavigateToFaq(faq.id) },
+                selected = selectedFaqId == faq.id
             )
         }
     }
@@ -200,11 +209,13 @@ private fun FaqList(
 private fun FaqPreviewItem(
     modifier: Modifier = Modifier,
     faq: Faq,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    selected: Boolean,
 ) {
     Card(
         modifier = modifier
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick)
+            .selectionBorder(selected),
     ) {
         Column(
             modifier = Modifier

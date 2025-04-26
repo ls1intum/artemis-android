@@ -29,7 +29,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.detail.FaqDetai
 import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.overview.FaqOverviewUi
 import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.overview.FaqOverviewViewModel
 import org.koin.androidx.compose.koinViewModel
-import org.koin.core.parameter.parametersOf
 
 @Composable
 fun SinglePageFaqBody(
@@ -68,7 +67,8 @@ fun SinglePageFaqBody(
                     modifier = Modifier.fillMaxSize(),
                     collapsingContentState = collapsingContentState,
                     viewModel = viewModel,
-                    onNavigateToFaq = onNavigateToFaq
+                    onNavigateToFaq = onNavigateToFaq,
+                    selectedFaqId = null // No selection in phone mode
                 )
             }
 
@@ -82,7 +82,8 @@ fun SinglePageFaqBody(
                             modifier = Modifier.fillMaxSize(),
                             collapsingContentState = collapsingContentState,
                             viewModel = viewModel,
-                            onNavigateToFaq = openFaq
+                            onNavigateToFaq = openFaq,
+                            selectedFaqId = (config as? OpenedFaq)?.faqId,
                         )
                     },
                     priorityColumn = { contentMod ->

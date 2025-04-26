@@ -30,7 +30,8 @@ internal fun ExerciseListUi(
     exercises: List<TimeFrame<Exercise>>,
     query: String,
     collapsingContentState: CollapsingContentState,
-    onClickExercise: (exerciseId: Long) -> Unit
+    onClickExercise: (exerciseId: Long) -> Unit,
+    selectedExerciseId: Long?
 ) {
     if (exercises.isEmpty()) {
         if (query.isNotBlank()) {
@@ -63,6 +64,7 @@ internal fun ExerciseListUi(
                 .fillMaxWidth()
                 .padding(horizontal = Spacings.ScreenHorizontalSpacing),
             exercise = exercise,
+            selected = exercise.id == selectedExerciseId,
             onClickExercise = { onClickExercise(exercise.id ?: 0) }
         )
     }

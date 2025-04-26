@@ -51,7 +51,8 @@ fun SinglePageLectureBody(
                 lectures = lectures,
                 collapsingContentState = collapsingContentState,
                 query = query,
-                onSelectLecture = onNavigateToLectureScreen
+                onSelectLecture = onNavigateToLectureScreen,
+                selectedLectureId = null // No selection in phone mode
             )
         }
 
@@ -66,7 +67,8 @@ fun SinglePageLectureBody(
                         lectures = lectures,
                         collapsingContentState = collapsingContentState,
                         query = query,
-                        onSelectLecture = openLecture
+                        onSelectLecture = openLecture,
+                        selectedLectureId = (config as? OpenedLecture)?.lectureId
                     )
                 },
                 priorityColumn = { contentMod ->
