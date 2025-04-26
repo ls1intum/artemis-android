@@ -13,6 +13,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuOpen
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -29,11 +33,13 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.toRoute
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.ui.ArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.FaqDeeplinks
+import de.tum.informatics.www1.artemis.native_app.core.ui.getArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.LocalMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
@@ -65,19 +71,30 @@ fun NavGraphBuilder.faqDetail() {
         val route: FaqDetailUi = backStackEntry.toRoute()
         val faqId = route.faqId
 
-        val viewModel = koinViewModel<FaqDetailViewModel> { parametersOf(faqId) }
-        val faq by viewModel.faq.collectAsState()
+        FaqDetailContent(faqId)
+    }
+}
 
-        val serverUrl by viewModel.serverUrl.collectAsState()
-        val markdownTransformer = rememberFaqArtemisMarkdownTransformer(serverUrl)
+@Composable
+fun FaqDetailContent(
+    faqId: Long,
+    onSidebarToggle: () -> Unit = {},
+) {
+    val viewModel: FaqDetailViewModel = koinViewModel(key = "faq|$faqId") {
+        parametersOf(faqId)
+    }
+    val faq by viewModel.faq.collectAsState()
 
-        CompositionLocalProvider(LocalMarkdownTransformer provides markdownTransformer) {
-            FaqDetailUi(
-                modifier = Modifier.fillMaxSize(),
-                faqDataState = faq,
-                onReloadRequest = viewModel::onRequestReload
-            )
-        }
+    val serverUrl by viewModel.serverUrl.collectAsState()
+    val markdownTransformer = rememberFaqArtemisMarkdownTransformer(serverUrl)
+
+    CompositionLocalProvider(LocalMarkdownTransformer provides markdownTransformer) {
+        FaqDetailUi(
+            modifier = Modifier.fillMaxSize(),
+            faqDataState = faq,
+            onReloadRequest = viewModel::onRequestReload,
+            onSidebarToggle = onSidebarToggle
+        )
     }
 }
 
@@ -85,8 +102,10 @@ fun NavGraphBuilder.faqDetail() {
 fun FaqDetailUi(
     modifier: Modifier = Modifier,
     faqDataState: DataState<Faq>,
-    onReloadRequest: () -> Unit
+    onReloadRequest: () -> Unit,
+    onSidebarToggle: () -> Unit,
 ) {
+    val layout = getArtemisAppLayout()
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -94,7 +113,16 @@ fun FaqDetailUi(
                 title = {
                     Text(stringResource(R.string.faq_details_title))
                 },
-                navigationIcon = { NavigationBackButton() }
+                navigationIcon = {
+                    if (layout == ArtemisAppLayout.Tablet) {
+                        IconButton(onClick = onSidebarToggle) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.MenuOpen,
+                                contentDescription = null
+                            )
+                        }
+                    } else NavigationBackButton()
+                }
             )
         }
     ) { paddingValues ->

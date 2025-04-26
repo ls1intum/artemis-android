@@ -50,32 +50,6 @@ internal fun testTagForFaq(faq: Faq) = "TEST_TAG_FAQ_${faq.id}"
 @Composable
 fun FaqOverviewUi(
     modifier: Modifier = Modifier,
-    collapsingContentState: CollapsingContentState,
-    scaffold: @Composable (searchConfiguration: CourseSearchConfiguration, content: @Composable () -> Unit) -> Unit,
-    onNavigateToFaq: (faqId: Long) -> Unit
-) {
-    val viewModel = koinViewModel<FaqOverviewViewModel>()
-    val query by viewModel.searchQuery.collectAsState()
-
-    val searchConfiguration = CourseSearchConfiguration.Search(
-        query = query,
-        hint = stringResource(R.string.faq_search_hint),
-        onUpdateQuery = viewModel::updateQuery
-    )
-
-    scaffold(searchConfiguration) {
-        FaqOverviewUi(
-            modifier = modifier,
-            viewModel = viewModel,
-            collapsingContentState = collapsingContentState,
-            onNavigateToFaq = onNavigateToFaq
-        )
-    }
-}
-
-@Composable
-fun FaqOverviewUi(
-    modifier: Modifier = Modifier,
     viewModel: FaqOverviewViewModel,
     collapsingContentState: CollapsingContentState,
     onNavigateToFaq: (faqId: Long) -> Unit
@@ -161,8 +135,7 @@ private fun FaqOverviewBody(
             ConfiguredFaqCategoryChipRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-                ,
+                    .padding(vertical = 8.dp),
                 configuredFaqCategories = filterChips
             )
         }

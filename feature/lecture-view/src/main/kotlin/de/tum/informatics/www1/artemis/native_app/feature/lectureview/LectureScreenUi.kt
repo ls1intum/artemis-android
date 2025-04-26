@@ -99,8 +99,9 @@ fun LectureDetailContent(
     onViewExercise: (exerciseId: Long) -> Unit,
     onSidebarToggle: () -> Unit
 ) {
-
-    val viewModel: LectureViewModel = koinViewModel { parametersOf(lectureId) }
+    val viewModel: LectureViewModel = koinViewModel(key = "lecture|$lectureId") {
+        parametersOf(lectureId)
+    }
     val lectureDataState by viewModel.lectureDataState.collectAsState()
     val courseId by remember(lectureDataState) {
         derivedStateOf { lectureDataState.bind { it.course?.id ?: 0 }.orElse(0) }

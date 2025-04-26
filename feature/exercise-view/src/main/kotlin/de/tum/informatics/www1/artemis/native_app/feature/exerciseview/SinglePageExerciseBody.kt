@@ -56,7 +56,6 @@ fun SinglePageExerciseBody(
             )
         }
 
-
         ArtemisAppLayout.Tablet -> {
             LayoutAwareTwoColumnLayout(
                 modifier = modifier,

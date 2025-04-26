@@ -43,7 +43,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedCom
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.CourseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.SinglePageExerciseBody
-import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.overview.FaqOverviewUi
+import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.SinglePageFaqBody
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.SinglePageLectureBody
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationConfiguration
 import de.tum.informatics.www1.artemis.native_app.feature.metis.IgnoreCustomBackHandling
@@ -75,10 +75,13 @@ private data class CourseUiScreen(
 sealed class CourseTab {
     @Serializable
     data object Exercises : CourseTab()
+
     @Serializable
     data object Lectures : CourseTab()
+
     @Serializable
     data object Communication : CourseTab()
+
     @Serializable
     data object Faq : CourseTab()
 }
@@ -254,32 +257,33 @@ internal fun CourseUiScreen(
     // is handled and the fact that the communicationTab supports the tablet layout. In the tablet
     // layout we want to display the scaffold always, while for the normal (phone) layout the
     // scaffold is only shown in the ConversationOverviewScreen.
-    val scaffold = @Composable { searchConfiguration: CourseSearchConfiguration, content: @Composable () -> Unit ->
-        CourseScaffold(
-            modifier = modifier,
-            courseDataState = courseDataState,
-            isCourseTabSelected = { tab ->
-                val currentDestination = navBackStackEntry?.destination
-                currentDestination?.hierarchy?.any { it.hasRoute(tab::class) } == true
-            },
-            updateSelectedCourseTab = {
-                // Reset the collapsing content state when switching tabs to show the search bar again
-                collapsingContentState.resetCollapsingContent()
-                navController.navigate(it) {
-                    popUpTo(navController.graph.findStartDestination().id) {
-                        saveState = true
+    val scaffold =
+        @Composable { searchConfiguration: CourseSearchConfiguration, content: @Composable () -> Unit ->
+            CourseScaffold(
+                modifier = modifier,
+                courseDataState = courseDataState,
+                isCourseTabSelected = { tab ->
+                    val currentDestination = navBackStackEntry?.destination
+                    currentDestination?.hierarchy?.any { it.hasRoute(tab::class) } == true
+                },
+                updateSelectedCourseTab = {
+                    // Reset the collapsing content state when switching tabs to show the search bar again
+                    collapsingContentState.resetCollapsingContent()
+                    navController.navigate(it) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
                     }
-                    launchSingleTop = true
-                    restoreState = true
-                }
-            },
-            onNavigateBack = onNavigateBack,
-            onReloadCourse = onReloadCourse,
-            searchConfiguration = searchConfiguration,
-            collapsingContentState = collapsingContentState,
-            content = content
-        )
-    }
+                },
+                onNavigateBack = onNavigateBack,
+                onReloadCourse = onReloadCourse,
+                searchConfiguration = searchConfiguration,
+                collapsingContentState = collapsingContentState,
+                content = content
+            )
+        }
 
     val initialTab = when {
         conversationId != null || postId != null -> CourseTab.Communication
@@ -348,7 +352,8 @@ internal fun CourseUiScreen(
                     scaffold(CourseSearchConfiguration.DisabledSearch) {}
                 }
             ) { course ->
-                val isCommunicationEnabled = course.courseInformationSharingConfiguration.supportsMessaging
+                val isCommunicationEnabled =
+                    course.courseInformationSharingConfiguration.supportsMessaging
 
                 if (!isCommunicationEnabled) {
                     scaffold(CourseSearchConfiguration.DisabledSearch) {
@@ -377,13 +382,14 @@ internal fun CourseUiScreen(
         }
 
         composable<CourseTab.Faq> {
-            FaqOverviewUi(
+            SinglePageFaqBody(
                 modifier = Modifier.fillMaxSize(),
                 scaffold = scaffold,
                 collapsingContentState = collapsingContentState,
                 onNavigateToFaq = onNavigateToFaq
             )
         }
+
     }
 }
 
