@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.MenuOpen
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -117,7 +117,7 @@ fun FaqDetailUi(
                     if (layout == ArtemisAppLayout.Tablet) {
                         IconButton(onClick = onSidebarToggle) {
                             Icon(
-                                imageVector = Icons.AutoMirrored.Filled.MenuOpen,
+                                imageVector = Icons.Filled.Menu,
                                 contentDescription = null
                             )
                         }

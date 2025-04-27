@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.MenuOpen
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
@@ -57,7 +57,7 @@ internal fun ExerciseScreenTopAppBar(
                 if (layout == ArtemisAppLayout.Tablet && showSideBarIcon) {
                     IconButton(onClick = onSidebarToggle) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.MenuOpen,
+                            imageVector = Icons.Filled.Menu,
                             contentDescription = null
                         )
                     }

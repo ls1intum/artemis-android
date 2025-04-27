@@ -20,10 +20,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.MenuOpen
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Info
@@ -250,7 +250,7 @@ fun ConversationChatListScreen(
                     if (layout == ArtemisAppLayout.Tablet) {
                         IconButton(onClick = onSidebarToggle) {
                             Icon(
-                                imageVector = Icons.AutoMirrored.Filled.MenuOpen,
+                                imageVector = Icons.Filled.Menu,
                                 contentDescription = null
                             )
                         }
