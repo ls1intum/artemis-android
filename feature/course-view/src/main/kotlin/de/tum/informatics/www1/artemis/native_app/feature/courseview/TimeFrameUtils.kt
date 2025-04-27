@@ -54,9 +54,9 @@ object TimeFrameUtils {
 
         val grouped = buildList {
             if (futureSorted.isNotEmpty()) add(TimeFrame.Future(futureSorted))
+            if (dueSoonSorted.isNotEmpty()) add(TimeFrame.DueSoon(dueSoonSorted))
             if (currentSorted.isNotEmpty()) add(TimeFrame.Current(currentSorted))
             if (pastSorted.isNotEmpty()) add(TimeFrame.Past(pastSorted))
-            if (dueSoonSorted.isNotEmpty()) add(TimeFrame.DueSoon(dueSoonSorted))
             if (noDateSorted.isNotEmpty()) add(TimeFrame.NoDate(noDateSorted))
         }
 
