@@ -43,6 +43,7 @@ fun ConversationScreen(
     showEmptyMessage: Boolean = false,
     isSidebarOpen: Boolean = false,
     onSidebarToggle: () -> Unit,
+    title: String?
 ) {
     val viewModel: ConversationViewModel =
         koinViewModel(
@@ -121,7 +122,8 @@ fun ConversationScreen(
                     }
                 }
             }
-        }
+        },
+        title = title
     )
 }
 

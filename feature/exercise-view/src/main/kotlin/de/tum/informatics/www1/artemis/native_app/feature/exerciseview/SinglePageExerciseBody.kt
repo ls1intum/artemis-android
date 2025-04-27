@@ -31,7 +31,8 @@ fun SinglePageExerciseBody(
     query: String,
     collapsingContentState: CollapsingContentState,
     onClickExercise: (Long) -> Unit,
-    actions: BoundExerciseActions
+    actions: BoundExerciseActions,
+    title: String?
 ) {
     val layout = getArtemisAppLayout()
     val isTabletPortrait = layout.isTabletPortrait
@@ -102,7 +103,8 @@ fun SinglePageExerciseBody(
                             )
                         }
                     }
-                }
+                },
+                title = title
             )
         }
     }

@@ -8,16 +8,22 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import de.tum.informatics.www1.artemis.native_app.core.ui.getArtemisAppLayout
@@ -31,7 +37,8 @@ fun LayoutAwareTwoColumnLayout(
     isSidebarOpen: Boolean,
     onSidebarToggle: () -> Unit,
     optionalColumn: @Composable (Modifier) -> Unit,
-    priorityColumn: @Composable (Modifier) -> Unit
+    priorityColumn: @Composable (Modifier) -> Unit,
+    title: String? = null
 ) {
     val layout = getArtemisAppLayout()
     val (isTabletLandscape, isTabletPortrait) = layout.let { it.isTabletLandscape to it.isTabletPortrait }
@@ -62,21 +69,11 @@ fun LayoutAwareTwoColumnLayout(
                     )
                 }
 
-                AnimatedVisibility(
-                    visible = isSidebarOpen,
-                    enter = slideInHorizontally { fullWidth -> -fullWidth } + fadeIn(),
-                    exit = slideOutHorizontally { fullWidth -> -fullWidth } + fadeOut(),
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .width(400.dp)
-                            .fillMaxHeight()
-                            .zIndex(2f)
-                            .background(MaterialTheme.colorScheme.surface)
-                    ) {
-                        optionalColumn(Modifier.fillMaxSize())
-                    }
-                }
+                Sidebar(
+                    title = title,
+                    optionalColumn = optionalColumn,
+                    isSidebarOpen = isSidebarOpen
+                )
             }
         }
 
@@ -84,21 +81,12 @@ fun LayoutAwareTwoColumnLayout(
             Row(
                 modifier = modifier.fillMaxSize(),
             ) {
-                AnimatedVisibility(
-                    visible = isSidebarOpen,
-                    enter = slideInHorizontally { fullWidth -> -fullWidth } + fadeIn(),
-                    exit = slideOutHorizontally { fullWidth -> -fullWidth } + fadeOut(),
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .width(400.dp)
-                            .fillMaxHeight()
-                            .zIndex(2f)
-                            .background(MaterialTheme.colorScheme.surface)
-                    ) {
-                        optionalColumn(Modifier.fillMaxSize())
-                    }
-                }
+
+                Sidebar(
+                    title = title,
+                    optionalColumn = optionalColumn,
+                    isSidebarOpen = isSidebarOpen
+                )
 
                 VerticalDivider()
 
@@ -120,3 +108,51 @@ fun LayoutAwareTwoColumnLayout(
     }
 }
 
+@Composable
+private fun Sidebar(
+    title: String?,
+    optionalColumn: @Composable (Modifier) -> Unit,
+    isSidebarOpen: Boolean
+) {
+    AnimatedVisibility(
+        visible = isSidebarOpen,
+        enter = slideInHorizontally { fullWidth -> -fullWidth } + fadeIn(),
+        exit = slideOutHorizontally { fullWidth -> -fullWidth } + fadeOut(),
+    ) {
+        Column(
+            modifier = Modifier
+                .width(400.dp)
+                .fillMaxHeight()
+                .zIndex(2f)
+                .background(MaterialTheme.colorScheme.surface)
+        ) {
+            SidebarHeader(title)
+
+            optionalColumn(
+                Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            )
+        }
+    }
+}
+
+@Composable
+fun SidebarHeader(title: String?) {
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        title?.let {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.titleMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        //Search bar or other UI elements can be added here
+    }
+}

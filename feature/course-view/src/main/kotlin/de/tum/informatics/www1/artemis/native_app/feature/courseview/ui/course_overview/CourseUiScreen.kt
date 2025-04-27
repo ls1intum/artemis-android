@@ -252,6 +252,13 @@ internal fun CourseUiScreen(
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
+    // Get course name from courseDataState
+    val courseName = remember(courseDataState) {
+        when (courseDataState) {
+            is DataState.Success -> courseDataState.data.title
+            else -> null
+        }
+    }
 
     // This scaffold function is needed because of the way the navigation in the communication tab
     // is handled and the fact that the communicationTab supports the tablet layout. In the tablet
@@ -324,6 +331,7 @@ internal fun CourseUiScreen(
                                 )
                             }
                         ),
+                        title = courseName
                     )
                 }
             }
@@ -339,7 +347,8 @@ internal fun CourseUiScreen(
                             lectureSearchConfiguration.query else "",
                         collapsingContentState = collapsingContentState,
                         onViewExercise = onNavigateToExercise,
-                        onNavigateToLectureScreen = { id -> onNavigateToLecture(id ?: 0L) }
+                        onNavigateToLectureScreen = { id -> onNavigateToLecture(id ?: 0L) },
+                        title = courseName
                     )
                 }
             }
@@ -376,7 +385,8 @@ internal fun CourseUiScreen(
                     courseId = courseId,
                     scaffold = scaffold,
                     collapsingContentState = collapsingContentState,
-                    initialConfiguration = initialConfiguration
+                    initialConfiguration = initialConfiguration,
+                    title = courseName
                 )
             }
         }
@@ -386,7 +396,8 @@ internal fun CourseUiScreen(
                 modifier = Modifier.fillMaxSize(),
                 scaffold = scaffold,
                 collapsingContentState = collapsingContentState,
-                onNavigateToFaq = onNavigateToFaq
+                onNavigateToFaq = onNavigateToFaq,
+                title = courseName
             )
         }
 

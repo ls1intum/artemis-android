@@ -55,7 +55,8 @@ internal fun SinglePageConversationBody(
     courseId: Long,
     scaffold: @Composable (searchConfiguration: CourseSearchConfiguration, content: @Composable () -> Unit) -> Unit,
     collapsingContentState: CollapsingContentState,
-    initialConfiguration: ConversationConfiguration = NothingOpened
+    initialConfiguration: ConversationConfiguration = NothingOpened,
+    title: String?
 ) {
     var configuration: ConversationConfiguration by rememberSaveable(initialConfiguration) {
         mutableStateOf(initialConfiguration)
@@ -184,7 +185,8 @@ internal fun SinglePageConversationBody(
                             conversationsOverview = { mod -> conversationOverview(mod) },
                             showEmptyMessage = true,
                             isSidebarOpen = isSidebarOpen,
-                            onSidebarToggle = { isSidebarOpen = !isSidebarOpen }
+                            onSidebarToggle = { isSidebarOpen = !isSidebarOpen },
+                            title = title
                         )
                     } else {
                         scaffold(searchConfiguration) {
@@ -219,6 +221,7 @@ internal fun SinglePageConversationBody(
                         conversationsOverview = { mod -> conversationOverview(mod) },
                         isSidebarOpen = isSidebarOpen,
                         onSidebarToggle = { isSidebarOpen = !isSidebarOpen },
+                        title = title
                     )
                 }
 

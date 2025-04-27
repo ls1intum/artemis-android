@@ -25,7 +25,8 @@ fun ConversationFacadeUi(
     courseId: Long,
     scaffold: @Composable (searchConfiguration: CourseSearchConfiguration, content: @Composable () -> Unit) -> Unit,
     collapsingContentState: CollapsingContentState,
-    initialConfiguration: ConversationConfiguration = NothingOpened
+    initialConfiguration: ConversationConfiguration = NothingOpened,
+    title: String?
 ) {
     var showCodeOfConduct by remember { mutableStateOf(true) }
 
@@ -46,7 +47,8 @@ fun ConversationFacadeUi(
             courseId = courseId,
             scaffold = scaffold,
             collapsingContentState = collapsingContentState,
-            initialConfiguration = initialConfiguration
+            initialConfiguration = initialConfiguration,
+            title = title
         )
     }
 }
