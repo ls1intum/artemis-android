@@ -36,6 +36,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -53,6 +54,7 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalTestApi::class)
 @Category(EndToEndTest::class)
 @RunWith(RobolectricTestRunner::class)
+@Ignore("The notifications have switched to a course-specific system with Artemis 8.0, see https://github.com/ls1intum/artemis-android/issues/562")
 class PushNotificationSettingsE2eTest : BaseComposeTest() {
 
     companion object {
