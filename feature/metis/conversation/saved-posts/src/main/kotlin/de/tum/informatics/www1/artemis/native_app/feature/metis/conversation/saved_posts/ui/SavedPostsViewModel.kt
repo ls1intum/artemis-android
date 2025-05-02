@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.sa
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.keepSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
@@ -11,12 +12,12 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.ReloadableViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.service.SavedPostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.asMetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
-import de.tum.informatics.www1.artemis.native_app.core.ui.ReloadableViewModel
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,7 +30,6 @@ import kotlin.coroutines.EmptyCoroutineContext
 
 class SavedPostsViewModel(
     val courseId: Long,
-    val savedPostStatus: SavedPostStatus,
     private val savedPostService: SavedPostService,
     serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
@@ -40,23 +40,36 @@ class SavedPostsViewModel(
     val serverUrl: StateFlow<String> = serverConfigurationService.serverUrl
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, "")
 
+
     val savedPosts: StateFlow<DataState<List<ISavedPost>>> = flatMapLatest(
         serverUrl,
         accountService.authToken,
         requestReload
     ) { serverUrl, authToken, _ ->
         retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-            savedPostService.getSavedPosts(
-                status = savedPostStatus,
-                courseId = courseId,
-                authToken = authToken,
-                serverUrl = serverUrl
-            ).bind { it as List<ISavedPost> }       // Required by the compiler
+            val responses = SavedPostStatus.entries.map { status ->
+                savedPostService.getSavedPosts(
+                    status = status,
+                    courseId = courseId,
+                    authToken = authToken,
+                    serverUrl = serverUrl
+                ).bind { it as List<ISavedPost> }
+            }
+
+            val firstFailure = responses.firstOrNull { it is NetworkResponse.Failure<*> }
+            if (firstFailure != null) {
+                return@retryOnInternet firstFailure
+            }
+
+            val posts = responses
+                .filterIsInstance<NetworkResponse.Response<List<ISavedPost>>>()
+                .map { it.data }
+                .flatten()
                 // TODO: this is currently required of a bug allowing duplicate items in the list
-                //  https://github.com/ls1intum/artemis-android/issues/307
-                .bind {
-                    it.distinctBy { savedPost -> savedPost.key }
-                }
+                // https://github.com/ls1intum/artemis-android/issues/307
+                .distinctBy { savedPost -> savedPost.key }
+
+            NetworkResponse.Response(data = posts)
         }
     }
         .keepSuccess()
