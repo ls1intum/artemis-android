@@ -42,6 +42,7 @@ internal fun ExerciseOverviewTab(
         modifier = modifier
             .verticalScroll(rememberScrollState())
             .fillMaxSize()
+            .padding(bottom =  32.dp)
     ) {
         ParticipationStatusUi(
             modifier = Modifier
@@ -51,6 +52,30 @@ internal fun ExerciseOverviewTab(
             exercise = exercise,
             actions = actions
         )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+       ExerciseChips(exercise)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        if (exercise !is QuizExercise && webViewState != null) {
+            ArtemisWebView(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                webViewState = webViewState,
+                webView = webView,
+                adjustHeightForContent = true,
+                setWebView = setWebView
+            )
+        } else {
+            Text(
+                text = stringResource(id = R.string.exercise_view_overview_problem_statement_not_available),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            )
+        }
 
         // The Spacers in this Column are needed as verticalArrangement.spacedBy does lead to a gap under the ArtemisWebView
         Spacer(modifier = Modifier.height(16.dp))
@@ -68,26 +93,5 @@ internal fun ExerciseOverviewTab(
             exerciseChannel = exerciseChannel,
             isLongToolbar = isLongToolbar
         )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (exercise !is QuizExercise && webViewState != null) {
-            ArtemisWebView(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                webViewState = webViewState,
-                webView = webView,
-                adjustHeightForContent = true,
-                setWebView = setWebView
-            )
-        } else {
-            Text(
-                text = stringResource(id = R.string.exercise_view_overview_problem_statement_not_available),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            )
-        }
     }
 }

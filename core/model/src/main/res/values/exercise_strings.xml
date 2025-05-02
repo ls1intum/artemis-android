@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="exercise_includedInOverallScore_includedCompletely">Included</string>
+    <string name="exercise_includedInOverallScore_includedAsBonus">Bonus</string>
+    <string name="exercise_includedInOverallScore_notIncluded">Not included</string>
+
+    <string name="not_yet_started">Not yet started</string>
+    <string name="user_not_assigned_to_team_short">No team yet</string>
+    <string name="exercise_missed_deadline_short">Missed due date</string>
+    <string name="user_not_participated_short">Not participated</string>
+    <string name="user_participating_short">Currently participating</string>
+    <string name="user_submitted_short">Already submitted</string>
+    <string name="status_dash">–</string>
+</resources>

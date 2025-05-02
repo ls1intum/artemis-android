@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="points_title">Points</string>
+    <string name="submission_due_title">Submission Due</string>
+    <string name="submission_closed_title">Submission Closed</string>
+    <string name="status_title">Status</string>
+    <string name="difficulty_title">Difficulty</string>
+    <string name="category_title">Category</string>
+    <string name="not_released">Not Released</string>
+    <string name="exercise_points">%1$s / %2$s</string>
+</resources>
