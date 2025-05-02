@@ -17,6 +17,9 @@ val settingsModule = module {
             pushNotificationJobService = get(),
             pushNotificationConfigurationService = get(),
             changeProfilePictureService = get(),
+            passkeySettingsService = get(),
+            webauthnApiService = get(),
+            localPasskeyManager = get(),
             appVersionProvider = get()
         )
     }

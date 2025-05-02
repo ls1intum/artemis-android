@@ -15,6 +15,9 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl.ExerciseServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl.ParticipationServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl.ServerTimeServiceImpl
+import de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.LocalPasskeyManager
+import de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.PasskeySettingsService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.WebauthnApiService
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
@@ -29,4 +32,7 @@ val dataModule = module {
     single<CourseExerciseService> { CourseExerciseServiceImpl(get(), get()) }
     single<ParticipationService> { ParticipationServiceImpl(get(), get()) }
     single<ServerTimeService> { ServerTimeServiceImpl(get(), get()) }
+    single<LocalPasskeyManager> { LocalPasskeyManager(androidContext()) }
+    single<WebauthnApiService> { WebauthnApiService(get(), get()) }
+    single<PasskeySettingsService> { PasskeySettingsService(get(), get()) }
 }

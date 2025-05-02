@@ -2,11 +2,12 @@ package de.tum.informatics.www1.artemis.native_app.core.data.service.passkey
 
 import android.content.Context
 import android.util.Log
-import androidx.credentials.CreateCredentialResponse
 import androidx.credentials.CreatePublicKeyCredentialRequest
+import androidx.credentials.CreatePublicKeyCredentialResponse
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
+import androidx.credentials.GetPasswordOption
 import androidx.credentials.GetPublicKeyCredentialOption
 import androidx.credentials.PasswordCredential
 import androidx.credentials.PublicKeyCredential
@@ -17,20 +18,29 @@ import androidx.credentials.exceptions.CreateCredentialInterruptedException
 import androidx.credentials.exceptions.CreateCredentialProviderConfigurationException
 import androidx.credentials.exceptions.CreateCredentialUnknownException
 import androidx.credentials.exceptions.GetCredentialException
-import androidx.credentials.exceptions.domerrors.DomError
+import androidx.credentials.exceptions.NoCredentialException
 import androidx.credentials.exceptions.publickeycredential.CreatePublicKeyCredentialDomException
 
 // From: https://developer.android.com/identity/sign-in/credential-manager#kotlin
 
-private const val TAG = "CredentialManager"
+private const val TAG = "LocalPasskeyManager"
 
-class CredentialManager(
+class LocalPasskeyManager(
     private val context: Context,
 ) {
 
     private val credentialManager = CredentialManager.create(context)
 
-    suspend fun createPasskey(requestJson: String, preferImmediatelyAvailableCredentials: Boolean) {
+    sealed class PasskeyCreationResult {
+        data class Success(val response: CreatePublicKeyCredentialResponse) : PasskeyCreationResult()
+        data object Canceled : PasskeyCreationResult()
+        data class Failure(val error: Exception) : PasskeyCreationResult()
+    }
+
+    suspend fun createPasskey(
+        requestJson: String,
+        preferImmediatelyAvailableCredentials: Boolean = false,
+    ): PasskeyCreationResult {
         val createPublicKeyCredentialRequest = CreatePublicKeyCredentialRequest(
             // Contains the request in JSON format. Uses the standard WebAuthn
             // web JSON spec.
@@ -51,37 +61,52 @@ class CredentialManager(
                 context = context,
                 request = createPublicKeyCredentialRequest,
             )
-            handlePasskeyRegistrationResult(result)
+            return PasskeyCreationResult.Success(result as CreatePublicKeyCredentialResponse)
         } catch (e : CreateCredentialException){
-            handlePassKeyCreationFailure(e)
+            return handlePassKeyCreationFailure(
+                error = e,
+                onRetry = {
+                    // Retry the request if needed.
+                    createPasskey(
+                        requestJson = requestJson,
+                        preferImmediatelyAvailableCredentials = preferImmediatelyAvailableCredentials
+                    )
+                }
+            )
         }
     }
 
-    private fun handlePasskeyRegistrationResult(result: CreateCredentialResponse) {
-        TODO("Not yet implemented")
-    }
-
-    private fun handlePassKeyCreationFailure(e: CreateCredentialException) {
-        when (e) {
+    private suspend fun handlePassKeyCreationFailure(
+        error: CreateCredentialException,
+        onRetry: suspend () -> PasskeyCreationResult,
+    ): PasskeyCreationResult {
+        when (error) {
             is CreatePublicKeyCredentialDomException -> {
                 // Handle the passkey DOM errors thrown according to the
                 // WebAuthn spec.
-                handlePasskeyError(e.domError)
+                Log.e(TAG, "Passkey creation failed with DOM error: ${error.domError.type}")
+                return PasskeyCreationResult.Failure(error)
             }
             is CreateCredentialCancellationException -> {
                 // The user intentionally canceled the operation and chose not
                 // to register the credential.
+                Log.d(TAG, "Passkey creation canceled by user")
+                return PasskeyCreationResult.Canceled
             }
             is CreateCredentialInterruptedException -> {
                 // Retry-able error. Consider retrying the call.
+                return onRetry()
             }
             is CreateCredentialProviderConfigurationException -> {
                 // Your app is missing the provider configuration dependency.
                 // Most likely, you're missing the
                 // "credentials-play-services-auth" module.
+                Log.e(TAG, "Passkey creation failed with provider configuration error: ${error.message}")
+                return PasskeyCreationResult.Failure(error)
             }
             is CreateCredentialUnknownException -> {
-
+                Log.e(TAG, "Passkey creation failed with unknown error: ${error.message}")
+                return PasskeyCreationResult.Failure(error)
             }
             is CreateCredentialCustomException -> {
                 // You have encountered an error from a 3rd-party SDK. If you
@@ -90,24 +115,33 @@ class CredentialManager(
                 // should check for any custom exception type constants within
                 // that SDK to match with e.type. Otherwise, drop or log the
                 // exception.
+                Log.e(TAG, "Passkey creation failed with custom error: ${error.message}")
+                return PasskeyCreationResult.Failure(error)
             }
-            else -> Log.w(TAG, "Unexpected exception type ${e::class.java.name}")
+            else -> {
+                Log.w(TAG, "Unexpected exception type ${error::class.java.name}")
+                return PasskeyCreationResult.Failure(error)
+            }
         }
     }
 
-    private fun handlePasskeyError(domError: DomError) {
-        TODO("Not yet implemented")
+    sealed class SignInResult {
+        data class WithPasskey(val responseJson: String) : SignInResult()
+        data class WithPassword(val username: String, val password: String) : SignInResult()
+        data object NoCredential : SignInResult()
+        data class Failure(val error: Exception) : SignInResult()
     }
 
-    suspend fun signInWithPasskey(requestJson: String) {
+    suspend fun signIn(requestJson: String): SignInResult {
+        val getPasswordOption = GetPasswordOption()
         val getPublicKeyCredentialOption = GetPublicKeyCredentialOption(
             requestJson = requestJson
         )
         val getCredRequest = GetCredentialRequest(
-            listOf(getPublicKeyCredentialOption)
+            listOf(getPasswordOption, getPublicKeyCredentialOption)
         )
 
-        try {
+        return try {
             val result = credentialManager.getCredential(
                 // Use an activity-based context to avoid undefined system UI
                 // launching behavior.
@@ -120,30 +154,44 @@ class CredentialManager(
         }
     }
 
-    private fun handleSignIn(result: GetCredentialResponse) {
+    private fun handleSignIn(result: GetCredentialResponse): SignInResult {
         // Handle the successfully returned credential.
         val credential = result.credential
 
-        when (credential) {
+        return when (credential) {
             is PublicKeyCredential -> {
                 val responseJson = credential.authenticationResponseJson
-                // Share responseJson i.e. a GetCredentialResponse on your server to
-                // validate and  authenticate
+                // Return the response JSON for server validation and authentication.
+                SignInResult.WithPasskey(responseJson)
             }
             is PasswordCredential -> {
                 val username = credential.id
                 val password = credential.password
-                // Use id and password to send to your server to validate
-                // and authenticate
-            } else -> {
+                // Return the username and password for server validation and authentication.
+                SignInResult.WithPassword(username, password)
+            }
+            else -> {
                 // Catch any unrecognized credential type here.
-            Log.e(TAG, "Unexpected type of credential")
+                Log.e(TAG, "Unexpected type of credential")
+                SignInResult.Failure(Exception("Unexpected credential type"))
             }
         }
     }
 
-    private fun handleSignInFailure(exception: GetCredentialException) {
-        TODO("Not yet implemented")
+    private fun handleSignInFailure(exception: GetCredentialException): SignInResult {
+        return when (exception) {
+            is NoCredentialException -> {
+                // No credentials were found. The user may not have registered
+                // any credentials yet.
+                Log.d(TAG, "No credentials found")
+                SignInResult.NoCredential
+            }
+            else -> {
+                // Handle other errors.
+                Log.e(TAG, "Sign-in failed with error: ${exception.message}")
+                SignInResult.Failure(exception)
+            }
+        }
     }
 
 }

@@ -1,8 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.data.service.passkey
 
 import androidx.credentials.PublicKeyCredential
-import androidx.credentials.webauthn.PublicKeyCredentialCreationOptions
-import androidx.credentials.webauthn.PublicKeyCredentialRequestOptions
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
@@ -20,7 +18,7 @@ class WebauthnApiService(
     artemisContextProvider: ArtemisContextProvider,
 ) : LoggedInBasedServiceImpl(ktorProvider,artemisContextProvider){
 
-    suspend fun getRegistrationOptions(): NetworkResponse<PublicKeyCredentialCreationOptions> {
+    suspend fun getRegistrationOptions(): NetworkResponse<String> {
         return postRequest {
             url {
                 appendPathSegments("webauthn", "register", "options")
@@ -37,7 +35,7 @@ class WebauthnApiService(
         }
     }
 
-    suspend fun getAuthenticationOptions(): NetworkResponse<PublicKeyCredentialRequestOptions> {
+    suspend fun getAuthenticationOptions(): NetworkResponse<String> {
         return postRequest {
             url {
                 appendPathSegments("webauthn", "authenticate", "options")
