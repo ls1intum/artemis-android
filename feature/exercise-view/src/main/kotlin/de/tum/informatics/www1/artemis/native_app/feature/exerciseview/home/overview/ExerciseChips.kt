@@ -26,11 +26,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.color
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.currentUserPoints
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.label
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.status
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExercisePointsDecimalFormat
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ExerciseColors
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.R
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
@@ -39,7 +39,12 @@ import kotlinx.datetime.toLocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-private data class TwoLineChipData(val title: String, val value: String, val isWarning: Boolean = false)
+private data class TwoLineChipData(
+    val title: String,
+    val value: String,
+    val isWarning: Boolean = false
+)
+
 private data class DifficultyChipData(val difficulty: Exercise.Difficulty)
 private data class CategoryChipData(val badges: List<SpecialBadgeData>)
 private data class SpecialBadgeData(val text: String, val background: Color)
@@ -58,16 +63,29 @@ fun ExerciseChips(
     val mainChips = buildList {
         // Points
         exercise.maxPoints?.let { max ->
-            val currentUserPoints = exercise.currentUserPoints.let(ExercisePointsDecimalFormat::format)
+            val currentUserPoints =
+                exercise.currentUserPoints.let(ExercisePointsDecimalFormat::format)
             val maxPoints = max.let(ExercisePointsDecimalFormat::format)
+
+            val pointsText = when {
+                currentUserPoints != null && maxPoints != null -> stringResource(
+                    id = R.string.exercise_chips_exercise_points,
+                    currentUserPoints,
+                    maxPoints
+                )
+
+                maxPoints != null -> stringResource(
+                    id = R.string.exercise_chips_points_max,
+                    maxPoints
+                )
+
+                else -> stringResource(id = R.string.exercise_chips_points_none)
+            }
+
             add(
                 TwoLineChipData(
-                    title = stringResource(R.string.points_title),
-                    value = stringResource(
-                        id = R.string.exercise_points,
-                        currentUserPoints,
-                        maxPoints
-                    )
+                    title = stringResource(R.string.exercise_chips_points_title),
+                    value = pointsText
                 )
             )
         }
@@ -87,13 +105,15 @@ fun ExerciseChips(
                     DateUtils.MINUTE_IN_MILLIS
                 ).toString()
             } else {
-                val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
+                val formatter =
+                    DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
                 due.toLocalDateTime(TimeZone.currentSystemDefault())
                     .toJavaLocalDateTime()
                     .format(formatter)
             }
 
-            val title = if (remaining > 0) R.string.submission_due_title else R.string.submission_closed_title
+            val title =
+                if (remaining > 0) R.string.exercise_chips_submission_due_title else R.string.exercise_chips_submission_closed_title
             add(
                 TwoLineChipData(
                     title = stringResource(title),
@@ -106,27 +126,32 @@ fun ExerciseChips(
         // Status
         add(
             TwoLineChipData(
-                title = stringResource(R.string.status_title),
+                title = stringResource(R.string.exercise_chips_status_title),
                 value = stringResource(exercise.status)
             )
         )
     }
 
-   //Difficulty
+    // Difficulty
     val difficultyChip = exercise.difficulty?.let { DifficultyChipData(it) }
 
-   //Category
+    //Category
     val badgeData = buildList {
         // Not released yet
         exercise.releaseDate?.takeIf { it > Clock.System.now() }?.let {
-            add(SpecialBadgeData(stringResource(R.string.not_released), Color(0xFFFFA500)))
+            add(
+                SpecialBadgeData(
+                    stringResource(R.string.exercise_chips_not_released),
+                    ExerciseColors.Category.notReleased
+                )
+            )
         }
         // Included in overall score
         if (exercise.includedInOverallScore != Exercise.IncludedInOverallScore.INCLUDED_COMPLETELY) {
             add(
                 SpecialBadgeData(
                     stringResource(exercise.includedInOverallScore.label),
-                    exercise.includedInOverallScore.color
+                    ExerciseColors.Type.notIncluded
                 )
             )
         }
@@ -155,10 +180,10 @@ fun ExerciseChips(
         // main two‑line chips
         items(mainChips) { data -> MainChip(data) }
 
-        // difficulty
+        // Difficulty
         difficultyChip?.let { item { DifficultyChip(it) } }
 
-        // category badges
+        // Category badges
         categoryChip?.let { item { CategoryChip(it) } }
     }
 }
@@ -213,7 +238,7 @@ private fun DifficultyChip(data: DifficultyChipData) {
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = stringResource(R.string.difficulty_title),
+                text = stringResource(R.string.exercise_chips_difficulty_title),
                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                 color = Color.Gray
             )
@@ -238,11 +263,11 @@ private fun CategoryChip(data: CategoryChipData) {
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = stringResource(R.string.category_title),
+                text = stringResource(R.string.exercise_chips_category_title),
                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                 color = Color.Gray
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                 data.badges.forEach { SpecialBadge(it) }
             }
         }
@@ -273,12 +298,21 @@ private fun DifficultyBar(difficulty: Exercise.Difficulty) {
         Exercise.Difficulty.MEDIUM -> 2
         Exercise.Difficulty.HARD -> 3
     }
+    val color = when (difficulty) {
+        Exercise.Difficulty.EASY -> ExerciseColors.Difficulty.easy
+        Exercise.Difficulty.MEDIUM -> ExerciseColors.Difficulty.medium
+        Exercise.Difficulty.HARD -> ExerciseColors.Difficulty.hard
+    }
+
     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         repeat(3) { idx ->
             Surface(
                 shape = RoundedCornerShape(2.dp),
-                color = if (idx < fill) difficulty.color else difficulty.color.copy(alpha = 0.3f)
-            ) { Spacer(modifier = Modifier.size(width = 20.dp, height = 10.dp)) }
+                color = if (idx < fill) color else color.copy(alpha = 0.3f)
+            ) {
+                Spacer(modifier = Modifier.size(width = 20.dp, height = 10.dp))
+            }
         }
     }
 }
+

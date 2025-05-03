@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.core.model.exercise
 
-import androidx.compose.ui.graphics.Color
 import de.tum.informatics.www1.artemis.native_app.core.common.hasPassedFlow
 import de.tum.informatics.www1.artemis.native_app.core.common.isInFutureFlow
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
@@ -213,25 +212,11 @@ val Exercise.currentUserPoints: Float
 val Exercise.latestParticipation: Participation?
     get() = studentParticipations.orEmpty().firstOrNull()
 
-val Exercise.Difficulty.color: Color
-    get() = when (this) {
-        Exercise.Difficulty.EASY -> Color(0xFF198754)  // Green
-        Exercise.Difficulty.MEDIUM -> Color(0xFFFFC107) // Yellow
-        Exercise.Difficulty.HARD -> Color(0xFFDC3545)   // Red
-    }
-
 val Exercise.IncludedInOverallScore.label: Int
     get() = when (this) {
         Exercise.IncludedInOverallScore.INCLUDED_COMPLETELY -> R.string.exercise_includedInOverallScore_includedCompletely
         Exercise.IncludedInOverallScore.INCLUDED_AS_BONUS -> R.string.exercise_includedInOverallScore_includedAsBonus
         Exercise.IncludedInOverallScore.NOT_INCLUDED -> R.string.exercise_includedInOverallScore_notIncluded
-    }
-
-val Exercise.IncludedInOverallScore.color: Color
-    get() = when (this) {
-        Exercise.IncludedInOverallScore.INCLUDED_COMPLETELY -> Color(0xFF198754)
-        Exercise.IncludedInOverallScore.INCLUDED_AS_BONUS -> Color(0xFFFFC107) // Warning
-        Exercise.IncludedInOverallScore.NOT_INCLUDED -> Color(0xFF6C757D) // Secondary
     }
 
 val Exercise.status: Int

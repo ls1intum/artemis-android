@@ -53,7 +53,7 @@ internal fun ExerciseOverviewTab(
             actions = actions
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
        ExerciseChips(exercise)
 
