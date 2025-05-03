@@ -28,8 +28,9 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.currentUserPoints
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.label
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.status
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExercisePointsDecimalFormat
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ParticipationStatusUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ProvideDefaultExerciseTemplateStatus
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ExerciseColors
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.R
 import kotlinx.datetime.Clock
@@ -43,11 +44,18 @@ import kotlin.time.Duration.Companion.days
 
 private const val MAX_NUMBER_OF_CHIPS = 2
 
-private data class TwoLineChipData(
-    val title: String,
+private sealed interface OverviewChipData {
+    val title: String
+}
+data class TextChip(
     val value: String,
-    val isWarning: Boolean = false
-)
+    val isWarning: Boolean = false, override val title: String
+) : OverviewChipData
+
+data class ContentChip(
+    override val title: String,
+    val content: @Composable () -> Unit
+) : OverviewChipData
 
 private data class DifficultyChipData(val difficulty: Exercise.Difficulty)
 private data class CategoryChipData(val badges: List<SpecialBadgeData>)
@@ -87,7 +95,7 @@ fun ExerciseOverviewChips(
             }
 
             add(
-                TwoLineChipData(
+                TextChip(
                     title = stringResource(R.string.exercise_chips_points_title),
                     value = pointsText
                 )
@@ -109,7 +117,7 @@ fun ExerciseOverviewChips(
             }
 
             add(
-                TwoLineChipData(
+                TextChip(
                     title = stringResource(title),
                     value = value ?: "",
                     isWarning = isLessThanDay
@@ -119,9 +127,17 @@ fun ExerciseOverviewChips(
 
         // Status
         add(
-            TwoLineChipData(
+            ContentChip(
                 title = stringResource(R.string.exercise_chips_status_title),
-                value = stringResource(exercise.status)
+                content = {
+                    ProvideDefaultExerciseTemplateStatus(exercise) {
+                        ParticipationStatusUi(
+                            modifier = Modifier,
+                            exercise = exercise,
+                            isChip = true
+                        )
+                    }
+                }
             )
         )
     }
@@ -154,7 +170,7 @@ fun ExerciseOverviewChips(
             add(
                 SpecialBadgeData(
                     cat.category,
-                    cat.colorValue?.let { Color(it) } ?: MaterialTheme.colorScheme.primary
+                    cat.colorValue?.let { Color(it) } ?: MaterialTheme.colorScheme.onSurface
                 )
             )
         }
@@ -172,7 +188,7 @@ fun ExerciseOverviewChips(
         contentPadding = PaddingValues(horizontal = 16.dp)
     ) {
         // main two‑line chips
-        items(mainChips) { data -> MainChip(data) }
+        items(mainChips) { data -> OverviewChipItem(data) }
 
         // Difficulty
         difficultyChip?.let { item { DifficultyChip(it) } }
@@ -184,10 +200,9 @@ fun ExerciseOverviewChips(
 
 
 @Composable
-private fun MainChip(data: TwoLineChipData) {
+private fun OverviewChipItem(data: OverviewChipData) {
     Surface(
-        modifier = Modifier
-            .height(ChipHeight),
+        modifier = Modifier.height(ChipHeight),
         shape = RoundedCornerShape(ChipCorner),
         border = BorderStroke(ChipBorder, color = Color.Gray),
         color = MaterialTheme.colorScheme.surface
@@ -200,18 +215,25 @@ private fun MainChip(data: TwoLineChipData) {
         ) {
             Text(
                 text = data.title,
-                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                 color = Color.Gray,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Text(
-                text = data.value,
-                style = MaterialTheme.typography.labelMedium,
-                color = if (data.isWarning) Color.Red else MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            when (data) {
+                is TextChip -> {
+                    Text(
+                        text = data.value,
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        color = if (data.isWarning) Color.Red else MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                is ContentChip -> {
+                    data.content()
+                }
+            }
         }
     }
 }
@@ -233,7 +255,7 @@ private fun DifficultyChip(data: DifficultyChipData) {
         ) {
             Text(
                 text = stringResource(R.string.exercise_chips_difficulty_title),
-                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                 color = Color.Gray
             )
             DifficultyBar(data.difficulty)
@@ -258,7 +280,7 @@ private fun CategoryChip(data: CategoryChipData) {
         ) {
             Text(
                 text = stringResource(R.string.exercise_chips_category_title),
-                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                 color = Color.Gray
             )
             Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -278,7 +300,7 @@ private fun SpecialBadge(badge: SpecialBadgeData) {
         Text(
             text = badge.text,
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-            style = MaterialTheme.typography.labelSmall,
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )

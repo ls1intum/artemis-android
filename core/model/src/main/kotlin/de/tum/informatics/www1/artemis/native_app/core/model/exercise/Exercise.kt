@@ -24,8 +24,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonClassDiscriminator
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.datetime.Clock
-import kotlin.time.Duration.Companion.days
 
 @OptIn(ExperimentalSerializationApi::class)
 @JsonClassDiscriminator("type") //Default is type anyway, however here I make it explicit
@@ -217,24 +215,4 @@ val Exercise.IncludedInOverallScore.label: Int
         Exercise.IncludedInOverallScore.INCLUDED_COMPLETELY -> R.string.exercise_includedInOverallScore_includedCompletely
         Exercise.IncludedInOverallScore.INCLUDED_AS_BONUS -> R.string.exercise_includedInOverallScore_includedAsBonus
         Exercise.IncludedInOverallScore.NOT_INCLUDED -> R.string.exercise_includedInOverallScore_notIncluded
-    }
-
-val Exercise.status: Int
-    get() {
-        val teamOk = !teamMode || !studentAssignedTeamIdComputed || studentAssignedTeamId != null
-        val participation = getSpecificStudentParticipation(testRun = false)
-        val now = Clock.System.now()
-        val due = dueDate ?: Clock.System.now().plus(1.days) // tomorrow
-        val uninitialized = due > now && participation == null
-        val missedDueDate = due < now && participation == null
-
-        return when {
-            !teamOk -> R.string.user_not_assigned_to_team_short
-            uninitialized -> R.string.not_yet_started
-            missedDueDate -> R.string.exercise_missed_deadline_short
-            participation?.initializationState == InitializationState.FINISHED -> R.string.user_submitted_short
-            participation?.initializationState == InitializationState.INITIALIZED && this is QuizExercise -> R.string.user_participating_short
-            this is QuizExercise -> R.string.not_yet_started
-            else -> R.string.status_dash
-        }
     }
