@@ -53,4 +53,13 @@ object ComponentColors {
         val completed: Color
             get() = Color(0xFF28A745)
     }
+
+    object RoundGreenCheckbox {
+        val checkedBackground: Color
+            @Composable get() = if (isSystemInDarkTheme()) Color(0xFF4CAF50) else Color(0xFF4CAF50)
+        val checkmark: Color
+            @Composable get() = Color.White
+        val uncheckedBackground: Color
+            @Composable get() = Color.Transparent
+    }
 }
