@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -41,7 +42,6 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -109,8 +109,6 @@ internal fun ConversationList(
     onToggleMuted: (conversationId: Long, muted: Boolean) -> Unit,
     trailingContent: LazyListScope.() -> Unit
 ) {
-    val isSavedPostsExpanded by viewModel.isSavedPostsExpanded.collectAsState()
-
     ConversationList(
         modifier = modifier,
         toggleFavoritesExpanded = viewModel::toggleFavoritesExpanded,
@@ -285,10 +283,23 @@ internal fun ConversationList(
     }
 }
 
+private fun LazyListScope.savedPostsHeaderRow(
+    onClick: () -> Unit
+) {
+    conversationSectionHeader(
+        key = SECTION_SAVED_POSTS_KEY,
+        text = R.string.conversation_overview_section_saved_posts,
+        isExpanded = null,
+        unreadCount = 0,
+        onClick = onClick,
+        icon = { Icon(imageVector = Icons.Default.Bookmark, contentDescription = null) }
+    )
+}
+
 private fun LazyListScope.conversationSectionHeader(
     key: String,
     @StringRes text: Int,
-    isExpanded: Boolean,
+    isExpanded: Boolean?,
     conversationCount: Int? = null,
     unreadCount: Long,
     onClick: () -> Unit,
@@ -301,6 +312,7 @@ private fun LazyListScope.conversationSectionHeader(
                 .animateItem()
                 .testTag(key)
                 .clickable { onClick() }
+                .heightIn(min = 64.dp)      // If isExpanded is null, then the height is smaller because of the missing icon button
                 .padding(vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
@@ -317,6 +329,10 @@ private fun LazyListScope.conversationSectionHeader(
                     text = if (conversationCount != null) stringResource(id = text, conversationCount) else stringResource(id = text),
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                 )
+            }
+
+            if (isExpanded == null) {
+                return@item
             }
 
             if (!isExpanded) UnreadMessages(unreadMessagesCount = unreadCount)
@@ -642,34 +658,4 @@ private fun String.removeSectionPrefix(): String {
         }
     }
     return result.trim()
-}
-
-private fun LazyListScope.savedPostsHeaderRow(
-    onClick: () -> Unit
-) {
-    item(key = SECTION_SAVED_POSTS_KEY) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag(SECTION_SAVED_POSTS_KEY)
-                .clickable { onClick() }
-                .padding(vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.weight(1f)
-            ) {
-                Icon(imageVector = Icons.Default.Bookmark, contentDescription = null)
-                Text(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 8.dp),
-                    text = stringResource(R.string.conversation_overview_section_saved_posts),
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                )
-            }
-        }
-    }
 }
