@@ -33,11 +33,15 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExercisePoint
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ExerciseColors
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.R
 import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.datetime.toLocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import kotlin.time.Duration.Companion.days
+
+private const val MAX_NUMBER_OF_CHIPS = 2
 
 private data class TwoLineChipData(
     val title: String,
@@ -55,9 +59,9 @@ private val ChipBorder = 1.dp
 private val ChipPadding = 8.dp
 
 @Composable
-fun ExerciseChips(
-    exercise: Exercise,
-    modifier: Modifier = Modifier
+fun ExerciseOverviewChips(
+    modifier: Modifier = Modifier,
+    exercise: Exercise
 ) {
 
     val mainChips = buildList {
@@ -90,34 +94,24 @@ fun ExerciseChips(
             )
         }
 
-        // Submission
         exercise.dueDate?.let { due ->
             val now = Clock.System.now()
-            val remaining = due.epochSeconds - now.epochSeconds
-            val isFuture = remaining > 0
-            val isLessThanWeek = kotlin.math.abs(remaining) < 7 * 24 * 60 * 60
-            val isLessThanDay = remaining in 1..86_400
+            val remaining = due - now
 
-            val value: String = if (isFuture && isLessThanWeek) {
-                DateUtils.getRelativeTimeSpanString(
-                    due.toEpochMilliseconds(),
-                    now.toEpochMilliseconds(),
-                    DateUtils.MINUTE_IN_MILLIS
-                ).toString()
+            val isLessThanDay = remaining.isPositive() && remaining < 1.days
+
+            val value = getFormattedSubmissionTime(due)
+
+            val title = if (remaining.isPositive()) {
+                R.string.exercise_chips_submission_due_title
             } else {
-                val formatter =
-                    DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
-                due.toLocalDateTime(TimeZone.currentSystemDefault())
-                    .toJavaLocalDateTime()
-                    .format(formatter)
+                R.string.exercise_chips_submission_closed_title
             }
 
-            val title =
-                if (remaining > 0) R.string.exercise_chips_submission_due_title else R.string.exercise_chips_submission_closed_title
             add(
                 TwoLineChipData(
                     title = stringResource(title),
-                    value = value,
+                    value = value ?: "",
                     isWarning = isLessThanDay
                 )
             )
@@ -156,7 +150,7 @@ fun ExerciseChips(
             )
         }
         // Categories (max 2 + remainder)
-        exercise.categories.take(2).forEach { cat ->
+        exercise.categories.take(MAX_NUMBER_OF_CHIPS).forEach { cat ->
             add(
                 SpecialBadgeData(
                     cat.category,
@@ -164,7 +158,7 @@ fun ExerciseChips(
                 )
             )
         }
-        val remainder = exercise.categories.size - 2
+        val remainder = exercise.categories.size - MAX_NUMBER_OF_CHIPS
         if (remainder > 0) add(SpecialBadgeData("+$remainder more", Color.LightGray))
     }
     val categoryChip = badgeData.takeIf { it.isNotEmpty() }?.let { CategoryChipData(it) }
@@ -316,3 +310,26 @@ private fun DifficultyBar(difficulty: Exercise.Difficulty) {
     }
 }
 
+@Composable
+fun getFormattedSubmissionTime(dueDate: Instant?): String? {
+    dueDate ?: return null
+
+    val now = Clock.System.now()
+    val remaining = dueDate - now
+
+    val isFuture = remaining.isPositive()
+    val isLessThanWeek = remaining.absoluteValue < 7.days
+
+    return if (isFuture && isLessThanWeek) {
+        DateUtils.getRelativeTimeSpanString(
+            dueDate.toEpochMilliseconds(),
+            now.toEpochMilliseconds(),
+            DateUtils.MINUTE_IN_MILLIS
+        ).toString()
+    } else {
+        val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
+        dueDate.toLocalDateTime(TimeZone.currentSystemDefault())
+            .toJavaLocalDateTime()
+            .format(formatter)
+    }
+}
