@@ -29,6 +29,7 @@ data class MiscArtemisNotification(
     override val type: MiscNotificationType,
     override val notificationPlaceholders: List<String>,
     override val target: String,
+    @Serializable(with = SafeInstantSerializer::class)
     override val date: Instant,
     override val version: Int
 ) : ArtemisNotification<MiscNotificationType>
@@ -39,6 +40,7 @@ data class CommunicationArtemisNotification(
     override val type: CommunicationNotificationType,
     override val notificationPlaceholders: List<String>,
     override val target: String,
+    @Serializable(with = SafeInstantSerializer::class)
     override val date: Instant,
     override val version: Int
 ) : ArtemisNotification<CommunicationNotificationType>
@@ -48,6 +50,7 @@ data class UnknownArtemisNotification(
     override val type: UnknownNotificationType,
     override val notificationPlaceholders: List<String>,
     override val target: String,
+    @Serializable(with = SafeInstantSerializer::class)
     override val date: Instant,
     override val version: Int
 ) : ArtemisNotification<UnknownNotificationType>
@@ -87,3 +90,18 @@ object CommunicationNotificationTypeDeserializer :
 val ArtemisNotification<CommunicationNotificationType>.parentId: Long
     get() = NotificationTargetManager.getCommunicationNotificationTarget(target).postId
 
+// This serializer is needed to handle the incompatible date format sent by the server, which is not compatible with the default Instant serializer.
+object SafeInstantSerializer : KSerializer<Instant> {
+    override val descriptor: SerialDescriptor =
+        PrimitiveSerialDescriptor("SafeInstant", PrimitiveKind.STRING)
+
+    override fun deserialize(decoder: Decoder): Instant {
+        val raw = decoder.decodeString()
+        val cleaned = raw.substringBefore('[')
+        return Instant.parse(cleaned)
+    }
+
+    override fun serialize(encoder: Encoder, value: Instant) {
+        encoder.encodeString(value.toString())
+    }
+}
