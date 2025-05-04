@@ -4,10 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,11 +24,9 @@ import com.google.accompanist.placeholder.material.placeholder
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
-import de.tum.informatics.www1.artemis.native_app.core.ui.ArtemisAppLayout
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.AdaptiveNavigationIcon
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
-import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.getExerciseTypeIconPainter
-import de.tum.informatics.www1.artemis.native_app.core.ui.getArtemisAppLayout
 
 
 @Composable
@@ -41,8 +36,6 @@ internal fun ExerciseScreenTopAppBar(
     onSidebarToggle: () -> Unit = {},
     showSideBarIcon: Boolean
 ) {
-    val layout = getArtemisAppLayout()
-
     Column(modifier = modifier) {
         ArtemisTopAppBar(
             modifier = Modifier.fillMaxWidth(),
@@ -54,14 +47,10 @@ internal fun ExerciseScreenTopAppBar(
                 )
             },
             navigationIcon = {
-                if (layout == ArtemisAppLayout.Tablet && showSideBarIcon) {
-                    IconButton(onClick = onSidebarToggle) {
-                        Icon(
-                            imageVector = Icons.Filled.Menu,
-                            contentDescription = null
-                        )
-                    }
-                } else NavigationBackButton()
+                AdaptiveNavigationIcon(
+                    onSidebarToggle = onSidebarToggle,
+                    showSidebarIcon = showSideBarIcon
+                )
             }
         )
     }

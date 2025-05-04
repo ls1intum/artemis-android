@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.faq.ui
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
@@ -105,7 +104,6 @@ fun SinglePageFaqBody(
                             }
 
                             is OpenedFaq -> key(conf.faqId) {
-                                Log.d("FAQ-DEBUG", "Composing FaqDetailContent for id=${conf.faqId}")
                                 FaqDetailContent(
                                     faqId = conf.faqId,
                                     onSidebarToggle = onSidebarToggle

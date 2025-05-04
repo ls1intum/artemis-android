@@ -77,17 +77,15 @@ fun SinglePageLectureBody(
                         NothingOpened -> {
                             IconButton(onClick = onSidebarToggle) {
                                 Icon(
-                                    imageVector = Icons.Filled.Menu,                                    contentDescription = "Open sidebar"
+                                    imageVector = Icons.Filled.Menu,
+                                    contentDescription = "Open sidebar"
                                 )
                             }
                             Box(
                                 modifier = contentMod.fillMaxSize(),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    modifier = Modifier.align(Alignment.Center),
-                                    text = stringResource(R.string.lecture_list_lecture_item_not_selected)
-                                )
+                                Text(text = stringResource(R.string.lecture_list_lecture_item_not_selected))
                             }
                         }
 

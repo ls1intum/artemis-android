@@ -9,10 +9,6 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,15 +30,13 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
-import de.tum.informatics.www1.artemis.native_app.core.ui.ArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.AdaptiveNavigationIcon
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.LinkBottomSheet
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.LinkBottomSheetState
-import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.LectureDeeplinks
-import de.tum.informatics.www1.artemis.native_app.core.ui.getArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.canDisplayMetisOnDisplaySide
@@ -168,7 +162,6 @@ internal fun LectureScreen(
     var displaySetCompletedFailureDialog: Boolean by remember { mutableStateOf(false) }
 
     val overviewListState = rememberLazyListState()
-    val layout = getArtemisAppLayout()
 
     BoxWithConstraints(modifier = modifier) {
         val displayCommunicationOnSide = canDisplayMetisOnDisplaySide(
@@ -189,14 +182,7 @@ internal fun LectureScreen(
                         )
                     },
                     navigationIcon = {
-                        if (layout == ArtemisAppLayout.Tablet) {
-                            IconButton(onClick = onSidebarToggle) {
-                                Icon(
-                                    imageVector = Icons.Filled.Menu,
-                                    contentDescription = null
-                                )
-                            }
-                        } else NavigationBackButton()
+                        AdaptiveNavigationIcon(onSidebarToggle = onSidebarToggle)
                     },
                     isElevated = false
                 )

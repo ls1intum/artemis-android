@@ -70,7 +70,7 @@ fun ConversationScreen(
             conversationsOverview(sidebarMod)
         },
         priorityColumn = { contentMod ->
-            if(showEmptyMessage) {
+            if (showEmptyMessage) {
                 IconButton(onClick = onSidebarToggle) {
                     Icon(
                         imageVector = Icons.Filled.Menu,
@@ -86,7 +86,8 @@ fun ConversationScreen(
             } else {
                 IconButton(onClick = onSidebarToggle) {
                     Icon(
-                        imageVector = Icons.Filled.Menu,                        contentDescription = "Open sidebar"
+                        imageVector = Icons.Filled.Menu,
+                        contentDescription = "Open sidebar"
                     )
                 }
                 AnimatedContent(

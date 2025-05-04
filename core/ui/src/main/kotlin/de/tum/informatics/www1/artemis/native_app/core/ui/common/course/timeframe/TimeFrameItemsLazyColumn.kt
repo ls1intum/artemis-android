@@ -73,7 +73,7 @@ fun <T> TimeFrameItemsLazyColumn(
                 val defaultExpanded = when (frame) {
                     is TimeFrame.Current -> true
                     is TimeFrame.DueSoon -> true
-                    else -> true // @TODO - revert this back
+                    else -> false
                 }
                 timeFrameGroupExpandedState[key] = defaultExpanded
             }

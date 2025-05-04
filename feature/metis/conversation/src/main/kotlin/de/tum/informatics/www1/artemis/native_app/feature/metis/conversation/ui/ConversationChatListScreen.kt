@@ -23,7 +23,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Info
@@ -58,15 +57,13 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
-import de.tum.informatics.www1.artemis.native_app.core.ui.ArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.BuildConfig
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicSearchTextField
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.AdaptiveNavigationIcon
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.innerShadow
-import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
-import de.tum.informatics.www1.artemis.native_app.core.ui.getArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ComponentColors
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
@@ -198,8 +195,6 @@ fun ConversationChatListScreen(
     val hasExercise = conversation?.filterPredicate(FILTER_EXERCISE) == true
     val hasLecture = conversation?.filterPredicate(FILTER_LECTURE) == true
 
-    val layout = getArtemisAppLayout()
-
     val closeSearch = {
         isSearchBarOpen = false
         onUpdateQuery("")
@@ -247,22 +242,16 @@ fun ConversationChatListScreen(
                     }
                 },
                 navigationIcon = {
-                    if (layout == ArtemisAppLayout.Tablet) {
-                        IconButton(onClick = onSidebarToggle) {
-                            Icon(
-                                imageVector = Icons.Filled.Menu,
-                                contentDescription = null
-                            )
-                        }
-                    } else {
-                        NavigationBackButton(onNavigateBack = {
+                    AdaptiveNavigationIcon(
+                        onSidebarToggle = onSidebarToggle,
+                        onNavigateBack = {
                             if (isSearchBarOpen) {
                                 closeSearch()
                             } else {
                                 onNavigateBack()
                             }
-                        })
-                    }
+                        }
+                    )
                 },
                 actions = {
                     if (!isSearchBarOpen) {
