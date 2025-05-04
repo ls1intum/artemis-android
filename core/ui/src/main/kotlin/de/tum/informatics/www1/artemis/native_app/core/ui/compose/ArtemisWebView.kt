@@ -135,8 +135,9 @@ private class ThemeClient(
             // The following code is inspired by: https://github.com/ls1intum/artemis-ios/blob/71596a9949bacd29c142cbdfe3a9825d6921628f/ArtemisKit/Sources/CourseView/ExerciseTab/ExerciseDetailViewModel.swift
             // The code can be found in the artemis-ios repository: https://github.com/ls1intum/artemis-ios
             if (adjustHeightForContent) {
-                val delay = 750L
+                val delay = 750L // This delay is needed to ensure that the page is fully loaded before we try to get the height
 
+                // Set the background color of all divs to transparent to avoid white background
                 view.evaluateJavascript(
                     """
                         (function applyBackgroundColorToAllDivs(color) {
@@ -149,6 +150,7 @@ private class ThemeClient(
                     null
                 )
 
+                // Get the height of the content after delay
                 view.postDelayed({
                     view.evaluateJavascript(
                         """
