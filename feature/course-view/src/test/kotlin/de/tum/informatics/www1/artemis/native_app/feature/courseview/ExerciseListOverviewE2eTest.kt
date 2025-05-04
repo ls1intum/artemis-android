@@ -1,9 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.feature.courseview
 
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToKey
 import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
@@ -85,19 +88,35 @@ class ExerciseListOverviewE2eTest : BaseCourseTest() {
 
         setupAndDisplayCourseUi()
 
+        // Click on the exercises tab
+        composeTestRule
+            .onNodeWithText(context.getString(R.string.course_ui_tab_exercises))
+            .performClick()
+
+        // Expand all sections by clicking their headers
+        composeTestRule
+            .onAllNodes(hasTestTagEndingWith("-header"))
+            .fetchSemanticsNodes()
+            .forEach { header ->
+                composeTestRule
+                    .onNode(hasTestTag(header.config.getOrNull(SemanticsProperties.TestTag) ?: ""))
+                    .performClick()
+            }
+
         composeTestRule
             .waitUntilExactlyOneExists(
                 hasTestTag(TEST_TAG_EXERCISE_LIST_LAZY_COLUMN),
                 DefaultTimeoutMillis
             )
 
-        // The exercise should be visible since all sections are expanded by default now
         composeTestRule
             .onNodeWithTag(TEST_TAG_EXERCISE_LIST_LAZY_COLUMN)
             .performScrollToKey(exercise.id!!)
 
+        // Verify the exercise title is visible
         composeTestRule
             .onNodeWithText(exercise.title!!)
             .assertExists("Could not find created exercise.")
     }
+
 }

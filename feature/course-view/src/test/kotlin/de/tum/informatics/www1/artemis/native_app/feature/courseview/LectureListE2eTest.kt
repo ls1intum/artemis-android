@@ -1,5 +1,8 @@
 package de.tum.informatics.www1.artemis.native_app.feature.courseview
 
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -27,10 +30,23 @@ class LectureListE2eTest : BaseCourseTest() {
 
         setupAndDisplayCourseUi()
 
-        composeTestRule.onNodeWithText(context.getString(R.string.course_ui_tab_lectures))
+        // Click on the lectures tab
+        composeTestRule
+            .onNodeWithText(context.getString(R.string.course_ui_tab_lectures))
             .performClick()
+
+        // Expand all sections by clicking their headers
+        composeTestRule
+            .onAllNodes(hasTestTagEndingWith("-header"))
+            .fetchSemanticsNodes()
+            .forEach { header ->
+                composeTestRule
+                    .onNode(hasTestTag(header.config.getOrNull(SemanticsProperties.TestTag) ?: ""))
+                    .performClick()
+            }
 
         composeTestRule.onNodeWithTag(TEST_TAG_LECTURE_LIST).performScrollToKey(lecture.id!!)
         composeTestRule.onNodeWithText(lecture.title).assertExists()
     }
+
 }
