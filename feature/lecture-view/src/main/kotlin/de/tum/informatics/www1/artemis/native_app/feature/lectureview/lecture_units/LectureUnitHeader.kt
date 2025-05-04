@@ -1,8 +1,10 @@
 package de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture_units
 
-import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -12,14 +14,15 @@ import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material3.Card
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -31,6 +34,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_uni
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitText
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitUnknown
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitVideo
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.RoundGreenCheckbox
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseListItem
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.R
 
@@ -95,22 +99,47 @@ internal fun LectureUnitHeader(
                 modifier = Modifier.weight(1f)
             )
 
-            Crossfade(
-                targetState = isUploadingMarkedAsCompleted,
-                label = "IsCompletedCheckbox <-> Updating"
-            ) { isUploadingState ->
-                if (isUploadingState) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(48.dp)
-                    )
-                } else {
-                    Checkbox(
-                        modifier = Modifier.testTag(TEST_TAG_CHECKBOX_LECTURE_UNIT_COMPLETED),
-                        checked = lectureUnit.completed,
-                        onCheckedChange = onMarkAsCompleted
-                    )
+            UploadingCheckbox(
+                isUploading = isUploadingMarkedAsCompleted,
+                checked = lectureUnit.completed,
+                onCheckedChange = { isChecked ->
+                    onMarkAsCompleted(isChecked)
                 }
-            }
+            )
         }
+    }
+}
+
+@Composable
+private fun UploadingCheckbox(
+    modifier: Modifier = Modifier,
+    isUploading: Boolean,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Box(
+        modifier = modifier.size(48.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        val alphaProgress by animateFloatAsState(
+            targetValue = if (isUploading) 1f else 0f
+        )
+        val alphaCheckbox by animateFloatAsState(
+            targetValue = if (isUploading) 0f else 1f
+        )
+
+        CircularProgressIndicator(
+            modifier = Modifier
+                .fillMaxSize()
+                .alpha(alphaProgress)
+        )
+
+        RoundGreenCheckbox(
+            modifier = Modifier
+                .testTag(TEST_TAG_CHECKBOX_LECTURE_UNIT_COMPLETED)
+                .alpha(alphaCheckbox),
+            checked = checked,
+            onCheckedChange = onCheckedChange
+        )
     }
 }

@@ -27,8 +27,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -59,12 +59,11 @@ import org.koin.core.parameter.parametersOf
 fun SavedPostsScreen(
     modifier: Modifier = Modifier,
     courseId: Long,
-    savedPostStatus: SavedPostStatus,
     onNavigateToPost: (ISavedPost) -> Unit
 ) {
     val viewModel = koinViewModel<SavedPostsViewModel>(
-        key = "$courseId|$savedPostStatus"
-    ) { parametersOf(courseId, savedPostStatus) }
+        key = "$courseId"
+    ) { parametersOf(courseId) }
 
     LaunchedEffect(viewModel) {
         viewModel.onRequestReload()
@@ -85,7 +84,6 @@ internal fun SavedPostsScreen(
     onNavigateToPost: (ISavedPost) -> Unit
 ) {
     val savedPosts by viewModel.savedPosts.collectAsState()
-    val status = viewModel.savedPostStatus
 
     val courseId = viewModel.courseId
     val serverUrl by viewModel.serverUrl.collectAsState()
@@ -94,7 +92,6 @@ internal fun SavedPostsScreen(
     CompositionLocalProvider(LocalMarkdownTransformer provides markdownTransformer) {
         SavedPostsScreen(
             modifier = modifier,
-            status = status,
             savedPostsDataState = savedPosts,
             onRequestReload = viewModel::onRequestReload,
             onNavigateToPost = onNavigateToPost,
@@ -107,47 +104,105 @@ internal fun SavedPostsScreen(
 @Composable
 internal fun SavedPostsScreen(
     modifier: Modifier,
-    status: SavedPostStatus,
     savedPostsDataState: DataState<List<ISavedPost>>,
     onRequestReload: () -> Unit,
     onNavigateToPost: (ISavedPost) -> Unit,
     onChangeStatus: (ISavedPost, SavedPostStatus) -> Deferred<MetisModificationFailure?>,
     onRemoveFromSavedPosts: (ISavedPost) -> Deferred<MetisModificationFailure?>
 ) {
-    Column(
-        modifier = modifier
-            .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top))
-            .padding(horizontal = Spacings.ScreenHorizontalSpacing)
-    ) {
-        if (status == SavedPostStatus.ARCHIVED || status == SavedPostStatus.COMPLETED) {
-            InfoMessageCard(
-                modifier = Modifier
-                    .padding(top = Spacings.ScreenTopBarSpacing)
-                    .padding(bottom = 8.dp),
-                infoText = stringResource(R.string.saved_posts_removal_notice)
+    var status by remember { mutableStateOf(SavedPostStatus.IN_PROGRESS) }
+
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            ArtemisTopAppBar(
+                title = { Text(stringResource(R.string.saved_posts_screen_title)) },
+                navigationIcon = { NavigationBackButton() }
             )
         }
+    ) { paddingValues ->
+        Column(
+            modifier = modifier
+                .padding(top = paddingValues.calculateTopPadding())
+                .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top))
+                .padding(top = Spacings.ScreenTopBarSpacing)
+        ) {
+            StatusSelectionRow(
+                selectedStatus = status,
+                onStatusSelected = { status = it }
+            )
 
-        BasicDataStateUi(
-            modifier = Modifier.fillMaxSize(),
-            dataState = savedPostsDataState,
-            loadingText = stringResource(R.string.saved_posts_loading_posts_loading),
-            failureText = stringResource(R.string.saved_posts_loading_posts_failed),
-            retryButtonText = stringResource(R.string.saved_posts_loading_posts_try_again),
-            onClickRetry = onRequestReload,
-            enablePullToRefresh = false
-        ) { savedPosts ->
-
-            ProvideMarkwon {
-                SavedPostsList(
-                    modifier = Modifier.fillMaxSize(),
-                    status = status,
-                    savedPosts = savedPosts,
-                    onNavigateToPost = onNavigateToPost,
-                    onChangeStatus = onChangeStatus,
-                    onRemoveFromSavedPosts = onRemoveFromSavedPosts
-                )
+            BasicDataStateUi(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = Spacings.ScreenHorizontalSpacing)
+                ,
+                dataState = savedPostsDataState,
+                loadingText = stringResource(R.string.saved_posts_loading_posts_loading),
+                failureText = stringResource(R.string.saved_posts_loading_posts_failed),
+                retryButtonText = stringResource(R.string.saved_posts_loading_posts_try_again),
+                onClickRetry = onRequestReload,
+                enablePullToRefresh = false
+            ) { savedPosts ->
+                ProvideMarkwon {
+                    SavedPostsList(
+                        modifier = Modifier.fillMaxSize(),
+                        status = status,
+                        savedPosts = savedPosts.filter { it.savedPostStatus == status },
+                        onNavigateToPost = onNavigateToPost,
+                        onChangeStatus = onChangeStatus,
+                        onRemoveFromSavedPosts = onRemoveFromSavedPosts
+                    )
+                }
             }
+        }
+    }
+}
+
+@Composable
+private fun StatusSelectionRow(
+    selectedStatus: SavedPostStatus,
+    onStatusSelected: (SavedPostStatus) -> Unit,
+) {
+    val filterChipColorAlpha = 0.8f
+
+    Row(
+        modifier = Modifier
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = Spacings.ScreenHorizontalSpacing),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        SavedPostStatus.entries.forEach { status ->
+            val isSelected = status == selectedStatus
+            FilterChip(
+                selected = isSelected,
+                onClick = {
+                    onStatusSelected(status)
+                },
+                label = {
+                    Text(
+                        text = status.getUiText(),
+                        color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = status.getIcon(),
+                        tint = if (isSelected) Color.White else MaterialTheme.colorScheme.primary,
+                        contentDescription = null
+                    )
+                },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = status.getTintColor()
+                        .copy(alpha = filterChipColorAlpha)
+                ),
+                border = FilterChipDefaults.filterChipBorder(
+                    borderColor = MaterialTheme.colorScheme.outlineVariant,
+                    selectedBorderColor = MaterialTheme.colorScheme.primary,
+                    enabled = true,
+                    selected = isSelected,
+                )
+            )
         }
     }
 }
@@ -162,27 +217,44 @@ private fun SavedPostsList(
     onChangeStatus: (ISavedPost, SavedPostStatus) -> Deferred<MetisModificationFailure?>,
     onRemoveFromSavedPosts: (ISavedPost) -> Deferred<MetisModificationFailure?>
 ) {
+    val removalNotice = @Composable {
+        if (status == SavedPostStatus.ARCHIVED || status == SavedPostStatus.COMPLETED) {
+            InfoMessageCard(
+                modifier = Modifier.padding(vertical = 8.dp),
+                infoText = stringResource(R.string.saved_posts_removal_notice)
+            )
+        }
+    }
+
     AnimatedContent(
         targetState = savedPosts.isEmpty(),
         label = "Animated saved posts list: empty <-> not empty"
     ) { isEmpty ->
         if (isEmpty) {
-            EmptyListHint(
+            Column(
                 modifier = modifier,
-                hint = stringResource(
-                    id = R.string.saved_posts_empty_state_title,
-                    status.getUiText()
-                ),
-                imageVector = status.getIcon()
-            )
+            ) {
+                removalNotice()
+
+                EmptyListHint(
+                    modifier = Modifier.fillMaxSize(),
+                    hint = stringResource(
+                        id = R.string.saved_posts_empty_state_title,
+                        status.getUiText()
+                    ),
+                    imageVector = status.getIcon()
+                )
+            }
             return@AnimatedContent
         }
 
         LazyColumn(
             modifier = modifier,
             verticalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = Spacings.calculateContentPaddingValues()
+            contentPadding = Spacings.calculateEndOfPagePaddingValues()
         ) {
+            item { removalNotice() }
+
             items(
                 items = savedPosts,
                 key = { it.key }
@@ -203,77 +275,6 @@ private fun SavedPostsList(
                     }
                 )
             }
-        }
-    }
-}
-
-@Composable
-fun SavedPostsScreenWithChips(
-    modifier: Modifier = Modifier,
-    courseId: Long,
-    onNavigateToPost: (ISavedPost) -> Unit
-) {
-    val statuses = SavedPostStatus.entries
-    val initialIndex = SavedPostStatus.IN_PROGRESS.ordinal
-
-    var selectedIndex by rememberSaveable { mutableIntStateOf(initialIndex) }
-    val currentStatus = statuses[selectedIndex]
-    val filterChipColorAlpha = 0.8f
-
-    Scaffold(
-        topBar = {
-            ArtemisTopAppBar(
-                title = { Text(stringResource(R.string.saved_posts_title_prefix)) },
-                navigationIcon = { NavigationBackButton() }
-            )
-        }
-    ) { paddingValues ->
-        Column(modifier = modifier.padding(paddingValues)) {
-            Row(
-                modifier = Modifier
-                    .horizontalScroll(rememberScrollState())
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                statuses.forEachIndexed { index, status ->
-                    val isSelected = (index == selectedIndex)
-                    FilterChip(
-                        selected = isSelected,
-                        onClick = {
-                            selectedIndex = index
-                        },
-                        label = {
-                            Text(
-                                text = status.getUiText(),
-                                color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface
-                            )
-                        },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = status.getIcon(),
-                                tint = if (isSelected) Color.White else MaterialTheme.colorScheme.primary,
-                                contentDescription = null
-                            )
-                        },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = status.getTintColor().copy(alpha = filterChipColorAlpha)
-                        ),
-                        border = FilterChipDefaults.filterChipBorder(
-                            borderColor = MaterialTheme.colorScheme.outlineVariant,
-                            selectedBorderColor = MaterialTheme.colorScheme.primary,
-                            enabled = true,
-                            selected = isSelected,
-                        )
-                    )
-                }
-            }
-
-            SavedPostsScreen(
-                modifier = modifier.fillMaxSize(),
-                courseId = courseId,
-                savedPostStatus = currentStatus,
-                onNavigateToPost = onNavigateToPost
-            )
         }
     }
 }

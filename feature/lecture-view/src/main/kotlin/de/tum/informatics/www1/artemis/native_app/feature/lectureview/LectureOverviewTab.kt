@@ -169,7 +169,6 @@ private fun LazyListScope.dateSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.background),
-            color = MaterialTheme.colorScheme.primary,
             style = MaterialTheme.typography.titleMedium.copy(
                 fontWeight = FontWeight.Medium
             )
@@ -196,7 +195,6 @@ private fun LazyListScope.descriptionSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.background),
-            color = MaterialTheme.colorScheme.primary,
             style = MaterialTheme.typography.titleMedium.copy(
                 fontWeight = FontWeight.Medium
             )
@@ -224,7 +222,6 @@ private fun LazyListScope.channelSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.background),
-            color = MaterialTheme.colorScheme.primary,
             style = MaterialTheme.typography.titleMedium.copy(
                 fontWeight = FontWeight.Medium
             )
@@ -296,7 +293,6 @@ private fun LazyListScope.lectureUnitSection(
         Text(
             modifier = modifier.background(MaterialTheme.colorScheme.background),
             text = stringResource(id = R.string.lecture_view_overview_section_lecture_units),
-            color = MaterialTheme.colorScheme.primary,
             style = MaterialTheme.typography.titleMedium.copy(
                 fontWeight = FontWeight.Medium
             )
