@@ -35,6 +35,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextPro
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.collectArtemisContextAsState
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.AnimatedDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisSection
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.pagePadding
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
@@ -45,6 +46,8 @@ import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
 import org.koin.compose.koinInject
 
+
+private const val GITHUB_ISSUES_LINK = "https://github.com/ls1intum/artemis-android/issues"
 
 /**
  * Display the settings screen.
@@ -143,7 +146,10 @@ fun SettingsScreen(
             BuildInformationSection(
                 modifier = Modifier.fillMaxWidth(),
                 versionCode = appVersion.versionCode,
-                versionName = appVersion.fullVersionName
+                versionName = appVersion.fullVersionName,
+                onReportBug = {
+                    linkOpener.openLink(GITHUB_ISSUES_LINK)
+                }
             )
         }
     }
@@ -156,7 +162,7 @@ private fun UserInformationSection(
     onRequestLogout: () -> Unit,
     onNavigateToAccountSettings: () -> Unit
 ) {
-    PreferenceSection(
+    ArtemisSection(
         modifier = modifier,
         title = stringResource(id = R.string.settings_account_information_section)
     ) {
@@ -200,7 +206,7 @@ private fun UserInformationSection(
 
 @Composable
 private fun NotificationSection(modifier: Modifier, onOpenNotificationSettings: () -> Unit) {
-    PreferenceSection(
+    ArtemisSection (
         modifier = modifier,
         title = stringResource(id = R.string.settings_notification_section)
     ) {
@@ -220,19 +226,12 @@ private fun AboutSection(
     onOpenImprint: () -> Unit,
     onOpenThirdPartyLicenses: () -> Unit
 ) {
-    PreferenceSection(
+    ArtemisSection(
         modifier = modifier,
-        title = stringResource(id = R.string.settings_about_section)
+        title = stringResource(id = R.string.settings_about_section),
+        description = if (!BuildConfig.hasInstanceRestriction) stringResource(id = R.string.settings_server_specifics_information) else null
     ) {
         val linkOpener = LocalLinkOpener.current
-
-        if (!BuildConfig.hasInstanceRestriction) {
-            Text(
-                modifier = Modifier.padding(bottom = 8.dp),
-                text = stringResource(id = R.string.settings_server_specifics_information),
-                style = MaterialTheme.typography.labelMedium
-            )
-        }
 
         if (serverUrl.isNotEmpty()) {
             ServerURLEntry(
@@ -278,8 +277,9 @@ private fun BuildInformationSection(
     modifier: Modifier,
     versionCode: Int,
     versionName: String,
+    onReportBug: () -> Unit,
 ) {
-    PreferenceSection(
+    ArtemisSection(
         modifier = modifier,
         title = stringResource(id = R.string.settings_build_section)
     ) {
@@ -295,6 +295,14 @@ private fun BuildInformationSection(
             text = stringResource(id = R.string.settings_build_version_name),
             valueText = versionName,
             onClick = { }
+        )
+
+        ButtonEntry(
+            modifier = Modifier.fillMaxWidth(),
+            text = stringResource(id = R.string.settings_report_bug),
+            textColor = MaterialTheme.colorScheme.error,
+            isFocused = true,
+            onClick = onReportBug
         )
     }
 }

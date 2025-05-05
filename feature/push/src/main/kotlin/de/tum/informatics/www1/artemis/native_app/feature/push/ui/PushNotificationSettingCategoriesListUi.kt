@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -22,6 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.Scaling
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisSection
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.push.R
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.PushNotificationSetting
@@ -68,42 +68,29 @@ private fun PushNotificationSettingsList(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         settingCategories.forEach { category ->
-            Card(
+            ArtemisSection(
                 modifier = modifier,
-                shape = MaterialTheme.shapes.medium
+                title = PushNotificationLocalization.getGroupName(groupName = category.categoryId),
+                testTag = testTagForSettingCategory(category.categoryId),
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                        .testTag(testTagForSettingCategory(category.categoryId)),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = PushNotificationLocalization.getGroupName(groupName = category.categoryId),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary
+                category.settings.forEachIndexed { settingIndex, pushNotificationSetting ->
+                    PushNotificationSettingEntry(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag(testTagForSetting(pushNotificationSetting.settingId)),
+                        setting = pushNotificationSetting,
+                        onUpdate = { webapp, email, push ->
+                            onUpdate(
+                                pushNotificationSetting,
+                                webapp,
+                                email,
+                                push
+                            )
+                        }
                     )
 
-                    category.settings.forEachIndexed { settingIndex, pushNotificationSetting ->
-                        PushNotificationSettingEntry(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .testTag(testTagForSetting(pushNotificationSetting.settingId)),
-                            setting = pushNotificationSetting,
-                            onUpdate = { webapp, email, push ->
-                                onUpdate(
-                                    pushNotificationSetting,
-                                    webapp,
-                                    email,
-                                    push
-                                )
-                            }
-                        )
-
-                        if (settingIndex != category.settings.size - 1) {
-                            HorizontalDivider()
-                        }
+                    if (settingIndex != category.settings.size - 1) {
+                        HorizontalDivider()
                     }
                 }
             }

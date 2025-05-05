@@ -10,7 +10,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToKey
 import androidx.lifecycle.SavedStateHandle
-import androidx.navigation.compose.rememberNavController
 import androidx.test.platform.app.InstrumentationRegistry
 import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
@@ -50,6 +49,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.test.testLoginMo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.communicationModule
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -148,6 +148,7 @@ class LectureE2eTest : BaseComposeTest() {
     }
 
     @Test(timeout = DefaultTestTimeoutMillis)
+    @Ignore("Lecture attachment creation has been deprecated in https://github.com/ls1intum/Artemis/pull/10708")
     fun `shows attachments`() {
         val attachments = runBlocking {
             (0 until 3).map {
@@ -248,9 +249,7 @@ class LectureE2eTest : BaseComposeTest() {
             LectureScreen(
                 modifier = Modifier.fillMaxSize(),
                 courseId = course.id!!,
-                lectureId = lecture.id!!,
                 viewModel = viewModel,
-                navController = rememberNavController(),
                 onViewExercise = {},
                 onNavigateToExerciseResultView = {},
                 onNavigateToTextExerciseParticipation = { _, _ -> },

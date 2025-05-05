@@ -2,7 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.push.ui
 
 import android.Manifest
 import android.os.Build
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,6 +35,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.Scaling
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.InfoMessageCard
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.linkTextColor
 import de.tum.informatics.www1.artemis.native_app.feature.push.R
 import kotlinx.coroutines.Job
@@ -56,6 +56,11 @@ fun PushNotificationSettingsUi(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        InfoMessageCard(
+            modifier = Modifier.fillMaxWidth(),
+            infoText = stringResource(id = R.string.push_notification_settings_explanation),
+        )
+
         ReceivePushNotificationsSwitch(
             modifier = Modifier.fillMaxWidth(),
             isChecked = arePushNotificationEnabled,
@@ -71,21 +76,24 @@ fun PushNotificationSettingsUi(
             }
         )
 
-        AnimatedVisibility(visible = arePushNotificationEnabled) {
-            PushNotificationSettingCategoriesListUi(
-                modifier = Modifier.fillMaxWidth(),
-                settingsByGroupDataState = settingsByGroupDataStore,
-                onUpdate = { setting, webapp, email, push ->
-                    viewModel.updateSettingsEntry(
-                        setting.settingId,
-                        email,
-                        webapp,
-                        push
-                    )
-                },
-                onRequestReload = viewModel::onRequestReload
-            )
-        }
+        // The following code is commented out because fine-graining the settings has to be adjusted
+        // to the the new endpoint with the new course-specific notification system
+
+        //AnimatedVisibility(visible = arePushNotificationEnabled) {
+        //    PushNotificationSettingCategoriesListUi(
+        //        modifier = Modifier.fillMaxWidth(),
+        //        settingsByGroupDataState = settingsByGroupDataStore,
+        //        onUpdate = { setting, webapp, email, push ->
+        //            viewModel.updateSettingsEntry(
+        //                setting.settingId,
+        //                email,
+        //                webapp,
+        //                push
+        //            )
+        //        },
+        //        onRequestReload = viewModel::onRequestReload
+        //    )
+        //}
     }
 
     if (updatePushNotificationEnabledJob != null) {
