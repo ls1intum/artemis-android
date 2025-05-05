@@ -47,6 +47,8 @@ import io.ktor.http.appendPathSegments
 import org.koin.compose.koinInject
 
 
+private const val GITHUB_ISSUES_LINK = "https://github.com/ls1intum/artemis-android/issues"
+
 /**
  * Display the settings screen.
  * Contains account settings, push settings and general info such as imprint and privacy policy.
@@ -144,7 +146,10 @@ fun SettingsScreen(
             BuildInformationSection(
                 modifier = Modifier.fillMaxWidth(),
                 versionCode = appVersion.versionCode,
-                versionName = appVersion.fullVersionName
+                versionName = appVersion.fullVersionName,
+                onReportBug = {
+                    linkOpener.openLink(GITHUB_ISSUES_LINK)
+                }
             )
         }
     }
@@ -272,6 +277,7 @@ private fun BuildInformationSection(
     modifier: Modifier,
     versionCode: Int,
     versionName: String,
+    onReportBug: () -> Unit,
 ) {
     ArtemisSection(
         modifier = modifier,
@@ -289,6 +295,14 @@ private fun BuildInformationSection(
             text = stringResource(id = R.string.settings_build_version_name),
             valueText = versionName,
             onClick = { }
+        )
+
+        ButtonEntry(
+            modifier = Modifier.fillMaxWidth(),
+            text = stringResource(id = R.string.settings_report_bug),
+            textColor = MaterialTheme.colorScheme.error,
+            isFocused = true,
+            onClick = onReportBug
         )
     }
 }
