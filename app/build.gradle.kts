@@ -21,7 +21,7 @@ plugins {
 android {
     namespace = "de.tum.informatics.www1.artemis.native_app.android"
 
-    val versionName = "2.0.0"
+    val versionName = "2.0.1"
     val versionCode = 624
 
     setProperty("archivesBaseName", "artemis-android-$versionName-$versionCode")
