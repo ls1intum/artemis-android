@@ -96,7 +96,7 @@ object SafeInstantSerializer : KSerializer<Instant> {
         PrimitiveSerialDescriptor("SafeInstant", PrimitiveKind.STRING)
 
     override fun deserialize(decoder: Decoder): Instant {
-        val raw = decoder.decodeString()
+        val raw = decoder.decodeString()            // eg "2025-05-04T11:28:18.762036099Z[Etc/UTC]"
         val cleaned = raw.substringBefore('[')
         return Instant.parse(cleaned)
     }
