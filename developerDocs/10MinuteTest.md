@@ -5,15 +5,25 @@ This file contains a manual test suite that should cover the most important func
 
 ### Testing Instructions
 
+#### Onboarding
 - Freshly install the app
 - Log in with a User -> Login successful
 - Enable Push notifications
+- Browse / enroll courses
+
+#### Exercise / Lecture
 - Go to a course 
 - See exercise details -> problem statement is loaded successfully
 - See lecture details
+
+#### Communication
 - Go to the communication tab
-- Go to a channel with existing posts -> posts are displayed
-- Write a reply -> is sent to server
-- Create a new conversation (eg DM or group chat)
-- Write a new post and react to it -> Post and reaction are shown in webapp
-- In webapp with a different user write a post -> Receive notification on Android
+- Also open the communication for this course on the webapp (with a different user)
+- On Android, go to a channel with existing posts -> posts are displayed
+- Create a new conversation with webapp user (eg DM or group chat)
+- Write a new post -> Post are shown in webapp
+- Write a reply -> is sent to server (confirm in webapp)
+- In webapp with a different user write a post -> On Android: 
+  - When in the same conversation: new post is received and displayed in the chat
+  - When not in conversation: notification is received
+- Android: react to a post -> reaction is shown on Android and webapp
