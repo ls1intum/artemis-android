@@ -16,6 +16,10 @@
     <string name="profile_picture_crop_apply">Apply</string>
     <string name="profile_picture_upload_error_could_not_be_compressed">Profile picture could not be compressed</string>
     <string name="profile_picture_upload_error_failed">Upload failed</string>
+    <string name="passkey_settings_section_title">Passkeys</string>
+    <string name="passkey_settings_section_desc">Passkeys are a safer and easier alternative to passwords.</string>
+    <string name="passkey_settings_add_key">Add new key</string>
+    <string name="passkey_settings_created_at_label">Created at %1$s</string>
 
 
 </resources>

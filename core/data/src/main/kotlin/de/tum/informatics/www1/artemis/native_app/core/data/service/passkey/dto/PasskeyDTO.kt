@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.dto
 
+import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -8,7 +9,7 @@ data class PasskeyDTO(
     val credentialId: String,
     val label: String,
     /** ISO 8601 date string */
-    val created: String,
+    val created: Instant,
     /** ISO 8601 date string */
-    val lastUsed: String
+    val lastUsed: Instant
 )

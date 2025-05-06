@@ -8,12 +8,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.dto.PasskeyDTO
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisSection
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.date.DateFormats
+import de.tum.informatics.www1.artemis.native_app.core.ui.date.format
+import de.tum.informatics.www1.artemis.native_app.feature.settings.R
 
 @Composable
 fun PasskeysSection(
@@ -23,8 +27,8 @@ fun PasskeysSection(
 ) {
     ArtemisSection(
         modifier = modifier,
-        title = "Passkeys",
-        description = "Passkeys are a safer and easier alternative to passwords."
+        title = stringResource(R.string.passkey_settings_section_title),
+        description = stringResource(R.string.passkey_settings_section_desc)
     ) {
         EmptyDataStateUi(
             dataState = passkeysDataState,
@@ -43,7 +47,10 @@ fun PasskeysSection(
                     )
 
                     Text(
-                        text = passkey.created,
+                        text = stringResource(
+                            R.string.passkey_settings_created_at_label,
+                            passkey.created.format(DateFormats.OnlyDate.format)
+                        ),
                         style = MaterialTheme.typography.labelMedium,
                     )
                 }
@@ -52,7 +59,7 @@ fun PasskeysSection(
             // TODO: enable once passkey creation error is resolved
 //            ButtonEntry(
 //                modifier = Modifier.fillMaxWidth(),
-//                text = "Add new key",
+//                text = stringResource(R.string.passkey_settings_add_key),
 //                leadingIcon = Icons.Default.Key,
 //                isFocused = true,
 //                textColor = MaterialTheme.colorScheme.primary,
