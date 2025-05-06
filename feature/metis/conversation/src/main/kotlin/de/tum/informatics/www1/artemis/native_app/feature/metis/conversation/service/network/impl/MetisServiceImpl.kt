@@ -26,6 +26,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.appendPathSegments
 import io.ktor.http.contentType
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -198,9 +199,6 @@ internal class MetisServiceImpl(
         }
     }
 
-    // TODO: Use the API object for the following functions once 8.0.0 has been released (applies to all functions below)
-    // See https://github.com/ls1intum/artemis-android/issues/462
-    // The following functions are not compatible with the pre 8.0.0 API structure
     override suspend fun getForwardedMessagesByIds(
         metisContext: MetisContext,
         postIds: List<Long>,
@@ -211,7 +209,7 @@ internal class MetisServiceImpl(
         return performNetworkCall {
            val response = ktorProvider.ktorClient.get(serverUrl) {
                 url {
-                    appendPathSegments("api", "communication", "forwarded-messages")
+                    appendPathSegments(*Api.Communication.path, "forwarded-messages")
                 }
                 parameter("postingIds", postIds.joinToString(","))
                 parameter("type", postType.toString())
@@ -219,7 +217,11 @@ internal class MetisServiceImpl(
             }
 
             // We are only interested in the actual forwarded messages.
-            val messageWrapper: List<ForwardedMessagesResponse> = Json.decodeFromJsonElement(ListSerializer(ForwardedMessagesResponse.serializer()), response.body())
+            val messageWrapper: List<ForwardedMessagesResponse> = try {
+                Json.decodeFromJsonElement(ListSerializer(ForwardedMessagesResponse.serializer()), response.body())
+            } catch (e: SerializationException) {
+                emptyList()
+            }
             messageWrapper.flatMap { it.messages }
         }
     }
@@ -233,7 +235,7 @@ internal class MetisServiceImpl(
         return performNetworkCall {
             ktorProvider.ktorClient.post(serverUrl) {
                 url {
-                    appendPathSegments("api", "communication", "forwarded-messages")
+                    appendPathSegments(*Api.Communication.path, "forwarded-messages")
                 }
 
                 contentType(ContentType.Application.Json)
@@ -253,9 +255,7 @@ internal class MetisServiceImpl(
             runCatching {
                 ktorProvider.ktorClient.get(serverUrl) {
                     url {
-                        appendPathSegments("api")
-                        appendPathSegments("communication")
-                        appendPathSegments("courses")
+                        appendPathSegments(*Api.Communication.Courses.path)
                         appendPathSegments(metisContext.courseId.toString())
                         appendPathSegments("messages-source-posts")
                     }
@@ -277,9 +277,7 @@ internal class MetisServiceImpl(
             runCatching {
                 ktorProvider.ktorClient.get(serverUrl) {
                     url {
-                        appendPathSegments("api")
-                        appendPathSegments("communication")
-                        appendPathSegments("courses")
+                        appendPathSegments(*Api.Communication.Courses.path)
                         appendPathSegments(metisContext.courseId.toString())
                         appendPathSegments("answer-messages-source-posts")
                     }
