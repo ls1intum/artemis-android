@@ -118,7 +118,7 @@ private fun OverviewChipContainer(
             Text(
                 text = title,
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.outlineVariant,
+                color = Color.Gray,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
