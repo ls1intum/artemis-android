@@ -122,4 +122,11 @@ class LoginViewModel(
                 .or(false)
         }
     }
+
+    fun loginWithPasskey(): Deferred<Boolean> {
+        return viewModelScope.async(coroutineContext) {
+            // TODO
+            false
+        }
+    }
 }

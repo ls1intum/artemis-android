@@ -1,9 +1,9 @@
 package de.tum.informatics.www1.artemis.native_app.feature.force_update.repository
 
 import android.util.Log
+import de.tum.informatics.www1.artemis.native_app.core.common.FeatureAvailability
 import de.tum.informatics.www1.artemis.native_app.core.common.app_version.NormalizedAppVersion
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
-import de.tum.informatics.www1.artemis.native_app.feature.force_update.FeatureAvailability
 import de.tum.informatics.www1.artemis.native_app.feature.force_update.service.UpdateServiceResult
 
 object UpdateUtil {
@@ -25,6 +25,7 @@ object UpdateUtil {
 
                 // 🔁 Set feature list
                 FeatureAvailability.setAvailableFeatures(data.features)
+                FeatureAvailability.setActiveModuleFeatures(data.activeModuleFeatures)
 
                 // 🔍 Version check
                 val serverMinVersion = data.minVersion

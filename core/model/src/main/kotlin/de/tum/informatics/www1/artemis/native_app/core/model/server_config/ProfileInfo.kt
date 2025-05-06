@@ -24,6 +24,7 @@ data class ProfileInfo(
     val externalCredentialProvider: String? = null,
     val externalPasswordResetLinkMap: Map<String, String>? = emptyMap(),
     val features: List<String> = emptyList(),
+    val activeModuleFeatures: List<String> = emptyList(),
     /**
      * Set if the server allows a saml2 based login. If not set, it is also not supported.
      */

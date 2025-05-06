@@ -33,7 +33,7 @@ class PasskeysUseCase(
     ) {
         getPasskeys()
     }
-        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Lazily)
 
 
     fun createPasskey(): Deferred<Boolean> {

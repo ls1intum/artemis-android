@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -24,6 +25,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.common.ActiveModuleFeature
+import de.tum.informatics.www1.artemis.native_app.core.common.FeatureAvailability
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.server_config.ProfileInfo
 import de.tum.informatics.www1.artemis.native_app.core.model.server_config.Saml2Config
@@ -110,6 +113,10 @@ internal fun LoginUi(
         hasUserAcceptedTerms = hasUserAcceptedTerms,
         saml2Config = saml2Config,
         isPasswordLoginDisabled = isPasswordLoginDisabled,
+        isPasskeyLoginEnabled = FeatureAvailability.isEnabled(ActiveModuleFeature.Passkey),
+        onPasskeyLogin = {
+            loginJob = viewModel.loginWithPasskey()
+        },
         updateUserAcceptedTerms = viewModel::updateUserAcceptedTerms,
         passwordBasedLoginContent = { loginModifier ->
             PasswordBasedLogin(
@@ -178,7 +185,9 @@ internal fun LoginUi(
     hasUserAcceptedTerms: Boolean,
     saml2Config: Saml2Config?,
     isPasswordLoginDisabled: Boolean,
+    isPasskeyLoginEnabled: Boolean = false,
     updateUserAcceptedTerms: (Boolean) -> Unit,
+    onPasskeyLogin: () -> Unit = {},
     passwordBasedLoginContent: @Composable (modifier: Modifier) -> Unit,
     saml2BasedLoginContent: @Composable (modifier: Modifier, config: Saml2Config) -> Unit
 ) {
@@ -202,18 +211,19 @@ internal fun LoginUi(
             passwordBasedLoginContent(loginModifier)
         }
 
+        if (isPasskeyLoginEnabled) {
+            Divider()
+            Button(
+                modifier = loginModifier,
+                onClick = onPasskeyLogin,
+            ) {
+                Text(text = stringResource(id = R.string.login_passkey_button_label))
+            }
+        }
+
         if (!isPasswordLoginDisabled && saml2Config != null) {
             //Both are visible, therefore we place a visual divider
-            DividerWithText(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                text = { modifier ->
-                    Text(
-                        modifier = modifier,
-                        text = stringResource(id = R.string.login_password_or_saml_divider_text),
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center,)
-                }
-            )
+            Divider()
         }
 
         if (saml2Config != null) {
@@ -229,6 +239,21 @@ internal fun LoginUi(
             )
         }
     }
+}
+
+@Composable
+private fun Divider() {
+    DividerWithText(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        text = { modifier ->
+            Text(
+                modifier = modifier,
+                text = stringResource(id = R.string.login_password_or_saml_divider_text),
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+            )
+        }
+    )
 }
 
 private fun <T> fromProfileInfo(

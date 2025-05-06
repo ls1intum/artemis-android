@@ -35,6 +35,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.attafitamim.krop.core.crop.rememberImageCropper
+import de.tum.informatics.www1.artemis.native_app.core.common.ActiveModuleFeature
+import de.tum.informatics.www1.artemis.native_app.core.common.FeatureAvailability
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.dto.PasskeyDTO
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
@@ -62,8 +64,12 @@ fun AccountSettingsScreen(
 ) {
     val account by viewModel.account.collectAsState()
     val passkeysUseCase = viewModel.passkeysUseCase
-    val passkeys by passkeysUseCase.passkeys.collectAsState()
-    // TODO: check ProfileInfo for "passkey" in activeModuleFeatures
+    val passkeysEnabled = FeatureAvailability.isEnabled(ActiveModuleFeature.Passkey)
+    val passkeys: DataState<List<PasskeyDTO>>? = if (passkeysEnabled) {
+        passkeysUseCase.passkeys.collectAsState().value
+    } else {
+        null
+    }
 
     AccountSettingsScreen(
         modifier = modifier,
