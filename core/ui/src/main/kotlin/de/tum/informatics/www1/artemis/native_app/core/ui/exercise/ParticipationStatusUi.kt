@@ -17,7 +17,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participat
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.hasPassed
 
-enum class TextLength {
+private enum class TextLength {
     Full, Short
 }
 
