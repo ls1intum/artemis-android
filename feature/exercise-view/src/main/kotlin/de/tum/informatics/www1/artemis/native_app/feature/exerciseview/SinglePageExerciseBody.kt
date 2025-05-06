@@ -32,7 +32,7 @@ fun SinglePageExerciseBody(
     collapsingContentState: CollapsingContentState,
     onClickExercise: (Long) -> Unit,
     actions: BoundExerciseActions,
-    title: String?
+    title: String
 ) {
     val layout = getArtemisAppLayout()
     val isTabletPortrait = layout.isTabletPortrait

@@ -331,7 +331,7 @@ internal fun CourseUiScreen(
                                 )
                             }
                         ),
-                        title = courseName
+                        title = courseName ?: ""
                     )
                 }
             }
@@ -348,7 +348,7 @@ internal fun CourseUiScreen(
                         collapsingContentState = collapsingContentState,
                         onViewExercise = onNavigateToExercise,
                         onNavigateToLectureScreen = { id -> onNavigateToLecture(id ?: 0L) },
-                        title = courseName
+                        title = courseName ?: ""
                     )
                 }
             }
@@ -386,7 +386,7 @@ internal fun CourseUiScreen(
                     scaffold = scaffold,
                     collapsingContentState = collapsingContentState,
                     initialConfiguration = initialConfiguration,
-                    title = courseName
+                    title = courseName ?: ""
                 )
             }
         }
@@ -397,7 +397,7 @@ internal fun CourseUiScreen(
                 scaffold = scaffold,
                 collapsingContentState = collapsingContentState,
                 onNavigateToFaq = onNavigateToFaq,
-                title = courseName
+                title = courseName ?: ""
             )
         }
 

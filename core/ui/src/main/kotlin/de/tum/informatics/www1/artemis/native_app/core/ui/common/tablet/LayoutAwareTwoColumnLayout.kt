@@ -38,7 +38,7 @@ fun LayoutAwareTwoColumnLayout(
     onSidebarToggle: () -> Unit,
     optionalColumn: @Composable (Modifier) -> Unit,
     priorityColumn: @Composable (Modifier) -> Unit,
-    title: String? = null
+    title: String
 ) {
     val layout = getArtemisAppLayout()
     val (isTabletLandscape, isTabletPortrait) = layout.let { it.isTabletLandscape to it.isTabletPortrait }
@@ -110,7 +110,7 @@ fun LayoutAwareTwoColumnLayout(
 
 @Composable
 private fun Sidebar(
-    title: String?,
+    title: String,
     optionalColumn: @Composable (Modifier) -> Unit,
     isSidebarOpen: Boolean
 ) {
@@ -138,16 +138,16 @@ private fun Sidebar(
 }
 
 @Composable
-fun SidebarHeader(title: String?) {
+fun SidebarHeader(title: String) {
     Column(
         modifier = Modifier
             .padding(16.dp)
             .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        title?.let {
+        title.takeIf { it.isNotEmpty() }?.let { nonEmptyTitle ->
             Text(
-                text = it,
+                text = nonEmptyTitle,
                 style = MaterialTheme.typography.titleMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

@@ -56,7 +56,7 @@ internal fun SinglePageConversationBody(
     scaffold: @Composable (searchConfiguration: CourseSearchConfiguration, content: @Composable () -> Unit) -> Unit,
     collapsingContentState: CollapsingContentState,
     initialConfiguration: ConversationConfiguration = NothingOpened,
-    title: String?
+    title: String
 ) {
     var configuration: ConversationConfiguration by rememberSaveable(initialConfiguration) {
         mutableStateOf(initialConfiguration)

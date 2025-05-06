@@ -31,7 +31,7 @@ fun SinglePageLectureBody(
     collapsingContentState: CollapsingContentState,
     onViewExercise: (Long) -> Unit,
     onNavigateToLectureScreen: (Long) -> Unit,
-    title: String? = null
+    title: String
 ) {
     val layout = getArtemisAppLayout()
     val isTabletPortrait = layout.isTabletPortrait
