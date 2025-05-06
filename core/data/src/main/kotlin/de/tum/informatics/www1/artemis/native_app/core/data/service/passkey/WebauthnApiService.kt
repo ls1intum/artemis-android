@@ -1,10 +1,9 @@
 package de.tum.informatics.www1.artemis.native_app.core.data.service.passkey
 
-import androidx.credentials.PublicKeyCredential
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
-import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.LoggedInBasedServiceImpl
+import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.ServerSelectedBasedServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.dto.PasskeyLoginResponseDTO
 import de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.dto.RegisterPasskeyDTO
 import de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.dto.RegisterPasskeyResponseDTO
@@ -16,7 +15,7 @@ import io.ktor.http.appendPathSegments
 class WebauthnApiService(
     ktorProvider: KtorProvider,
     artemisContextProvider: ArtemisContextProvider,
-) : LoggedInBasedServiceImpl(ktorProvider,artemisContextProvider){
+) : ServerSelectedBasedServiceImpl(ktorProvider, artemisContextProvider){
 
     suspend fun getRegistrationOptions(): NetworkResponse<String> {
         return postRequest {
@@ -43,12 +42,12 @@ class WebauthnApiService(
         }
     }
 
-    suspend fun loginWithPasskey(publicKeyCredential: PublicKeyCredential): NetworkResponse<PasskeyLoginResponseDTO> {
+    suspend fun loginWithPasskey(publicKeyCredentialJson: String): NetworkResponse<PasskeyLoginResponseDTO> {
         return postRequest {
             url {
                 appendPathSegments("login", "webauthn")
             }
-            setBody(publicKeyCredential)
+            setBody(publicKeyCredentialJson)
         }
     }
 

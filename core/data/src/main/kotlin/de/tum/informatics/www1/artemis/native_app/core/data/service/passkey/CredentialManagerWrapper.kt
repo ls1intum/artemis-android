@@ -7,9 +7,7 @@ import androidx.credentials.CreatePublicKeyCredentialResponse
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
-import androidx.credentials.GetPasswordOption
 import androidx.credentials.GetPublicKeyCredentialOption
-import androidx.credentials.PasswordCredential
 import androidx.credentials.PublicKeyCredential
 import androidx.credentials.exceptions.CreateCredentialCancellationException
 import androidx.credentials.exceptions.CreateCredentialCustomException
@@ -85,6 +83,7 @@ class CredentialManagerWrapper(
                 // Handle the passkey DOM errors thrown according to the
                 // WebAuthn spec.
                 // TODO: we always get a "Passkey creation failed with DOM error: androidx.credentials.TYPE_SECURITY_ERROR: The incoming request cannot be validated"
+                //      With GPM: "RP ID cannot be validated"
                 Log.e(TAG, "Passkey creation failed with DOM error: ${error.domError.type}: ${error.message}")
                 return PasskeyCreationResult.Failure(error)
             }
@@ -128,18 +127,16 @@ class CredentialManagerWrapper(
 
     sealed class SignInResult {
         data class WithPasskey(val responseJson: String) : SignInResult()
-        data class WithPassword(val username: String, val password: String) : SignInResult()
         data object NoCredential : SignInResult()
         data class Failure(val error: Exception) : SignInResult()
     }
 
     suspend fun signIn(requestJson: String): SignInResult {
-        val getPasswordOption = GetPasswordOption()
         val getPublicKeyCredentialOption = GetPublicKeyCredentialOption(
             requestJson = requestJson
         )
         val getCredRequest = GetCredentialRequest(
-            listOf(getPasswordOption, getPublicKeyCredentialOption)
+            listOf(getPublicKeyCredentialOption)
         )
 
         return try {
@@ -165,12 +162,6 @@ class CredentialManagerWrapper(
                 // Return the response JSON for server validation and authentication.
                 SignInResult.WithPasskey(responseJson)
             }
-            is PasswordCredential -> {
-                val username = credential.id
-                val password = credential.password
-                // Return the username and password for server validation and authentication.
-                SignInResult.WithPassword(username, password)
-            }
             else -> {
                 // Catch any unrecognized credential type here.
                 Log.e(TAG, "Unexpected type of credential")
@@ -189,7 +180,7 @@ class CredentialManagerWrapper(
             }
             else -> {
                 // Handle other errors.
-                Log.e(TAG, "Sign-in failed with error: ${exception.message}")
+                Log.e(TAG, "Sign-in failed with error: ${exception.type}: ${exception.message}")
                 SignInResult.Failure(exception)
             }
         }

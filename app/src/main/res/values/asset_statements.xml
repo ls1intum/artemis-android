@@ -2,7 +2,7 @@
 <resources>
       <string name="asset_statements" translatable="false">
   [{
-    \"include\": \"https://artemis.ase.in.tum.de/.well-known/assetlinks.json\"
+    \"include\": \"https://artemis.tum.de/.well-known/assetlinks.json\"
   }]
   </string>
 </resources>

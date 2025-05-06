@@ -19,13 +19,15 @@ val loginModule = module {
     viewModelOf(::AccountViewModel)
     viewModel {
         LoginViewModel(
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get()
+            savedStateHandle = get(),
+            accountService = get(),
+            loginService = get(),
+            pushNotificationConfigurationService = get(),
+            serverConfigurationService = get(),
+            serverProfileInfoService = get(),
+            networkStatusProvider = get(),
+            webauthnApiService = get(),
+            credentialManagerWrapper = get(),
         )
     }
     viewModel {

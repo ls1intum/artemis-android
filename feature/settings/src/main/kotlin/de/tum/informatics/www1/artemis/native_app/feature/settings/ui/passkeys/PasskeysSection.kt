@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Key
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,6 +20,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateU
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.DateFormats
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.format
 import de.tum.informatics.www1.artemis.native_app.feature.settings.R
+import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.ButtonEntry
 
 @Composable
 fun PasskeysSection(
@@ -57,14 +60,14 @@ fun PasskeysSection(
             }
 
             // TODO: enable once passkey creation error is resolved
-//            ButtonEntry(
-//                modifier = Modifier.fillMaxWidth(),
-//                text = stringResource(R.string.passkey_settings_add_key),
-//                leadingIcon = Icons.Default.Key,
-//                isFocused = true,
-//                textColor = MaterialTheme.colorScheme.primary,
-//                onClick = onCreatePasskey,
-//            )
+            ButtonEntry(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(R.string.passkey_settings_add_key),
+                leadingIcon = Icons.Default.Key,
+                isFocused = true,
+                textColor = MaterialTheme.colorScheme.primary,
+                onClick = onCreatePasskey,
+            )
         }
     }
 }

@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
+import de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.CredentialManagerWrapper
+import de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.WebauthnApiService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerProfileInfoService
@@ -34,6 +36,8 @@ class LoginViewModel(
     serverConfigurationService: ServerConfigurationService,
     serverProfileInfoService: ServerProfileInfoService,
     networkStatusProvider: NetworkStatusProvider,
+    private val webauthnApiService: WebauthnApiService,
+    private val credentialManagerWrapper: CredentialManagerWrapper,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : BaseAccountViewModel(serverConfigurationService, networkStatusProvider, serverProfileInfoService) {
 
@@ -125,8 +129,28 @@ class LoginViewModel(
 
     fun loginWithPasskey(): Deferred<Boolean> {
         return viewModelScope.async(coroutineContext) {
-            // TODO
-            false
+            // Get challenge from server
+            val challengeResponse = webauthnApiService.getAuthenticationOptions()
+            if (challengeResponse is NetworkResponse.Failure) {
+                return@async false
+            }
+
+            // Use passkey to create response
+            val requestJson = (challengeResponse as NetworkResponse.Response).data
+            val result = credentialManagerWrapper.signIn(requestJson)
+            if (result is CredentialManagerWrapper.SignInResult.NoCredential) {
+                return@async true       // We do not consider this a failure
+            }
+            if (result is CredentialManagerWrapper.SignInResult.Failure) {
+                return@async false
+            }
+
+            // Send response to server
+            val publicKeyCredentialResponseJson =
+                (result as CredentialManagerWrapper.SignInResult.WithPasskey).responseJson
+            val serverResponse = webauthnApiService.loginWithPasskey(publicKeyCredentialResponseJson)
+
+            serverResponse.bind { it.authenticated }.or(false)
         }
     }
 }

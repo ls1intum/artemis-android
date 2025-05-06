@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.model.server_config
 
+import de.tum.informatics.www1.artemis.native_app.core.common.ActiveModuleFeature
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -34,6 +35,7 @@ data class ProfileInfo(
      * If a login using a username-password combination is not possible.
      */
     val isPasswordLoginDisabled: Boolean = saml2 != null && (saml2.passwordLoginDisabled || !saml2.enablePassword)
+    val isPasskeyLoginEnabled: Boolean = activeModuleFeatures.contains(ActiveModuleFeature.Passkey.rawValue)
     val compatibleVersions: CompatibleVersions? = null
 }
 
