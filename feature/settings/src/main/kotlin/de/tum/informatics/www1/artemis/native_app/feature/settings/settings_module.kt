@@ -19,7 +19,7 @@ val settingsModule = module {
             changeProfilePictureService = get(),
             passkeySettingsService = get(),
             webauthnApiService = get(),
-            localPasskeyManager = get(),
+            credentialManagerWrapper = get(),
             appVersionProvider = get()
         )
     }

@@ -8,10 +8,9 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.performAutoReloadingNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
-import de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.LocalPasskeyManager
+import de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.CredentialManagerWrapper
 import de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.PasskeySettingsService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.WebauthnApiService
-import de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.dto.PasskeyDTO
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.isLoggedIn
@@ -22,6 +21,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotif
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
 import de.tum.informatics.www1.artemis.native_app.feature.push.unsubscribeFromNotifications
 import de.tum.informatics.www1.artemis.native_app.feature.settings.service.ChangeProfilePictureService
+import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.passkeys.PasskeysUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.util.ProfilePictureBitmapUtil
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.util.ProfilePictureUploadResult
 import io.ktor.http.ContentType
@@ -47,7 +47,7 @@ class SettingsViewModel(
     private val changeProfilePictureService: ChangeProfilePictureService,
     passkeySettingsService: PasskeySettingsService,
     private val webauthnApiService: WebauthnApiService,
-    private val localPasskeyManager: LocalPasskeyManager,
+    private val credentialManagerWrapper: CredentialManagerWrapper,
     appVersionProvider: AppVersionProvider,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : ReloadableViewModel() {
@@ -60,13 +60,13 @@ class SettingsViewModel(
     val account: StateFlow<DataState<Account>> = _account
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
-    val passkeys: StateFlow<DataState<List<PasskeyDTO>>> = passkeySettingsService.performAutoReloadingNetworkCall(
+    val passkeysUseCase = PasskeysUseCase(
         networkStatusProvider = networkStatusProvider,
-        manualReloadFlow = requestReload
-    ) {
-        getPasskeys()
-    }
-        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
+        passkeySettingsService = passkeySettingsService,
+        webauthnApiService = webauthnApiService,
+        credentialManagerWrapper = credentialManagerWrapper,
+        coroutineContext = coroutineContext
+    )
 
     init {
         viewModelScope.launch(coroutineContext) {
@@ -124,36 +124,6 @@ class SettingsViewModel(
             _account.emit(DataState.Success(updatedAccount))
 
             ProfilePictureUploadResult.Success
-        }
-    }
-
-    fun createPasskey(): Deferred<Boolean> {
-        return viewModelScope.async(coroutineContext) {
-            val options = webauthnApiService.getRegistrationOptions()
-            if (options is NetworkResponse.Failure) {
-                return@async false
-            }
-
-            val requestJson = (options as NetworkResponse.Response).data
-            val result = localPasskeyManager.createPasskey(requestJson)
-
-            if (result is LocalPasskeyManager.PasskeyCreationResult.Failure) {
-                return@async false
-            }
-
-            if (result is LocalPasskeyManager.PasskeyCreationResult.Canceled) {
-                return@async true       // We do not consider this a failure
-            }
-
-            val publicKeyCredentialResponseJson =
-                (result as LocalPasskeyManager.PasskeyCreationResult.Success).response.registrationResponseJson
-            // TODO: continue here + maybe create PasskeyManager that contains this logic
-
-            val response = webauthnApiService.registerPasskey(
-                ,
-            )
-
-            response.bind { it.successful }.or(false)
         }
     }
 }

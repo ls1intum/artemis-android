@@ -25,7 +25,7 @@ import androidx.credentials.exceptions.publickeycredential.CreatePublicKeyCreden
 
 private const val TAG = "LocalPasskeyManager"
 
-class LocalPasskeyManager(
+class CredentialManagerWrapper(
     private val context: Context,
 ) {
 
@@ -84,7 +84,8 @@ class LocalPasskeyManager(
             is CreatePublicKeyCredentialDomException -> {
                 // Handle the passkey DOM errors thrown according to the
                 // WebAuthn spec.
-                Log.e(TAG, "Passkey creation failed with DOM error: ${error.domError.type}")
+                // TODO: we always get a "Passkey creation failed with DOM error: androidx.credentials.TYPE_SECURITY_ERROR: The incoming request cannot be validated"
+                Log.e(TAG, "Passkey creation failed with DOM error: ${error.domError.type}: ${error.message}")
                 return PasskeyCreationResult.Failure(error)
             }
             is CreateCredentialCancellationException -> {

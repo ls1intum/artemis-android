@@ -36,6 +36,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.attafitamim.krop.core.crop.rememberImageCropper
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.dto.PasskeyDTO
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisSection
@@ -48,6 +49,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.settings.R
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.LogoutButtonEntry
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.PreferenceEntry
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.SettingsViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.passkeys.PasskeysSection
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.util.ProfilePictureUploadResult
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.util.getMessage
 import kotlinx.coroutines.Deferred
@@ -59,14 +61,20 @@ fun AccountSettingsScreen(
     viewModel: SettingsViewModel = koinInject(),
 ) {
     val account by viewModel.account.collectAsState()
+    val passkeysUseCase = viewModel.passkeysUseCase
+    val passkeys by passkeysUseCase.passkeys.collectAsState()
+    // TODO: check ProfileInfo for "passkey" in activeModuleFeatures
 
     AccountSettingsScreen(
         modifier = modifier,
         accountDataState = account,
+        passkeys = passkeys,
         onDeleteProfilePicture = viewModel::onDeleteProfilePicture,
         onUploadProfilePicture = viewModel::onUploadProfilePicture,
+        onCreatePasskey = passkeysUseCase::createPasskey,
         onLogout = viewModel::onRequestLogout,
-        onRequestReload = viewModel::onRequestReload)
+        onRequestReload = viewModel::onRequestReload
+    )
 }
 
 
@@ -74,13 +82,16 @@ fun AccountSettingsScreen(
 internal fun AccountSettingsScreen(
     modifier: Modifier = Modifier,
     accountDataState: DataState<Account>,
+    passkeys: DataState<List<PasskeyDTO>>?,
     onDeleteProfilePicture: () -> Unit,
     onUploadProfilePicture: (ImageBitmap) -> Deferred<ProfilePictureUploadResult>,
+    onCreatePasskey: () -> Deferred<Boolean>,
     onLogout: () -> Unit,
     onRequestReload: () -> Unit
 ) {
     var showChangeActionsBottomSheet by remember { mutableStateOf(false) }
     var uploadJob: Deferred<ProfilePictureUploadResult>? by remember { mutableStateOf(null) }
+    var createPasskeyJob: Deferred<Boolean>? by remember { mutableStateOf(null) }
 
     val imageCropper = rememberImageCropper()
     val croppingImagePicker = rememberCroppingImagePicker(
@@ -99,6 +110,17 @@ internal fun AccountSettingsScreen(
             Toast.makeText(
                 context,
                 it.getMessage(context),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    AwaitDeferredCompletion(job = createPasskeyJob) { success ->
+        createPasskeyJob = null
+        if (!success) {
+            Toast.makeText(
+                context,
+                "Failed to create passkey",
                 Toast.LENGTH_SHORT
             ).show()
         }
@@ -129,12 +151,16 @@ internal fun AccountSettingsScreen(
             AccountSettingsBody(
                 modifier = Modifier.fillMaxWidth(),
                 account = account,
-                onChangeClicked = {
+                passkeys = passkeys,
+                onChangeProfilePicture = {
                     if (account.hasCustomProfilePicture) {
                         showChangeActionsBottomSheet = true
                     } else {
                         launchImagePicker()
                     }
+                },
+                onCreatePasskey = {
+                    createPasskeyJob = onCreatePasskey()
                 },
                 onLogout = onLogout
             )
@@ -163,7 +189,9 @@ internal fun AccountSettingsScreen(
 private fun AccountSettingsBody(
     modifier: Modifier = Modifier,
     account: Account,
-    onChangeClicked: () -> Unit,
+    passkeys: DataState<List<PasskeyDTO>>?,  // null means passkeys are disabled
+    onChangeProfilePicture: () -> Unit,
+    onCreatePasskey: () -> Unit,
     onLogout: () -> Unit,
 ) {
     Column(
@@ -175,12 +203,20 @@ private fun AccountSettingsBody(
     ) {
         ChangeProfilePicture(
             account = account,
-            onChangeClicked = onChangeClicked
+            onChangeClicked = onChangeProfilePicture
         )
 
         DetailsSection(
             account = account,
         )
+
+        passkeys?.let {
+            PasskeysSection(
+                modifier = Modifier.fillMaxWidth(),
+                passkeysDataState = it,
+                onCreatePasskey = onCreatePasskey
+            )
+        }
 
         LogoutButtonEntry(
             modifier = Modifier.fillMaxWidth(),
