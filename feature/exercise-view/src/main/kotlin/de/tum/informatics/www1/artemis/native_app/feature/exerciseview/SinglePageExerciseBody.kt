@@ -48,9 +48,17 @@ fun SinglePageExerciseBody(
         config = OpenedExercise(config, id)
     }
 
-    BackHandler(enabled = isTabletPortrait && config is OpenedExercise) {
+    val resetToSidebar = {
         isSidebarOpen = true
         config = NothingOpened
+    }
+
+    // Handle system back button
+    BackHandler(enabled = config is OpenedExercise) {
+        if (isTabletPortrait) {
+            // In portrait mode, first back press resets to exercise list
+            resetToSidebar()
+        }
     }
 
     when (layout) {
@@ -102,8 +110,7 @@ fun SinglePageExerciseBody(
                                 exerciseId = conf.exerciseId,
                                 viewMode = ExerciseViewMode.Overview,
                                 onNavigateBack = {
-                                    isSidebarOpen = true
-                                    config = NothingOpened
+                                    resetToSidebar()
                                 },
                                 actions = actions,
                                 onSidebarToggle = onSidebarToggle
