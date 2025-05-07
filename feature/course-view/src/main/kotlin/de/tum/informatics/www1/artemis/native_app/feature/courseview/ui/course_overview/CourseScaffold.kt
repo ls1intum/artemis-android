@@ -68,6 +68,7 @@ internal fun CourseScaffold(
                     courseDataState = courseDataState,
                     isSelected = isCourseTabSelected,
                     onUpdateSelectedTab = updateSelectedCourseTab,
+                    onNavigateBack = onNavigateBack
                 )
             }
         },

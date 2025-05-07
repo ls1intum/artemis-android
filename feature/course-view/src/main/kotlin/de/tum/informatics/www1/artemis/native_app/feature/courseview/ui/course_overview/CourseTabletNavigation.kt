@@ -27,7 +27,8 @@ fun CourseTabletNavigation(
     modifier: Modifier = Modifier,
     courseDataState: DataState<Course>,
     isSelected: (CourseTab) -> Boolean,
-    onUpdateSelectedTab: (CourseTab) -> Unit
+    onUpdateSelectedTab: (CourseTab) -> Unit,
+    onNavigateBack: () -> Unit
 ) {
     val navItems = getNavigationItems(courseDataState)
     val selectedIndex = navItems.indexOfFirst { isSelected(it.route) }.coerceAtLeast(0)
@@ -35,7 +36,7 @@ fun CourseTabletNavigation(
     ArtemisTopAppBar(
         modifier = modifier,
         navigationIcon = {
-            NavigationBackButton()
+            NavigationBackButton(onNavigateBack)
         },
         title = {
             Row(
