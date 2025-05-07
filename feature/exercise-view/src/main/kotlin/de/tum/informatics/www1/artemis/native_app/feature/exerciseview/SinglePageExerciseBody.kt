@@ -24,6 +24,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.Col
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.getArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.isTabletPortrait
+import androidx.activity.compose.BackHandler
 
 @Composable
 fun SinglePageExerciseBody(
@@ -45,6 +46,11 @@ fun SinglePageExerciseBody(
     val openExercise: (Long) -> Unit = { id ->
         if (isTabletPortrait) isSidebarOpen = false
         config = OpenedExercise(config, id)
+    }
+
+    BackHandler(enabled = isTabletPortrait && config is OpenedExercise) {
+        isSidebarOpen = true
+        config = NothingOpened
     }
 
     when (layout) {
