@@ -5,7 +5,6 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.ServerSelectedBasedServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.dto.PasskeyLoginResponseDTO
-import de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.dto.RegisterPasskeyDTO
 import de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.dto.RegisterPasskeyResponseDTO
 import io.ktor.client.request.setBody
 import io.ktor.http.appendPathSegments
@@ -25,12 +24,12 @@ class WebauthnApiService(
         }
     }
 
-    suspend fun registerPasskey(registerPasskeyDto: RegisterPasskeyDTO): NetworkResponse<RegisterPasskeyResponseDTO> {
+    suspend fun registerPasskey(registerPasskeyJson: String): NetworkResponse<RegisterPasskeyResponseDTO> {
         return postRequest {
             url {
                 appendPathSegments("webauthn", "register")
             }
-            setBody(registerPasskeyDto)
+            setBody(registerPasskeyJson)
         }
     }
 

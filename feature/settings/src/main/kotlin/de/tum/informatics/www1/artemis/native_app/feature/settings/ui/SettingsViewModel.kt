@@ -65,7 +65,8 @@ class SettingsViewModel(
         passkeySettingsService = passkeySettingsService,
         webauthnApiService = webauthnApiService,
         credentialManagerWrapper = credentialManagerWrapper,
-        coroutineContext = coroutineContext
+        requestReload = requestReload,
+        coroutineScope = viewModelScope + coroutineContext,
     )
 
     init {

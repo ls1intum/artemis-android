@@ -30,7 +30,7 @@ class CredentialManagerWrapper(
     private val credentialManager = CredentialManager.create(context)
 
     sealed class PasskeyCreationResult {
-        data class Success(val response: CreatePublicKeyCredentialResponse) : PasskeyCreationResult()
+        data class Success(val registrationResponseJson: String) : PasskeyCreationResult()
         data object Canceled : PasskeyCreationResult()
         data class Failure(val error: Exception) : PasskeyCreationResult()
     }
@@ -59,7 +59,7 @@ class CredentialManagerWrapper(
                 context = context,
                 request = createPublicKeyCredentialRequest,
             )
-            return PasskeyCreationResult.Success(result as CreatePublicKeyCredentialResponse)
+            return PasskeyCreationResult.Success((result as CreatePublicKeyCredentialResponse).registrationResponseJson)
         } catch (e : CreateCredentialException){
             return handlePassKeyCreationFailure(
                 error = e,
@@ -95,6 +95,7 @@ class CredentialManagerWrapper(
             }
             is CreateCredentialInterruptedException -> {
                 // Retry-able error. Consider retrying the call.
+                Log.w(TAG, "Passkey creation interrupted: ${error.message}, retrying...")
                 return onRetry()
             }
             is CreateCredentialProviderConfigurationException -> {
