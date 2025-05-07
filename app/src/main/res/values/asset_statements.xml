@@ -3,6 +3,8 @@
       <string name="asset_statements" translatable="false">
   [{
     \"include\": \"https://artemis.tum.de/.well-known/assetlinks.json\"
+          <!-- For testing purposes, we also include the assetlinks from one of the test servers. -->
+    \"include\": \"https://artemis-test1.artemis.cit.tum.de/.well-known/assetlinks.json\"
   }]
   </string>
 </resources>

@@ -148,6 +148,7 @@ class CredentialManagerWrapper(
             )
             handleSignIn(result)
         } catch (e: GetCredentialException) {
+            // TODO: "Sign-in failed with error: androidx.credentials.TYPE_GET_PUBLIC_KEY_CREDENTIAL_DOM_EXCEPTION/androidx.credentials.TYPE_DATA_ERROR: [50152] RP ID cannot be validated."
             handleSignInFailure(e)
         }
     }
