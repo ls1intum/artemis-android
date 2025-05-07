@@ -3,7 +3,7 @@
 ## Checklist
 - Create a new draft release on github. 
   - Make the automatically generated release notes more readable by sorting them and removing irrelevant information (eg Dependabot version updates)
-- Test all the newly introduced features and the basic app functionality (such as sending and receiving posts)
+- Test all the newly introduced features and the basic app functionality (see `10MinuteTest.md`)
 - Update the app version name in `app/build.gralde.kts` and commit that to `develop` (the app version *code* will be set by the Github action)
 - Merge `develop` into `main`, this will build a new app bundle and release it for internal testing on the Play Console
   - For the PlayStore release notes (configured in the Play Console), shorten the Github release notes and only include the most relevant information for the end users
