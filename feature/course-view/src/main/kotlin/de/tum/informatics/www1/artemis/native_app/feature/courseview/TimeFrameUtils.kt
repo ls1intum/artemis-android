@@ -53,10 +53,10 @@ object TimeFrameUtils {
         val noDateSorted = noDate.sortedByStartDate()
 
         val grouped = buildList {
-            if (pastSorted.isNotEmpty()) add(TimeFrame.Past(pastSorted))
-            if (currentSorted.isNotEmpty()) add(TimeFrame.Current(currentSorted))
-            if (dueSoonSorted.isNotEmpty()) add(TimeFrame.DueSoon(dueSoonSorted))
             if (futureSorted.isNotEmpty()) add(TimeFrame.Future(futureSorted))
+            if (dueSoonSorted.isNotEmpty()) add(TimeFrame.DueSoon(dueSoonSorted))
+            if (currentSorted.isNotEmpty()) add(TimeFrame.Current(currentSorted))
+            if (pastSorted.isNotEmpty()) add(TimeFrame.Past(pastSorted))
             if (noDateSorted.isNotEmpty()) add(TimeFrame.NoDate(noDateSorted))
         }
 
@@ -71,7 +71,7 @@ object TimeFrameUtils {
         for (item in items) {
             val end = when (item) {
                 is Exercise -> item.dueDate
-                is Lecture -> item.endDate
+                is Lecture -> item.endDate ?: item.startDate
                 else -> null
             }
             if (end == null) {
@@ -91,7 +91,7 @@ object TimeFrameUtils {
 
         return map
             .map { (indicator, bucketItems) -> WeeklyGroup(indicator, bucketItems) }
-            .sortedBy { (indicator, _) ->
+            .sortedByDescending { (indicator, _) ->
                 toSortInstant(indicator)
             }
     }
