@@ -20,7 +20,14 @@ object TimeFrameUtils {
     ): List<TimeFrame<T>> {
         if (isEmpty()) return emptyList()
 
-        val (past, notPast) = partition { item ->
+        val (futureRelease, notFutureRelease) = partition { item ->
+            val start = getStartDate(item)
+            val end = getEndDate(item)
+            val release = getStartDate(item)
+            start == null && end == null && release != null && release > now
+        }
+
+        val (past, notPast) = notFutureRelease.partition { item ->
             val start = getStartDate(item)
             val end = getEndDate(item)
             (start == null || start < now) && (end != null && end < now)
@@ -29,7 +36,8 @@ object TimeFrameUtils {
         val (noDate, dated) = notPast.partition { item ->
             val start = getStartDate(item)
             val end = getEndDate(item)
-            (start == null || start < now) && end == null
+            val release = getStartDate(item)
+            (start == null || start < now) && end == null && (release == null || release <= now)
         }
 
         val (dueSoon, currentOrFuture) = dated.partition { item ->
@@ -49,7 +57,7 @@ object TimeFrameUtils {
         val pastSorted = past.sortedByStartDate()
         val currentSorted = current.sortedByStartDate()
         val dueSoonSorted = dueSoon.sortedByStartDate()
-        val futureSorted = future.sortedByStartDate()
+        val futureSorted = (futureRelease + future).sortedByStartDate()
         val noDateSorted = noDate.sortedByStartDate()
 
         val grouped = buildList {
@@ -79,6 +87,8 @@ object TimeFrameUtils {
             } else {
                 val cal = Calendar.getInstance()
                 cal.timeInMillis = end.toEpochMilliseconds()
+                cal.firstDayOfWeek = Calendar.MONDAY
+                cal.minimalDaysInFirstWeek = 4
 
                 val indicator = WeekIndicator.Dated(
                     cal.get(Calendar.YEAR),
