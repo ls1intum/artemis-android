@@ -134,7 +134,7 @@ internal fun Project.configureReleaseTypeFlavors(
     }
 }
 
-private const val TUM_ARTEMIS_SERVER_URL = "https://artemis.tum.de"
+private const val TUM_ARTEMIS_SERVER_URL = "https://artemis.tum.de/"        // The "/" at the end is important, as it is used in the URL building process
 
 internal fun Project.configureInstanceSelectionFlavors(
     commonExtension: CommonExtension<*, *, *, *, *, *>,
