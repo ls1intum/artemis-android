@@ -1,7 +1,9 @@
 package de.tum.informatics.www1.artemis.native_app.feature.faq.ui.overview
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,6 +22,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -32,6 +36,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.NoSearchResults
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.selectionBorder
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
@@ -44,34 +49,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.FaqCateg
 import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.FaqCategoryChipFlowRow
 
 internal fun testTagForFaq(faq: Faq) = "TEST_TAG_FAQ_${faq.id}"
-
-@Composable
-fun FaqOverviewUi(
-    modifier: Modifier = Modifier,
-    collapsingContentState: CollapsingContentState,
-    scaffold: @Composable (searchConfiguration: CourseSearchConfiguration, content: @Composable () -> Unit) -> Unit,
-    onNavigateToFaq: (faqId: Long) -> Unit,
-    selectedFaqId: Long? = null,
-) {
-    val viewModel = koinViewModel<FaqOverviewViewModel>()
-    val query by viewModel.searchQuery.collectAsState()
-
-    val searchConfiguration = CourseSearchConfiguration.Search(
-        query = query,
-        hint = stringResource(R.string.faq_search_hint),
-        onUpdateQuery = viewModel::updateQuery
-    )
-
-    scaffold(searchConfiguration) {
-        FaqOverviewUi(
-            modifier = modifier,
-            viewModel = viewModel,
-            collapsingContentState = collapsingContentState,
-            onNavigateToFaq = onNavigateToFaq,
-            selectedFaqId = selectedFaqId
-        )
-    }
-}
 
 @Composable
 fun FaqOverviewUi(
