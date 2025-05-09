@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="exercise_chips_points_title">Points</string>
+    <string name="exercise_chips_submission_due_title">Submission Due</string>
+    <string name="exercise_chips_submission_closed_title">Submission Closed</string>
+    <string name="exercise_chips_status_title">Status</string>
+    <string name="exercise_chips_difficulty_title">Difficulty</string>
+    <string name="exercise_chips_category_title">Category</string>
+    <string name="exercise_chips_not_released">Not Released</string>
+    <string name="exercise_chips_exercise_points">%1$s / %2$s</string>
+    <string name="exercise_chips_points_max">%1$s</string>
+    <string name="exercise_chips_points_none">No points</string>
+</resources>
