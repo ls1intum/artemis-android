@@ -31,12 +31,13 @@ fun SinglePageLectureBody(
     collapsingContentState: CollapsingContentState,
     onViewExercise: (Long) -> Unit,
     onNavigateToLectureScreen: (Long) -> Unit,
+    initialConfiguration: LectureConfiguration,
     title: String
 ) {
     val layout = getArtemisAppLayout()
     val isTabletPortrait = layout.isTabletPortrait
 
-    var config: LectureConfiguration by rememberSaveable { mutableStateOf(NothingOpened) }
+    var config: LectureConfiguration by rememberSaveable { mutableStateOf(initialConfiguration) }
     var isSidebarOpen by rememberSaveable { mutableStateOf(true) }
     val onSidebarToggle: () -> Unit = { isSidebarOpen = !isSidebarOpen }
 

@@ -17,3 +17,14 @@ data class OpenedFaq(
     val _prev: FaqConfiguration,
     val faqId: Long
 ) : FaqConfiguration(10, _prev)
+
+fun getInitialFaqConfiguration(
+    faqId: Long?
+): FaqConfiguration = when {
+    faqId != null ->  OpenedFaq(
+        faqId = faqId,
+        _prev = NothingOpened
+    )
+
+    else -> NothingOpened
+}

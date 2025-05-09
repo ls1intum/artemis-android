@@ -83,3 +83,36 @@ data object IgnoreCustomBackHandling : ConversationConfiguration(
     navigationLevel = 0,
     prevConfiguration = null
 )
+
+fun getInitialConversationConfiguration(
+    conversationId: Long?,
+    postId: Long?,
+    username: String?,
+    userId: Long?
+): ConversationConfiguration = when {
+    conversationId != null && postId != null -> OpenedConversation(
+        _prevConfiguration = IgnoreCustomBackHandling,
+        conversationId = conversationId,
+        openedThread = OpenedThread(
+            StandalonePostId.ServerSideId(postId)
+        )
+    )
+
+    conversationId != null -> OpenedConversation(
+        _prevConfiguration = IgnoreCustomBackHandling,
+        conversationId = conversationId,
+        openedThread = null
+    )
+
+    username != null -> NavigateToUserConversation(
+        _prevConfiguration = IgnoreCustomBackHandling,
+        userIdentifier = UserIdentifier.Username(username)
+    )
+
+    userId != null -> NavigateToUserConversation(
+        _prevConfiguration = IgnoreCustomBackHandling,
+        userIdentifier = UserIdentifier.UserId(userId)
+    )
+
+    else -> NothingOpened
+}

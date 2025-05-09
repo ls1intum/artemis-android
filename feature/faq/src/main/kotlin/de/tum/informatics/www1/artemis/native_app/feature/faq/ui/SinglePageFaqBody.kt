@@ -35,12 +35,13 @@ fun SinglePageFaqBody(
     collapsingContentState: CollapsingContentState,
     onNavigateToFaq: (Long) -> Unit,
     scaffold: @Composable (searchConfiguration: CourseSearchConfiguration, content: @Composable () -> Unit) -> Unit,
-    title: String
+    title: String,
+    initialConfiguration: FaqConfiguration
 ) {
     val layout = getArtemisAppLayout()
     val isTabletPortrait = layout.isTabletPortrait
 
-    var config: FaqConfiguration by rememberSaveable { mutableStateOf(NothingOpened) }
+    var config: FaqConfiguration by rememberSaveable { mutableStateOf(initialConfiguration) }
     var isSidebarOpen by rememberSaveable { mutableStateOf(true) }
 
     val openFaq: (Long) -> Unit = { id ->

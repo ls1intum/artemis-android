@@ -17,3 +17,14 @@ data class OpenedExercise(
     private val _prev: ExerciseConfiguration,
     val exerciseId: Long
 ) : ExerciseConfiguration(10, _prev)
+
+fun getInitialExerciseConfigurations(
+    exerciseId: Long?
+): ExerciseConfiguration = when {
+    exerciseId != null ->  OpenedExercise(
+        exerciseId = exerciseId,
+        _prev = NothingOpened
+    )
+
+    else -> NothingOpened
+}

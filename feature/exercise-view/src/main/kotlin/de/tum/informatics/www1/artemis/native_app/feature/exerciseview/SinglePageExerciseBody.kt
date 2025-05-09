@@ -34,12 +34,13 @@ fun SinglePageExerciseBody(
     collapsingContentState: CollapsingContentState,
     onClickExercise: (Long) -> Unit,
     actions: BoundExerciseActions,
-    title: String
+    initialConfiguration: ExerciseConfiguration,
+    title: String,
 ) {
     val layout = getArtemisAppLayout()
     val isTabletPortrait = layout.isTabletPortrait
 
-    var config: ExerciseConfiguration by rememberSaveable { mutableStateOf(NothingOpened) }
+    var config: ExerciseConfiguration by rememberSaveable { mutableStateOf(initialConfiguration) }
     var isSidebarOpen by remember { mutableStateOf(true) }
     val onSidebarToggle: () -> Unit = { isSidebarOpen = !isSidebarOpen }
 
