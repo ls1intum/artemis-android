@@ -117,7 +117,6 @@ fun NavGraphBuilder.rootNavGraph(
         onNavigateToExercise = { exerciseId ->
             navController.navigateToExercise(
                 exerciseId = exerciseId,
-                showSideBarIcon = false,
                 viewMode = ExerciseViewMode.Overview
             ) { }
         },
@@ -146,7 +145,6 @@ fun NavGraphBuilder.rootNavGraph(
         onViewExercise = { exerciseId ->
             navController.navigateToExercise(
                 exerciseId,
-                showSideBarIcon = false,
                 ExerciseViewMode.Overview
             ) { }
         }
