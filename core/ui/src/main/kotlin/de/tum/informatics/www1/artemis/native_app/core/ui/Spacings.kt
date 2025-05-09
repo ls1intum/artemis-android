@@ -93,6 +93,13 @@ object Spacings {
         val iconSize = 32.dp
 
     }
+
+    object ExerciseOverviewChips {
+        val height = 50.dp
+        val corner = 8.dp
+        val border = 1.dp
+        val padding = 8.dp
+    }
 }
 
 fun Modifier.endOfPagePadding() = padding(bottom = Spacings.EndOfScrollablePageSpacing).navigationBarsPadding()

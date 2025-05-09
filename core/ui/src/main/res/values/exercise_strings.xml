@@ -22,6 +22,13 @@
     <string name="exercise_user_not_participated">Not participated.</string>
     <string name="exercise_user_participating">Currently participating.</string>
     <string name="exercise_user_submitted">You have already submitted.</string>
+    <string name="exercise_not_yet_started">Not yet started</string>
+    <string name="exercise_user_not_assigned_to_team_short">No team yet</string>
+    <string name="exercise_exercise_missed_deadline_short">Missed due date</string>
+    <string name="exercise_user_not_participated_short">Not participated</string>
+    <string name="exercise_user_participating_short">Currently participating</string>
+    <string name="exercise_user_submitted_short">Already submitted</string>
+    <string name="exercise_status_dash">–</string>
     <!--  Display nothing like the webapp does.  -->
     <string name="exercise_user_unknown"> </string>
 

@@ -38,6 +38,8 @@ object ExerciseColors {
             get() = Color(0xff28a745)
         val unknown: Color
             get() = Color(0xFFFFFFFF)
+        val notReleased: Color
+            get() = Color(0xffffc107)
     }
 
     object Quiz {
