@@ -1,7 +1,6 @@
 plugins {
     id("artemis.android.feature")
     id("artemis.android.library.compose")
-    id("kotlin-parcelize")
 }
 
 android {
@@ -13,6 +12,8 @@ dependencies {
     implementation(project(":core:data"))
     implementation(project(":core:device"))
     implementation(project(":feature:metis"))
+    implementation(project(":feature:lecture-view"))
+    implementation(project(":feature:exercise-view"))
     implementation(project(":feature:metis:conversation:emoji-picker"))
     implementation(project(":feature:faq"))
 

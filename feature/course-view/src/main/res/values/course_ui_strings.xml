@@ -11,32 +11,10 @@
     <string name="course_ui_loading_course_loading">Fetching your course from server…</string>
     <string name="course_ui_loading_course_try_again">Try again</string>
     <string name="course_ui_exercises_search_hint">Search for an exercise</string>
-    <string name="course_ui_exercises_no_search_results_title">No exercises found</string>
-    <string name="course_ui_exercises_no_search_results_body">\"%s\" did not match any exercises.</string>
-
-    <!--  Supplied with the from date and to date.   -->
-    <string name="course_ui_weekly_list_week_header">%1$s - %2$s</string>
-    <string name="course_ui_weekly_list_unbound_week_header">No date associated</string>
-    <!--  Screen reader information about the expand button to show weekly exercises  -->
-    <string name="course_ui_list_expand_button_more_content_info">Expand  list</string>
-    <string name="course_ui_list_expand_button_less_content_info">Collapse list</string>
-    <string name="course_ui_list_time_frame_past">Past</string>
-    <string name="course_ui_list_time_frame_current">Current</string>
-    <string name="course_ui_list_time_frame_future">Future</string>
-    <string name="course_ui_list_time_frame_no_date">No date</string>
-    <string name="course_ui_list_time_frame_due_soon">Due soon</string>
-
-    <string name="course_ui_lecture_item_start_date_set">Start date: %1$s</string>
-    <string name="course_ui_lecture_item_start_date_not_set">No due date</string>
-
-    <!--  Lecture list  -->
-    <string name="course_ui_lectures_no_search_results_title">No lectures found</string>
-    <string name="course_ui_lectures_no_search_results_body">\"%s\" did not match any lectures.</string>
-    <string name="course_ui_lectures_search_hint">Search for a lecture</string>
 
     <!--  Communication  -->
     <string name="course_ui_communication_disabled">Course communication is disabled.</string>
 
-    <!--  Listing  -->
-    <string name="course_ui_sub_title_no_date">No Date Associated</string>
+    <string name="course_ui_lectures_search_hint">Search for a lecture</string>
+
 </resources>

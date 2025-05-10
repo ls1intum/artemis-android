@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.courseview.ui
+package de.tum.informatics.www1.artemis.native_app.feature.lectureview
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,12 +24,32 @@ import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.NoSearchResults
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.timeframe.TimeFrame
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.timeframe.TimeFrameItemsLazyColumn
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.selectionBorder
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
-import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
-import de.tum.informatics.www1.artemis.native_app.feature.courseview.TimeFrame
 
-internal const val TEST_TAG_LECTURE_LIST = "lecture list"
+const val TEST_TAG_LECTURE_LIST = "lecture list"
+
+@Composable
+fun LectureOverviewBody(
+    modifier: Modifier,
+    lectures: List<TimeFrame<Lecture>>,
+    collapsingContentState: CollapsingContentState,
+    query: String,
+    onSelectLecture: (Long) -> Unit,
+    selectedLectureId: Long?
+) {
+    LectureListUi(
+        modifier = modifier,
+        lectures = lectures,
+        collapsingContentState = collapsingContentState,
+        query = query,
+        onClickLecture = { lec -> onSelectLecture(lec.id ?: 0L) },
+        selectedLectureId = selectedLectureId
+    )
+}
 
 @Composable
 internal fun LectureListUi(
@@ -37,23 +57,26 @@ internal fun LectureListUi(
     lectures: List<TimeFrame<Lecture>>,
     collapsingContentState: CollapsingContentState,
     query: String,
-    onClickLecture: (Lecture) -> Unit
+    onClickLecture: (Lecture) -> Unit,
+    selectedLectureId: Long?
 ) {
     if (lectures.isEmpty()) {
         if (query.isNotBlank()) {
             NoSearchResults(
                 modifier = modifier,
-                title = stringResource(id = R.string.course_ui_lectures_no_search_results_title),
-                details = stringResource(id = R.string.course_ui_lectures_no_search_results_body, query)
+                title = stringResource(id = R.string.lecture_list_lectures_no_search_results_title),
+                details = stringResource(
+                    id = R.string.lecture_list_lectures_no_search_results_body,
+                    query
+                )
             )
-            return
+        } else {
+            EmptyListHint(
+                modifier = modifier,
+                hint = stringResource(id = R.string.lecture_list_lectures_no_search_results_title),
+                imageVector = Icons.Default.School
+            )
         }
-
-        EmptyListHint(
-            modifier = modifier,
-            hint = stringResource(id = R.string.course_ui_lectures_no_search_results_title),
-            imageVector = Icons.Default.School
-        )
         return
     }
 
@@ -64,29 +87,35 @@ internal fun LectureListUi(
         timeFrameGroup = lectures,
         query = query,
         getItemId = { id ?: 0L }
-    ) { m, lecture ->
+    ) { itemMod, lecture ->
         LectureListItem(
-            modifier = m
+            modifier = itemMod
                 .fillMaxWidth()
                 .padding(horizontal = Spacings.ScreenHorizontalSpacing),
             lecture = lecture,
-            onClick = { onClickLecture(lecture) }
+            onClick = { onClickLecture(lecture) },
+            selected = selectedLectureId == lecture.id
         )
     }
 }
 
 @Composable
-private fun LectureListItem(modifier: Modifier, lecture: Lecture, onClick: () -> Unit) {
+private fun LectureListItem(
+    modifier: Modifier,
+    lecture: Lecture,
+    onClick: () -> Unit,
+    selected: Boolean
+) {
     val startTime = lecture.startDate
     val startTimeText = if (startTime != null) {
         stringResource(
-            id = R.string.course_ui_lecture_item_start_date_set,
+            id = R.string.lecture_list_lecture_item_start_date_set,
             getRelativeTime(to = startTime)
         )
-    } else stringResource(id = R.string.course_ui_lecture_item_start_date_not_set)
+    } else stringResource(id = R.string.lecture_list_lecture_item_start_date_not_set)
 
     Card(
-        modifier = modifier,
+        modifier = modifier.selectionBorder(selected),
         onClick = onClick
     ) {
         Column(

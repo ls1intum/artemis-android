@@ -1,9 +1,10 @@
-package de.tum.informatics.www1.artemis.native_app.feature.courseview
+package de.tum.informatics.www1.artemis.native_app.core.ui.common.course.timeframe
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
+import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import java.text.SimpleDateFormat
@@ -134,7 +135,7 @@ object TimeFrameUtils {
     fun WeekIndicator.toRangeString(): String {
         return when (this) {
             is WeekIndicator.Dated -> {
-                val start = computeWeekStartDate(this) ?: return stringResource(R.string.course_ui_sub_title_no_date)
+                val start = computeWeekStartDate(this) ?: return stringResource(R.string.course_sub_title_no_date)
                 val cal = Calendar.getInstance().apply { time = start }
                 cal.add(Calendar.DAY_OF_YEAR, 6)
                 val end = cal.time
@@ -144,7 +145,7 @@ object TimeFrameUtils {
             }
 
             WeekIndicator.NoDate -> {
-                stringResource(R.string.course_ui_sub_title_no_date)
+                stringResource(R.string.course_sub_title_no_date)
             }
         }
     }

@@ -79,7 +79,8 @@ fun ConversationOverviewBody(
     onRequestCreatePersonalConversation: () -> Unit,
     onRequestAddChannel: () -> Unit,
     onRequestBrowseChannel: () -> Unit,
-    canCreateChannel: Boolean
+    canCreateChannel: Boolean,
+    selectedConversationId: Long?
 ) {
     ConversationOverviewBody(
         modifier = modifier,
@@ -90,7 +91,8 @@ fun ConversationOverviewBody(
         onRequestCreatePersonalConversation = onRequestCreatePersonalConversation,
         onRequestAddChannel = onRequestAddChannel,
         onRequestBrowseChannel = onRequestBrowseChannel,
-        canCreateChannel = canCreateChannel
+        canCreateChannel = canCreateChannel,
+        selectedConversationId = selectedConversationId
     )
 }
 
@@ -104,7 +106,8 @@ fun ConversationOverviewBody(
     onRequestCreatePersonalConversation: () -> Unit,
     onRequestAddChannel: () -> Unit,
     onRequestBrowseChannel: () -> Unit,
-    canCreateChannel: Boolean
+    canCreateChannel: Boolean,
+    selectedConversationId: Long? = null
 ) {
     var showCodeOfConduct by rememberSaveable { mutableStateOf(false) }
     val conversationCollectionsDataState: DataState<ConversationCollections> by viewModel.conversations.collectAsState()
@@ -198,7 +201,8 @@ fun ConversationOverviewBody(
                                 }
                             }
                         }
-                    }
+                    },
+                    selectedConversationId = selectedConversationId
                 )
             }
         }

@@ -11,6 +11,7 @@
     <string name="faq_overview_read_more">Read more</string>
 
     <string name="faq_overview_no_faqs">No FAQs found</string>
+    <string name="faq_overview_no_faqs_selected">Please select an FAQ from sidebar</string>
     <string name="faq_overview_no_faqs_search">\"%s\" did not match any FAQs.</string>
     <string name="faq_search_hint">Search for an FAQ</string>
     <string name="faq_details_title">FAQ Details</string>

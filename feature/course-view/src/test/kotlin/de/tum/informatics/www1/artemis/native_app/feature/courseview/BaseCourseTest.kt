@@ -3,6 +3,9 @@ package de.tum.informatics.www1.artemis.native_app.feature.courseview
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.test.platform.app.InstrumentationRegistry
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
@@ -74,5 +77,12 @@ abstract class BaseCourseTest : BaseComposeTest() {
         }
 
         return viewModel
+    }
+
+    internal fun hasTestTagEndingWith(suffix: String): SemanticsMatcher {
+        return SemanticsMatcher("has test tag ending with $suffix") { semanticsNode ->
+            val tag = semanticsNode.config.getOrNull(SemanticsProperties.TestTag)
+            tag?.endsWith(suffix) == true
+        }
     }
 }

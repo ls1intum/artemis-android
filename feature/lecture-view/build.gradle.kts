@@ -1,6 +1,7 @@
 plugins {
     id("artemis.android.feature")
     id("artemis.android.library.compose")
+    id("kotlin-parcelize")
 }
 
 android {

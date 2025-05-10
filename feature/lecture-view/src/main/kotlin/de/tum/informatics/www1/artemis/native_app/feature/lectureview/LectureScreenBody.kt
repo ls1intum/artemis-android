@@ -25,7 +25,6 @@ import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_uni
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.DefaultTab
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import kotlinx.coroutines.Deferred
@@ -38,18 +37,12 @@ internal fun LectureScreenBody(
     lectureChannel: DataState<ChannelChat>,
     lectureUnits: List<LectureUnit>,
     onViewExercise: (exerciseId: Long) -> Unit,
-    onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
-    onParticipateInQuiz: (exerciseId: Long, isPractice: Boolean) -> Unit,
-    onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
-    onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
-    courseId: Long,
     overviewListState: LazyListState,
     onRequestViewLink: (String) -> Unit,
     onRequestOpenAttachment: (Attachment) -> Unit,
     onDisplaySetCompletedFailureDialog: () -> Unit,
     onReloadLecture: () -> Unit,
     onUpdateLectureUnitIsComplete: (lectureUnitId: Long, isCompleted: Boolean) -> Deferred<Boolean>,
-    onStartExercise: (exerciseId: Long, onParticipationId: (Long) -> Unit) -> Unit,
 ) {
     val selectedTabIndexState = rememberSaveable {
         mutableIntStateOf(0)
@@ -140,33 +133,6 @@ internal fun LectureScreenBody(
                         },
                         onRequestViewLink = onRequestViewLink,
                         onRequestOpenAttachment = onRequestOpenAttachment,
-                        exerciseActions = BoundExerciseActions(
-                            onClickStartTextExercise = { exerciseId ->
-                                onStartExercise(exerciseId) { participationId ->
-                                    onNavigateToTextExerciseParticipation(
-                                        exerciseId,
-                                        participationId
-                                    )
-                                }
-                            },
-                            onClickOpenQuiz = { exerciseId ->
-                                onParticipateInQuiz(exerciseId, false)
-                            },
-                            onClickPracticeQuiz = { exerciseId ->
-                                onParticipateInQuiz(exerciseId, true)
-                            },
-                            onClickStartQuiz = { exerciseId ->
-                                onParticipateInQuiz(exerciseId, false)
-                            },
-                            onClickOpenTextExercise = onNavigateToTextExerciseParticipation,
-                            onClickViewResult = onNavigateToExerciseResultView,
-                            onClickViewQuizResults = { exerciseId ->
-                                onClickViewQuizResults(
-                                    courseId,
-                                    exerciseId
-                                )
-                            }
-                        ),
                         state = overviewListState
                     )
                 }
