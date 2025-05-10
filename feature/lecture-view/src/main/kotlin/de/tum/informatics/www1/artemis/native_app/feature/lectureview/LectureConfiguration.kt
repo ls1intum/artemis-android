@@ -17,14 +17,3 @@ data class OpenedLecture(
     private val _prev: LectureConfiguration,
     val lectureId: Long
 ) : LectureConfiguration(10, _prev)
-
-fun getInitialLectureConfiguration(
-    lectureId: Long?
-): LectureConfiguration = when {
-    lectureId != null ->  OpenedLecture(
-        lectureId = lectureId,
-        _prev = NothingOpened
-    )
-
-    else -> NothingOpened
-}

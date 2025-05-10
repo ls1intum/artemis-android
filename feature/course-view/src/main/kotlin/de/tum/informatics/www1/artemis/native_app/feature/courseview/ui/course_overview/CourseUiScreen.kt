@@ -38,20 +38,22 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.Col
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CommunicationDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CourseDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ExerciseDeeplinks
-import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.FaqDeeplinks
-import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.LectureDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.CourseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.SinglePageExerciseBody
-import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.getInitialExerciseConfigurations
 import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.SinglePageFaqBody
-import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.getInitialFaqConfiguration
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.SinglePageLectureBody
-import de.tum.informatics.www1.artemis.native_app.feature.lectureview.getInitialLectureConfiguration
-import de.tum.informatics.www1.artemis.native_app.feature.metis.getInitialConversationConfiguration
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationConfiguration
+import de.tum.informatics.www1.artemis.native_app.feature.metis.IgnoreCustomBackHandling
+import de.tum.informatics.www1.artemis.native_app.feature.metis.NavigateToUserConversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.NothingOpened
+import de.tum.informatics.www1.artemis.native_app.feature.metis.OpenedConversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.OpenedThread
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.UserIdentifier
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleCourse
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.ConversationFacadeUi
@@ -66,10 +68,7 @@ private data class CourseUiScreen(
     val conversationId: Long? = null,
     val postId: Long? = null,
     val username: String? = null,
-    val userId: Long? = null,
-    val exerciseId: Long? = null,
-    val lectureId: Long? = null,
-    val faqId: Long? = null,
+    val userId: Long? = null
 )
 
 @Serializable
@@ -103,9 +102,6 @@ fun NavGraphBuilder.course(
 ) {
     val deepLinks = CourseDeeplinks.ToCourse.generateLinks() +
             ExerciseDeeplinks.ToExerciseOverview.generateLinks() +
-            ExerciseDeeplinks.ToExercise.generateLinks() +
-            LectureDeeplinks.ToLecture.generateLinks() +
-            FaqDeeplinks.ToFaq.generateLinks( ) +
             CommunicationDeeplinks.ToConversation.generateLinks() +
             CommunicationDeeplinks.ToOneToOneChatByUsername.generateLinks() +
             CommunicationDeeplinks.ToOneToOneChatByUserId.generateLinks() +
@@ -125,9 +121,6 @@ fun NavGraphBuilder.course(
         val postId = route.postId
         val username = route.username
         val userId = route.userId
-        val exerciseId = route.exerciseId
-        val lectureId = route.lectureId
-        val faqId = route.faqId
 
         CourseUiScreen(
             modifier = Modifier.fillMaxSize(),
@@ -137,9 +130,6 @@ fun NavGraphBuilder.course(
             postId = postId,
             username = username,
             userId = userId,
-            exerciseId = exerciseId,
-            lectureId = lectureId,
-            faqId = faqId,
             onNavigateToExercise = onNavigateToExercise,
             onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
             onNavigateToExerciseResultView = onNavigateToExerciseResultView,
@@ -167,9 +157,6 @@ fun CourseUiScreen(
     postId: Long? = null,
     username: String? = null,
     userId: Long? = null,
-    exerciseId: Long? = null,
-    lectureId: Long? = null,
-    faqId: Long? = null,
     onNavigateToExercise: (exerciseId: Long) -> Unit,
     onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
     onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
@@ -202,15 +189,14 @@ fun CourseUiScreen(
         onUpdateQuery = viewModel::onUpdateExerciseQuery
     )
 
+
+
     CourseUiScreen(
         modifier = modifier,
         conversationId = conversationId,
         courseDataState = courseDataState,
         username = username,
         userId = userId,
-        exerciseId = exerciseId,
-        lectureId = lectureId,
-        faqId = faqId,
         lectureSearchConfiguration = lectureSearchConfiguration,
         exerciseSearchConfiguration = exerciseSearchConfiguration,
         collapsingContentState = collapsingContentState,
@@ -246,9 +232,6 @@ internal fun CourseUiScreen(
     postId: Long? = null,
     username: String? = null,
     userId: Long? = null,
-    exerciseId: Long? = null,
-    lectureId: Long? = null,
-    faqId: Long? = null,
     lectureSearchConfiguration: CourseSearchConfiguration,
     collapsingContentState: CollapsingContentState,
     exerciseSearchConfiguration: CourseSearchConfiguration,
@@ -273,7 +256,7 @@ internal fun CourseUiScreen(
     val courseName = remember(courseDataState) {
         when (courseDataState) {
             is DataState.Success -> courseDataState.data.title
-            else -> ""
+            else -> null
         }
     }
 
@@ -312,9 +295,6 @@ internal fun CourseUiScreen(
     val initialTab = when {
         conversationId != null || postId != null -> CourseTab.Communication
         username != null || userId != null -> CourseTab.Communication
-        exerciseId != null -> CourseTab.Exercises
-        lectureId != null -> CourseTab.Lectures
-        faqId != null -> CourseTab.Faq
         else -> CourseTab.Exercises
     }
 
@@ -325,13 +305,6 @@ internal fun CourseUiScreen(
         composable<CourseTab.Exercises> {
             scaffold(exerciseSearchConfiguration) {
                 EmptyDataStateUi(dataState = exercisesTimeFrameDataState) { exercises ->
-
-                    val initialConfiguration = remember(exerciseId) {
-                        getInitialExerciseConfigurations(
-                            exerciseId
-                        )
-                    }
-
                     SinglePageExerciseBody(
                         modifier = Modifier.fillMaxSize(),
                         exercises = exercises,
@@ -358,8 +331,7 @@ internal fun CourseUiScreen(
                                 )
                             }
                         ),
-                        title = courseName,
-                        initialConfiguration = initialConfiguration
+                        title = courseName ?: ""
                     )
                 }
             }
@@ -368,13 +340,6 @@ internal fun CourseUiScreen(
         composable<CourseTab.Lectures> {
             scaffold(lectureSearchConfiguration) {
                 EmptyDataStateUi(dataState = lecturesTimeFrameDataState) { lectures ->
-
-                    val initialConfiguration = remember(lectureId) {
-                        getInitialLectureConfiguration(
-                            lectureId = lectureId
-                        )
-                    }
-
                     SinglePageLectureBody(
                         modifier = Modifier.fillMaxSize(),
                         lectures = lectures,
@@ -383,8 +348,7 @@ internal fun CourseUiScreen(
                         collapsingContentState = collapsingContentState,
                         onViewExercise = onNavigateToExercise,
                         onNavigateToLectureScreen = { id -> onNavigateToLecture(id ?: 0L) },
-                        initialConfiguration = initialConfiguration,
-                        title = courseName
+                        title = courseName ?: ""
                     )
                 }
             }
@@ -422,25 +386,18 @@ internal fun CourseUiScreen(
                     scaffold = scaffold,
                     collapsingContentState = collapsingContentState,
                     initialConfiguration = initialConfiguration,
-                    title = courseName
+                    title = courseName ?: ""
                 )
             }
         }
 
         composable<CourseTab.Faq> {
-            val initialConfiguration = remember(faqId) {
-                getInitialFaqConfiguration(
-                    faqId = faqId
-                )
-            }
-
             SinglePageFaqBody(
                 modifier = Modifier.fillMaxSize(),
                 scaffold = scaffold,
                 collapsingContentState = collapsingContentState,
                 onNavigateToFaq = onNavigateToFaq,
-                initialConfiguration = initialConfiguration,
-                title = courseName
+                title = courseName ?: ""
             )
         }
 
@@ -459,4 +416,37 @@ private fun CommunicationDisabledInfo() {
             style = MaterialTheme.typography.bodyLarge
         )
     }
+}
+
+private fun getInitialConversationConfiguration(
+    conversationId: Long?,
+    postId: Long?,
+    username: String?,
+    userId: Long?
+): ConversationConfiguration = when {
+    conversationId != null && postId != null -> OpenedConversation(
+        _prevConfiguration = IgnoreCustomBackHandling,
+        conversationId = conversationId,
+        openedThread = OpenedThread(
+            StandalonePostId.ServerSideId(postId)
+        )
+    )
+
+    conversationId != null -> OpenedConversation(
+        _prevConfiguration = IgnoreCustomBackHandling,
+        conversationId = conversationId,
+        openedThread = null
+    )
+
+    username != null -> NavigateToUserConversation(
+        _prevConfiguration = IgnoreCustomBackHandling,
+        userIdentifier = UserIdentifier.Username(username)
+    )
+
+    userId != null -> NavigateToUserConversation(
+        _prevConfiguration = IgnoreCustomBackHandling,
+        userIdentifier = UserIdentifier.UserId(userId)
+    )
+
+    else -> NothingOpened
 }
