@@ -63,15 +63,17 @@ sealed interface ExerciseViewUiNestedNavigation {
 @Serializable
 data class ExerciseViewUi(
     val exerciseId: Long,
-    val viewMode: ExerciseViewMode = ExerciseViewMode.Overview
+    val viewMode: ExerciseViewMode = ExerciseViewMode.Overview,
+    val showSideBarIcon: Boolean = true
 )
 
 fun NavController.navigateToExercise(
     exerciseId: Long,
+    showSideBarIcon: Boolean = true,
     viewMode: ExerciseViewMode,
     builder: NavOptionsBuilder.() -> Unit
 ) {
-    navigate(ExerciseViewUi(exerciseId, viewMode), builder)
+    navigate(ExerciseViewUi(exerciseId, viewMode, showSideBarIcon), builder)
 }
 
 fun NavGraphBuilder.exercise(
@@ -144,7 +146,8 @@ fun NavGraphBuilder.exercise(
                     },
                     onClickViewQuizResults = { courseId ->
                         onClickViewQuizResults(courseId, exerciseId)
-                    }
+                    },
+                    showSideBarIcon = route.showSideBarIcon,
                 )
             }
 

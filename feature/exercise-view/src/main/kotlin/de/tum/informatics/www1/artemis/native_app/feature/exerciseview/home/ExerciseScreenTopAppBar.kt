@@ -33,7 +33,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.getExerciseTy
 internal fun ExerciseScreenTopAppBar(
     modifier: Modifier,
     exerciseDataState: DataState<Exercise>,
-    onSidebarToggle: () -> Unit = {}
+    onSidebarToggle: () -> Unit = {},
+    showSideBarIcon: Boolean
 ) {
     Column(modifier = modifier) {
         ArtemisTopAppBar(
@@ -47,7 +48,8 @@ internal fun ExerciseScreenTopAppBar(
             },
             navigationIcon = {
                 AdaptiveNavigationIcon(
-                    onSidebarToggle = onSidebarToggle
+                    onSidebarToggle = onSidebarToggle,
+                    showSidebarIcon = showSideBarIcon
                 )
             }
         )

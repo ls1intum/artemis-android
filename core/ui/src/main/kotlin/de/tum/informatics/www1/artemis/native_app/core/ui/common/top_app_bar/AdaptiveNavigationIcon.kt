@@ -13,10 +13,11 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.getArtemisAppLayout
 fun AdaptiveNavigationIcon(
     onSidebarToggle: () -> Unit,
     onNavigateBack: (() -> Unit)? = null,
+    showSidebarIcon: Boolean = true,
 ) {
     val layout = getArtemisAppLayout()
 
-    if (layout == ArtemisAppLayout.Tablet) {
+    if (layout == ArtemisAppLayout.Tablet && showSidebarIcon) {
         IconButton(onClick = onSidebarToggle) {
             Icon(
                 imageVector = Icons.Filled.Menu,
