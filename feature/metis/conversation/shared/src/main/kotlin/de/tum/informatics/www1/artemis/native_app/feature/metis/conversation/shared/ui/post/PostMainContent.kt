@@ -25,7 +25,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -53,7 +52,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.common.UserRoleBadge
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.common.OptionalUserRoleBadge
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureWithDialog
 import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.coroutines.delay
@@ -315,15 +314,9 @@ private fun AuthorRoleAndTimeRow(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
-            /*
-            * remember is needed here to prevent the value from being reset after an update
-            * (the author role is not sent when updating a post)
-            */
-            val initialAuthorRole by remember { mutableStateOf(authorRole) }
-            UserRoleBadge(
+            OptionalUserRoleBadge(
                 modifier = Modifier.applyGrayscale(isGrayscale),
-                userRole = initialAuthorRole
+                userRole = authorRole
             )
 
             Spacer(modifier = Modifier.weight(1f))
