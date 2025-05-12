@@ -76,8 +76,21 @@ class SavedPostsViewModel(
                                     postingType = if (post is IAnswerPost) PostingType.ANSWER else PostingType.POST
                                 )
                                 forwardedMessagesHandler.resolveForwardedMessagesForSavedPost(
-                                    chatListItem = ChatListItem.PostItem.SavedItem.SavedPost(post)
+                                    chatListItem = if (post.hasForwardedMessages == true) {
+                                        ChatListItem.PostItem.SavedItem.SavedPostWithForwardedMessage(
+                                            post = post,
+                                            forwardedPosts = emptyList(),
+                                            courseId = courseId
+                                        )
+                                    } else {
+                                        ChatListItem.PostItem.SavedItem.SavedPost(
+                                            post = post
+                                        )
+                                    }
                                 )
+                            }.map { savedPost ->
+                                //println(savedPost)
+                                savedPost
                             }
                     }
             }

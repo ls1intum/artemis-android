@@ -177,6 +177,10 @@ class ForwardedMessagesHandler(
                 forwardedPosts = newForwardedPosts
             )
 
+            is ChatListItem.PostItem.SavedItem.SavedPostWithForwardedMessage -> copy(
+                forwardedPosts = newForwardedPosts
+            )
+
             else -> return this
         }
     }
