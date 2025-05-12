@@ -10,9 +10,6 @@
 
     <string name="exercise_view_overview_title">Exercise Details</string>
 
-    <string name="exercise_view_overview_points_max">Points: %1$s</string>
-    <string name="exercise_view_overview_points_reached">Points: %1$s of %2$s</string>
-    <string name="exercise_view_overview_points_none">No points</string>
     <string name="exercise_view_overview_hint_submission_due_date">Submission due:</string>
     <string name="exercise_view_overview_no_submission_due_date">No due date</string>
     <string name="exercise_view_overview_hint_assessment_due_date">Assessment due:</string>
@@ -35,6 +32,7 @@
 
     <string name="exercise_participation_status_title">Your exercise status:</string>
 
+    <string name="exercise_view_overview_problem_statement">Problem Statement</string>
     <string name="exercise_view_overview_problem_statement_not_available">No problem statement available.</string>
 
     <string name="exercise_info_title">Exercise info</string>

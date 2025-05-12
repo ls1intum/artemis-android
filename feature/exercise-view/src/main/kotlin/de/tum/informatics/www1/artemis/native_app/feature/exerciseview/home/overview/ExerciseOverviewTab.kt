@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
@@ -42,6 +43,7 @@ internal fun ExerciseOverviewTab(
         modifier = modifier
             .verticalScroll(rememberScrollState())
             .fillMaxSize()
+            .padding(bottom =  32.dp)
     ) {
         ParticipationStatusUi(
             modifier = Modifier
@@ -51,6 +53,44 @@ internal fun ExerciseOverviewTab(
             exercise = exercise,
             actions = actions
         )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+       ExerciseOverviewChips(exercise = exercise)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Spacings.ScreenHorizontalSpacing),
+            text = stringResource(id = R.string.exercise_view_overview_problem_statement),
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.Medium
+            )
+        )
+
+        if (exercise !is QuizExercise && webViewState != null) {
+            Spacer(modifier = Modifier.height(8.dp))
+
+            ArtemisWebView(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                webViewState = webViewState,
+                webView = webView,
+                adjustHeightForContent = true,
+                setWebView = setWebView
+            )
+        } else {
+            Text(
+                text = stringResource(id = R.string.exercise_view_overview_problem_statement_not_available),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = Spacings.ScreenHorizontalSpacing),
+                color = MaterialTheme.colorScheme.secondary,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
 
         // The Spacers in this Column are needed as verticalArrangement.spacedBy does lead to a gap under the ArtemisWebView
         Spacer(modifier = Modifier.height(16.dp))
@@ -68,26 +108,5 @@ internal fun ExerciseOverviewTab(
             exerciseChannel = exerciseChannel,
             isLongToolbar = isLongToolbar
         )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (exercise !is QuizExercise && webViewState != null) {
-            ArtemisWebView(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                webViewState = webViewState,
-                webView = webView,
-                adjustHeightForContent = true,
-                setWebView = setWebView
-            )
-        } else {
-            Text(
-                text = stringResource(id = R.string.exercise_view_overview_problem_statement_not_available),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            )
-        }
     }
 }

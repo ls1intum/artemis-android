@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.sa
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.keepSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
@@ -35,7 +36,6 @@ import kotlin.coroutines.EmptyCoroutineContext
 
 class SavedPostsViewModel(
     val courseId: Long,
-    val savedPostStatus: SavedPostStatus,
     private val savedPostService: SavedPostService,
     private val metisService: MetisService,
     serverConfigurationService: ServerConfigurationService,
@@ -54,33 +54,48 @@ class SavedPostsViewModel(
         requestReload
     ) { serverUrl, authToken, _ ->
         retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-            savedPostService.getSavedPosts(
-                status = savedPostStatus,
-                courseId = courseId,
-                authToken = authToken,
-                serverUrl = serverUrl
-            ).bind { it as List<ISavedPost> }       // Required by the compiler
+            val responses = SavedPostStatus.entries.map { status ->
+                savedPostService.getSavedPosts(
+                    status = status,
+                    courseId = courseId,
+                    authToken = authToken,
+                    serverUrl = serverUrl
+                ).bind { it as List<ISavedPost> }  // Required by the compiler
+                    .bind {
+                        val forwardedMessagesHandler = ForwardedMessagesHandler(
+                            metisService = metisService,
+                            metisContext = metisContext,
+                            authToken = authToken,
+                            serverUrl = serverUrl
+                        )
+                        forwardedMessagesHandler.extractForwardedMessages(it)
+                        it
+                            .distinctBy { savedPost -> savedPost.key }
+                            .map { post ->
+                                forwardedMessagesHandler.loadForwardedMessages(
+                                    postingType = if (post is IAnswerPost) PostingType.ANSWER else PostingType.POST
+                                )
+                                forwardedMessagesHandler.resolveForwardedMessagesForSavedPost(
+                                    chatListItem = ChatListItem.PostItem.SavedItem.SavedPost(post)
+                                )
+                            }
+                    }
+            }
+
+            val firstFailure = responses.firstOrNull { it is NetworkResponse.Failure<*> }
+            if (firstFailure != null) {
+                return@retryOnInternet firstFailure
+            }
+
+            val posts = responses
+                .filterIsInstance<NetworkResponse.Response<List<ChatListItem.PostItem.SavedItem>>>()
+                .map { it.data }
+                .flatten()
                 // TODO: this is currently required of a bug allowing duplicate items in the list
-                //  https://github.com/ls1intum/artemis-android/issues/307
-                .bind {
-                    val forwardedMessagesHandler = ForwardedMessagesHandler(
-                        metisService = metisService,
-                        metisContext = metisContext,
-                        authToken = authToken,
-                        serverUrl = serverUrl
-                    )
-                    forwardedMessagesHandler.extractForwardedMessages(it)
-                    it
-                        .distinctBy { savedPost -> savedPost.key }
-                        .map { post ->
-                            forwardedMessagesHandler.loadForwardedMessages(
-                                postingType = if (post is IAnswerPost) PostingType.ANSWER else PostingType.POST
-                            )
-                            forwardedMessagesHandler.resolveForwardedMessagesForSavedPost(
-                                chatListItem = ChatListItem.PostItem.SavedItem.SavedPost(post)
-                            )
-                        }
-                }
+                // https://github.com/ls1intum/artemis-android/issues/307
+                .distinctBy { savedPost -> savedPost.key }
+
+            NetworkResponse.Response(data = posts)
         }
     }
         .keepSuccess()

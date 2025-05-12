@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="conversation_settings_title">Conversation Settings</string>
+    <string name="conversation_settings_title">Conversation Details</string>
     <string name="conversation_settings_loading">Loading conversation…</string>
     <string name="conversation_settings_failure">Something went wrong while loading your conversation.</string>
     <string name="conversation_settings_try_again">Try again</string>
@@ -16,20 +16,15 @@
     <string name="conversation_settings_basic_data_save">Save changes</string>
 
     <string name="conversation_settings_section_more_info">More info</string>
-    <string name="conversation_settings_section_more_info_created_by">Created by: %1$s (%2$s)</string>
-    <string name="conversation_settings_section_more_info_created_on">Created on: %1$s</string>
+    <string name="conversation_settings_section_more_info_created_by">Created by:</string>
+    <string name="conversation_settings_section_more_info_created_on">Created on:</string>
 
     <string name="conversation_settings_section_other">Other</string>
     <string name="conversation_settings_section_other_leave_conversation">Leave conversation</string>
     <string name="conversation_settings_section_other_archive_channel">Archive channel</string>
     <string name="conversation_settings_section_other_unarchive_channel">Unarchive channel</string>
 
-    <string name="conversation_settings_section_members">Members</string>
-    <plurals name="conversation_settings_section_members_count">
-        <item quantity="zero">No members</item>
-        <item quantity="one">1 member</item>
-        <item quantity="other">%d members</item>
-    </plurals>
+    <string name="conversation_settings_section_members">Members (%d)</string>
     <string name="conversation_settings_section_members_add_members">Add members</string>
     <string name="conversation_settings_section_members_view_all_members">View all members</string>
 

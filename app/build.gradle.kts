@@ -14,14 +14,14 @@ plugins {
     id("com.google.gms.google-services")
     id("com.google.firebase.appdistribution")
     id("com.google.android.gms.oss-licenses-plugin")
-    id("io.sentry.android.gradle") version "5.3.0"
+    id("io.sentry.android.gradle") version "5.5.0"
     id("artemis.android.room")
 }
 
 android {
     namespace = "de.tum.informatics.www1.artemis.native_app.android"
 
-    val versionName = "2.0.0"
+    val versionName = "2.0.1"
     val versionCode = 624
 
     setProperty("archivesBaseName", "artemis-android-$versionName-$versionCode")
@@ -53,6 +53,8 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            merges += "/META-INF/LICENSE.md"
+            merges += "META-INF/LICENSE-notice.md"
         }
     }
 
