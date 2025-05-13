@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="image_view_share_menu_item">Share Image</string>
+    <string name="image_view_download_menu_item">Download Image</string>
+</resources>

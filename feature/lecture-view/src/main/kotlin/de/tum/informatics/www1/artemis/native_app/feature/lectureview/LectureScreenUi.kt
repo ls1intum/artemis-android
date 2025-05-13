@@ -244,7 +244,7 @@ internal fun LectureScreen(
                         LinkBottomSheet(
                             modifier = Modifier.fillMaxSize(),
                             link = LectureUnitAttachmentUtil.createAttachmentFileUrl(link, fileName, true), // the image view requires the path only
-                            fileName = link,
+                            fileName = fileName,
                             state = LinkBottomSheetState.IMAGEVIEWSTATE,
                             onDismissRequest = { pendingOpenFileAttachment = null }
                         )

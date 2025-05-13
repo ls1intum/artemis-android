@@ -26,6 +26,7 @@ import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.au
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.collectArtemisContextAsState
 import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.PdfFile
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ImageFile
 
 enum class LinkBottomSheetState {
     PDFVIEWSTATE,
@@ -67,7 +68,12 @@ fun LinkBottomSheet(
                 }
 
                 LinkBottomSheetState.IMAGEVIEWSTATE -> {
-
+                    val imageFile = ImageFile(link, artemisContext.authTokenOrEmptyString, fileName ?: link.substringAfterLast("/"))
+                    ArtemisImageView(
+                        modifier = Modifier.fillMaxSize(),
+                        imageFile,
+                        dismiss = onDismissRequest
+                    )
                 }
 
                 LinkBottomSheetState.WEBVIEWSTATE -> {

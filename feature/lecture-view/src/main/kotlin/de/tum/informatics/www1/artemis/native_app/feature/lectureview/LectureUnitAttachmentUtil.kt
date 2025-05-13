@@ -62,7 +62,8 @@ object LectureUnitAttachmentUtil {
         link: String
     ) {
         // We can use the download function of the PdfFile class to download the file as it also works for other file types
-        val pdfFile = PdfFile(link, artemisContext.authTokenOrEmptyString, name)
+        val newName = name ?: link.substringAfterLast("/")
+        val pdfFile = PdfFile(link, artemisContext.authTokenOrEmptyString, newName)
         pdfFile.downloadPdf(context = context, isPdf = false)
     }
 }
