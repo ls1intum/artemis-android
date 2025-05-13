@@ -29,6 +29,7 @@ data class AnswerPost(
     constructor(answerPostDb: AnswerPostPojo, post: StandalonePost) : this(
         id = answerPostDb.serverPostId,
         author = User(id = answerPostDb.authorId),
+        authorRole = answerPostDb.authorRole,
         content = answerPostDb.content,
         creationDate = answerPostDb.creationDate,
         post = post
