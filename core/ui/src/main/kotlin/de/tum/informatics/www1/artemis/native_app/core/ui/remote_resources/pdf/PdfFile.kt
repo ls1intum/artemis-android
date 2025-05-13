@@ -25,6 +25,14 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
 
+/**
+ * Class representing a PDF file that can be downloaded and shared.
+ * Used for lecture unit attachments and pdf attachments sent to the chat.
+ *
+ * @property link The URL of the PDF file.
+ * @property authToken The authentication token used for downloading the file.
+ * @property filename The name of the file.
+ */
 class PdfFile(
     val link: String,
     override val authToken: String,

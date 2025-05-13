@@ -68,7 +68,7 @@ fun ArtemisPdfView(
     if (pdfState.mError != null) {
         val errorMessage = when (pdfState.mError) {
             is UnknownHostException -> {
-                R.string.pdf_view_error_no_internet
+                R.string.file_error_no_internet
             }
             else -> {
                 R.string.pdf_view_error_loading

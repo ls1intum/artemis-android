@@ -11,6 +11,13 @@ import io.ktor.http.HttpHeaders
 import java.io.File
 import java.net.UnknownHostException
 
+/**
+ * Base class for files that can be downloaded and shared.
+ *
+ * @property authToken The authentication token used for downloading the file.
+ * @property filename The name of the file.
+ * @property url The URL of the file.
+ */
 abstract class BaseFile(
     open val authToken: String,
     open val filename: String,
@@ -37,14 +44,14 @@ abstract class BaseFile(
 
             Toast.makeText(
                 context,
-                getString(context, R.string.pdf_view_downloading_toast),
+                getString(context, R.string.file_downloading_toast),
                 Toast.LENGTH_SHORT
             ).show()
 
         } catch (e: Exception) {
             val errorMessage = when (e) {
-                is UnknownHostException -> R.string.pdf_view_error_no_internet
-                else -> R.string.pdf_view_error_downloading
+                is UnknownHostException -> R.string.file_error_no_internet
+                else -> R.string.file_error_downloading
             }
             Toast.makeText(context, getString(context, errorMessage), Toast.LENGTH_LONG).show()
             e.printStackTrace()

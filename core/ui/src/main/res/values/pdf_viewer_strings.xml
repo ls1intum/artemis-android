@@ -7,11 +7,11 @@
 
     <string name="pdf_view_page_count">Page %1d/%2d</string>
 
-    <string name="pdf_view_downloading_toast">Downloading to Downloads folder...</string>
+    <string name="file_downloading_toast">Downloading to Downloads folder...</string>
     <string name="pdf_view_share_title">Share PDF using</string>
 
     <string name="pdf_view_error_loading">Error while loading PDF</string>
-    <string name="pdf_view_error_no_internet">Error: No internet connection</string>
-    <string name="pdf_view_error_downloading">Error while downloading File</string>
+    <string name="file_error_no_internet">Error: No internet connection</string>
+    <string name="file_error_downloading">Error while downloading File</string>
 
 </resources>
