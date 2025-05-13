@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.compose
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTransformGestures
@@ -34,13 +35,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImagePainter
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.endOfPagePadding
-import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ImageFile
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.ImageFile
 
 @Composable
 fun ArtemisImageView(
@@ -68,29 +70,44 @@ fun ArtemisImageView(
             .fillMaxSize()
             .padding(8.dp)
     ) {
-        if (painterState is AsyncImagePainter.State.Success) {
-            Image(
-                painter = painter,
-                contentDescription = null,
-                contentScale = ContentScale.None,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .graphicsLayer(
-                        scaleX = scale,
-                        scaleY = scale,
-                        translationX = offset.x,
-                        translationY = offset.y,
-                    )
-                    .then(gestureModifier)
-            )
-        } else if (painterState is AsyncImagePainter.State.Loading) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        when (painterState) {
+            is AsyncImagePainter.State.Success -> {
+                Image(
+                    painter = painter,
+                    contentDescription = null,
+                    contentScale = ContentScale.None,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer(
+                            scaleX = scale,
+                            scaleY = scale,
+                            translationX = offset.x,
+                            translationY = offset.y,
+                        )
+                        .then(gestureModifier)
+                )
+            }
+
+            is AsyncImagePainter.State.Loading -> {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+
+            is AsyncImagePainter.State.Error -> {
+                Toast.makeText(
+                    LocalContext.current,
+                    stringResource(id = R.string.image_view_error_loading),
+                    Toast.LENGTH_LONG
+                ).show()
+
+                dismiss()
+            }
+
+            AsyncImagePainter.State.Empty -> { } // required by compiler and needs to be empty
         }
 
         Box(
             modifier = Modifier
                 .align(Alignment.TopStart)
-                .padding(8.dp)
                 .background(
                     color = Color.Black.copy(alpha = 0.5f),
                     shape = MaterialTheme.shapes.medium

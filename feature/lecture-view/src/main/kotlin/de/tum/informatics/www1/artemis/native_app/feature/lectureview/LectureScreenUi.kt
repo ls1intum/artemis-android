@@ -26,6 +26,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.toRoute
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.authTokenOrEmptyString
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
@@ -40,6 +41,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.compose.LinkBottomShee
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.LectureDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.ImageFile
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.PdfFile
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.canDisplayMetisOnDisplaySide
 import io.github.fornewid.placeholder.material3.placeholder
@@ -232,20 +235,19 @@ internal fun LectureScreen(
 
                 when (type)  {
                     is LectureUnitAttachmentUtil.LectureAttachmentType.PDF -> {
+                        val pdfFile = PdfFile(formattedUrl, artemisContext.authTokenOrEmptyString, fileName)
                         LinkBottomSheet(
                             modifier = Modifier.fillMaxSize(),
-                            link = formattedUrl,
-                            fileName = fileName,
-                            state = LinkBottomSheetState.PDFVIEWSTATE,
+                            state = LinkBottomSheetState.PDFVIEWSTATE(pdfFile),
                             onDismissRequest = { pendingOpenFileAttachment = null }
                         )
                     }
                     is LectureUnitAttachmentUtil.LectureAttachmentType.Image -> {
+                        val imagePath = LectureUnitAttachmentUtil.createAttachmentFileUrl(link, fileName, true)
+                        val imageFile = ImageFile(imagePath, artemisContext.authTokenOrEmptyString, fileName)
                         LinkBottomSheet(
                             modifier = Modifier.fillMaxSize(),
-                            link = LectureUnitAttachmentUtil.createAttachmentFileUrl(link, fileName, true), // the image view requires the path only
-                            fileName = fileName,
-                            state = LinkBottomSheetState.IMAGEVIEWSTATE,
+                            state = LinkBottomSheetState.IMAGEVIEWSTATE(imageFile),
                             onDismissRequest = { pendingOpenFileAttachment = null }
                         )
                     }

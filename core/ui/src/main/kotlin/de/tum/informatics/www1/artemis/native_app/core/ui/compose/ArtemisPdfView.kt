@@ -33,14 +33,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.endOfPagePadding
-import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.PdfFile
-import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.HorizontalPdfView
-import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.VerticalPdfView
-import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.state.HorizontalPdfReaderState
-import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.state.PdfReaderState
-import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.state.VerticalPdfReaderState
-import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.state.rememberHorizontalPdfReaderState
-import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.state.rememberVerticalPdfReaderState
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.PdfFile
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.render.HorizontalPdfView
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.render.VerticalPdfView
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.render.state.HorizontalPdfReaderState
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.render.state.PdfReaderState
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.render.state.VerticalPdfReaderState
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.render.state.rememberHorizontalPdfReaderState
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.render.state.rememberVerticalPdfReaderState
 import java.net.UnknownHostException
 
 @Composable
@@ -137,11 +137,11 @@ fun ArtemisPdfView(
                 onDismissRequest = { showMenu = false },
                 downloadPdf = {
                     showMenu = false
-                    pdfState.file?.let { pdfFile.downloadPdf(context) }
+                    pdfState.file?.let { pdfFile.download(context) }
                 },
                 sharePdf = {
                     showMenu = false
-                    pdfState.file?.let { pdfFile.sharePdf(context, it) }
+                    pdfState.file?.let { pdfFile.share(context, it) }
                 },
                 toggleViewMode = {
                     showMenu = false

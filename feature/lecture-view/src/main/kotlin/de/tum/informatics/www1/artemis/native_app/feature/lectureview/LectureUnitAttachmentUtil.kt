@@ -5,9 +5,10 @@ import android.webkit.MimeTypeMap
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.authTokenOrEmptyString
 import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
-import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.PdfFile
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.BaseFile
 import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
+import java.io.File
 import java.net.URLEncoder
 
 object LectureUnitAttachmentUtil {
@@ -61,9 +62,11 @@ object LectureUnitAttachmentUtil {
         name: String?,
         link: String
     ) {
-        // We can use the download function of the PdfFile class to download the file as it also works for other file types
+        // We can use the download function of the BaseFile class to download the file
         val newName = name ?: link.substringAfterLast("/")
-        val pdfFile = PdfFile(link, artemisContext.authTokenOrEmptyString, newName)
-        pdfFile.downloadPdf(context = context, isPdf = false)
+        val file = object : BaseFile(artemisContext.authTokenOrEmptyString, newName, link) {
+            override fun share(context: Context, file: File) {}
+        }
+        file.download(context)
     }
 }

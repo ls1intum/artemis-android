@@ -12,7 +12,6 @@
 
     <string name="pdf_view_error_loading">Error while loading PDF</string>
     <string name="pdf_view_error_no_internet">Error: No internet connection</string>
-    <string name="pdf_view_error_downloading">Error while downloading PDF</string>
-    <string name="pdf_view_error_downloading_non_pdf">Error while downloading PDF</string>
+    <string name="pdf_view_error_downloading">Error while downloading File</string>
 
 </resources>
