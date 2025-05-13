@@ -1,7 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.courseregistration
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -31,11 +30,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
@@ -44,6 +42,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseItemPreview
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.util.CourseUtil
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
@@ -184,16 +183,14 @@ private fun RegisterForCourseContent(
         val columnCount = CourseUtil.computeCourseColumnCount(windowSizeClass)
 
         if(data.isEmpty()) {
-            Column(
-                modifier = Modifier.align(Alignment.Center)
-            ) {
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(id = R.string.course_registration_no_courses),
-                    textAlign = TextAlign.Center,
-                    fontSize = 18.sp
-                )
-            }
+            EmptyListHint(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = Spacings.ScreenHorizontalSpacing)
+                    .align(Alignment.Center),
+                hint = stringResource(id = R.string.course_registration_no_courses),
+                painter =  painterResource(id = de.tum.informatics.www1.artemis.native_app.core.ui.R.drawable.enroll)
+            )
         }
 
         LazyVerticalGrid(
