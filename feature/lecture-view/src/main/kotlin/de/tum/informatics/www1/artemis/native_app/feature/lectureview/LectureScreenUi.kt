@@ -19,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavController
@@ -26,12 +27,13 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.toRoute
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
+import de.tum.informatics.www1.artemis.native_app.core.ui.collectArtemisContextAsState
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.LinkBottomSheet
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.LinkBottomSheetState
@@ -41,13 +43,10 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedCom
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.canDisplayMetisOnDisplaySide
 import io.github.fornewid.placeholder.material3.placeholder
-import io.ktor.http.URLBuilder
-import io.ktor.http.appendPathSegments
 import kotlinx.coroutines.Deferred
 import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
-import java.net.URLEncoder
 
 const val METIS_RATIO = 0.3f
 
@@ -158,7 +157,9 @@ internal fun LectureScreen(
     onUpdateLectureUnitIsComplete: (lectureUnitId: Long, isCompleted: Boolean) -> Deferred<Boolean>,
     onStartExercise: (exerciseId: Long, onParticipationId: (Long) -> Unit) -> Unit,
 ) {
+    val context = LocalContext.current
     val linkOpener = LocalLinkOpener.current
+    val artemisContext by LocalArtemisContextProvider.current.collectArtemisContextAsState()
 
     val lectureTitle = lectureDataState.bind<String?> { it.title }.orElse(null)
 
@@ -223,19 +224,46 @@ internal fun LectureScreen(
             val currentPendingOpenFileAttachment = pendingOpenFileAttachment
             if (currentPendingOpenFileAttachment != null) {
                 val fileName = currentPendingOpenFileAttachment.name.orEmpty()
-                val url = buildOpenAttachmentLink(
-                    serverUrl,
-                    currentPendingOpenFileAttachment.link.orEmpty()
-                )
-                val formattedUrl = createAttachmentFileUrl(url, fileName, true)
+                val link = currentPendingOpenFileAttachment.link.orEmpty()
+                val type = LectureUnitAttachmentUtil.detectAttachmentType(link)
 
-                LinkBottomSheet(
-                    modifier = Modifier.fillMaxSize(),
-                    link = formattedUrl,
-                    fileName = currentPendingOpenFileAttachment.name.orEmpty(),
-                    state = LinkBottomSheetState.PDFVIEWSTATE,
-                    onDismissRequest = { pendingOpenFileAttachment = null }
-                )
+                val url = LectureUnitAttachmentUtil.buildOpenAttachmentLink(serverUrl, link)
+                val formattedUrl = LectureUnitAttachmentUtil.createAttachmentFileUrl(url, fileName, true)
+
+                when (type)  {
+                    is LectureUnitAttachmentUtil.LectureAttachmentType.PDF -> {
+                        LinkBottomSheet(
+                            modifier = Modifier.fillMaxSize(),
+                            link = formattedUrl,
+                            fileName = fileName,
+                            state = LinkBottomSheetState.PDFVIEWSTATE,
+                            onDismissRequest = { pendingOpenFileAttachment = null }
+                        )
+                    }
+                    is LectureUnitAttachmentUtil.LectureAttachmentType.Image -> {
+                        LinkBottomSheet(
+                            modifier = Modifier.fillMaxSize(),
+                            link = LectureUnitAttachmentUtil.createAttachmentFileUrl(link, fileName, true), // the image view requires the path only
+                            fileName = link,
+                            state = LinkBottomSheetState.IMAGEVIEWSTATE,
+                            onDismissRequest = { pendingOpenFileAttachment = null }
+                        )
+                    }
+                    is LectureUnitAttachmentUtil.LectureAttachmentType.Other -> {
+                        DownloadPendingAttachmentAlertDialog(
+                            onDismissRequest = { pendingOpenFileAttachment = null },
+                            onRequestDownloadFile = {
+                                LectureUnitAttachmentUtil.downloadAttachment(
+                                    context = context,
+                                    artemisContext = artemisContext,
+                                    link = formattedUrl,
+                                    name = currentPendingOpenFileAttachment.name
+                                )
+                                pendingOpenFileAttachment = null
+                            }
+                        )
+                    }
+                }
             }
 
             if (pendingOpenLink != null) {
@@ -269,27 +297,17 @@ internal fun LectureScreen(
     }
 }
 
-private fun buildOpenAttachmentLink(
-    serverUrl: String,
-    attachmentLink: String
-): String {
-    return URLBuilder(serverUrl).apply {
-        appendPathSegments(*Api.Core.UploadedFile.path)
-        appendPathSegments(attachmentLink)
-    }.buildString()
+@Composable
+private fun DownloadPendingAttachmentAlertDialog(
+    onDismissRequest: () -> Unit,
+    onRequestDownloadFile: () -> Unit
+) {
+    TextAlertDialog(
+        title = stringResource(id = R.string.lecture_view_open_file_attachment_dialog_title),
+        text = stringResource(id = R.string.lecture_view_open_file_attachment_dialog_message),
+        confirmButtonText = stringResource(id = R.string.lecture_view_open_file_attachment_dialog_positive),
+        dismissButtonText = stringResource(id = R.string.lecture_view_open_file_attachment_dialog_negative),
+        onPressPositiveButton = onRequestDownloadFile,
+        onDismissRequest = onDismissRequest
+    )
 }
-
-// Necessary to encode the file name for the attachment URL, see
-// https://github.com/ls1intum/Artemis/blob/develop/src/main/webapp/app/shared/http/file.service.ts
-private fun createAttachmentFileUrl(downloadUrl: String, downloadName: String, encodeName: Boolean): String {
-    val downloadUrlComponents = downloadUrl.split("/")
-    val extension = downloadUrlComponents.lastOrNull()?.substringAfterLast('.', "") ?: ""
-    val restOfUrl = downloadUrlComponents.dropLast(1).joinToString("/")
-    val encodedDownloadName = if (encodeName) {
-        URLEncoder.encode("$downloadName.$extension", "UTF-8").replace("+", "%20")
-    } else {
-        "$downloadName.$extension"
-    }
-    return "$restOfUrl/$encodedDownloadName"
-}
-

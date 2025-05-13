@@ -29,6 +29,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.PdfFile
 
 enum class LinkBottomSheetState {
     PDFVIEWSTATE,
+    IMAGEVIEWSTATE,
     WEBVIEWSTATE
 }
 
@@ -63,6 +64,10 @@ fun LinkBottomSheet(
                         pdfFile = pdfFile,
                         dismiss = onDismissRequest
                     )
+                }
+
+                LinkBottomSheetState.IMAGEVIEWSTATE -> {
+
                 }
 
                 LinkBottomSheetState.WEBVIEWSTATE -> {

@@ -4,7 +4,6 @@ import android.app.DownloadManager
 import android.content.ClipData
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Environment
 import android.os.ParcelFileDescriptor
 import android.util.Log
@@ -17,6 +16,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.core.content.ContextCompat.getString
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.PdfRendering
 import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.state.PdfReaderState
@@ -120,11 +120,11 @@ class PdfFile(
         }
     }
 
-    fun downloadPdf(context: Context) {
+    fun downloadPdf(context: Context, isPdf: Boolean = true) {
         try {
             val downloadManager: DownloadManager =
                 context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-            val downloadUri = Uri.parse(link)
+            val downloadUri = link.toUri()
 
             downloadManager
                 .enqueue(
@@ -152,7 +152,7 @@ class PdfFile(
                     R.string.pdf_view_error_no_internet
                 }
                 else -> {
-                    R.string.pdf_view_error_downloading
+                    if (isPdf) R.string.pdf_view_error_downloading else R.string.pdf_view_error_downloading_non_pdf
                 }
             }
             Toast.makeText(context, getString(context, errorMessage), Toast.LENGTH_LONG)
