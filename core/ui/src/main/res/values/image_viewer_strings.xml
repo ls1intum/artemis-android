@@ -4,4 +4,5 @@
     <string name="image_view_download_menu_item">Download Image</string>
 
     <string name="image_view_error_loading">Error while loading Image</string>
+    <string name="image_view_share_title">Share Image using</string>
 </resources>

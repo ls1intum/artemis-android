@@ -44,7 +44,7 @@ class VerticalPdfReaderState(
         val Saver: Saver<VerticalPdfReaderState, *> = listSaver(
             save = { state ->
                 listOf(
-                    state.pdfFile.link,
+                    state.pdfFile.url,
                     state.pdfFile.authToken,
                     state.pdfFile.filename,
                     state.isZoomEnabled,

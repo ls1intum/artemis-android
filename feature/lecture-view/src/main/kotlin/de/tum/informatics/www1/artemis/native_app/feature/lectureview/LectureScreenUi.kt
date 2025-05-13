@@ -243,8 +243,7 @@ internal fun LectureScreen(
                         )
                     }
                     is LectureUnitAttachmentUtil.LectureAttachmentType.Image -> {
-                        val imagePath = LectureUnitAttachmentUtil.createAttachmentFileUrl(link, fileName, true)
-                        val imageFile = ImageFile(imagePath, artemisContext.authTokenOrEmptyString, fileName)
+                        val imageFile = ImageFile(formattedUrl, artemisContext.authTokenOrEmptyString, fileName)
                         LinkBottomSheet(
                             modifier = Modifier.fillMaxSize(),
                             state = LinkBottomSheetState.IMAGEVIEWSTATE(imageFile),

@@ -43,6 +43,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.endOfPagePadding
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.ImageFile
+import java.io.File
 
 @Composable
 fun ArtemisImageView(
@@ -50,12 +51,15 @@ fun ArtemisImageView(
     imageFile: ImageFile,
     dismiss: () -> Unit
 ) {
+    val context = LocalContext.current
+    val file = File(context.cacheDir, imageFile.filename)
+
     var scale by remember { mutableFloatStateOf(1f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
     var showMenu by remember { mutableStateOf(false) }
 
     val artemisImageProvider = LocalArtemisImageProvider.current
-    val painter = artemisImageProvider.rememberArtemisAsyncImagePainter(imagePath = imageFile.imagePath)
+    val painter = artemisImageProvider.rememberArtemisAsyncImagePainterByUrl(imageUrl = imageFile.url)
     val painterState by painter.state.collectAsState()
 
     val gestureModifier = Modifier.pointerInput(Unit) {
@@ -144,11 +148,11 @@ fun ArtemisImageView(
                 onDismissRequest = { showMenu = false },
                 downloadImage = {
                     showMenu = false
-                    //imageFile.onDownload()
+                    imageFile.download(context)
                 },
                 shareImage = {
                     showMenu = false
-                    //imageFile.onShare()
+                    imageFile.share(context, file)
                 }
             )
         }
