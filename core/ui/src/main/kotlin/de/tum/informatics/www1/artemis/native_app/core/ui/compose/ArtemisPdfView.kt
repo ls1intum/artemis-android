@@ -90,7 +90,7 @@ fun ArtemisPdfView(
         Column {
             pdfState.file?.let {
                 Text(
-                    text = pdfFile.filename ?: it.name,
+                    text = pdfFile.filename,
                     modifier = Modifier.padding(8.dp),
                     style = MaterialTheme.typography.titleMedium
                 )

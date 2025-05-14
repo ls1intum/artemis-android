@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.core.ui.compose
+package de.tum.informatics.www1.artemis.native_app.core.ui.compose.util
 
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable

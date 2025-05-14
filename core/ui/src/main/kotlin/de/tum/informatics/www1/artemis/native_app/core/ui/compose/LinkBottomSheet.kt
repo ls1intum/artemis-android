@@ -22,8 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.web.WebContent
 import com.google.accompanist.web.WebViewState
-import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextProvider
-import de.tum.informatics.www1.artemis.native_app.core.ui.collectArtemisContextAsState
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.ImageFile
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.PdfFile
 
@@ -40,8 +38,6 @@ fun LinkBottomSheet(
     state: LinkBottomSheetState,
     onDismissRequest: () -> Unit
 ) {
-    val artemisContext by LocalArtemisContextProvider.current.collectArtemisContextAsState()
-
     ModalBottomSheet(
         modifier = modifier.statusBarsPadding(),
         contentWindowInsets = { WindowInsets.statusBars },
