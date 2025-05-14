@@ -29,6 +29,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BottomSheetActionButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.MetisModificationTaskHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
@@ -41,7 +42,7 @@ import kotlinx.coroutines.Deferred
 @Composable
 fun SavedPostWithActions(
     modifier: Modifier = Modifier,
-    savedPost: ISavedPost,
+    savedPostChatListItem: ChatListItem.PostItem.SavedItem,
     onClick: () -> Unit,
     onChangeStatus: (newStatus: SavedPostStatus) -> Deferred<MetisModificationFailure?>,
     onRemoveFromSavedPosts: () -> Deferred<MetisModificationFailure?>
@@ -59,7 +60,7 @@ fun SavedPostWithActions(
     Column(modifier = modifier) {
         SavedPostItem(
             modifier = Modifier.fillMaxWidth(),
-            savedPost = savedPost,
+            savedPostChatListItem = savedPostChatListItem,
             isLoading = metisModificationTask != null,
             onClick = onClick,
             onLongClick = { displayBottomSheet = true },
@@ -70,7 +71,7 @@ fun SavedPostWithActions(
                         .padding(top = 4.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    for (status in possibleNextStatuses(savedPost.savedPostStatus)) {
+                    for (status in possibleNextStatuses((savedPostChatListItem.post as ISavedPost).savedPostStatus)) {
                         StatusActionButton(
                             modifier = Modifier
                                 .weight(1f)
@@ -88,7 +89,7 @@ fun SavedPostWithActions(
 
     if (displayBottomSheet) {
         SavedPostBottomSheet(
-            currentStatus = savedPost.savedPostStatus,
+            currentStatus = (savedPostChatListItem.post as ISavedPost).savedPostStatus,
             onChangeStatusActionClick = { newStatus ->
                 metisModificationTask = onChangeStatus(newStatus)
                 displayBottomSheet = false

@@ -6,7 +6,7 @@ import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.predefinedEmojiIds
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisFilter
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisSortingStrategy
