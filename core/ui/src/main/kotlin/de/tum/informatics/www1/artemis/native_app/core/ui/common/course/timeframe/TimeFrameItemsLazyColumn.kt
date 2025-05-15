@@ -17,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.SaverScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -44,18 +45,18 @@ fun <T> TimeFrameItemsLazyColumn(
     getItemId: T.() -> Long,
     itemContent: @Composable (Modifier, T) -> Unit
 ) {
+    val defaultExpandedTimeFrames = remember(timeFrameGroup) {
+        TimeFrameUtils.defaultExpandedTimeFrames(timeFrameGroup)
+    }
+
     val timeFrameGroupExpandedState: MutableMap<String, Boolean> = rememberSaveable(
         timeFrameGroup,
         saver = TimeFrameItemsSectionExpandedSaver
     ) {
         SnapshotStateMap<String, Boolean>().apply {
-            timeFrameGroup.forEach { group ->
-                val defaultExpanded = when (group) {
-                    is TimeFrame.Current -> true
-                    is TimeFrame.DueSoon -> true
-                    else -> false
-                }
-                this[group.key] = defaultExpanded
+            timeFrameGroup.forEach { frame ->
+                val defaultExpanded = defaultExpandedTimeFrames.contains(frame.javaClass)
+                this[frame.key] = defaultExpanded
             }
         }
     }
@@ -70,11 +71,7 @@ fun <T> TimeFrameItemsLazyColumn(
         } else {
             timeFrameGroupExpandedState.forEach { (key, _) ->
                 val frame = timeFrameGroup.find { it.key == key } ?: return@forEach
-                val defaultExpanded = when (frame) {
-                    is TimeFrame.Current -> true
-                    is TimeFrame.DueSoon -> true
-                    else -> false
-                }
+                val defaultExpanded = defaultExpandedTimeFrames.contains(frame.javaClass)
                 timeFrameGroupExpandedState[key] = defaultExpanded
             }
         }
