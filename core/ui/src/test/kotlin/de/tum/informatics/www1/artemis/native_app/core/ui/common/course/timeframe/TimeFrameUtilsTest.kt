@@ -2,7 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.core.ui.common.course.timefra
 
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.timeframe.TimeFrameUtils.defaultExpandedTimeFrames
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -13,8 +12,6 @@ class TimeFrameUtilsTest {
         val timeFrames = listOf(
             TimeFrame.Current(items(5)),
             TimeFrame.DueSoon(items(5)),
-            TimeFrame.Future(emptyList()),
-            TimeFrame.NoDate(emptyList()),
             TimeFrame.Past(items(5))
         )
 
@@ -23,18 +20,13 @@ class TimeFrameUtilsTest {
         assertEquals(2, result.size)
         assertTrue(result.contains(TimeFrame.Current::class.java))
         assertTrue(result.contains(TimeFrame.DueSoon::class.java))
-        assertFalse(result.contains(TimeFrame.Future::class.java))
-        assertFalse(result.contains(TimeFrame.NoDate::class.java))
-        assertFalse(result.contains(TimeFrame.Past::class.java))
     }
 
     @Test
     fun `test GIVEN few current and dueSoon but many future WHEN calling defaultExpandedTimeFrames THEN also future is open`() {
         val timeFrames = listOf(
             TimeFrame.Current(items(2)),
-            TimeFrame.DueSoon(emptyList()),
             TimeFrame.Future(items(13)),
-            TimeFrame.NoDate(emptyList()),
             TimeFrame.Past(items(5))
         )
 
@@ -44,8 +36,6 @@ class TimeFrameUtilsTest {
         assertTrue(result.contains(TimeFrame.Current::class.java))
         assertTrue(result.contains(TimeFrame.DueSoon::class.java))
         assertTrue(result.contains(TimeFrame.Future::class.java))
-        assertFalse(result.contains(TimeFrame.NoDate::class.java))
-        assertFalse(result.contains(TimeFrame.Past::class.java))
     }
 
     @Test
@@ -54,7 +44,6 @@ class TimeFrameUtilsTest {
             TimeFrame.Current(items(2)),
             TimeFrame.DueSoon(items(2)),
             TimeFrame.Future(items(2)),
-            TimeFrame.NoDate(emptyList()),
             TimeFrame.Past(items(5))
         )
 
@@ -64,8 +53,17 @@ class TimeFrameUtilsTest {
         assertTrue(result.contains(TimeFrame.Current::class.java))
         assertTrue(result.contains(TimeFrame.DueSoon::class.java))
         assertTrue(result.contains(TimeFrame.Future::class.java))
-        assertFalse(result.contains(TimeFrame.NoDate::class.java))
         assertTrue(result.contains(TimeFrame.Past::class.java))
+    }
+
+    @Test
+    fun `test GIVEN only noDate entries WHEN calling defaultExpandedTimeFrames THEN return noDate`() {
+        val timeFrames = listOf(
+            TimeFrame.NoDate(items(5))
+        )
+
+        val result = defaultExpandedTimeFrames(timeFrames)
+        assertTrue(result.contains(TimeFrame.NoDate::class.java))
     }
 
 

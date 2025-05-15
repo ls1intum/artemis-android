@@ -176,6 +176,8 @@ object TimeFrameUtils {
             return expanded
         }
 
+        // TODO: consider no date?
+
         expanded.add(TimeFrame.Past::class.java)
 
         return expanded
