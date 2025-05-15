@@ -355,7 +355,6 @@ internal class CommunicationNotificationManagerImpl(
                 mutableFlags
             )
 
-        // TODO: remove notification + mute seems to not work atm
         return NotificationCompat.Action.Builder(
             R.drawable.mute,
             context.getString(R.string.push_notification_action_mute),
