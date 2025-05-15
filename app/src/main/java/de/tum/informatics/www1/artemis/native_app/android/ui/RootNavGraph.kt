@@ -38,15 +38,15 @@ fun NavGraphBuilder.rootNavGraph(
     val onNavigateToTextExerciseParticipation =
         { exerciseId: Long, participationId: Long ->
             navController.navigateToExercise(
-                exerciseId,
-                ExerciseViewMode.TextParticipation(participationId)
+                exerciseId = exerciseId,
+                viewMode = ExerciseViewMode.TextParticipation(participationId)
             ) {}
         }
 
     val onNavigateToExerciseResultView = { exerciseId: Long ->
         navController.navigateToExercise(
-            exerciseId,
-            ExerciseViewMode.ViewResult
+            exerciseId = exerciseId,
+            viewMode = ExerciseViewMode.ViewResult
         ) {}
     }
 
@@ -116,8 +116,9 @@ fun NavGraphBuilder.rootNavGraph(
     course(
         onNavigateToExercise = { exerciseId ->
             navController.navigateToExercise(
-                exerciseId,
-                ExerciseViewMode.Overview
+                exerciseId = exerciseId,
+                showSideBarIcon = false,
+                viewMode = ExerciseViewMode.Overview
             ) { }
         },
         onNavigateToExerciseResultView = onNavigateToExerciseResultView,
@@ -145,13 +146,10 @@ fun NavGraphBuilder.rootNavGraph(
         onViewExercise = { exerciseId ->
             navController.navigateToExercise(
                 exerciseId,
+                showSideBarIcon = false,
                 ExerciseViewMode.Overview
             ) { }
-        },
-        onNavigateToExerciseResultView = onNavigateToExerciseResultView,
-        onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
-        onParticipateInQuiz = onParticipateInQuiz,
-        onClickViewQuizResults = onClickViewQuizResults
+        }
     )
 
     faqDetail()

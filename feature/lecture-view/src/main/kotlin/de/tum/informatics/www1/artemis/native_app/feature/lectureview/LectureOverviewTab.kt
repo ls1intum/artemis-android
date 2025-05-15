@@ -53,7 +53,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.DateFormats
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.format
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CommunicationDeeplinks
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture_units.LectureUnitHeader
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture_units.LectureUnitOnlineUi
@@ -80,7 +79,6 @@ internal fun LectureOverviewTab(
     onMarkAsCompleted: (lectureUnitId: Long, isCompleted: Boolean) -> Unit,
     onRequestViewLink: (String) -> Unit,
     onRequestOpenAttachment: (Attachment) -> Unit,
-    exerciseActions: BoundExerciseActions,
     state: LazyListState
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
@@ -134,7 +132,6 @@ internal fun LectureOverviewTab(
                 modifier = Modifier.fillMaxWidth(),
                 lectureUnits = lectureUnits,
                 onViewExercise = onViewExercise,
-                exerciseActions = exerciseActions,
                 onMarkAsCompleted = onMarkAsCompleted,
                 onRequestOpenAttachment = onRequestOpenAttachment,
                 onHeaderClick = { lectureUnit ->
@@ -288,7 +285,6 @@ private fun LazyListScope.lectureUnitSection(
     modifier: Modifier,
     lectureUnits: List<LectureUnitData>,
     onViewExercise: (exerciseId: Long) -> Unit,
-    exerciseActions: BoundExerciseActions,
     onRequestOpenAttachment: (Attachment) -> Unit,
     onMarkAsCompleted: (lectureUnitId: Long, isCompleted: Boolean) -> Unit,
     onHeaderClick: (LectureUnit) -> Unit
@@ -311,7 +307,6 @@ private fun LazyListScope.lectureUnitSection(
                     .animateItem(),
                 lectureUnit = lectureUnitWithData.lectureUnit,
                 onClickExercise = onViewExercise,
-                exerciseActions = exerciseActions,
                 onMarkAsCompleted = { isCompleted ->
                     onMarkAsCompleted(lectureUnitWithData.lectureUnit.id, isCompleted)
                 },
