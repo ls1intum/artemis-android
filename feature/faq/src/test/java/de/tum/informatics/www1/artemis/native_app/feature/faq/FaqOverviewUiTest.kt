@@ -114,7 +114,8 @@ class FaqOverviewUiTest : BaseComposeTest() {
             FaqOverviewUi(
                 viewModel = viewModel,
                 collapsingContentState = CollapsingContentState(),
-                onNavigateToFaq = {}
+                onNavigateToFaq = {},
+                selectedFaqId = null
             )
         }
         return viewModel

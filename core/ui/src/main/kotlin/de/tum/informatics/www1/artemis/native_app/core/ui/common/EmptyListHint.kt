@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 fun EmptyListHint(
     modifier: Modifier,
     hint: String,
+    secondaryHint: String? = null,
     imageVector: ImageVector? = null,
     painter: Painter? = null
 ) {
@@ -62,6 +63,17 @@ fun EmptyListHint(
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+
+        Spacer(modifier = Modifier.size(4.dp))
+
+        secondaryHint?.let {
+            Text(
+                text = secondaryHint,
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 

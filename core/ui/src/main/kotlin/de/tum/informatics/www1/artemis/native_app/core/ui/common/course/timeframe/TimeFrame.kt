@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.courseview
+package de.tum.informatics.www1.artemis.native_app.core.ui.common.course.timeframe
 
 sealed class TimeFrame<T>(val items: List<T>) {
 

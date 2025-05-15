@@ -16,7 +16,13 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.ReloadableViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.service.SavedPostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.asMetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.network.MetisService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.util.ForwardedMessagesHandler
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.PostingType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -31,17 +37,18 @@ import kotlin.coroutines.EmptyCoroutineContext
 class SavedPostsViewModel(
     val courseId: Long,
     private val savedPostService: SavedPostService,
+    private val metisService: MetisService,
     serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
     private val networkStatusProvider: NetworkStatusProvider,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : ReloadableViewModel() {
 
+    val metisContext = MetisContext.Course(courseId)
     val serverUrl: StateFlow<String> = serverConfigurationService.serverUrl
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, "")
 
-
-    val savedPosts: StateFlow<DataState<List<ISavedPost>>> = flatMapLatest(
+    val savedPosts: StateFlow<DataState<List<ChatListItem.PostItem.SavedItem>>> = flatMapLatest(
         serverUrl,
         accountService.authToken,
         requestReload
@@ -53,7 +60,39 @@ class SavedPostsViewModel(
                     courseId = courseId,
                     authToken = authToken,
                     serverUrl = serverUrl
-                ).bind { it as List<ISavedPost> }
+                ).bind { it as List<ISavedPost> }  // Required by the compiler
+                    .bind {
+                        val forwardedMessagesHandler = ForwardedMessagesHandler(
+                            metisService = metisService,
+                            metisContext = metisContext,
+                            authToken = authToken,
+                            serverUrl = serverUrl
+                        )
+                        forwardedMessagesHandler.extractForwardedMessages(it)
+                        it
+                            .distinctBy { savedPost -> savedPost.key }
+                            .map { post ->
+                                forwardedMessagesHandler.loadForwardedMessages(
+                                    postingType = if (post is IAnswerPost) PostingType.ANSWER else PostingType.POST
+                                )
+                                forwardedMessagesHandler.resolveForwardedMessagesForSavedPost(
+                                    chatListItem = if (post.hasForwardedMessages == true) {
+                                        ChatListItem.PostItem.SavedItem.SavedPostWithForwardedMessage(
+                                            post = post,
+                                            forwardedPosts = emptyList(),
+                                            courseId = courseId
+                                        )
+                                    } else {
+                                        ChatListItem.PostItem.SavedItem.SavedPost(
+                                            post = post
+                                        )
+                                    }
+                                )
+                            }.map { savedPost ->
+                                //println(savedPost)
+                                savedPost
+                            }
+                    }
             }
 
             val firstFailure = responses.firstOrNull { it is NetworkResponse.Failure<*> }
@@ -62,7 +101,7 @@ class SavedPostsViewModel(
             }
 
             val posts = responses
-                .filterIsInstance<NetworkResponse.Response<List<ISavedPost>>>()
+                .filterIsInstance<NetworkResponse.Response<List<ChatListItem.PostItem.SavedItem>>>()
                 .map { it.data }
                 .flatten()
                 // TODO: this is currently required of a bug allowing duplicate items in the list

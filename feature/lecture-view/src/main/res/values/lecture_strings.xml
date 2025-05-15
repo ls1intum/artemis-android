@@ -45,4 +45,12 @@
     <string name="lecture_view_lecture_unit_set_completed_failed_dialog_title">Error!</string>
     <string name="lecture_view_lecture_unit_set_completed_failed_dialog_message">Something went wrong while setting the lecture unit as completed.</string>
     <string name="lecture_view_lecture_unit_set_completed_failed_dialog_positive">@android:string/ok</string>
+
+    <!--  Lecture list  -->
+    <string name="lecture_list_lectures_no_search_results_title">No lectures found</string>
+    <string name="lecture_list_lectures_no_search_results_body">\"%s\" did not match any lectures.</string>
+    <string name="lecture_list_lecture_item_start_date_set">Start date: %1$s</string>
+    <string name="lecture_list_lecture_item_start_date_not_set">No due date</string>
+    <string name="lecture_list_lecture_item_not_selected">Please select a lecture from the list.</string>
+
 </resources>

@@ -1,8 +1,8 @@
 package de.tum.informatics.www1.artemis.native_app.feature.exerciseview.home.overview
 
-import androidx.compose.ui.Modifier
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise

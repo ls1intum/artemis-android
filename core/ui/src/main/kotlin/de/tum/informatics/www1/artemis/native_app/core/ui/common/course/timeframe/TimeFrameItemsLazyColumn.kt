@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.courseview.ui
+package de.tum.informatics.www1.artemis.native_app.core.ui.common.course.timeframe
 
 import android.os.Parcelable
 import androidx.compose.foundation.clickable
@@ -28,17 +28,15 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
-import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
-import de.tum.informatics.www1.artemis.native_app.feature.courseview.TimeFrame
-import de.tum.informatics.www1.artemis.native_app.feature.courseview.TimeFrameUtils
-import de.tum.informatics.www1.artemis.native_app.feature.courseview.TimeFrameUtils.toRangeString
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.timeframe.TimeFrameUtils.toRangeString
 import kotlinx.parcelize.Parcelize
 
 const val MAX_NUMBER_OF_ITEMS_WITHOUT_SUB_LABEL = 5
 
 @Composable
-internal fun <T> TimeFrameItemsLazyColumn(
+fun <T> TimeFrameItemsLazyColumn(
     modifier: Modifier,
     timeFrameGroup: List<TimeFrame<T>>,
     verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(8.dp),
@@ -157,11 +155,11 @@ private fun <T> TimeFrameItemsSectionHeader(
 ) {
     val size = group.items.size
     var groupTitle = when (group) {
-        is TimeFrame.Past<*> -> stringResource(R.string.course_ui_list_time_frame_past)
-        is TimeFrame.Current<*> -> stringResource(R.string.course_ui_list_time_frame_current)
-        is TimeFrame.Future -> stringResource(R.string.course_ui_list_time_frame_future)
-        is TimeFrame.NoDate -> stringResource(R.string.course_ui_list_time_frame_no_date)
-        is TimeFrame.DueSoon -> stringResource(R.string.course_ui_list_time_frame_due_soon)
+        is TimeFrame.Past<*> -> stringResource(R.string.course_list_time_frame_past)
+        is TimeFrame.Current<*> -> stringResource(R.string.course_list_time_frame_current)
+        is TimeFrame.Future -> stringResource(R.string.course_list_time_frame_future)
+        is TimeFrame.NoDate -> stringResource(R.string.course_list_time_frame_no_date)
+        is TimeFrame.DueSoon -> stringResource(R.string.course_list_time_frame_due_soon)
     }
 
     groupTitle += " ($size)"
@@ -182,8 +180,8 @@ private fun <T> TimeFrameItemsSectionHeader(
 
         val contentDescription =
             stringResource(
-                id = if (expanded) R.string.course_ui_list_expand_button_less_content_info
-                else R.string.course_ui_list_expand_button_more_content_info
+                id = if (expanded) R.string.course_list_expand_button_less_content_info
+                else R.string.course_list_expand_button_more_content_info
             )
 
         Icon(

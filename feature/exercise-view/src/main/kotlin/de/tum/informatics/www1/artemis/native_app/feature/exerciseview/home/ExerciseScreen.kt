@@ -52,7 +52,9 @@ internal fun ExerciseScreen(
     onViewResult: () -> Unit,
     onViewTextExerciseParticipationScreen: (participationId: Long) -> Unit,
     onParticipateInQuiz: (courseId: Long, isPractice: Boolean) -> Unit,
-    onClickViewQuizResults: (courseId: Long) -> Unit
+    onClickViewQuizResults: (courseId: Long) -> Unit,
+    onSidebarToggle: () -> Unit = {},
+    showSideBarIcon: Boolean = true,
 ) {
     val artemisContext by LocalArtemisContextProvider.current.collectArtemisContextAsState()
 
@@ -124,7 +126,9 @@ internal fun ExerciseScreen(
                 topBar = {
                     ExerciseScreenTopAppBar(
                         modifier = Modifier.fillMaxWidth(),
-                        exerciseDataState = exerciseDataState
+                        exerciseDataState = exerciseDataState,
+                        onSidebarToggle = onSidebarToggle,
+                        showSideBarIcon = showSideBarIcon,
                     )
                 },
                 floatingActionButton = floatingActionButton

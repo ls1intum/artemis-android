@@ -20,7 +20,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -36,7 +35,6 @@ import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_uni
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitUnknown
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitVideo
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.RoundGreenCheckbox
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseListItem
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.R
 
@@ -50,7 +48,6 @@ internal fun LectureUnitHeader(
     modifier: Modifier,
     lectureUnit: LectureUnit,
     onClickExercise: (exerciseId: Long) -> Unit,
-    exerciseActions: BoundExerciseActions,
     isUploadingMarkedAsCompleted: Boolean,
     onMarkAsCompleted: (isCompleted: Boolean) -> Unit,
     onRequestOpenAttachment: (Attachment) -> Unit,
@@ -64,10 +61,7 @@ internal fun LectureUnitHeader(
             ExerciseListItem(
                 modifier = modifier,
                 exercise = exercise,
-                onClickExercise = { onClickExercise(exerciseId) },
-                exerciseActions = remember(exerciseActions, exercise) {
-                    exerciseActions.getUnbound(exerciseId = exerciseId)
-                }
+                onClickExercise = { onClickExercise(exerciseId) }
             )
             return
         }

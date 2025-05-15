@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.force_update.repository
 
-import android.util.Log
 import de.tum.informatics.www1.artemis.native_app.core.common.app_version.NormalizedAppVersion
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.feature.force_update.FeatureAvailability
@@ -29,11 +28,6 @@ object UpdateUtil {
                 // 🔍 Version check
                 val serverMinVersion = data.minVersion
                 val updateRequired = serverMinVersion > currentVersion
-
-                Log.d("TAG", "Current version: $currentVersion")
-                Log.d("TAG", "Min required version: ${data.minVersion}")
-                Log.d("TAG", "Recommended version: ${data.recommendedVersion}")
-                Log.d("TAG", "Available features: ${data.features.joinToString()}")
 
                 UpdateRepository.UpdateResult(
                     updateAvailable = updateRequired,

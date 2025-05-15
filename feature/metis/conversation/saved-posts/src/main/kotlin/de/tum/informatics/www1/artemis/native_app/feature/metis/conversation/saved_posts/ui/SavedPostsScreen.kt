@@ -46,7 +46,9 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwo
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.rememberPostArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getIcon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getTintColor
@@ -92,7 +94,7 @@ internal fun SavedPostsScreen(
     CompositionLocalProvider(LocalMarkdownTransformer provides markdownTransformer) {
         SavedPostsScreen(
             modifier = modifier,
-            savedPostsDataState = savedPosts,
+            savedPostsChatListItemsDataState = savedPosts,
             onRequestReload = viewModel::onRequestReload,
             onNavigateToPost = onNavigateToPost,
             onChangeStatus = viewModel::changeSavedPostStatus,
@@ -104,7 +106,7 @@ internal fun SavedPostsScreen(
 @Composable
 internal fun SavedPostsScreen(
     modifier: Modifier,
-    savedPostsDataState: DataState<List<ISavedPost>>,
+    savedPostsChatListItemsDataState: DataState<List<ChatListItem.PostItem.SavedItem>>,
     onRequestReload: () -> Unit,
     onNavigateToPost: (ISavedPost) -> Unit,
     onChangeStatus: (ISavedPost, SavedPostStatus) -> Deferred<MetisModificationFailure?>,
@@ -137,18 +139,18 @@ internal fun SavedPostsScreen(
                     .fillMaxSize()
                     .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                 ,
-                dataState = savedPostsDataState,
+                dataState = savedPostsChatListItemsDataState,
                 loadingText = stringResource(R.string.saved_posts_loading_posts_loading),
                 failureText = stringResource(R.string.saved_posts_loading_posts_failed),
                 retryButtonText = stringResource(R.string.saved_posts_loading_posts_try_again),
                 onClickRetry = onRequestReload,
                 enablePullToRefresh = false
-            ) { savedPosts ->
+            ) { savedPostChatListItems ->
                 ProvideMarkwon {
                     SavedPostsList(
                         modifier = Modifier.fillMaxSize(),
                         status = status,
-                        savedPosts = savedPosts.filter { it.savedPostStatus == status },
+                        savedPostChatListItems = savedPostChatListItems.filter { (it.post as SavedPost).savedPostStatus == status },
                         onNavigateToPost = onNavigateToPost,
                         onChangeStatus = onChangeStatus,
                         onRemoveFromSavedPosts = onRemoveFromSavedPosts
@@ -212,7 +214,7 @@ private fun StatusSelectionRow(
 private fun SavedPostsList(
     modifier: Modifier = Modifier,
     status: SavedPostStatus,
-    savedPosts: List<ISavedPost>,
+    savedPostChatListItems: List<ChatListItem.PostItem.SavedItem>,
     onNavigateToPost: (ISavedPost) -> Unit,
     onChangeStatus: (ISavedPost, SavedPostStatus) -> Deferred<MetisModificationFailure?>,
     onRemoveFromSavedPosts: (ISavedPost) -> Deferred<MetisModificationFailure?>
@@ -227,7 +229,7 @@ private fun SavedPostsList(
     }
 
     AnimatedContent(
-        targetState = savedPosts.isEmpty(),
+        targetState = savedPostChatListItems.isEmpty(),
         label = "Animated saved posts list: empty <-> not empty"
     ) { isEmpty ->
         if (isEmpty) {
@@ -256,22 +258,23 @@ private fun SavedPostsList(
             item { removalNotice() }
 
             items(
-                items = savedPosts,
+                items = savedPostChatListItems,
                 key = { it.key }
             ) {
+                val savedPost = it.post as ISavedPost
                 SavedPostWithActions(
                     modifier = Modifier
                         .fillMaxWidth()
                         .animateItem(),
-                    savedPost = it,
+                    savedPostChatListItem = it,
                     onClick = {
-                        onNavigateToPost(it)
+                        onNavigateToPost(savedPost)
                     },
                     onChangeStatus = { newStatus ->
-                        onChangeStatus(it, newStatus)
+                        onChangeStatus(savedPost, newStatus)
                     },
                     onRemoveFromSavedPosts = {
-                        onRemoveFromSavedPosts(it)
+                        onRemoveFromSavedPosts(savedPost)
                     }
                 )
             }

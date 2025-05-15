@@ -35,10 +35,10 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextPro
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.collectArtemisContextAsState
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.AdaptiveNavigationIcon
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.LinkBottomSheet
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.LinkBottomSheetState
-import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.LectureDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.ImageFile
@@ -65,10 +65,6 @@ fun NavController.navigateToLecture(
 
 fun NavGraphBuilder.lecture(
     onViewExercise: (exerciseId: Long) -> Unit,
-    onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
-    onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
-    onParticipateInQuiz: (courseId: Long, exerciseId: Long, isPractice: Boolean) -> Unit,
-    onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
 ) {
     animatedComposable<LectureScreenUi>(
         deepLinks = LectureDeeplinks.ToLecture.generateLinks() +
@@ -88,19 +84,32 @@ fun NavGraphBuilder.lecture(
             modifier = Modifier.fillMaxSize(),
             courseId = courseId,
             viewModel = viewModel,
-            onViewExercise = onViewExercise,
-            onNavigateToExerciseResultView = onNavigateToExerciseResultView,
-            onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
-            onParticipateInQuiz = { exerciseId, isPractice ->
-                onParticipateInQuiz(
-                    courseId,
-                    exerciseId,
-                    isPractice
-                )
-            },
-            onClickViewQuizResults = onClickViewQuizResults
+            onViewExercise = onViewExercise
         )
     }
+}
+
+@Composable
+fun LectureDetailContent(
+    lectureId: Long,
+    onViewExercise: (exerciseId: Long) -> Unit,
+    onSidebarToggle: () -> Unit
+) {
+    val viewModel: LectureViewModel = koinViewModel(key = "lecture|$lectureId") {
+        parametersOf(lectureId)
+    }
+    val lectureDataState by viewModel.lectureDataState.collectAsState()
+    val courseId by remember(lectureDataState) {
+        derivedStateOf { lectureDataState.bind { it.course?.id ?: 0 }.orElse(0) }
+    }
+
+    LectureScreen(
+        modifier = Modifier.fillMaxSize(),
+        courseId = courseId,
+        viewModel = viewModel,
+        onViewExercise = onViewExercise,
+        onSidebarToggle = onSidebarToggle
+    )
 }
 
 @Composable
@@ -109,10 +118,7 @@ internal fun LectureScreen(
     courseId: Long,
     viewModel: LectureViewModel,
     onViewExercise: (exerciseId: Long) -> Unit,
-    onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
-    onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
-    onParticipateInQuiz: (exerciseId: Long, isPractice: Boolean) -> Unit,
-    onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit
+    onSidebarToggle: () -> Unit = {},
 ) {
     val lectureDataState by viewModel.lectureDataState.collectAsState()
     val serverUrl by viewModel.serverUrl.collectAsState()
@@ -127,19 +133,9 @@ internal fun LectureScreen(
         lectureChannel = lectureChannel,
         lectureUnits = lectureUnits,
         onViewExercise = onViewExercise,
-        onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
-        onParticipateInQuiz = onParticipateInQuiz,
-        onNavigateToExerciseResultView = onNavigateToExerciseResultView,
-        onClickViewQuizResults = onClickViewQuizResults,
         onReloadLecture = viewModel::onRequestReload,
         onUpdateLectureUnitIsComplete = viewModel::updateLectureUnitIsComplete,
-        onStartExercise = { exerciseId, onParticipationId ->
-            viewModel.startExercise(
-                exerciseId = exerciseId
-            ) {
-                onParticipationId(it)
-            }
-        }
+        onSidebarToggle = onSidebarToggle
     )
 }
 
@@ -152,13 +148,9 @@ internal fun LectureScreen(
     lectureChannel: DataState<ChannelChat>,
     lectureUnits: List<LectureUnit>,
     onViewExercise: (exerciseId: Long) -> Unit,
-    onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
-    onParticipateInQuiz: (exerciseId: Long, isPractice: Boolean) -> Unit,
-    onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
-    onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
     onReloadLecture: () -> Unit,
     onUpdateLectureUnitIsComplete: (lectureUnitId: Long, isCompleted: Boolean) -> Deferred<Boolean>,
-    onStartExercise: (exerciseId: Long, onParticipationId: (Long) -> Unit) -> Unit,
+    onSidebarToggle: () -> Unit
 ) {
     val context = LocalContext.current
     val linkOpener = LocalLinkOpener.current
@@ -193,7 +185,9 @@ internal fun LectureScreen(
                             overflow = TextOverflow.Ellipsis
                         )
                     },
-                    navigationIcon = { NavigationBackButton() },
+                    navigationIcon = {
+                        AdaptiveNavigationIcon(onSidebarToggle = onSidebarToggle)
+                    },
                     isElevated = false
                 )
             }
@@ -208,20 +202,14 @@ internal fun LectureScreen(
                 lectureChannel = lectureChannel,
                 lectureUnits = lectureUnits,
                 onViewExercise = onViewExercise,
-                onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
-                onParticipateInQuiz = onParticipateInQuiz,
-                onNavigateToExerciseResultView = onNavigateToExerciseResultView,
-                onClickViewQuizResults = onClickViewQuizResults,
-                courseId = courseId,
                 overviewListState = overviewListState,
+                onRequestViewLink = { pendingOpenLink = it },
+                onRequestOpenAttachment = { pendingOpenFileAttachment = it },
                 onDisplaySetCompletedFailureDialog = {
                     displaySetCompletedFailureDialog = true
                 },
-                onRequestOpenAttachment = { pendingOpenFileAttachment = it },
-                onRequestViewLink = { pendingOpenLink = it },
                 onReloadLecture = onReloadLecture,
                 onUpdateLectureUnitIsComplete = onUpdateLectureUnitIsComplete,
-                onStartExercise = onStartExercise,
             )
 
             val currentPendingOpenFileAttachment = pendingOpenFileAttachment

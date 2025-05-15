@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.SignalWifiOff
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -22,6 +24,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 
 
 /**
@@ -100,19 +103,19 @@ inline fun <T> Content(
             Column(
                 modifier = Modifier
             ) {
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = failureText,
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyLarge,
+                EmptyListHint(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = Spacings.ScreenHorizontalSpacing)
+                        .align(Alignment.CenterHorizontally),
+                    hint = failureText,
+                    imageVector = Icons.Outlined.SignalWifiOff
                 )
 
                 TextButton(
                     onClick = onClickRetry,
                     content = { Text(text = retryButtonText) },
-                    modifier = Modifier
-                        .padding(top = 0.dp)
-                        .align(Alignment.CenterHorizontally)
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
             }
         }

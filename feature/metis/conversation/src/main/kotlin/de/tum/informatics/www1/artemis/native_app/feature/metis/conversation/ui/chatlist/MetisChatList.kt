@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -34,6 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.EmojiService
@@ -189,7 +192,15 @@ fun MetisChatList(
             ) {
                 when (posts) {
                     PostsDataState.Empty -> {
-                        NoPostsFoundInformation(modifier = informationModifier)
+                        EmptyListHint(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = Spacings.ScreenHorizontalSpacing)
+                                .align(Alignment.Center),
+                            hint = stringResource(id = R.string.metis_post_list_empty),
+                            secondaryHint = stringResource(id = R.string.metis_post_list_empty_secondary),
+                            imageVector = Icons.AutoMirrored.Filled.Chat,
+                        )
                     }
 
                     PostsDataState.Loading -> {
@@ -420,22 +431,6 @@ private fun LoadingPostsInformation(modifier: Modifier) {
 
         LinearProgressIndicator(
             modifier = Modifier.fillMaxWidth(0.4f)
-        )
-    }
-}
-
-@Composable
-private fun NoPostsFoundInformation(
-    modifier: Modifier
-) {
-    Box(
-        modifier = modifier,
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = stringResource(id = R.string.metis_post_list_empty),
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center
         )
     }
 }
