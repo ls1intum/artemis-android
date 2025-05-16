@@ -338,7 +338,7 @@ interface MetisDao {
     ): Int
 
     @Query("select author_role from postings where id = :clientPostId")
-    suspend fun queryPostAuthorRole(clientPostId: String): UserRole
+    suspend fun queryPostAuthorRole(clientPostId: String): UserRole?
 
     @Query("select server_post_id from metis_post_context where server_id = :serverId and client_post_id = :clientPostId")
     suspend fun queryServerSidePostId(serverId: String, clientPostId: String): Long

@@ -28,7 +28,7 @@ data class PostPojo(
     @ColumnInfo(name = "author_name")
     override val authorName: String,
     @ColumnInfo(name = "author_role")
-    override val authorRole: UserRole,
+    override val authorRole: UserRole?,
     @ColumnInfo(name = "author_id")
     override val authorId: Long,
     @ColumnInfo(name = "author_image_url")
