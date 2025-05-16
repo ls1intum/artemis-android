@@ -36,6 +36,13 @@ interface ArtemisImageProvider {
     ): AsyncImagePainter = rememberAsyncImagePainter(model = rememberArtemisImageRequest(imagePath))
 
     @Composable
+    fun rememberArtemisImageRequestByUrl(imageUrl: String): ImageRequest
+
+    @Composable
+    fun rememberArtemisAsyncImagePainterByUrl(imageUrl: String): AsyncImagePainter =
+        rememberAsyncImagePainter(model = rememberArtemisImageRequestByUrl(imageUrl))
+
+    @Composable
     fun rememberArtemisImageLoader() : ImageLoader
 }
 
@@ -57,6 +64,11 @@ private class EmptyArtemisImageProvider : ArtemisImageProvider {
     @Composable
     override fun rememberArtemisImageLoader(): ImageLoader {
         return ImageLoader(LocalContext.current)
+    }
+
+    @Composable
+    override fun rememberArtemisImageRequestByUrl(imageUrl: String): ImageRequest {
+        return ImageRequest.Builder(LocalContext.current).build()
     }
 }
 

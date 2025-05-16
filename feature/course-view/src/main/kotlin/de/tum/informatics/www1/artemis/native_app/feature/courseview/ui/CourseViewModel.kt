@@ -9,10 +9,10 @@ import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvi
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BaseExerciseListViewModel
-import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.timeframe.TimeFrame
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.timeframe.TimeFrameUtils.groupByTimeFrame
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BaseExerciseListViewModel
+import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

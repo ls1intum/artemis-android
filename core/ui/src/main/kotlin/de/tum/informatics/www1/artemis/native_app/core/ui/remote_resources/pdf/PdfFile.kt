@@ -1,14 +1,10 @@
-package de.tum.informatics.www1.artemis.native_app.core.ui.pdf
+package de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf
 
-import android.app.DownloadManager
 import android.content.ClipData
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
-import android.os.Environment
 import android.os.ParcelFileDescriptor
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
@@ -18,8 +14,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.core.content.ContextCompat.getString
 import androidx.core.content.FileProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
-import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.PdfRendering
-import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.state.PdfReaderState
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.BaseFile
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.render.PdfRendering
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.render.state.PdfReaderState
 import io.ktor.http.HttpHeaders
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,17 +24,20 @@ import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
-import java.net.UnknownHostException
-import java.util.Date
 
-
+/**
+ * Class representing a PDF file that can be downloaded and shared.
+ * Used for lecture unit attachments and pdf attachments sent to the chat.
+ *
+ * @property url The URL of the PDF file.
+ * @property authToken The authentication token used for downloading the file.
+ * @property filename The name of the file.
+ */
 class PdfFile(
-    val link: String,
-    val authToken: String,
-    val filename: String? = null
-) {
-
-    private fun generateFileName(): String = "${Date().time}.pdf"
+    override val url: String,
+    override val authToken: String,
+    override val filename: String
+): BaseFile(authToken, filename, url) {
 
     fun load(
         coroutineScope: CoroutineScope,
@@ -49,7 +49,7 @@ class PdfFile(
     ) {
         val client = OkHttpClient()
         val request = Request.Builder()
-            .url(link)
+            .url(url)
             .header(HttpHeaders.Cookie, "jwt=$authToken")
             .build()
 
@@ -74,7 +74,7 @@ class PdfFile(
 
                         val bufferSize = 8192
                         var downloaded = 0
-                        val file = File(context.cacheDir, filename ?: generateFileName())
+                        val file = File(context.cacheDir, filename)
                         val response = client.newCall(request).execute()
                         if (!response.isSuccessful) {
                             state.mError = Exception("Failed to download PDF: ${response.code}")
@@ -120,52 +120,11 @@ class PdfFile(
         }
     }
 
-    fun downloadPdf(context: Context) {
-        try {
-            val downloadManager: DownloadManager =
-                context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-            val downloadUri = Uri.parse(link)
-
-            downloadManager
-                .enqueue(
-                    DownloadManager.Request(downloadUri)
-                        .addRequestHeader(HttpHeaders.Cookie, "jwt=$authToken")
-                        .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                        .setTitle(
-                            filename ?: generateFileName()
-                        )
-                        .setDestinationInExternalPublicDir(
-                            Environment.DIRECTORY_DOWNLOADS,
-                            downloadUri.lastPathSegment
-                        )
-                )
-
-            Toast.makeText(
-                context,
-                getString(context, R.string.pdf_view_downloading_toast),
-                Toast.LENGTH_SHORT
-            ).show()
-
-        } catch (e: Exception) {
-            val errorMessage = when (e) {
-                is UnknownHostException -> {
-                    R.string.pdf_view_error_no_internet
-                }
-                else -> {
-                    R.string.pdf_view_error_downloading
-                }
-            }
-            Toast.makeText(context, getString(context, errorMessage), Toast.LENGTH_LONG)
-                .show()
-            e.printStackTrace()
-        }
-    }
-
-    fun sharePdf(context: Context, pdfFile: File) {
+    override fun share(context: Context, file: File) {
         val pdfUri = FileProvider.getUriForFile(
             context,
             "${context.packageName}.fileprovider",
-            pdfFile
+            file
         )
 
         val shareIntent = Intent(Intent.ACTION_SEND).apply {

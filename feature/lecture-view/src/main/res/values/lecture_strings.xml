@@ -23,6 +23,11 @@
 
     <string name="lecture_view_open_link_button">Open link</string>
 
+    <string name="lecture_view_open_file_attachment_dialog_title">Download File?</string>
+    <string name="lecture_view_open_file_attachment_dialog_message">This file cannot be viewed. Do you want to download it instead?</string>
+    <string name="lecture_view_open_file_attachment_dialog_positive">Download</string>
+    <string name="lecture_view_open_file_attachment_dialog_negative">Cancel</string>
+
     <!--  Attachments Tab  -->
     <string name="lecture_view_attachments_empty">This lecture has no attachments.</string>
     <string name="lecture_view_attachments_pdf">PDF</string>

@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render
+package de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.render
 
 import android.graphics.Bitmap
 import android.graphics.Canvas

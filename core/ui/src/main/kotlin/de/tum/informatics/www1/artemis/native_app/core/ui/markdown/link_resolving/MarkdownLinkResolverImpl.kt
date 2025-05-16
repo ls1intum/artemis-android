@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.authTokenOrEmptyString
 import de.tum.informatics.www1.artemis.native_app.core.common.markdown.MarkdownUrlUtil
 import de.tum.informatics.www1.artemis.native_app.core.ui.LinkOpener
@@ -16,6 +17,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.collectArtemisContextAsState
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.LinkBottomSheet
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.LinkBottomSheetState
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.PdfFile
 import io.noties.markwon.LinkResolver
 
 class MarkdownLinkResolverImpl(): MarkdownLinkResolver {
@@ -25,32 +27,25 @@ class MarkdownLinkResolverImpl(): MarkdownLinkResolver {
         val context = LocalContext.current
         val localLinkOpener = LocalLinkOpener.current
 
-        val (bottomSheetLink, setLinkToShow) = remember { mutableStateOf<String?>(null) }
-        val (bottomSheetState, setBottomSheetState) = remember { mutableStateOf(LinkBottomSheetState.WEBVIEWSTATE) }
+        val (bottomSheetState, setBottomSheetState) = remember { mutableStateOf<LinkBottomSheetState?>(null) }
 
-        if (bottomSheetLink != null) {
-            val filename =
-                if (bottomSheetState == LinkBottomSheetState.PDFVIEWSTATE) MarkdownUrlUtil.decodeUrl(
-                    bottomSheetLink.substringAfterLast("/")
-                ) else null
+        if (bottomSheetState != null) {
             LinkBottomSheet(
                 modifier = Modifier.fillMaxSize(),
-                link = bottomSheetLink,
-                fileName = filename,
                 state = bottomSheetState,
-                onDismissRequest = { setLinkToShow(null) }
+                onDismissRequest = { setBottomSheetState(null) }
             )
         }
 
         return remember(context, localLinkOpener, artemisContext.serverUrl, artemisContext.authTokenOrEmptyString) {
-            BaseMarkdownLinkResolver(localLinkOpener, setLinkToShow, setBottomSheetState)
+            BaseMarkdownLinkResolver(artemisContext, localLinkOpener, setBottomSheetState)
         }
     }
 }
 
 class BaseMarkdownLinkResolver(
+    private val artemisContext: ArtemisContext,
     private val linkOpener: LinkOpener,
-    private val showModalBottomSheet: (String) -> Unit,
     private val setBottomSheetState: (LinkBottomSheetState) -> Unit
 ) : LinkResolver {
     override fun resolve(view: View, link: String) {
@@ -61,13 +56,14 @@ class BaseMarkdownLinkResolver(
 
         when {
             link.endsWith(".pdf") -> {
-                setBottomSheetState(LinkBottomSheetState.PDFVIEWSTATE)
-                showModalBottomSheet(link)
+                val pdfFile = PdfFile(link, artemisContext.authTokenOrEmptyString, MarkdownUrlUtil.decodeUrl(
+                    link.substringAfterLast("/")
+                ))
+                setBottomSheetState(LinkBottomSheetState.PDFVIEWSTATE(pdfFile))
             }
             // TODO: open Artemis link in a Modal Bottom Sheet webview to attach session cookie (https://github.com/ls1intum/artemis-android/issues/245)
 //            link.startsWith(serverUrl) -> {
-//                setBottomSheetState(LinkBottomSheetState.WEBVIEWSTATE)
-//                showModalBottomSheet(link)
+//                setBottomSheetState(LinkBottomSheetState.WEBVIEWSTATE(link))
 //            }
             else -> {
                 linkOpener.openLink(link)
