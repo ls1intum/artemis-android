@@ -31,6 +31,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.notification_mode
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.delete.DeleteNotificationReceiver
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.mark_as_read.MarkAsReadReceiver
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.mute.MuteConversationReceiver
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.reply.ReplyReceiver
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.util.NotificationTargetManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.util.toCircleShape
@@ -175,6 +176,12 @@ internal class CommunicationNotificationManagerImpl(
             )
             .addAction(
                 buildMarkAsReadAction(
+                    context = context,
+                    communication = communication,
+                )
+            )
+            .addAction(
+                buildMuteAction(
                     context = context,
                     communication = communication,
                 )
@@ -334,6 +341,29 @@ internal class CommunicationNotificationManagerImpl(
             .build()
     }
 
+    private fun buildMuteAction(
+        context: Context,
+        communication: PushCommunicationEntity,
+    ): NotificationCompat.Action {
+        val parentId = communication.parentId
+        val resultIntent = buildIntentWithParentId<MuteConversationReceiver>(parentId)
+        val pendingIntent: PendingIntent =
+            PendingIntent.getBroadcast(
+                context,
+                parentId.asRequestCode(),
+                resultIntent,
+                mutableFlags
+            )
+
+        return NotificationCompat.Action.Builder(
+            R.drawable.mute,
+            context.getString(R.string.push_notification_action_mute),
+            pendingIntent
+        )
+            .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_MUTE)
+            .build()
+    }
+
     private inline fun <reified T: BaseCommunicationNotificationReceiver>buildIntentWithParentId(
         parentId: Long
     ) = Intent(context, T::class.java)
@@ -341,3 +371,4 @@ internal class CommunicationNotificationManagerImpl(
 
     private fun Long.asRequestCode() = (this % Int.MAX_VALUE).toInt()
 }
+

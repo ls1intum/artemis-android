@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="push_notification_action_mark_as_read">Mark as read</string>
+    <string name="push_notification_action_mute">Mute</string>
 
     <string name="push_notification_action_reply">Reply</string>
 
