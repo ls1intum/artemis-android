@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRight
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -17,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.SaverScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -44,18 +46,20 @@ fun <T> TimeFrameItemsLazyColumn(
     getItemId: T.() -> Long,
     itemContent: @Composable (Modifier, T) -> Unit
 ) {
+    val listState = rememberLazyListState()
+
+    val defaultExpandedTimeFrames = remember(timeFrameGroup) {
+        TimeFrameUtils.defaultExpandedTimeFrames(timeFrameGroup)
+    }
+
     val timeFrameGroupExpandedState: MutableMap<String, Boolean> = rememberSaveable(
         timeFrameGroup,
         saver = TimeFrameItemsSectionExpandedSaver
     ) {
         SnapshotStateMap<String, Boolean>().apply {
-            timeFrameGroup.forEach { group ->
-                val defaultExpanded = when (group) {
-                    is TimeFrame.Current -> true
-                    is TimeFrame.DueSoon -> true
-                    else -> false
-                }
-                this[group.key] = defaultExpanded
+            timeFrameGroup.forEach { frame ->
+                val defaultExpanded = defaultExpandedTimeFrames.contains(frame.javaClass)
+                this[frame.key] = defaultExpanded
             }
         }
     }
@@ -70,12 +74,23 @@ fun <T> TimeFrameItemsLazyColumn(
         } else {
             timeFrameGroupExpandedState.forEach { (key, _) ->
                 val frame = timeFrameGroup.find { it.key == key } ?: return@forEach
-                val defaultExpanded = when (frame) {
-                    is TimeFrame.Current -> true
-                    is TimeFrame.DueSoon -> true
-                    else -> false
-                }
+                val defaultExpanded = defaultExpandedTimeFrames.contains(frame.javaClass)
                 timeFrameGroupExpandedState[key] = defaultExpanded
+            }
+        }
+    }
+
+    LaunchedEffect(defaultExpandedTimeFrames) {
+        // Scroll to current / dueSoon section if future is expanded (because future is on the top of the list, but focus should be on current/dueSoon
+        if (defaultExpandedTimeFrames.contains(TimeFrame.Future::class.java)) {
+            val currentSection = timeFrameGroup.indexOfFirst { it is TimeFrame.Current }
+            if (currentSection != -1) {
+                listState.animateScrollToItem(currentSection)
+            } else {
+                val dueSoonSection = timeFrameGroup.indexOfFirst { it is TimeFrame.DueSoon }
+                if (dueSoonSection != -1) {
+                    listState.animateScrollToItem(dueSoonSection)
+                }
             }
         }
     }
@@ -84,7 +99,8 @@ fun <T> TimeFrameItemsLazyColumn(
     LazyColumn(
         modifier = modifier,
         verticalArrangement = verticalArrangement,
-        contentPadding = Spacings.calculateContentPaddingValues()
+        contentPadding = Spacings.calculateContentPaddingValues(),
+        state = listState,
     ) {
         timeFrameGroup.forEach { group ->
             val isExpanded = timeFrameGroupExpandedState[group.key] == true
