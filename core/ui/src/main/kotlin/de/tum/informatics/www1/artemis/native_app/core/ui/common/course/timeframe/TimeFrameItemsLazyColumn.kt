@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRight
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -45,6 +46,8 @@ fun <T> TimeFrameItemsLazyColumn(
     getItemId: T.() -> Long,
     itemContent: @Composable (Modifier, T) -> Unit
 ) {
+    val listState = rememberLazyListState()
+
     val defaultExpandedTimeFrames = remember(timeFrameGroup) {
         TimeFrameUtils.defaultExpandedTimeFrames(timeFrameGroup)
     }
@@ -77,11 +80,27 @@ fun <T> TimeFrameItemsLazyColumn(
         }
     }
 
+    LaunchedEffect(defaultExpandedTimeFrames) {
+        // Scroll to current / dueSoon section if future is expanded (because future is on the top of the list, but focus should be on current/dueSoon
+        if (defaultExpandedTimeFrames.contains(TimeFrame.Future::class.java)) {
+            val currentSection = timeFrameGroup.indexOfFirst { it is TimeFrame.Current }
+            if (currentSection != -1) {
+                listState.animateScrollToItem(currentSection)
+            } else {
+                val dueSoonSection = timeFrameGroup.indexOfFirst { it is TimeFrame.DueSoon }
+                if (dueSoonSection != -1) {
+                    listState.animateScrollToItem(dueSoonSection)
+                }
+            }
+        }
+    }
+
 
     LazyColumn(
         modifier = modifier,
         verticalArrangement = verticalArrangement,
-        contentPadding = Spacings.calculateContentPaddingValues()
+        contentPadding = Spacings.calculateContentPaddingValues(),
+        state = listState,
     ) {
         timeFrameGroup.forEach { group ->
             val isExpanded = timeFrameGroupExpandedState[group.key] == true
