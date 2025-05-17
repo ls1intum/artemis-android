@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.AdaptiveNavigationIcon
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
@@ -29,7 +30,8 @@ fun ConversationSettingsScreen(
     onRequestAddMembers: () -> Unit,
     onRequestViewAllMembers: () -> Unit,
     onConversationLeft: () -> Unit,
-    onChannelDeleted: () -> Unit
+    onChannelDeleted: () -> Unit,
+    onSidebarToggle: () -> Unit
 ) {
     ConversationSettingsScreen(
         modifier = modifier,
@@ -40,7 +42,8 @@ fun ConversationSettingsScreen(
         onRequestAddMembers = onRequestAddMembers,
         onRequestViewAllMembers = onRequestViewAllMembers,
         onConversationLeft = onConversationLeft,
-        onChannelDeleted = onChannelDeleted
+        onChannelDeleted = onChannelDeleted,
+        onSidebarToggle = onSidebarToggle
     )
 }
 
@@ -54,7 +57,8 @@ internal fun ConversationSettingsScreen(
     onRequestAddMembers: () -> Unit,
     onRequestViewAllMembers: () -> Unit,
     onConversationLeft: () -> Unit,
-    onChannelDeleted: () -> Unit
+    onChannelDeleted: () -> Unit,
+    onSidebarToggle: () -> Unit
 ) {
     LaunchedEffect(courseId, conversationId) {
         viewModel.updateConversation(courseId, conversationId)
@@ -72,7 +76,7 @@ internal fun ConversationSettingsScreen(
                     Text(text = stringResource(id = R.string.conversation_settings_title))
                 },
                 navigationIcon = {
-                    NavigationBackButton(onNavigateBack)
+                    AdaptiveNavigationIcon(onNavigateBack = onNavigateBack, onSidebarToggle = onSidebarToggle)
                 }
             )
         }

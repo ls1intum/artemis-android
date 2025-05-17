@@ -41,6 +41,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.NoSearchResults
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.AdaptiveNavigationIcon
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisSearchTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
@@ -57,13 +58,15 @@ internal fun testTagForBrowsedChannelItem(channelId: Long) = "browsedChannel$cha
 fun BrowseChannelsScreen(
     modifier: Modifier,
     onNavigateToConversation: (conversationId: Long) -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onSidebarToggle: () -> Unit
 ) {
     BrowseChannelsScreen(
         modifier = modifier,
         viewModel = koinViewModel(),
         onNavigateToConversation = onNavigateToConversation,
-        onNavigateBack = onNavigateBack
+        onNavigateBack = onNavigateBack,
+        onSidebarToggle = onSidebarToggle
     )
 }
 
@@ -72,7 +75,8 @@ internal fun BrowseChannelsScreen(
     modifier: Modifier,
     viewModel: BrowseChannelsViewModel,
     onNavigateToConversation: (conversationId: Long) -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onSidebarToggle: () -> Unit
 ) {
 
     LaunchedEffect(Unit) {
@@ -105,7 +109,7 @@ internal fun BrowseChannelsScreen(
         topBar = {
             ArtemisSearchTopAppBar(
                 title = { Text(text = stringResource(id = R.string.browse_channels_title)) },
-                navigationIcon = { NavigationBackButton(onNavigateBack) },
+                navigationIcon = { AdaptiveNavigationIcon( onNavigateBack = onNavigateBack, onSidebarToggle = onSidebarToggle) },
                 searchBarHint = stringResource(id = R.string.browse_channels_search_hint),
                 query = query,
                 updateQuery = viewModel::updateQuery,

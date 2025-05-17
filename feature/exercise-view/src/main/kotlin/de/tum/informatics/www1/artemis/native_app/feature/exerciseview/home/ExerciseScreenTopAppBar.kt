@@ -48,8 +48,7 @@ internal fun ExerciseScreenTopAppBar(
             },
             navigationIcon = {
                 AdaptiveNavigationIcon(
-                    onSidebarToggle = onSidebarToggle,
-                    showSidebarIcon = showSideBarIcon
+                    onSidebarToggle = onSidebarToggle
                 )
             }
         )

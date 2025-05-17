@@ -15,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.AdaptiveNavigationIcon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.NavigateToUserConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import org.koin.androidx.compose.koinViewModel
@@ -26,7 +27,8 @@ internal fun NavigateToUserConversationUi(
     courseId: Long,
     navigation: NavigateToUserConversation,
     onNavigateToConversation: (Long) -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onSidebarToggle: () -> Unit
 ) {
     val viewModel: NavigateToUserConversationViewModel =
         koinViewModel { parametersOf(courseId, navigation.userIdentifier) }
@@ -37,9 +39,7 @@ internal fun NavigateToUserConversationUi(
         modifier = modifier,
         topBar = {
             TopAppBar(title = { }, navigationIcon = {
-                IconButton(onClick = onNavigateBack) {
-                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
-                }
+               AdaptiveNavigationIcon(onNavigateBack = onNavigateBack, onSidebarToggle = onSidebarToggle)
             })
         }
     ) { padding ->

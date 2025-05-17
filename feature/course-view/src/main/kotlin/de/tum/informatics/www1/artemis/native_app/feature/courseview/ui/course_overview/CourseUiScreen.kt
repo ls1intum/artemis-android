@@ -56,7 +56,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.S
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.UserIdentifier
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleCourse
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.ConversationFacadeUi
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.SinglePageConversationBody
 import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -256,7 +256,7 @@ internal fun CourseUiScreen(
     val courseName = remember(courseDataState) {
         when (courseDataState) {
             is DataState.Success -> courseDataState.data.title
-            else -> null
+            else -> ""
         }
     }
 
@@ -380,13 +380,13 @@ internal fun CourseUiScreen(
                     )
                 }
 
-                ConversationFacadeUi(
+                SinglePageConversationBody(
                     modifier = Modifier.fillMaxSize(),
                     courseId = courseId,
                     scaffold = scaffold,
                     collapsingContentState = collapsingContentState,
                     initialConfiguration = initialConfiguration,
-                    title = courseName ?: ""
+                    title = courseName
                 )
             }
         }
@@ -397,7 +397,7 @@ internal fun CourseUiScreen(
                 scaffold = scaffold,
                 collapsingContentState = collapsingContentState,
                 onNavigateToFaq = onNavigateToFaq,
-                title = courseName ?: ""
+                title = courseName
             )
         }
 

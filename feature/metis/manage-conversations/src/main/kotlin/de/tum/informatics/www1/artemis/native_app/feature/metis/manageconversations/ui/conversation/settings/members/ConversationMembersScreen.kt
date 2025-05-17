@@ -15,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.AdaptiveNavigationIcon
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisSearchTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
@@ -27,7 +28,8 @@ fun ConversationMembersScreen(
     modifier: Modifier,
     courseId: Long,
     conversationId: Long,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onSidebarToggle: () -> Unit
 ) {
     val viewModel: ConversationMembersViewModel = koinViewModel {
         parametersOf(
@@ -44,7 +46,7 @@ fun ConversationMembersScreen(
         modifier = modifier,
         topBar = {
             ArtemisSearchTopAppBar(
-                navigationIcon = { NavigationBackButton(onNavigateBack) },
+                navigationIcon = { AdaptiveNavigationIcon(onNavigateBack = onNavigateBack, onSidebarToggle = onSidebarToggle) },
                 title = {
                     Text(text = stringResource(id = R.string.conversation_members_title))
                 },

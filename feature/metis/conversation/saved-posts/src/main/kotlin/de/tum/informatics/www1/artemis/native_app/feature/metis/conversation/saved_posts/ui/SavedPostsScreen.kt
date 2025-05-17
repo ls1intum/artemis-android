@@ -39,6 +39,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.InfoMessageCard
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.AdaptiveNavigationIcon
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.LocalMarkdownTransformer
@@ -61,7 +62,8 @@ import org.koin.core.parameter.parametersOf
 fun SavedPostsScreen(
     modifier: Modifier = Modifier,
     courseId: Long,
-    onNavigateToPost: (ISavedPost) -> Unit
+    onNavigateToPost: (ISavedPost) -> Unit,
+    onSidebarToggle: () -> Unit
 ) {
     val viewModel = koinViewModel<SavedPostsViewModel>(
         key = "$courseId"
@@ -74,7 +76,8 @@ fun SavedPostsScreen(
     SavedPostsScreen(
         modifier = modifier,
         viewModel = viewModel,
-        onNavigateToPost = onNavigateToPost
+        onNavigateToPost = onNavigateToPost,
+        onSidebarToggle = onSidebarToggle
     )
 }
 
@@ -83,7 +86,8 @@ fun SavedPostsScreen(
 internal fun SavedPostsScreen(
     modifier: Modifier,
     viewModel: SavedPostsViewModel,
-    onNavigateToPost: (ISavedPost) -> Unit
+    onNavigateToPost: (ISavedPost) -> Unit,
+    onSidebarToggle: () -> Unit
 ) {
     val savedPosts by viewModel.savedPosts.collectAsState()
 
@@ -98,7 +102,8 @@ internal fun SavedPostsScreen(
             onRequestReload = viewModel::onRequestReload,
             onNavigateToPost = onNavigateToPost,
             onChangeStatus = viewModel::changeSavedPostStatus,
-            onRemoveFromSavedPosts = viewModel::removeFromSavedPosts
+            onRemoveFromSavedPosts = viewModel::removeFromSavedPosts,
+            onSidebarToggle = onSidebarToggle
         )
     }
 }
@@ -110,7 +115,8 @@ internal fun SavedPostsScreen(
     onRequestReload: () -> Unit,
     onNavigateToPost: (ISavedPost) -> Unit,
     onChangeStatus: (ISavedPost, SavedPostStatus) -> Deferred<MetisModificationFailure?>,
-    onRemoveFromSavedPosts: (ISavedPost) -> Deferred<MetisModificationFailure?>
+    onRemoveFromSavedPosts: (ISavedPost) -> Deferred<MetisModificationFailure?>,
+    onSidebarToggle: () -> Unit
 ) {
     var status by remember { mutableStateOf(SavedPostStatus.IN_PROGRESS) }
 
@@ -119,7 +125,7 @@ internal fun SavedPostsScreen(
         topBar = {
             ArtemisTopAppBar(
                 title = { Text(stringResource(R.string.saved_posts_screen_title)) },
-                navigationIcon = { NavigationBackButton() }
+                navigationIcon = { AdaptiveNavigationIcon(onSidebarToggle) }
             )
         }
     ) { paddingValues ->
