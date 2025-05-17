@@ -27,7 +27,8 @@
     <string name="course_wide_context_random">Random</string>
     <string name="course_wide_context_announcement">Announcement</string>
 
-    <string name="metis_post_list_empty">No posts found.</string>
+    <string name="metis_post_list_empty">No messages found</string>
+    <string name="metis_post_list_empty_secondary">Write the first message to kickstart this conversation.</string>
     <string name="metis_post_list_loading">Loading posts…</string>
     <string name="metis_post_list_error">Something went wrong while loading your posts.</string>
     <string name="metis_post_list_error_try_again">Try again</string>

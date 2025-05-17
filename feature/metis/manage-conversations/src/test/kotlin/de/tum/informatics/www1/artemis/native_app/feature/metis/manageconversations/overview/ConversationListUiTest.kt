@@ -48,7 +48,8 @@ class ConversationListUiTest : BaseComposeTest() {
                 onToggleMarkAsFavourite = { _, _ -> },
                 onToggleHidden = { _, _ -> },
                 onToggleMuted = { _, _ -> },
-                trailingContent = {}
+                trailingContent = {},
+                selectedConversationId = null
             )
         }
     }

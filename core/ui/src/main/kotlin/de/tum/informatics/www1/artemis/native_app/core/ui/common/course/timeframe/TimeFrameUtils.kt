@@ -1,9 +1,10 @@
-package de.tum.informatics.www1.artemis.native_app.feature.courseview
+package de.tum.informatics.www1.artemis.native_app.core.ui.common.course.timeframe
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
+import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import java.text.SimpleDateFormat
@@ -20,7 +21,14 @@ object TimeFrameUtils {
     ): List<TimeFrame<T>> {
         if (isEmpty()) return emptyList()
 
-        val (past, notPast) = partition { item ->
+        val (futureRelease, notFutureRelease) = partition { item ->
+            val start = getStartDate(item)
+            val end = getEndDate(item)
+            val release = getStartDate(item)
+            start == null && end == null && release != null && release > now
+        }
+
+        val (past, notPast) = notFutureRelease.partition { item ->
             val start = getStartDate(item)
             val end = getEndDate(item)
             (start == null || start < now) && (end != null && end < now)
@@ -29,7 +37,8 @@ object TimeFrameUtils {
         val (noDate, dated) = notPast.partition { item ->
             val start = getStartDate(item)
             val end = getEndDate(item)
-            (start == null || start < now) && end == null
+            val release = getStartDate(item)
+            (start == null || start < now) && end == null && (release == null || release <= now)
         }
 
         val (dueSoon, currentOrFuture) = dated.partition { item ->
@@ -49,14 +58,14 @@ object TimeFrameUtils {
         val pastSorted = past.sortedByStartDate()
         val currentSorted = current.sortedByStartDate()
         val dueSoonSorted = dueSoon.sortedByStartDate()
-        val futureSorted = future.sortedByStartDate()
+        val futureSorted = (futureRelease + future).sortedByStartDate()
         val noDateSorted = noDate.sortedByStartDate()
 
         val grouped = buildList {
-            if (pastSorted.isNotEmpty()) add(TimeFrame.Past(pastSorted))
-            if (currentSorted.isNotEmpty()) add(TimeFrame.Current(currentSorted))
-            if (dueSoonSorted.isNotEmpty()) add(TimeFrame.DueSoon(dueSoonSorted))
             if (futureSorted.isNotEmpty()) add(TimeFrame.Future(futureSorted))
+            if (dueSoonSorted.isNotEmpty()) add(TimeFrame.DueSoon(dueSoonSorted))
+            if (currentSorted.isNotEmpty()) add(TimeFrame.Current(currentSorted))
+            if (pastSorted.isNotEmpty()) add(TimeFrame.Past(pastSorted))
             if (noDateSorted.isNotEmpty()) add(TimeFrame.NoDate(noDateSorted))
         }
 
@@ -71,7 +80,7 @@ object TimeFrameUtils {
         for (item in items) {
             val end = when (item) {
                 is Exercise -> item.dueDate
-                is Lecture -> item.endDate
+                is Lecture -> item.endDate ?: item.startDate
                 else -> null
             }
             if (end == null) {
@@ -79,6 +88,8 @@ object TimeFrameUtils {
             } else {
                 val cal = Calendar.getInstance()
                 cal.timeInMillis = end.toEpochMilliseconds()
+                cal.firstDayOfWeek = Calendar.MONDAY
+                cal.minimalDaysInFirstWeek = 4
 
                 val indicator = WeekIndicator.Dated(
                     cal.get(Calendar.YEAR),
@@ -91,7 +102,7 @@ object TimeFrameUtils {
 
         return map
             .map { (indicator, bucketItems) -> WeeklyGroup(indicator, bucketItems) }
-            .sortedBy { (indicator, _) ->
+            .sortedByDescending { (indicator, _) ->
                 toSortInstant(indicator)
             }
     }
@@ -124,7 +135,7 @@ object TimeFrameUtils {
     fun WeekIndicator.toRangeString(): String {
         return when (this) {
             is WeekIndicator.Dated -> {
-                val start = computeWeekStartDate(this) ?: return stringResource(R.string.course_ui_sub_title_no_date)
+                val start = computeWeekStartDate(this) ?: return stringResource(R.string.course_sub_title_no_date)
                 val cal = Calendar.getInstance().apply { time = start }
                 cal.add(Calendar.DAY_OF_YEAR, 6)
                 val end = cal.time
@@ -134,7 +145,7 @@ object TimeFrameUtils {
             }
 
             WeekIndicator.NoDate -> {
-                stringResource(R.string.course_ui_sub_title_no_date)
+                stringResource(R.string.course_sub_title_no_date)
             }
         }
     }

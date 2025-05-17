@@ -1,6 +1,6 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared
+package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.util
 
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
@@ -97,6 +97,21 @@ class ForwardedMessagesHandler(
     }
 
     /**
+     * A wrapper method to resolve forwarded messages for a given ChatListItem of type PostItem.SavedItem.
+     * This method is used for the SavedPosts only, the logic is handled in [resolveForwardedMessages]
+     *
+     * @param chatListItem The ChatListItem of type PostItem.SavedItem for which the source posts should be matched.
+     */
+    fun resolveForwardedMessagesForSavedPost(
+        chatListItem: ChatListItem.PostItem.SavedItem,
+    ): ChatListItem.PostItem.SavedItem {
+        if (chatListItem !is ChatListItem.PostItem.ForwardedMessage) return chatListItem
+
+        return resolveForwardedMessages(chatListItem as ChatListItem.PostItem.SavedItem.SavedPostWithForwardedMessage) as ChatListItem.PostItem.SavedItem.SavedPostWithForwardedMessage
+    }
+
+
+    /**
      * Matches the previously loaded source posts to a given destination post by comparing the
      * destination id of the source post with the id of the destination post.
      */
@@ -159,6 +174,10 @@ class ForwardedMessagesHandler(
             )
 
             is ChatListItem.PostItem.ThreadItem.ContextItem.ContextPostWithForwardedMessage -> copy(
+                forwardedPosts = newForwardedPosts
+            )
+
+            is ChatListItem.PostItem.SavedItem.SavedPostWithForwardedMessage -> copy(
                 forwardedPosts = newForwardedPosts
             )
 

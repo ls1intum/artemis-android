@@ -1,7 +1,9 @@
 package de.tum.informatics.www1.artemis.native_app.feature.faq.ui.overview
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,6 +22,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -32,7 +36,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.NoSearchResults
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseSearchConfiguration
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.selectionBorder
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
@@ -43,42 +47,16 @@ import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.Configur
 import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.ConfiguredFaqCategoryChipRow
 import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.FaqCategoryChipConfig
 import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.FaqCategoryChipFlowRow
-import org.koin.androidx.compose.koinViewModel
 
 internal fun testTagForFaq(faq: Faq) = "TEST_TAG_FAQ_${faq.id}"
 
 @Composable
 fun FaqOverviewUi(
     modifier: Modifier = Modifier,
-    collapsingContentState: CollapsingContentState,
-    scaffold: @Composable (searchConfiguration: CourseSearchConfiguration, content: @Composable () -> Unit) -> Unit,
-    onNavigateToFaq: (faqId: Long) -> Unit
-) {
-    val viewModel = koinViewModel<FaqOverviewViewModel>()
-    val query by viewModel.searchQuery.collectAsState()
-
-    val searchConfiguration = CourseSearchConfiguration.Search(
-        query = query,
-        hint = stringResource(R.string.faq_search_hint),
-        onUpdateQuery = viewModel::updateQuery
-    )
-
-    scaffold(searchConfiguration) {
-        FaqOverviewUi(
-            modifier = modifier,
-            viewModel = viewModel,
-            collapsingContentState = collapsingContentState,
-            onNavigateToFaq = onNavigateToFaq
-        )
-    }
-}
-
-@Composable
-fun FaqOverviewUi(
-    modifier: Modifier = Modifier,
     viewModel: FaqOverviewViewModel,
     collapsingContentState: CollapsingContentState,
-    onNavigateToFaq: (faqId: Long) -> Unit
+    onNavigateToFaq: (faqId: Long) -> Unit,
+    selectedFaqId: Long?
 ) {
     val faqs by viewModel.displayedFaqs.collectAsState()
     val query by viewModel.searchQuery.collectAsState()
@@ -102,7 +80,8 @@ fun FaqOverviewUi(
         query = query,
         collapsingContentState = collapsingContentState,
         onReloadRequest = viewModel::onRequestReload,
-        onNavigateToFaq = onNavigateToFaq
+        onNavigateToFaq = onNavigateToFaq,
+        selectedFaqId = selectedFaqId
     )
 }
 
@@ -115,7 +94,8 @@ fun FaqOverviewUi(
     query: String,
     collapsingContentState: CollapsingContentState,
     onReloadRequest: () -> Unit,
-    onNavigateToFaq: (faqId: Long) -> Unit
+    onNavigateToFaq: (faqId: Long) -> Unit,
+    selectedFaqId: Long? = null,
 ) {
     BasicDataStateUi(
         modifier = modifier
@@ -136,7 +116,8 @@ fun FaqOverviewUi(
                 filterChips = filterChips,
                 collapsingContentState = collapsingContentState,
                 query = query,
-                onNavigateToFaq = onNavigateToFaq
+                onNavigateToFaq = onNavigateToFaq,
+                selectedFaqId = selectedFaqId
             )
         }
     }
@@ -150,7 +131,8 @@ private fun FaqOverviewBody(
     filterChips: List<ConfiguredFaqCategoryChip>,
     collapsingContentState: CollapsingContentState,
     query: String,
-    onNavigateToFaq: (Long) -> Unit
+    onNavigateToFaq: (Long) -> Unit,
+    selectedFaqId: Long? = null,
 ) {
     val isSearching = query.isNotBlank()
 
@@ -161,8 +143,7 @@ private fun FaqOverviewBody(
             ConfiguredFaqCategoryChipRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-                ,
+                    .padding(vertical = 8.dp),
                 configuredFaqCategories = filterChips
             )
         }
@@ -190,7 +171,8 @@ private fun FaqOverviewBody(
                 .fillMaxSize()
                 .nestedScroll(collapsingContentState.nestedScrollConnection),
             faqs = faqs,
-            onNavigateToFaq = onNavigateToFaq
+            onNavigateToFaq = onNavigateToFaq,
+            selectedFaqId = selectedFaqId
         )
     }
 }
@@ -200,7 +182,8 @@ private fun FaqOverviewBody(
 private fun FaqList(
     modifier: Modifier = Modifier,
     faqs: List<Faq>,
-    onNavigateToFaq: (Long) -> Unit
+    onNavigateToFaq: (Long) -> Unit,
+    selectedFaqId: Long? = null,
 ) {
     LazyColumn(
         modifier = modifier,
@@ -217,7 +200,8 @@ private fun FaqList(
                     .animateItem()
                     .testTag(testTagForFaq(faq)),
                 faq = faq,
-                onClick = { onNavigateToFaq(faq.id) }
+                onClick = { onNavigateToFaq(faq.id) },
+                selected = selectedFaqId == faq.id
             )
         }
     }
@@ -227,45 +211,69 @@ private fun FaqList(
 private fun FaqPreviewItem(
     modifier: Modifier = Modifier,
     faq: Faq,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    selected: Boolean,
 ) {
     Card(
         modifier = modifier
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick)
+            .selectionBorder(selected),
     ) {
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-        ) {
-            Text(
-                text = faq.questionTitle,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            FaqCategoryChipFlowRow(categories = faq.categories)
-
-            MarkdownText(
-                modifier = Modifier.padding(vertical = 8.dp),
-                markdown = faq.questionAnswer,
-                style = MaterialTheme.typography.bodyLarge,
-                maxLines = 8,
-                onClick = onClick
-            )
-
-            TextButton(
-                modifier = Modifier.align(Alignment.End),
-                onClick = onClick,
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
             ) {
-                Text(stringResource(R.string.faq_overview_read_more))
+                Text(
+                    text = faq.questionTitle,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                FaqCategoryChipFlowRow(categories = faq.categories)
+
+                MarkdownText(
+                    modifier = Modifier.padding(vertical = 8.dp).padding(bottom = 0.dp),
+                    markdown = faq.questionAnswer + "\n\n\n.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    maxLines = 8,
+                    onClick = onClick
+                )
+            }
+
+            // Overlay fading background with read more button, inspired by the iOS app
+            val color = MaterialTheme.colorScheme.surfaceContainer
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                color.copy(alpha = 0.8f),
+                                color,
+                                color,
+                            )
+                        )
+                    )
+            ) {
+                TextButton(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .padding(16.dp)
+                        .padding(top = 8.dp),
+                    onClick = onClick
+                ) {
+                    Text(stringResource(R.string.faq_overview_read_more))
+                }
             }
         }
     }
 }
-
 
 @Preview(showBackground = true, widthDp = 380, heightDp = 700)
 @Composable
@@ -295,6 +303,3 @@ private fun FaqListPreview() {
         )
     }
 }
-
-
-

@@ -11,6 +11,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.ui.SavedPostsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
@@ -101,7 +102,6 @@ class SavedPostsScreenUiTest : BaseComposeTest() {
     }
 
     private fun setupUi(
-        forStatus: SavedPostStatus = SavedPostStatus.IN_PROGRESS,
         savedPost: ISavedPost = createSavedPost(),
         onChangeStatus: (ISavedPost, SavedPostStatus) -> Deferred<MetisModificationFailure?> = { _, _ -> CompletableDeferred() },
         onRemoveFromSavedPosts: (ISavedPost) -> Deferred<MetisModificationFailure?> = { CompletableDeferred() }
@@ -109,8 +109,7 @@ class SavedPostsScreenUiTest : BaseComposeTest() {
         composeTestRule.setContent {
             SavedPostsScreen(
                 modifier = Modifier,
-                status = forStatus,
-                savedPostsDataState = DataState.Success(listOf(savedPost)),
+                savedPostsChatListItemsDataState = DataState.Success(listOf(ChatListItem.PostItem.SavedItem.SavedPost(savedPost))),
                 onRequestReload = {},
                 onNavigateToPost = { _ -> },
                 onChangeStatus = onChangeStatus,

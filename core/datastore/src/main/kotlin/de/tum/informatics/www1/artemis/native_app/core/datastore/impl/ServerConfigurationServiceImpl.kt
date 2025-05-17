@@ -56,8 +56,15 @@ internal class ServerConfigurationServiceImpl(
     }
 
     override suspend fun updateServerUrl(serverUrl: String) {
+        // The server URL must end with a trailing slash
+        val actualUrl = if (!serverUrl.endsWith("/")) {
+            "$serverUrl/"
+        } else {
+            serverUrl
+        }
+
         context.serverCommunicationPreferences.edit { data ->
-            data[SERVER_URL_KEY] = serverUrl
+            data[SERVER_URL_KEY] = actualUrl
         }
     }
 }

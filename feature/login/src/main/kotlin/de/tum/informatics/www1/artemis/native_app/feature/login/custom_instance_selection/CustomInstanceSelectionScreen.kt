@@ -76,13 +76,7 @@ internal class CustomInstanceSelectionViewModel(
 
     fun setCustomInstance(onDone: () -> Unit) {
         viewModelScope.launch {
-            val actualUrl = if (!serverUrl.value.endsWith("/")) {
-                serverUrl.value + "/"
-            } else {
-                serverUrl.value
-            }
-
-            serverConfigurationService.updateServerUrl(actualUrl)
+            serverConfigurationService.updateServerUrl(serverUrl.value)
             onDone()
         }
     }

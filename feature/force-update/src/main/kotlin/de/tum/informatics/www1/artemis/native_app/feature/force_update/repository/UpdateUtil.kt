@@ -31,11 +31,6 @@ object UpdateUtil {
                 val serverMinVersion = data.minVersion
                 val updateRequired = serverMinVersion > currentVersion
 
-                Log.d("TAG", "Current version: $currentVersion")
-                Log.d("TAG", "Min required version: ${data.minVersion}")
-                Log.d("TAG", "Recommended version: ${data.recommendedVersion}")
-                Log.d("TAG", "Available features: ${data.features.joinToString()}")
-
                 UpdateRepository.UpdateResult(
                     updateAvailable = updateRequired,
                     forceUpdate = updateRequired,

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -41,7 +42,6 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,6 +54,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.selectionBorder
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
@@ -107,10 +108,9 @@ internal fun ConversationList(
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
     onToggleHidden: (conversationId: Long, hidden: Boolean) -> Unit,
     onToggleMuted: (conversationId: Long, muted: Boolean) -> Unit,
-    trailingContent: LazyListScope.() -> Unit
+    trailingContent: LazyListScope.() -> Unit,
+    selectedConversationId: Long?
 ) {
-    val isSavedPostsExpanded by viewModel.isSavedPostsExpanded.collectAsState()
-
     ConversationList(
         modifier = modifier,
         toggleFavoritesExpanded = viewModel::toggleFavoritesExpanded,
@@ -128,7 +128,8 @@ internal fun ConversationList(
         onToggleMarkAsFavourite = onToggleMarkAsFavourite,
         onToggleHidden = onToggleHidden,
         onToggleMuted = onToggleMuted,
-        trailingContent = trailingContent
+        trailingContent = trailingContent,
+        selectedConversationId = selectedConversationId
     )
 }
 
@@ -150,7 +151,8 @@ internal fun ConversationList(
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
     onToggleHidden: (conversationId: Long, hidden: Boolean) -> Unit,
     onToggleMuted: (conversationId: Long, muted: Boolean) -> Unit,
-    trailingContent: LazyListScope.() -> Unit
+    trailingContent: LazyListScope.() -> Unit,
+    selectedConversationId: Long?
 ) {
     val listWithHeader: LazyListScope.(ConversationSectionState, String, String, Int, Int?, Long, () -> Unit, @Composable () -> Unit) -> Unit =
         { items, key, suffix, textRes, count, unreadCount, onClick, icon ->
@@ -171,7 +173,8 @@ internal fun ConversationList(
                 onNavigateToConversation = onNavigateToConversation,
                 onToggleMarkAsFavourite = onToggleMarkAsFavourite,
                 onToggleHidden = onToggleHidden,
-                onToggleMuted = onToggleMuted
+                onToggleMuted = onToggleMuted,
+                selectedConversationId = selectedConversationId
             )
         }
 
@@ -285,10 +288,23 @@ internal fun ConversationList(
     }
 }
 
+private fun LazyListScope.savedPostsHeaderRow(
+    onClick: () -> Unit
+) {
+    conversationSectionHeader(
+        key = SECTION_SAVED_POSTS_KEY,
+        text = R.string.conversation_overview_section_saved_posts,
+        isExpanded = null,
+        unreadCount = 0,
+        onClick = onClick,
+        icon = { Icon(imageVector = Icons.Default.Bookmark, contentDescription = null) }
+    )
+}
+
 private fun LazyListScope.conversationSectionHeader(
     key: String,
     @StringRes text: Int,
-    isExpanded: Boolean,
+    isExpanded: Boolean?,
     conversationCount: Int? = null,
     unreadCount: Long,
     onClick: () -> Unit,
@@ -301,6 +317,7 @@ private fun LazyListScope.conversationSectionHeader(
                 .animateItem()
                 .testTag(key)
                 .clickable { onClick() }
+                .heightIn(min = 64.dp)      // If isExpanded is null, then the height is smaller because of the missing icon button
                 .padding(vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
@@ -317,6 +334,10 @@ private fun LazyListScope.conversationSectionHeader(
                     text = if (conversationCount != null) stringResource(id = text, conversationCount) else stringResource(id = text),
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                 )
+            }
+
+            if (isExpanded == null) {
+                return@item
             }
 
             if (!isExpanded) UnreadMessages(unreadMessagesCount = unreadCount)
@@ -343,7 +364,8 @@ private fun LazyListScope.conversationList(
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
     onToggleHidden: (conversationId: Long, hidden: Boolean) -> Unit,
-    onToggleMuted: (conversationId: Long, muted: Boolean) -> Unit
+    onToggleMuted: (conversationId: Long, muted: Boolean) -> Unit,
+    selectedConversationId: Long?
 ) {
     if (!section.isExpanded) return
 
@@ -372,7 +394,8 @@ private fun LazyListScope.conversationList(
                         )
                     },
                     onToggleHidden = { onToggleHidden(conversation.id, !conversation.isHidden) },
-                    onToggleMuted = { onToggleMuted(conversation.id, !conversation.isMuted) }
+                    onToggleMuted = { onToggleMuted(conversation.id, !conversation.isMuted) },
+                    selected = conversation.id == selectedConversationId
                 )
             }
         }
@@ -387,11 +410,12 @@ private fun ListItemBase(
     grayedOut: Boolean,
     onClick: () -> Unit,
     leadingContent: @Composable () -> Unit,
-    otherTrailingContent: @Composable () -> Unit
+    otherTrailingContent: @Composable () -> Unit,
+    selected: Boolean = false
 ) {
     val headlineColor = LocalContentColor.current.copy(alpha = if (grayedOut) 0.6f else 1f)
 
-    Box(modifier = modifier) {
+    Box(modifier = modifier.selectionBorder(selected)) {
         ListItem(
             modifier = Modifier
                 .clickable(onClick = onClick)
@@ -431,7 +455,8 @@ private fun ConversationListItem(
     onNavigateToConversation: () -> Unit,
     onToggleMarkAsFavourite: () -> Unit,
     onToggleHidden: () -> Unit,
-    onToggleMuted: () -> Unit
+    onToggleMuted: () -> Unit,
+    selected: Boolean = false
 ) {
     val unreadMessagesCount = conversation.unreadMessagesCount ?: 0
     val displayName = getConversationTitle(conversation, showPrefix)
@@ -457,7 +482,8 @@ private fun ConversationListItem(
                 onToggleHidden = onToggleHidden,
                 onToggleMuted = onToggleMuted
             )
-        }
+        },
+        selected = selected
     )
 }
 
@@ -642,34 +668,4 @@ private fun String.removeSectionPrefix(): String {
         }
     }
     return result.trim()
-}
-
-private fun LazyListScope.savedPostsHeaderRow(
-    onClick: () -> Unit
-) {
-    item(key = SECTION_SAVED_POSTS_KEY) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag(SECTION_SAVED_POSTS_KEY)
-                .clickable { onClick() }
-                .padding(vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.weight(1f)
-            ) {
-                Icon(imageVector = Icons.Default.Bookmark, contentDescription = null)
-                Text(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 8.dp),
-                    text = stringResource(R.string.conversation_overview_section_saved_posts),
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                )
-            }
-        }
-    }
 }

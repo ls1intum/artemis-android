@@ -12,7 +12,7 @@ val saved_posts_module = module {
     viewModel { params ->
         SavedPostsViewModel(
             params[0],
-            params[1],
+            get(),
             get(),
             get(),
             get(),
