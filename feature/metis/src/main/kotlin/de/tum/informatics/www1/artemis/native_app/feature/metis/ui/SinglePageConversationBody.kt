@@ -6,6 +6,8 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -14,9 +16,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import de.tum.informatics.www1.artemis.native_app.core.ui.ArtemisAppLayout
+import de.tum.informatics.www1.artemis.native_app.core.ui.R.drawable.sidebar_icon
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseSearchConfiguration
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.core.ui.getArtemisAppLayout
@@ -120,12 +125,13 @@ fun SinglePageConversationBody(
                 configuration = BrowseChannelConfiguration(configuration)
             },
             canCreateChannel = canCreateChannel,
-            selectedConversationId =  (configuration as? OpenedConversation)?.conversationId,
+            selectedConversationId = (configuration as? OpenedConversation)?.conversationId,
         )
     }
 
     var showCodeOfConduct by remember { mutableStateOf(true) }
-    val conversationOverviewViewModel: ConversationOverviewViewModel = koinViewModel { parametersOf(courseId) }
+    val conversationOverviewViewModel: ConversationOverviewViewModel =
+        koinViewModel { parametersOf(courseId) }
     val query by conversationOverviewViewModel.query.collectAsState()
     val searchConfiguration = CourseSearchConfiguration.Search(
         hint = stringResource(id = R.string.conversation_overview_search_hint),
@@ -160,7 +166,8 @@ fun SinglePageConversationBody(
                     if (doAlwaysShowScaffold) {
                         DefaultTransition.navigateNeutral
                     } else {
-                        val navigationLevelDiff = targetState.navigationLevel - initialState.navigationLevel
+                        val navigationLevelDiff =
+                            targetState.navigationLevel - initialState.navigationLevel
                         when {
                             navigationLevelDiff > 0 -> DefaultTransition.navigateForward
                             navigationLevelDiff < 0 -> DefaultTransition.navigateBack
@@ -232,14 +239,18 @@ private fun ConversationContent(
                     conversationOverview(modifier)
                 }
             } else {
-                    Box(
-                        modifier = modifier,
-                        contentAlignment = androidx.compose.ui.Alignment.Center
-                    ) {
-                        Text(
-                            text = "Please select a conversation from the list."
-                        )
-                    }
+                IconButton(onClick = onSidebarToggle) {
+                    Icon(
+                        painter = painterResource(id = sidebar_icon),
+                        contentDescription = null
+                    )
+                }
+                Box(
+                    modifier = modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "Please select a conversation from the list.")
+                }
             }
         }
 

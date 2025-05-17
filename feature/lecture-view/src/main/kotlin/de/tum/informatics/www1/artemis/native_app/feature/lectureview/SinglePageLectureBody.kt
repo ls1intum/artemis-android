@@ -2,8 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.lectureview
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -14,9 +12,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.ui.ArtemisAppLayout
+import de.tum.informatics.www1.artemis.native_app.core.ui.R.drawable.sidebar_icon
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.timeframe.TimeFrame
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.tablet.LayoutAwareTwoColumnLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
@@ -77,8 +77,8 @@ fun SinglePageLectureBody(
                         NothingOpened -> {
                             IconButton(onClick = onSidebarToggle) {
                                 Icon(
-                                    imageVector = Icons.Filled.Menu,
-                                    contentDescription = "Open sidebar"
+                                    painter = painterResource(id = sidebar_icon),
+                                    contentDescription = null
                                 )
                             }
                             Box(
