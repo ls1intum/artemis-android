@@ -8,6 +8,10 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.dto.
 import de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.dto.RegisterPasskeyResponseDTO
 import io.ktor.client.request.setBody
 import io.ktor.http.appendPathSegments
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
 
 // Inspired by the webapp implementation: https://github.com/ls1intum/Artemis/blob/develop/src/main/webapp/app/core/user/settings/passkey-settings/webauthn-api.service.ts
 // Note: The requests do not use the Api.kt, because they do not include the /api prefix.
@@ -24,12 +28,20 @@ class WebauthnApiService(
         }
     }
 
+    @Serializable
+    data class RegisterRequest(val publicKey: PublicKey)
+
+    @Serializable
+    data class PublicKey(val credential: JsonObject, val label: String)
+
     suspend fun registerPasskey(registerPasskeyJson: String): NetworkResponse<RegisterPasskeyResponseDTO> {
+        val credential = Json.parseToJsonElement(registerPasskeyJson).jsonObject
+        val publicKey = PublicKey(credential = credential, label = "Passkey Android")
         return postRequest {
             url {
                 appendPathSegments("webauthn", "register")
             }
-            setBody(registerPasskeyJson)
+            setBody(RegisterRequest(publicKey))
         }
     }
 

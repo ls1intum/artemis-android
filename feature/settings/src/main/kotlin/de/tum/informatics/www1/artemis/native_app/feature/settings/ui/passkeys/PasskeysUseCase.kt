@@ -20,11 +20,11 @@ import kotlinx.coroutines.flow.StateFlow
 private const val TAG = "PasskeysUseCase"
 
 class PasskeysUseCase(
-    private val networkStatusProvider: NetworkStatusProvider,
-    private val passkeySettingsService: PasskeySettingsService,
+    networkStatusProvider: NetworkStatusProvider,
+    passkeySettingsService: PasskeySettingsService,
     private val webauthnApiService: WebauthnApiService,
     private val credentialManagerWrapper: CredentialManagerWrapper,
-    private val requestReload: Flow<Unit>,
+    requestReload: Flow<Unit>,
     private val coroutineScope: CoroutineScope,
 ) {
 
@@ -36,38 +36,53 @@ class PasskeysUseCase(
     }
         .stateIn(coroutineScope, SharingStarted.Lazily)
 
+    sealed class CreationResult {
+        data object Success : CreationResult()
+        data object Cancelled : CreationResult()
+        data class Failure(val error: String) : CreationResult()
+    }
 
-    fun createPasskey(): Deferred<Boolean> {
+    fun createPasskey(): Deferred<CreationResult> {
         return coroutineScope.async {
             val options = webauthnApiService.getRegistrationOptions()
             if (options is NetworkResponse.Failure) {
-                return@async false
+                return@async CreationResult.Failure(options.exception.localizedMessage ?: "Unknown error")
             }
 
             val requestJson = (options as NetworkResponse.Response).data
             val result = credentialManagerWrapper.createPasskey(requestJson)
 
             if (result is CredentialManagerWrapper.PasskeyCreationResult.Failure) {
-                return@async false
+                return@async CreationResult.Failure(result.error.localizedMessage ?: "Unknown error")
             }
 
-            if (result is CredentialManagerWrapper.PasskeyCreationResult.Canceled) {
-                return@async true       // We do not consider this a failure
+            if (result is CredentialManagerWrapper.PasskeyCreationResult.Cancelled) {
+                return@async CreationResult.Cancelled
             }
 
             val publicKeyCredentialResponseJson =
                 (result as CredentialManagerWrapper.PasskeyCreationResult.Success).registrationResponseJson
 
-            Log.d(TAG, "Passkey creation result: $publicKeyCredentialResponseJson")
-            Log.d(TAG, "Register passkey with server...")
-
             val registrationServerResponse = webauthnApiService.registerPasskey(
                 publicKeyCredentialResponseJson,
             )
 
-            Log.d(TAG, "Server response: $registrationServerResponse")
+            when (registrationServerResponse) {
+                is NetworkResponse.Failure -> {
+                    Log.e(TAG, "Failed to register passkey: ${registrationServerResponse.exception}")
+                    CreationResult.Failure(registrationServerResponse.exception.localizedMessage ?: "Unknown error")
+                }
+                is NetworkResponse.Response -> {
+                    val success = registrationServerResponse.data.success
+                    if (!success) {
+                        Log.e(TAG, "Failed to register passkey: Registration call result was not successful")
+                        return@async CreationResult.Failure("Registration call result was not successful")
+                    }
 
-            registrationServerResponse.bind { it.successful }.or(false)
+                    Log.d(TAG, "Successfully registered passkey")
+                    CreationResult.Success
+                }
+            }
         }
     }
 }

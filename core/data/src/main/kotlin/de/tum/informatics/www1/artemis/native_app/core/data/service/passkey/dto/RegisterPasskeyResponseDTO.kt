@@ -4,5 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class RegisterPasskeyResponseDTO(
-    val successful: Boolean,
+    val success: Boolean,
 )

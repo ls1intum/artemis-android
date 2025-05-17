@@ -31,7 +31,7 @@ class CredentialManagerWrapper(
 
     sealed class PasskeyCreationResult {
         data class Success(val registrationResponseJson: String) : PasskeyCreationResult()
-        data object Canceled : PasskeyCreationResult()
+        data object Cancelled : PasskeyCreationResult()
         data class Failure(val error: Exception) : PasskeyCreationResult()
     }
 
@@ -82,8 +82,11 @@ class CredentialManagerWrapper(
             is CreatePublicKeyCredentialDomException -> {
                 // Handle the passkey DOM errors thrown according to the
                 // WebAuthn spec.
-                // TODO: we always get a "Passkey creation failed with DOM error: androidx.credentials.TYPE_SECURITY_ERROR: The incoming request cannot be validated"
-                //      With GPM: "RP ID cannot be validated"
+                if (error.message?.contains("Cancelled by user") == true) {
+                    Log.d(TAG, "Passkey creation cancelled by user")
+                    return PasskeyCreationResult.Cancelled
+                }
+
                 Log.e(TAG, "Passkey creation failed with DOM error: ${error.domError.type}: ${error.message}")
                 return PasskeyCreationResult.Failure(error)
             }
@@ -91,7 +94,7 @@ class CredentialManagerWrapper(
                 // The user intentionally canceled the operation and chose not
                 // to register the credential.
                 Log.d(TAG, "Passkey creation canceled by user")
-                return PasskeyCreationResult.Canceled
+                return PasskeyCreationResult.Cancelled
             }
             is CreateCredentialInterruptedException -> {
                 // Retry-able error. Consider retrying the call.
