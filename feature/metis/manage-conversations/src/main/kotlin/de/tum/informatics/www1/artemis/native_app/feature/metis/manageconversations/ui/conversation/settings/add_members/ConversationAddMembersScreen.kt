@@ -21,7 +21,8 @@ fun ConversationAddMembersScreen(
     modifier: Modifier,
     courseId: Long,
     conversationId: Long,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onSidebarToggle: () -> Unit
 ) {
     val viewModel = koinViewModel<ConversationAddMembersViewModel> { parametersOf(courseId, conversationId) }
     val canAdd by viewModel.canAdd.collectAsState()
@@ -47,6 +48,7 @@ fun ConversationAddMembersScreen(
         },
         onNavigateBack = onNavigateBack,
         displayFailedDialog = displayFailedDialog,
-        onDismissFailedDialog = { displayFailedDialog = false }
+        onDismissFailedDialog = { displayFailedDialog = false },
+        onSidebarToggle = onSidebarToggle,
     )
 }

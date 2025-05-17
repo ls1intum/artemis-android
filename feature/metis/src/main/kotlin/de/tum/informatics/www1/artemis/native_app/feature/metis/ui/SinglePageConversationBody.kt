@@ -284,7 +284,8 @@ private fun ConversationContent(
                             OpenedThread(StandalonePostId.ServerSideId(savedPost.referencePostId))
                         )
                     )
-                }
+                },
+                onSidebarToggle = onSidebarToggle
             )
         }
 
@@ -300,7 +301,8 @@ private fun ConversationContent(
                         )
                     )
                 },
-                onNavigateBack = onNavigateBack
+                onNavigateBack = onNavigateBack,
+                onSidebarToggle = onSidebarToggle
             )
         }
 
@@ -318,7 +320,8 @@ private fun ConversationContent(
                             )
                         )
                     },
-                    onNavigateBack = onNavigateBack
+                    onNavigateBack = onNavigateBack,
+                    onSidebarToggle = onSidebarToggle
                 )
             }
         }
@@ -336,7 +339,8 @@ private fun ConversationContent(
                         )
                     )
                 },
-                onNavigateBack = onNavigateBack
+                onNavigateBack = onNavigateBack,
+                onSidebarToggle = onSidebarToggle
             )
         }
 
@@ -346,14 +350,16 @@ private fun ConversationContent(
                     modifier = modifier,
                     courseId = courseId,
                     conversationId = configuration.conversationId,
-                    onNavigateBack = onNavigateBack
+                    onNavigateBack = onNavigateBack,
+                    onSidebarToggle = onSidebarToggle
                 )
 
                 configuration.isAddingMembers -> ConversationAddMembersScreen(
                     modifier = modifier,
                     courseId = courseId,
                     conversationId = configuration.conversationId,
-                    onNavigateBack = onNavigateBack
+                    onNavigateBack = onNavigateBack,
+                    onSidebarToggle = onSidebarToggle
                 )
 
                 else -> ConversationSettingsScreen(
@@ -361,6 +367,7 @@ private fun ConversationContent(
                     courseId = courseId,
                     conversationId = configuration.conversationId,
                     onNavigateBack = onNavigateBack,
+                    onSidebarToggle = onSidebarToggle,
                     onRequestAddMembers = {
                         onUpdateConfig(
                             configuration.copy(
@@ -392,7 +399,8 @@ private fun ConversationContent(
                     OpenedConversation(configuration.prevConfiguration ?: NothingOpened, it, null)
                 )
             },
-            onNavigateBack = { onUpdateConfig(NothingOpened) }
+            onNavigateBack = { onUpdateConfig(NothingOpened) },
+            onSidebarToggle = onSidebarToggle
         )
 
         is IgnoreCustomBackHandling -> {
