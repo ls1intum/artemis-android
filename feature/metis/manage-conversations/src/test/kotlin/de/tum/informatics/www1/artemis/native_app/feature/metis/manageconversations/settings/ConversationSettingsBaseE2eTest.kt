@@ -123,7 +123,8 @@ internal abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest()
                 onRequestAddMembers = { },
                 onRequestViewAllMembers = { },
                 onConversationLeft = onConversationLeft,
-                onChannelDeleted = onChannelDeleted
+                onChannelDeleted = onChannelDeleted,
+                onSidebarToggle = { },
             )
         }
 
