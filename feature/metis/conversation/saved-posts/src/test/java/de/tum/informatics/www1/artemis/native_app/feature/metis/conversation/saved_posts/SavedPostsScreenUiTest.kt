@@ -113,7 +113,8 @@ class SavedPostsScreenUiTest : BaseComposeTest() {
                 onRequestReload = {},
                 onNavigateToPost = { _ -> },
                 onChangeStatus = onChangeStatus,
-                onRemoveFromSavedPosts = onRemoveFromSavedPosts
+                onRemoveFromSavedPosts = onRemoveFromSavedPosts,
+                onSidebarToggle = {}
             )
         }
     }
