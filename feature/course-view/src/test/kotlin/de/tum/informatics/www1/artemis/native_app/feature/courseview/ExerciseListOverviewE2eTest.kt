@@ -3,6 +3,8 @@ package de.tum.informatics.www1.artemis.native_app.feature.courseview
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.hasAnyDescendant
+import androidx.compose.ui.test.hasContentDescriptionExactly
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -95,7 +97,8 @@ class ExerciseListOverviewE2eTest : BaseCourseTest() {
 
         // Expand all sections by clicking their headers
         composeTestRule
-            .onAllNodes(hasTestTagEndingWith("-header"))
+            .onAllNodes(hasTestTagEndingWith("-header")
+                .and(hasAnyDescendant(hasContentDescriptionExactly("Expand list"))))
             .fetchSemanticsNodes()
             .forEach { header ->
                 composeTestRule
