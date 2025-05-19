@@ -40,7 +40,6 @@ import com.attafitamim.krop.core.crop.rememberImageCropper
 import de.tum.informatics.www1.artemis.native_app.core.common.ActiveModuleFeature
 import de.tum.informatics.www1.artemis.native_app.core.common.FeatureAvailability
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.dto.PasskeyDTO
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisSection
@@ -50,6 +49,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.pagePadding
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureData
 import de.tum.informatics.www1.artemis.native_app.feature.settings.R
+import de.tum.informatics.www1.artemis.native_app.feature.settings.service.dto.PasskeyDTO
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.LogoutButtonEntry
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.PreferenceEntry
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.SettingsViewModel

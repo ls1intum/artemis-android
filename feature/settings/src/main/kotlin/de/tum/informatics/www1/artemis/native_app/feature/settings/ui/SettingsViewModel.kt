@@ -8,19 +8,18 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.performAutoReloadingNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
-import de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.CredentialManagerWrapper
-import de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.PasskeySettingsService
-import de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.WebauthnApiService
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.isLoggedIn
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.core.ui.ReloadableViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.login.service.impl.AndroidCredentialServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
 import de.tum.informatics.www1.artemis.native_app.feature.push.unsubscribeFromNotifications
 import de.tum.informatics.www1.artemis.native_app.feature.settings.service.ChangeProfilePictureService
+import de.tum.informatics.www1.artemis.native_app.feature.settings.service.PasskeySettingsService
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.passkeys.PasskeysUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.util.ProfilePictureBitmapUtil
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.util.ProfilePictureUploadResult
@@ -46,8 +45,7 @@ class SettingsViewModel(
     private val pushNotificationConfigurationService: PushNotificationConfigurationService,
     private val changeProfilePictureService: ChangeProfilePictureService,
     passkeySettingsService: PasskeySettingsService,
-    private val webauthnApiService: WebauthnApiService,
-    private val credentialManagerWrapper: CredentialManagerWrapper,
+    androidCredentialServiceImpl: AndroidCredentialServiceImpl,
     appVersionProvider: AppVersionProvider,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : ReloadableViewModel() {
@@ -63,8 +61,7 @@ class SettingsViewModel(
     val passkeysUseCase = PasskeysUseCase(
         networkStatusProvider = networkStatusProvider,
         passkeySettingsService = passkeySettingsService,
-        webauthnApiService = webauthnApiService,
-        credentialManagerWrapper = credentialManagerWrapper,
+        androidCredentialServiceImpl = androidCredentialServiceImpl,
         requestReload = requestReload,
         coroutineScope = viewModelScope + coroutineContext,
     )

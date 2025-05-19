@@ -4,12 +4,12 @@ import android.util.Log
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.performAutoReloadingNetworkCall
-import de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.CredentialManagerWrapper
-import de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.PasskeySettingsService
-import de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.WebauthnApiService
-import de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.dto.PasskeyDTO
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.feature.login.service.AndroidCredentialService
+import de.tum.informatics.www1.artemis.native_app.feature.login.service.impl.AndroidCredentialServiceImpl
+import de.tum.informatics.www1.artemis.native_app.feature.settings.service.PasskeySettingsService
+import de.tum.informatics.www1.artemis.native_app.feature.settings.service.dto.PasskeyDTO
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -21,9 +21,8 @@ private const val TAG = "PasskeysUseCase"
 
 class PasskeysUseCase(
     networkStatusProvider: NetworkStatusProvider,
-    passkeySettingsService: PasskeySettingsService,
-    private val webauthnApiService: WebauthnApiService,
-    private val credentialManagerWrapper: CredentialManagerWrapper,
+    private val passkeySettingsService: PasskeySettingsService,
+    private val androidCredentialServiceImpl: AndroidCredentialServiceImpl,
     requestReload: Flow<Unit>,
     private val coroutineScope: CoroutineScope,
 ) {
@@ -44,26 +43,26 @@ class PasskeysUseCase(
 
     fun createPasskey(): Deferred<CreationResult> {
         return coroutineScope.async {
-            val options = webauthnApiService.getRegistrationOptions()
+            val options = passkeySettingsService.getRegistrationOptions()
             if (options is NetworkResponse.Failure) {
                 return@async CreationResult.Failure(options.exception.localizedMessage ?: "Unknown error")
             }
 
             val requestJson = (options as NetworkResponse.Response).data
-            val result = credentialManagerWrapper.createPasskey(requestJson)
+            val result = androidCredentialServiceImpl.createPasskey(requestJson)
 
-            if (result is CredentialManagerWrapper.PasskeyCreationResult.Failure) {
+            if (result is AndroidCredentialService.PasskeyCreationResult.Failure) {
                 return@async CreationResult.Failure(result.error.localizedMessage ?: "Unknown error")
             }
 
-            if (result is CredentialManagerWrapper.PasskeyCreationResult.Cancelled) {
+            if (result is AndroidCredentialService.PasskeyCreationResult.Cancelled) {
                 return@async CreationResult.Cancelled
             }
 
             val publicKeyCredentialResponseJson =
-                (result as CredentialManagerWrapper.PasskeyCreationResult.Success).registrationResponseJson
+                (result as AndroidCredentialService.PasskeyCreationResult.Success).registrationResponseJson
 
-            val registrationServerResponse = webauthnApiService.registerPasskey(
+            val registrationServerResponse = passkeySettingsService.registerPasskey(
                 publicKeyCredentialResponseJson,
             )
 

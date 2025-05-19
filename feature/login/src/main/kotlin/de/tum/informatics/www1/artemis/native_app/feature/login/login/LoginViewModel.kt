@@ -5,15 +5,15 @@ import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
-import de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.CredentialManagerWrapper
-import de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.WebauthnApiService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerProfileInfoService
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.feature.login.BaseAccountViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.login.service.AndroidCredentialService
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.network.LoginService
+import de.tum.informatics.www1.artemis.native_app.feature.login.service.network.PasskeyLoginService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -36,8 +36,8 @@ class LoginViewModel(
     serverConfigurationService: ServerConfigurationService,
     serverProfileInfoService: ServerProfileInfoService,
     networkStatusProvider: NetworkStatusProvider,
-    private val webauthnApiService: WebauthnApiService,
-    private val credentialManagerWrapper: CredentialManagerWrapper,
+    private val passkeyLoginService: PasskeyLoginService,
+    private val androidCredentialService: AndroidCredentialService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : BaseAccountViewModel(serverConfigurationService, networkStatusProvider, serverProfileInfoService) {
 
@@ -129,28 +129,53 @@ class LoginViewModel(
 
     fun loginWithPasskey(): Deferred<Boolean> {
         return viewModelScope.async(coroutineContext) {
+            val serverUrl = serverUrl.value
+            val hasToRegisterForPushNotifications =
+                pushNotificationConfigurationService.getArePushNotificationsEnabledFlow(serverUrl)
+                    .first()
+
+
             // Get challenge from server
-            val challengeResponse = webauthnApiService.getAuthenticationOptions()
+            val challengeResponse = passkeyLoginService.getAuthenticationOptions()
             if (challengeResponse is NetworkResponse.Failure) {
                 return@async false
             }
 
             // Use passkey to create response
-            val requestJson = (challengeResponse as NetworkResponse.Response).data
-            val result = credentialManagerWrapper.signIn(requestJson)
-            if (result is CredentialManagerWrapper.SignInResult.NoCredential) {
+            val authenticationOptionsResponse = (challengeResponse as NetworkResponse.Response).data
+            val result = androidCredentialService.signIn(authenticationOptionsResponse)
+            if (result is AndroidCredentialService.SignInResult.NoCredential) {
                 return@async true       // We do not consider this a failure
             }
-            if (result is CredentialManagerWrapper.SignInResult.Failure) {
+            if (result is AndroidCredentialService.SignInResult.Failure) {
                 return@async false
             }
 
             // Send response to server
-            val publicKeyCredentialResponseJson =
-                (result as CredentialManagerWrapper.SignInResult.WithPasskey).responseJson
-            val serverResponse = webauthnApiService.loginWithPasskey(publicKeyCredentialResponseJson)
+            val publicKeyCredentialResponseJson = (result as AndroidCredentialService.SignInResult.WithPasskey).responseJson
+            passkeyLoginService
+                .loginWithPasskey(publicKeyCredentialResponseJson)
+                .then {
+                    if (hasToRegisterForPushNotifications) {
+                        val wasSuccess =
+                            pushNotificationConfigurationService.updateArePushNotificationEnabled(
+                                true,
+                                serverUrl,
+                                it.idToken
+                            )
 
-            serverResponse.bind { it.authenticated }.or(false)
+                        if (wasSuccess) NetworkResponse.Response(it) else NetworkResponse.Failure(
+                            RuntimeException("Could not register for push notifications")
+                        )
+                    } else NetworkResponse.Response(it)
+                }
+                .onSuccess {
+                    accountService.storeAccessToken(it.idToken, rememberMe = true)
+                }
+                .bind { true }
+                .or(false)
+
+//            serverResponse.bind { it.authenticated }.or(false)
         }
     }
 }

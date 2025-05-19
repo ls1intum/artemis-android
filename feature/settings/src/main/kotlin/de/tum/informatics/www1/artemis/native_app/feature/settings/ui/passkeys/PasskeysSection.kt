@@ -14,12 +14,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.data.service.passkey.dto.PasskeyDTO
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisSection
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.DateFormats
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.format
 import de.tum.informatics.www1.artemis.native_app.feature.settings.R
+import de.tum.informatics.www1.artemis.native_app.feature.settings.service.dto.PasskeyDTO
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.ButtonEntry
 
 @Composable

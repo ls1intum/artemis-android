@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.core.data.service.passkey
+package de.tum.informatics.www1.artemis.native_app.feature.login.service.impl
 
 import android.content.Context
 import android.util.Log
@@ -18,27 +18,21 @@ import androidx.credentials.exceptions.CreateCredentialUnknownException
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.credentials.exceptions.NoCredentialException
 import androidx.credentials.exceptions.publickeycredential.CreatePublicKeyCredentialDomException
+import de.tum.informatics.www1.artemis.native_app.feature.login.service.AndroidCredentialService
 
-// From: https://developer.android.com/identity/sign-in/credential-manager#kotlin
 
-private const val TAG = "LocalPasskeyManager"
+private const val TAG = "AndroidCredentialServiceImpl"
 
-class CredentialManagerWrapper(
+class AndroidCredentialServiceImpl(
     private val context: Context,
-) {
+): AndroidCredentialService {
 
     private val credentialManager = CredentialManager.create(context)
 
-    sealed class PasskeyCreationResult {
-        data class Success(val registrationResponseJson: String) : PasskeyCreationResult()
-        data object Cancelled : PasskeyCreationResult()
-        data class Failure(val error: Exception) : PasskeyCreationResult()
-    }
-
-    suspend fun createPasskey(
+    override suspend fun createPasskey(
         requestJson: String,
-        preferImmediatelyAvailableCredentials: Boolean = false,
-    ): PasskeyCreationResult {
+        preferImmediatelyAvailableCredentials: Boolean
+    ): AndroidCredentialService.PasskeyCreationResult {
         val createPublicKeyCredentialRequest = CreatePublicKeyCredentialRequest(
             // Contains the request in JSON format. Uses the standard WebAuthn
             // web JSON spec.
@@ -59,7 +53,7 @@ class CredentialManagerWrapper(
                 context = context,
                 request = createPublicKeyCredentialRequest,
             )
-            return PasskeyCreationResult.Success((result as CreatePublicKeyCredentialResponse).registrationResponseJson)
+            return AndroidCredentialService.PasskeyCreationResult.Success((result as CreatePublicKeyCredentialResponse).registrationResponseJson)
         } catch (e : CreateCredentialException){
             return handlePassKeyCreationFailure(
                 error = e,
@@ -76,25 +70,28 @@ class CredentialManagerWrapper(
 
     private suspend fun handlePassKeyCreationFailure(
         error: CreateCredentialException,
-        onRetry: suspend () -> PasskeyCreationResult,
-    ): PasskeyCreationResult {
+        onRetry: suspend () -> AndroidCredentialService.PasskeyCreationResult,
+    ): AndroidCredentialService.PasskeyCreationResult {
         when (error) {
             is CreatePublicKeyCredentialDomException -> {
                 // Handle the passkey DOM errors thrown according to the
                 // WebAuthn spec.
                 if (error.message?.contains("Cancelled by user") == true) {
                     Log.d(TAG, "Passkey creation cancelled by user")
-                    return PasskeyCreationResult.Cancelled
+                    return AndroidCredentialService.PasskeyCreationResult.Cancelled
                 }
 
-                Log.e(TAG, "Passkey creation failed with DOM error: ${error.domError.type}: ${error.message}")
-                return PasskeyCreationResult.Failure(error)
+                Log.e(
+                    TAG,
+                    "Passkey creation failed with DOM error: ${error.domError.type}: ${error.message}"
+                )
+                return AndroidCredentialService.PasskeyCreationResult.Failure(error)
             }
             is CreateCredentialCancellationException -> {
                 // The user intentionally canceled the operation and chose not
                 // to register the credential.
                 Log.d(TAG, "Passkey creation canceled by user")
-                return PasskeyCreationResult.Cancelled
+                return AndroidCredentialService.PasskeyCreationResult.Cancelled
             }
             is CreateCredentialInterruptedException -> {
                 // Retry-able error. Consider retrying the call.
@@ -105,12 +102,15 @@ class CredentialManagerWrapper(
                 // Your app is missing the provider configuration dependency.
                 // Most likely, you're missing the
                 // "credentials-play-services-auth" module.
-                Log.e(TAG, "Passkey creation failed with provider configuration error: ${error.message}")
-                return PasskeyCreationResult.Failure(error)
+                Log.e(
+                    TAG,
+                    "Passkey creation failed with provider configuration error: ${error.message}"
+                )
+                return AndroidCredentialService.PasskeyCreationResult.Failure(error)
             }
             is CreateCredentialUnknownException -> {
                 Log.e(TAG, "Passkey creation failed with unknown error: ${error.message}")
-                return PasskeyCreationResult.Failure(error)
+                return AndroidCredentialService.PasskeyCreationResult.Failure(error)
             }
             is CreateCredentialCustomException -> {
                 // You have encountered an error from a 3rd-party SDK. If you
@@ -120,22 +120,16 @@ class CredentialManagerWrapper(
                 // that SDK to match with e.type. Otherwise, drop or log the
                 // exception.
                 Log.e(TAG, "Passkey creation failed with custom error: ${error.message}")
-                return PasskeyCreationResult.Failure(error)
+                return AndroidCredentialService.PasskeyCreationResult.Failure(error)
             }
             else -> {
                 Log.w(TAG, "Unexpected exception type ${error::class.java.name}")
-                return PasskeyCreationResult.Failure(error)
+                return AndroidCredentialService.PasskeyCreationResult.Failure(error)
             }
         }
     }
 
-    sealed class SignInResult {
-        data class WithPasskey(val responseJson: String) : SignInResult()
-        data object NoCredential : SignInResult()
-        data class Failure(val error: Exception) : SignInResult()
-    }
-
-    suspend fun signIn(requestJson: String): SignInResult {
+    override suspend fun signIn(requestJson: String): AndroidCredentialService.SignInResult {
         val getPublicKeyCredentialOption = GetPublicKeyCredentialOption(
             requestJson = requestJson
         )
@@ -152,12 +146,11 @@ class CredentialManagerWrapper(
             )
             handleSignIn(result)
         } catch (e: GetCredentialException) {
-            // TODO: "Sign-in failed with error: androidx.credentials.TYPE_GET_PUBLIC_KEY_CREDENTIAL_DOM_EXCEPTION/androidx.credentials.TYPE_DATA_ERROR: [50152] RP ID cannot be validated."
             handleSignInFailure(e)
         }
     }
 
-    private fun handleSignIn(result: GetCredentialResponse): SignInResult {
+    private fun handleSignIn(result: GetCredentialResponse): AndroidCredentialService.SignInResult {
         // Handle the successfully returned credential.
         val credential = result.credential
 
@@ -165,28 +158,28 @@ class CredentialManagerWrapper(
             is PublicKeyCredential -> {
                 val responseJson = credential.authenticationResponseJson
                 // Return the response JSON for server validation and authentication.
-                SignInResult.WithPasskey(responseJson)
+                AndroidCredentialService.SignInResult.WithPasskey(responseJson)
             }
             else -> {
                 // Catch any unrecognized credential type here.
                 Log.e(TAG, "Unexpected type of credential")
-                SignInResult.Failure(Exception("Unexpected credential type"))
+                AndroidCredentialService.SignInResult.Failure(Exception("Unexpected credential type"))
             }
         }
     }
 
-    private fun handleSignInFailure(exception: GetCredentialException): SignInResult {
+    private fun handleSignInFailure(exception: GetCredentialException): AndroidCredentialService.SignInResult {
         return when (exception) {
             is NoCredentialException -> {
                 // No credentials were found. The user may not have registered
                 // any credentials yet.
                 Log.d(TAG, "No credentials found")
-                SignInResult.NoCredential
+                AndroidCredentialService.SignInResult.NoCredential
             }
             else -> {
                 // Handle other errors.
                 Log.e(TAG, "Sign-in failed with error: ${exception.type}: ${exception.message}")
-                SignInResult.Failure(exception)
+                AndroidCredentialService.SignInResult.Failure(exception)
             }
         }
     }

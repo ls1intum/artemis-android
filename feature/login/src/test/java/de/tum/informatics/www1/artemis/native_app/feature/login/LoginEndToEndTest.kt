@@ -9,10 +9,10 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.platform.app.InstrumentationRegistry
-import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
-import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
 import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
+import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
+import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.LoginUi
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.LoginViewModel
@@ -66,6 +66,8 @@ class LoginEndToEndTest : KoinTest {
             serverConfigurationService = get(),
             serverProfileInfoService = get(),
             networkStatusProvider = get(),
+            passkeyLoginService = get(),
+            androidCredentialService = get(),
             coroutineContext = UnconfinedTestDispatcher()
         )
 

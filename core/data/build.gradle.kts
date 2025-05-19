@@ -33,10 +33,6 @@ dependencies {
     testImplementation(libs.mockk.android)
     testImplementation(libs.mockk.agent)
 
-    // Supporting passkeys
-    implementation(libs.androidx.credentials)
-    implementation(libs.androidx.credentials.play.services.auth)
-
     testImplementation(project(":core:common-test"))
     testImplementation(project(":core:data-test"))
     testImplementation(libs.kotlinx.coroutines.test)
