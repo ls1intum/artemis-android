@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -31,6 +30,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.server_config.Saml2
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.feature.login.R
+import de.tum.informatics.www1.artemis.native_app.feature.login.login.login_options.PasskeyBasedLogin
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.login_options.PasswordBasedLogin
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.login_options.Saml2BasedLogin
 import io.ktor.http.URLBuilder
@@ -95,9 +95,20 @@ internal fun LoginUi(
     val saml2Config: Saml2Config? = fromProfileInfo(profileInfo, null) { it.saml2 }
 
     var loginJob: Deferred<Boolean>? by remember { mutableStateOf(null) }
+    var loginWithPasskeyJob: Deferred<Boolean>? by remember { mutableStateOf(null) }
 
     AwaitDeferredCompletion(job = loginJob) { wasSuccessful ->
         loginJob = null
+
+        if (wasSuccessful) {
+            onLoggedIn()
+        } else {
+            displayLoginFailedDialog = true
+        }
+    }
+
+    AwaitDeferredCompletion(job = loginWithPasskeyJob) { wasSuccessful ->
+        loginWithPasskeyJob = null
 
         if (wasSuccessful) {
             onLoggedIn()
@@ -114,9 +125,6 @@ internal fun LoginUi(
         saml2Config = saml2Config,
         isPasswordLoginDisabled = isPasswordLoginDisabled,
         isPasskeyLoginEnabled = isPasskeyLoginEnabled,
-        onPasskeyLogin = {
-            loginJob = viewModel.loginWithPasskey()
-        },
         updateUserAcceptedTerms = viewModel::updateUserAcceptedTerms,
         passwordBasedLoginContent = { loginModifier ->
             PasswordBasedLogin(
@@ -128,7 +136,7 @@ internal fun LoginUi(
                 updateUsername = viewModel::updateUsername,
                 updatePassword = viewModel::updatePassword,
                 updateRememberMe = viewModel::updateRememberMe,
-                isLoginButtonEnabled = isLoginButtonEnabled,
+                isLoginButtonEnabled = isLoginButtonEnabled && loginWithPasskeyJob == null,
                 onClickLogin = {
                     loginJob = viewModel.login()
                 },
@@ -151,6 +159,16 @@ internal fun LoginUi(
                 rememberMe = rememberMe,
                 updateRememberMe = viewModel::updateRememberMe,
                 onLoginButtonClicked = { onClickSaml2Login(rememberMe) }
+            )
+        },
+        passkeyLoginContent = { loginModifier ->
+            PasskeyBasedLogin(
+                modifier = loginModifier,
+                onPasskeyLogin = {
+                    loginWithPasskeyJob = viewModel.loginWithPasskey()
+                },
+                isLoggingIn = loginWithPasskeyJob != null,
+                isEnabled = loginJob == null
             )
         }
     )
@@ -187,9 +205,9 @@ internal fun LoginUi(
     isPasswordLoginDisabled: Boolean,
     isPasskeyLoginEnabled: Boolean = false,
     updateUserAcceptedTerms: (Boolean) -> Unit,
-    onPasskeyLogin: () -> Unit = {},
     passwordBasedLoginContent: @Composable (modifier: Modifier) -> Unit,
-    saml2BasedLoginContent: @Composable (modifier: Modifier, config: Saml2Config) -> Unit
+    saml2BasedLoginContent: @Composable (modifier: Modifier, config: Saml2Config) -> Unit,
+    passkeyLoginContent: @Composable (modifier: Modifier) -> Unit = {},
 ) {
     Column(modifier = modifier.then(Modifier.verticalScroll(rememberScrollState()))) {
         Text(
@@ -213,12 +231,7 @@ internal fun LoginUi(
 
         if (isPasskeyLoginEnabled) {
             Divider()
-            Button(
-                modifier = loginModifier,
-                onClick = onPasskeyLogin,
-            ) {
-                Text(text = stringResource(id = R.string.login_passkey_button_label))
-            }
+            passkeyLoginContent(loginModifier)
         }
 
         if (!isPasswordLoginDisabled && saml2Config != null) {
