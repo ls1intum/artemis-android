@@ -2,7 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.login.service.network
 
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
-import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.ServerSelectedBasedServiceImpl
@@ -20,7 +19,7 @@ class PasskeyLoginServiceImpl(
     artemisContextProvider: ArtemisContextProvider,
 ) : ServerSelectedBasedServiceImpl(ktorProvider, artemisContextProvider), PasskeyLoginService {
 
-    private var setCookie: String = ""
+    private var challengeCookie: String = ""
 
     override suspend fun getAuthenticationOptions(): NetworkResponse<String> {
         val artemisContext = artemisContext()
@@ -33,7 +32,7 @@ class PasskeyLoginServiceImpl(
             }
 
             if (response.status.isSuccess()) {
-                setCookie = response.setCookie().firstOrNull { it.name == "jwt" }?.value ?: ""
+                challengeCookie = response.headers["set-cookie"] ?: ""
                 response.bodyAsText()
             } else {
                 throw Exception("Failed to get authentication options: ${response.status}")
@@ -50,7 +49,7 @@ class PasskeyLoginServiceImpl(
                     appendPathSegments("login", "webauthn")
                 }
 
-                cookieAuth(setCookie)
+                headers["cookie"] = challengeCookie
                 setBody(publicKeyCredentialJson)
             }
 
