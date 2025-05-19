@@ -1,10 +1,16 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.common.course.timeframe
 
+import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.timeframe.TimeFrameUtils.defaultExpandedTimeFrames
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.experimental.categories.Category
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+@Category(UnitTest::class)
+@RunWith(RobolectricTestRunner::class)
 class TimeFrameUtilsTest {
 
     @Test
