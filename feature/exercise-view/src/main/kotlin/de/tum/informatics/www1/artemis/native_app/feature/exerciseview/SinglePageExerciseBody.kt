@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.exerciseview
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
@@ -24,7 +25,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.Col
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.getArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.isTabletPortrait
-import androidx.activity.compose.BackHandler
 
 @Composable
 fun SinglePageExerciseBody(
