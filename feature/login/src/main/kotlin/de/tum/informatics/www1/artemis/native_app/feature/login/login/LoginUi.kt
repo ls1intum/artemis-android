@@ -24,6 +24,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.common.ActiveModuleFeature
+import de.tum.informatics.www1.artemis.native_app.core.common.FeatureAvailability
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.server_config.ProfileInfo
 import de.tum.informatics.www1.artemis.native_app.core.model.server_config.Saml2Config
@@ -90,8 +92,6 @@ internal fun LoginUi(
 
     val isPasswordLoginDisabled = fromProfileInfo(profileInfo, false) { it.isPasswordLoginDisabled }
 
-    val isPasskeyLoginEnabled = fromProfileInfo(profileInfo, false) { it.isPasskeyLoginEnabled }
-
     val saml2Config: Saml2Config? = fromProfileInfo(profileInfo, null) { it.saml2 }
 
     var loginJob: Deferred<Boolean>? by remember { mutableStateOf(null) }
@@ -124,7 +124,7 @@ internal fun LoginUi(
         hasUserAcceptedTerms = hasUserAcceptedTerms,
         saml2Config = saml2Config,
         isPasswordLoginDisabled = isPasswordLoginDisabled,
-        isPasskeyLoginEnabled = isPasskeyLoginEnabled,
+        isPasskeyLoginEnabled = FeatureAvailability.isEnabled(ActiveModuleFeature.Passkey),
         updateUserAcceptedTerms = viewModel::updateUserAcceptedTerms,
         passwordBasedLoginContent = { loginModifier ->
             PasswordBasedLogin(
