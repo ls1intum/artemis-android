@@ -21,7 +21,7 @@ val settingsModule = module {
             pushNotificationConfigurationService = get(),
             changeProfilePictureService = get(),
             passkeySettingsService = get(),
-            androidCredentialServiceImpl = get(),
+            androidCredentialService = get(),
             appVersionProvider = get()
         )
     }

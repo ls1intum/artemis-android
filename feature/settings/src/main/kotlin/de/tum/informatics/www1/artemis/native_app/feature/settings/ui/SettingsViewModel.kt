@@ -14,7 +14,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.isLoggedIn
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.core.ui.ReloadableViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.login.service.impl.AndroidCredentialServiceImpl
+import de.tum.informatics.www1.artemis.native_app.feature.login.service.AndroidCredentialService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
 import de.tum.informatics.www1.artemis.native_app.feature.push.unsubscribeFromNotifications
@@ -45,7 +45,7 @@ class SettingsViewModel(
     private val pushNotificationConfigurationService: PushNotificationConfigurationService,
     private val changeProfilePictureService: ChangeProfilePictureService,
     passkeySettingsService: PasskeySettingsService,
-    androidCredentialServiceImpl: AndroidCredentialServiceImpl,
+    androidCredentialService: AndroidCredentialService,
     appVersionProvider: AppVersionProvider,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : ReloadableViewModel() {
@@ -61,7 +61,7 @@ class SettingsViewModel(
     val passkeysUseCase = PasskeysUseCase(
         networkStatusProvider = networkStatusProvider,
         passkeySettingsService = passkeySettingsService,
-        androidCredentialServiceImpl = androidCredentialServiceImpl,
+        androidCredentialService = androidCredentialService,
         requestReload = requestReload,
         coroutineScope = viewModelScope + coroutineContext,
     )

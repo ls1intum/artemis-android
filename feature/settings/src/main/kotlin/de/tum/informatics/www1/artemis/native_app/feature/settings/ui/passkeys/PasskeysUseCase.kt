@@ -7,7 +7,6 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_cont
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.AndroidCredentialService
-import de.tum.informatics.www1.artemis.native_app.feature.login.service.impl.AndroidCredentialServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.settings.service.PasskeySettingsService
 import de.tum.informatics.www1.artemis.native_app.feature.settings.service.dto.PasskeyDTO
 import kotlinx.coroutines.CoroutineScope
@@ -22,7 +21,7 @@ private const val TAG = "PasskeysUseCase"
 class PasskeysUseCase(
     networkStatusProvider: NetworkStatusProvider,
     private val passkeySettingsService: PasskeySettingsService,
-    private val androidCredentialServiceImpl: AndroidCredentialServiceImpl,
+    private val androidCredentialService: AndroidCredentialService,
     requestReload: Flow<Unit>,
     private val coroutineScope: CoroutineScope,
 ) {
@@ -49,7 +48,7 @@ class PasskeysUseCase(
             }
 
             val requestJson = (options as NetworkResponse.Response).data
-            val result = androidCredentialServiceImpl.createPasskey(requestJson)
+            val result = androidCredentialService.createPasskey(requestJson)
 
             if (result is AndroidCredentialService.PasskeyCreationResult.Failure) {
                 return@async CreationResult.Failure(result.error.localizedMessage ?: "Unknown error")
