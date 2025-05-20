@@ -125,7 +125,11 @@ fun SinglePageConversationBody(
                 configuration = BrowseChannelConfiguration(configuration)
             },
             canCreateChannel = canCreateChannel,
-            selectedConversationId = (configuration as? OpenedConversation)?.conversationId,
+            selectedConversationId = when (val config = configuration) {
+                is OpenedConversation -> config.conversationId
+                is ConversationSettings -> config.conversationId
+                else -> null
+            }
         )
     }
 
