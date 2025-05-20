@@ -12,6 +12,8 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
+const val MIN_NUMBER_OF_VISIBLE_ITEMS = 7
+
 object TimeFrameUtils {
     fun <T> List<T>.groupByTimeFrame(
         now: Instant = Clock.System.now(),
@@ -148,6 +150,46 @@ object TimeFrameUtils {
                 stringResource(R.string.course_sub_title_no_date)
             }
         }
+    }
+
+    fun defaultExpandedTimeFrames(
+        timeFrameGroup: List<TimeFrame<*>>,
+    ): Set<Class<out TimeFrame<*>>> {
+        // Prio 1: Due soon + current
+        val expanded = mutableSetOf<Class<out TimeFrame<*>>>().apply {
+            add(TimeFrame.DueSoon::class.java)
+            add(TimeFrame.Current::class.java)
+        }
+
+        val dueSoonCount = timeFrameGroup.filterIsInstance<TimeFrame.DueSoon<*>>().sumOf { it.items.size }
+        val currentCount = timeFrameGroup.filterIsInstance<TimeFrame.Current<*>>().sumOf { it.items.size }
+        var expandedItemCount = dueSoonCount + currentCount
+
+        if (expandedItemCount >= MIN_NUMBER_OF_VISIBLE_ITEMS) {
+            return expanded
+        }
+
+        // Prio 2: Future
+        expanded.add(TimeFrame.Future::class.java)
+        val futureCount = timeFrameGroup.filterIsInstance<TimeFrame.Future<*>>().sumOf { it.items.size }
+        expandedItemCount += futureCount
+
+        if (expandedItemCount >= MIN_NUMBER_OF_VISIBLE_ITEMS) {
+            return expanded
+        }
+
+        // Prio 3: Past
+        expanded.add(TimeFrame.Past::class.java)
+        val pastCount = timeFrameGroup.filterIsInstance<TimeFrame.Future<*>>().sumOf { it.items.size }
+        expandedItemCount += pastCount
+
+        if (expandedItemCount >= MIN_NUMBER_OF_VISIBLE_ITEMS) {
+            return expanded
+        }
+
+        // Prio 4: NoDate
+        expanded.add(TimeFrame.NoDate::class.java)
+        return expanded
     }
 
 }

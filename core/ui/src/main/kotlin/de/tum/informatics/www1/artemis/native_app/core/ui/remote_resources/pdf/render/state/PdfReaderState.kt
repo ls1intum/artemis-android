@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.state
+package de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.render.state
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -6,8 +6,8 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
-import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.PdfFile
-import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.PdfRendering
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.PdfFile
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.render.PdfRendering
 import java.io.File
 
 abstract class PdfReaderState(
