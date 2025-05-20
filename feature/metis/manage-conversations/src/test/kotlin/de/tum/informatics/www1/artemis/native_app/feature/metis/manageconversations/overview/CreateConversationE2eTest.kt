@@ -150,7 +150,8 @@ class CreateConversationE2eTest : ConversationBaseTest() {
                     }
                 },
                 onNavigateBack = {},
-                onDismissFailedDialog = {}
+                onDismissFailedDialog = {},
+                onSidebarToggle = {}
             )
         }
 

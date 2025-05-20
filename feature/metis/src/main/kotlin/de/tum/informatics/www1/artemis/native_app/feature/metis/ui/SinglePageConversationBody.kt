@@ -1,23 +1,31 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.ui
 
-import android.content.res.Configuration
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import de.tum.informatics.www1.artemis.native_app.core.ui.ArtemisAppLayout
+import de.tum.informatics.www1.artemis.native_app.core.ui.R.drawable.sidebar_icon
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseSearchConfiguration
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.core.ui.getArtemisAppLayout
+import de.tum.informatics.www1.artemis.native_app.core.ui.isTabletPortrait
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.DefaultTransition
 import de.tum.informatics.www1.artemis.native_app.feature.metis.AddChannelConfiguration
 import de.tum.informatics.www1.artemis.native_app.feature.metis.BrowseChannelConfiguration
@@ -45,27 +53,28 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.S
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.user_conversation.NavigateToUserConversationUi
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.tablet.LayoutAwareTwoColumnLayout
+import de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.ui.CodeOfConductFacadeUi
 
 private const val TAG = "SinglePageConversationBody"
 
 @Composable
-internal fun SinglePageConversationBody(
+fun SinglePageConversationBody(
     modifier: Modifier,
-    viewModel: SinglePageConversationBodyViewModel,
     courseId: Long,
     scaffold: @Composable (searchConfiguration: CourseSearchConfiguration, content: @Composable () -> Unit) -> Unit,
     collapsingContentState: CollapsingContentState,
     initialConfiguration: ConversationConfiguration = NothingOpened,
     title: String
 ) {
+    val viewModel: SinglePageConversationBodyViewModel = koinViewModel { parametersOf(courseId) }
     var configuration: ConversationConfiguration by rememberSaveable(initialConfiguration) {
         mutableStateOf(initialConfiguration)
     }
 
     val layout = getArtemisAppLayout()
-    val isPortrait = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
-    val isTabletPortrait = layout == ArtemisAppLayout.Tablet && isPortrait
     var isSidebarOpen by rememberSaveable { mutableStateOf(true) }
+    val isTabletPortrait = layout.isTabletPortrait
 
     val openConversation = { conversationId: Long ->
         if (isTabletPortrait) isSidebarOpen = false
@@ -116,11 +125,17 @@ internal fun SinglePageConversationBody(
                 configuration = BrowseChannelConfiguration(configuration)
             },
             canCreateChannel = canCreateChannel,
-            selectedConversationId =  (configuration as? OpenedConversation)?.conversationId,
+            selectedConversationId = when (val config = configuration) {
+                is OpenedConversation -> config.conversationId
+                is ConversationSettings -> config.conversationId
+                else -> null
+            }
         )
     }
 
-    val conversationOverviewViewModel: ConversationOverviewViewModel = koinViewModel { parametersOf(courseId) }
+    var showCodeOfConduct by remember { mutableStateOf(true) }
+    val conversationOverviewViewModel: ConversationOverviewViewModel =
+        koinViewModel { parametersOf(courseId) }
     val query by conversationOverviewViewModel.query.collectAsState()
     val searchConfiguration = CourseSearchConfiguration.Search(
         hint = stringResource(id = R.string.conversation_overview_search_hint),
@@ -137,213 +152,275 @@ internal fun SinglePageConversationBody(
         }
     }
 
-    scaffoldWrapper {
-        AnimatedContent(
-            targetState = configuration,
-            transitionSpec = {
-                if (doAlwaysShowScaffold) {
-                    DefaultTransition.navigateNeutral
-                } else {
-                    val navigationLevelDiff = targetState.navigationLevel - initialState.navigationLevel
-                    when {
-                        navigationLevelDiff > 0 -> DefaultTransition.navigateForward
-                        navigationLevelDiff < 0 -> DefaultTransition.navigateBack
-                        else -> DefaultTransition.navigateNeutral
-                    }
-                        .using(
-                            SizeTransform(clip = false)
-                        )
+    if (showCodeOfConduct) {
+        scaffold(CourseSearchConfiguration.DisabledSearch) {
+            CodeOfConductFacadeUi(
+                modifier = modifier,
+                courseId = courseId,
+                onCodeOfConductAccepted = {
+                    showCodeOfConduct = false
                 }
-            },
-            contentKey = {
-                it.javaClass        // Eg no recomposition of the ChatList when navigating to a thread.
-            },
-            label = "SinglePageConversationBody screen transition animation"
-        ) { config ->
-            // This handles the state of the search bar in tablet mode depending on the view
-            // We only want to show it in the conversation overview
-            if (doAlwaysShowScaffold) {
-                if (config is NothingOpened) {
-                    collapsingContentState.resetCollapsingContent()
-                } else {
-                    collapsingContentState.collapseContent()
-                }
-            }
-
-            when (config) {
-                NothingOpened -> {
+            )
+        }
+    } else {
+        scaffoldWrapper {
+            AnimatedContent(
+                targetState = configuration,
+                transitionSpec = {
                     if (doAlwaysShowScaffold) {
-                        ConversationScreen(
-                            modifier = modifier,
-                            conversationId = -1L, // "fake" conversation
-                            threadPostId = null,
-                            courseId = courseId,
-                            onOpenThread = { },
-                            onCloseThread = { },
-                            onCloseConversation = { },
-                            onNavigateToSettings = { },
-                            conversationsOverview = { mod -> conversationOverview(mod) },
-                            showEmptyMessage = true,
-                            isSidebarOpen = isSidebarOpen,
-                            onSidebarToggle = { isSidebarOpen = !isSidebarOpen },
-                            title = title
-                        )
+                        DefaultTransition.navigateNeutral
                     } else {
-                        scaffold(searchConfiguration) {
-                            conversationOverview(modifier)
+                        val navigationLevelDiff =
+                            targetState.navigationLevel - initialState.navigationLevel
+                        when {
+                            navigationLevelDiff > 0 -> DefaultTransition.navigateForward
+                            navigationLevelDiff < 0 -> DefaultTransition.navigateBack
+                            else -> DefaultTransition.navigateNeutral
                         }
+                            .using(
+                                SizeTransform(clip = false)
+                            )
+                    }
+                },
+                contentKey = {
+                    it.javaClass        // Eg no recomposition of the ChatList when navigating to a thread.
+                },
+                label = "SinglePageConversationBody screen transition animation"
+            ) { config ->
+                // This handles the state of the search bar in tablet mode depending on the view
+                // We only want to show it in the conversation overview
+                if (doAlwaysShowScaffold) {
+                    if (config is NothingOpened) {
+                        collapsingContentState.resetCollapsingContent()
+                    } else {
+                        collapsingContentState.collapseContent()
                     }
                 }
 
-                is OpenedConversation -> {
-                    ConversationScreen(
-                        modifier = modifier,
-                        conversationId = config.conversationId,
-                        threadPostId = config.openedThread?.postId,
-                        courseId = courseId,
-                        onOpenThread = { postId ->
-                            configuration = OpenedConversation(
-                                _prevConfiguration = config,
-                                conversationId = config.conversationId,
-                                openedThread = OpenedThread(postId)
-                            )
-                        },
-                        onCloseThread = navigateToPrevConfig,
-                        onCloseConversation = {
-                            configuration = NothingOpened
-                        },
-                        onNavigateToSettings = {
-                            configuration = ConversationSettings(
-                                conversationId = config.conversationId,
-                                _prevConfiguration = config
-                            )
-                        },
-                        conversationsOverview = { mod -> conversationOverview(mod) },
-                        isSidebarOpen = isSidebarOpen,
-                        onSidebarToggle = { isSidebarOpen = !isSidebarOpen },
-                        title = title
-                    )
-                }
-
-                is OpenedSavedPosts -> {
-                    // TODO: This should potentially be moved into the ConversationScreen. That allows us to still display the ConvOverview on the left.
-                    //      https://github.com/ls1intum/artemis-android/issues/288
-                    SavedPostsScreen(
-                        modifier = modifier,
-                        courseId = courseId,
-                        onNavigateToPost = { savedPost ->
-                            configuration = OpenedConversation(
-                                _prevConfiguration = configuration,
-                                conversationId = savedPost.conversation.id,
-                                openedThread = OpenedThread(
-                                    StandalonePostId.ServerSideId(savedPost.referencePostId)
-                                )
-                            )
-                        }
-                    )
-                }
-
-                is BrowseChannelConfiguration -> {
-                    BrowseChannelsScreen(
-                        modifier = modifier,
-                        onNavigateToConversation = openConversation,
-                        onNavigateBack = navigateToPrevConfig
-                    )
-                }
-
-                is AddChannelConfiguration -> {
-                    if (canCreateChannel) {
-                        CreateChannelScreen(
-                            modifier = modifier,
+                LayoutAwareTwoColumnLayout(
+                    modifier = modifier,
+                    isSidebarOpen = isSidebarOpen,
+                    onSidebarToggle = { isSidebarOpen = !isSidebarOpen },
+                    optionalColumn = conversationOverview,
+                    priorityColumn = { innerMod ->
+                        ConversationContent(
+                            modifier = innerMod,
+                            configuration = config,
+                            onUpdateConfig = { configuration = it },
+                            onNavigateBack = navigateToPrevConfig,
                             courseId = courseId,
-                            onConversationCreated = openConversation,
-                            onNavigateBack = navigateToPrevConfig
+                            canCreateChannel = canCreateChannel,
+                            onSidebarToggle = { isSidebarOpen = !isSidebarOpen },
+                            scaffold = { content -> scaffold(searchConfiguration, content) },
+                            conversationOverview = conversationOverview
                         )
-                    }
-                }
+                    },
+                    title = title
+                )
 
-                is CreatePersonalConversation -> {
-                    CreatePersonalConversationScreen(
-                        modifier = modifier,
-                        courseId = courseId,
-                        onConversationCreated = openConversation,
-                        onNavigateBack = navigateToPrevConfig
+            }
+        }
+    }
+
+}
+
+@Composable
+private fun ConversationContent(
+    modifier: Modifier,
+    configuration: ConversationConfiguration,
+    onUpdateConfig: (ConversationConfiguration) -> Unit,
+    onNavigateBack: () -> Unit,
+    courseId: Long,
+    canCreateChannel: Boolean,
+    onSidebarToggle: () -> Unit,
+    scaffold: @Composable (content: @Composable () -> Unit) -> Unit,
+    conversationOverview: @Composable (Modifier) -> Unit
+) {
+    when (configuration) {
+        NothingOpened -> {
+            if (getArtemisAppLayout() == ArtemisAppLayout.Phone) {
+                scaffold {
+                    conversationOverview(modifier)
+                }
+            } else {
+                IconButton(onClick = onSidebarToggle) {
+                    Icon(
+                        painter = painterResource(id = sidebar_icon),
+                        contentDescription = null
                     )
                 }
-
-                is ConversationSettings -> {
-                    when {
-                        config.isViewingAllMembers -> {
-                            ConversationMembersScreen(
-                                modifier = modifier,
-                                courseId = courseId,
-                                conversationId = config.conversationId,
-                                onNavigateBack = navigateToPrevConfig
-                            )
-                        }
-
-                        config.isAddingMembers -> {
-                            ConversationAddMembersScreen(
-                                modifier = modifier,
-                                courseId = courseId,
-                                conversationId = config.conversationId,
-                                onNavigateBack = navigateToPrevConfig
-                            )
-                        }
-
-                        else -> {
-                            ConversationSettingsScreen(
-                                modifier = modifier,
-                                courseId = courseId,
-                                conversationId = config.conversationId,
-                                onNavigateBack = navigateToPrevConfig,
-                                onRequestAddMembers = {
-                                    configuration = config.copy(
-                                        isAddingMembers = true,
-                                        _prevConfiguration = configuration
-                                    )
-                                },
-                                onRequestViewAllMembers = {
-                                    configuration = config.copy(
-                                        isViewingAllMembers = true,
-                                        _prevConfiguration = configuration
-                                    )
-                                },
-                                onConversationLeft = {
-                                    configuration = NothingOpened
-                                },
-                                onChannelDeleted = {
-                                    configuration = NothingOpened
-
-                                }
-                            )
-                        }
-                    }
-                }
-
-                is NavigateToUserConversation -> {
-                    NavigateToUserConversationUi(
-                        modifier = modifier,
-                        courseId = courseId,
-                        navigation = config,
-                        onNavigateToConversation = { conversationId ->
-                            configuration = OpenedConversation(
-                                // We want to skip the NavigateToUserConversationUi when navigating back, as it is only a utility loading screen
-                                _prevConfiguration = configuration.prevConfiguration ?: NothingOpened,
-                                conversationId = conversationId,
-                                openedThread = null
-                            )
-                        },
-                        onNavigateBack = { configuration = NothingOpened }
-                    )
-                }
-
-                is IgnoreCustomBackHandling -> {
-                    Log.e(TAG, "IgnoreCustomBackHandling is only a technical configuration and should not be handled in SinglePageConversationBody")
-                    // Somehow users managed to navigate to this configuration, so we just navigate back to the overview screen
-                    configuration = NothingOpened
+                Box(
+                    modifier = modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "Please select a conversation from the list.")
                 }
             }
+        }
+
+        is OpenedConversation -> {
+            ConversationScreen(
+                modifier = modifier,
+                conversationId = configuration.conversationId,
+                threadPostId = configuration.openedThread?.postId,
+                courseId = courseId,
+                onOpenThread = { postId ->
+                    onUpdateConfig(
+                        OpenedConversation(
+                            configuration,
+                            configuration.conversationId,
+                            OpenedThread(postId)
+                        )
+                    )
+                },
+                onCloseThread = onNavigateBack,
+                onCloseConversation = { onUpdateConfig(NothingOpened) },
+                onNavigateToSettings = {
+                    onUpdateConfig(
+                        ConversationSettings(
+                            configuration.conversationId,
+                            configuration
+                        )
+                    )
+                },
+                onSidebarToggle = onSidebarToggle
+            )
+        }
+
+        is OpenedSavedPosts -> {
+            SavedPostsScreen(
+                modifier = modifier,
+                courseId = courseId,
+                onNavigateToPost = { savedPost ->
+                    onUpdateConfig(
+                        OpenedConversation(
+                            configuration,
+                            savedPost.conversation.id,
+                            OpenedThread(StandalonePostId.ServerSideId(savedPost.referencePostId))
+                        )
+                    )
+                },
+                onSidebarToggle = onSidebarToggle
+            )
+        }
+
+        is BrowseChannelConfiguration -> {
+            BrowseChannelsScreen(
+                modifier = modifier,
+                onNavigateToConversation = {
+                    onUpdateConfig(
+                        OpenedConversation(
+                            configuration,
+                            it,
+                            null
+                        )
+                    )
+                },
+                onNavigateBack = onNavigateBack,
+                onSidebarToggle = onSidebarToggle
+            )
+        }
+
+        is AddChannelConfiguration -> {
+            if (canCreateChannel) {
+                CreateChannelScreen(
+                    modifier = modifier,
+                    courseId = courseId,
+                    onConversationCreated = {
+                        onUpdateConfig(
+                            OpenedConversation(
+                                configuration,
+                                it,
+                                null
+                            )
+                        )
+                    },
+                    onNavigateBack = onNavigateBack,
+                    onSidebarToggle = onSidebarToggle
+                )
+            }
+        }
+
+        is CreatePersonalConversation -> {
+            CreatePersonalConversationScreen(
+                modifier = modifier,
+                courseId = courseId,
+                onConversationCreated = {
+                    onUpdateConfig(
+                        OpenedConversation(
+                            configuration,
+                            it,
+                            null
+                        )
+                    )
+                },
+                onNavigateBack = onNavigateBack,
+                onSidebarToggle = onSidebarToggle
+            )
+        }
+
+        is ConversationSettings -> {
+            when {
+                configuration.isViewingAllMembers -> ConversationMembersScreen(
+                    modifier = modifier,
+                    courseId = courseId,
+                    conversationId = configuration.conversationId,
+                    onNavigateBack = onNavigateBack,
+                    onSidebarToggle = onSidebarToggle
+                )
+
+                configuration.isAddingMembers -> ConversationAddMembersScreen(
+                    modifier = modifier,
+                    courseId = courseId,
+                    conversationId = configuration.conversationId,
+                    onNavigateBack = onNavigateBack,
+                    onSidebarToggle = onSidebarToggle
+                )
+
+                else -> ConversationSettingsScreen(
+                    modifier = modifier,
+                    courseId = courseId,
+                    conversationId = configuration.conversationId,
+                    onNavigateBack = onNavigateBack,
+                    onSidebarToggle = onSidebarToggle,
+                    onRequestAddMembers = {
+                        onUpdateConfig(
+                            configuration.copy(
+                                isAddingMembers = true,
+                                _prevConfiguration = configuration
+                            )
+                        )
+                    },
+                    onRequestViewAllMembers = {
+                        onUpdateConfig(
+                            configuration.copy(
+                                isViewingAllMembers = true,
+                                _prevConfiguration = configuration
+                            )
+                        )
+                    },
+                    onConversationLeft = { onUpdateConfig(NothingOpened) },
+                    onChannelDeleted = { onUpdateConfig(NothingOpened) }
+                )
+            }
+        }
+
+        is NavigateToUserConversation -> NavigateToUserConversationUi(
+            modifier = modifier,
+            courseId = courseId,
+            navigation = configuration,
+            onNavigateToConversation = {
+                onUpdateConfig(
+                    OpenedConversation(configuration.prevConfiguration ?: NothingOpened, it, null)
+                )
+            },
+            onNavigateBack = { onUpdateConfig(NothingOpened) },
+            onSidebarToggle = onSidebarToggle
+        )
+
+        is IgnoreCustomBackHandling -> {
+            Log.e(TAG, "IgnoreCustomBackHandling is not meant to be displayed")
+            onUpdateConfig(NothingOpened)
         }
     }
 }

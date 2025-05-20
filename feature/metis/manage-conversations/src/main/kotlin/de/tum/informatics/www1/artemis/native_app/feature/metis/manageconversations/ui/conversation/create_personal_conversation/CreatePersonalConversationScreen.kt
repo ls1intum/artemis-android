@@ -18,7 +18,8 @@ fun CreatePersonalConversationScreen(
     modifier: Modifier,
     courseId: Long,
     onConversationCreated: (conversationId: Long) -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onSidebarToggle: () -> Unit
 ) {
     val viewModel = koinViewModel<CreatePersonalConversationViewModel> { parametersOf(courseId) }
     val canCreateConversation by viewModel.canCreateConversation.collectAsState()
@@ -39,6 +40,7 @@ fun CreatePersonalConversationScreen(
             }
         },
         onDismissFailedDialog = { displayFailedDialog = false },
-        onNavigateBack = onNavigateBack
+        onNavigateBack = onNavigateBack,
+        onSidebarToggle = onSidebarToggle,
     )
 }

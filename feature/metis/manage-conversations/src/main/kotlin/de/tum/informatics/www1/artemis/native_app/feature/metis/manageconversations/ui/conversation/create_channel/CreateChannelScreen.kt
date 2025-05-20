@@ -45,6 +45,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Scaling
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisSection
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.AdaptiveNavigationIcon
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.pagePadding
@@ -64,13 +65,15 @@ fun CreateChannelScreen(
     modifier: Modifier,
     courseId: Long,
     onConversationCreated: (conversationId: Long) -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onSidebarToggle: () -> Unit
 ) {
     CreateChannelScreen(
         modifier = modifier,
         viewModel = koinViewModel { parametersOf(courseId) },
         onConversationCreated = onConversationCreated,
-        onNavigateBack = onNavigateBack
+        onNavigateBack = onNavigateBack,
+        onSidebarToggle = onSidebarToggle
     )
 }
 
@@ -79,7 +82,8 @@ internal fun CreateChannelScreen(
     modifier: Modifier,
     viewModel: CreateChannelViewModel,
     onConversationCreated: (conversationId: Long) -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onSidebarToggle: () -> Unit
 ) {
     var isDisplayingErrorDialog by remember { mutableStateOf(false) }
 
@@ -103,7 +107,7 @@ internal fun CreateChannelScreen(
                     Text(text = stringResource(id = R.string.create_channel_title))
                 },
                 navigationIcon = {
-                    NavigationBackButton(onNavigateBack)
+                    AdaptiveNavigationIcon(onNavigateBack = onNavigateBack, onSidebarToggle = onSidebarToggle)
                 }
             )
         }
