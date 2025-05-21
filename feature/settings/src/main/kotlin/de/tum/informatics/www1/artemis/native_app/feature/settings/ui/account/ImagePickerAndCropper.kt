@@ -18,7 +18,6 @@ import com.attafitamim.krop.core.crop.CropResult
 import com.attafitamim.krop.core.crop.CropState
 import com.attafitamim.krop.core.crop.ImageCropper
 import com.attafitamim.krop.core.crop.RoundRectCropShape
-import com.attafitamim.krop.core.crop.cropSrc
 import com.attafitamim.krop.core.crop.cropperStyle
 import com.attafitamim.krop.ui.ImageCropperDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
@@ -37,7 +36,7 @@ fun rememberCroppingImagePicker(
 
     return rememberImagePicker(onImage = { imageSource ->
         scope.launch {
-            val result = imageCropper.cropSrc(imageSource)
+            val result = imageCropper.crop { imageSource }
 
             when (result) {
                 is CropResult.Success -> {
