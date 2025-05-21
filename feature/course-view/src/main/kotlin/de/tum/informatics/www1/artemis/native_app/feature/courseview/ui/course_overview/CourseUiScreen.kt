@@ -424,19 +424,28 @@ private fun getInitialConversationConfiguration(
     username: String?,
     userId: Long?
 ): ConversationConfiguration = when {
-    conversationId != null && postId != null -> OpenedConversation(
-        _prevConfiguration = IgnoreCustomBackHandling,
-        conversationId = conversationId,
-        openedThread = OpenedThread(
-            StandalonePostId.ServerSideId(postId)
+    conversationId != null -> {
+        val chatConfig = OpenedConversation(
+            _prevConfiguration = IgnoreCustomBackHandling,
+            conversationId = conversationId,
+            openedThread = null
         )
-    )
 
-    conversationId != null -> OpenedConversation(
-        _prevConfiguration = IgnoreCustomBackHandling,
-        conversationId = conversationId,
-        openedThread = null
-    )
+        if (postId == null) {
+            chatConfig
+        } else {
+            // Currently, we only end up in this case when the user clicks on a notification.
+            // In this case, we want to setup the prevConfiguration to be mirror the behavior of
+            // manually opening the post thread, so that the back navigation works as expected.
+            OpenedConversation(
+                _prevConfiguration = chatConfig.copy(_prevConfiguration = NothingOpened),
+                conversationId = conversationId,
+                openedThread = OpenedThread(
+                    StandalonePostId.ServerSideId(postId)
+                )
+            )
+        }
+    }
 
     username != null -> NavigateToUserConversation(
         _prevConfiguration = IgnoreCustomBackHandling,
