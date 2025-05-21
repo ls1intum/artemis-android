@@ -122,7 +122,7 @@ internal fun MetisThreadUi(
             isMarkedAsDeleteList = viewModel.isMarkedAsDeleteList,
             clientId = clientId,
             answerChatListItemState = answerChatListItemState,
-            onCreatePost = viewModel::createReply,
+            onCreatePost = viewModel::createAnswerPost,
             onEditPost = { post, newText ->
                 val parentPost = postDataState.orNull()
 
@@ -160,7 +160,7 @@ internal fun MetisThreadUi(
             onUndoDeletePost = viewModel::undoDeletePost,
             onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
             onRequestReload = viewModel::onRequestReload,
-            onRequestRetrySend = viewModel::retryCreateReply,
+            onRequestRetrySend = viewModel::retryCreateAnswerPost,
             generateLinkPreviews = viewModel::generateLinkPreviews,
             onRemoveLinkPreview = viewModel::removeLinkPreview,
             onFileSelect = { uri, context ->

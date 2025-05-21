@@ -717,7 +717,7 @@ internal open class ConversationViewModel(
         }
     }
 
-    fun createReply(): Deferred<MetisModificationFailure?> {
+    fun createAnswerPost(): Deferred<MetisModificationFailure?> {
         return viewModelScope.async(coroutineContext) {
             val serverSideParentPostId =
                 getPostId() ?: return@async MetisModificationFailure.CREATE_POST
@@ -733,12 +733,15 @@ internal open class ConversationViewModel(
         }
     }
 
-    fun retryCreateReply(clientPostId: String, content: String) {
+    fun retryCreateAnswerPost(clientPostId: String, content: String) {
         viewModelScope.launch(coroutineContext) {
-            createPostService.retryCreatePost(
+            val serverSideParentPostId = getPostId() ?: return@launch
+
+            createPostService.retryCreateAnswerPost(
                 courseId = courseId,
                 conversationId = conversationId,
                 clientSidePostId = clientPostId,
+                parentPostId = serverSideParentPostId,
                 content = content
             )
         }
