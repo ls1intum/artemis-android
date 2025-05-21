@@ -19,6 +19,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.impl.ArtemisImageProviderStub
+import de.tum.informatics.www1.artemis.native_app.core.ui.test.BottomSheetClickWorkaroundTheme
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.impl.EmojiServiceStub
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.model.LinkPreview
@@ -207,6 +208,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
         )
     )
 
+    @SuppressLint("UnrememberedMutableState")
     fun setupThreadUi(
         post: IStandalonePost,
         onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure>)? = { CompletableDeferred() },
@@ -227,38 +229,40 @@ abstract class BaseChatUITest : BaseComposeTest() {
         }
 
         composeTestRule.setContent {
-            MetisThreadUi(
-                modifier = Modifier.fillMaxSize(),
-                courseId = course.id!!,
-                clientId = clientId,
-                postDataState = DataState.Success(post),
-                conversationDataState = DataState.Success(conversation),
-                postActionFlags = PostActionFlags(
-                    isAbleToPin = isAbleToPin,
-                    isAtLeastTutorInCourse = isAtLeastTutorInCourse,
-                    hasModerationRights = hasModerationRights,
-                ),
-                generateLinkPreviews = { _ -> linkPreviewStateFlow },
-                onRemoveLinkPreview = { _, _, _ -> CompletableDeferred<MetisModificationFailure>() },
-                serverUrl = "",
-                forwardMessageUseCase = forwardMessageUseCaseMock,
-                isMarkedAsDeleteList = mutableStateListOf(),
-                emojiService = EmojiServiceStub,
-                chatListContextItem = chatListItem,
-                answerChatListItemState = { answer -> threadUseCase.getAnswerChatListItem(answer) },
-                initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
-                onCreatePost = { CompletableDeferred() },
-                onEditPost = { _, _ -> CompletableDeferred() },
-                onResolvePost = onResolvePost,
-                onPinPost = onPinPost,
-                onSavePost = { CompletableDeferred() },
-                onDeletePost = { CompletableDeferred() },
-                onUndoDeletePost = {},
-                onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
-                onRequestReload = {},
-                onRequestRetrySend = { _, _ -> },
-                onFileSelect = { _, _ -> },
-            )
+            BottomSheetClickWorkaroundTheme {
+                MetisThreadUi(
+                    modifier = Modifier.fillMaxSize(),
+                    courseId = course.id!!,
+                    clientId = clientId,
+                    postDataState = DataState.Success(post),
+                    conversationDataState = DataState.Success(conversation),
+                    postActionFlags = PostActionFlags(
+                        isAbleToPin = isAbleToPin,
+                        isAtLeastTutorInCourse = isAtLeastTutorInCourse,
+                        hasModerationRights = hasModerationRights,
+                    ),
+                    generateLinkPreviews = { _ -> linkPreviewStateFlow },
+                    onRemoveLinkPreview = { _, _, _ -> CompletableDeferred<MetisModificationFailure>() },
+                    serverUrl = "",
+                    forwardMessageUseCase = forwardMessageUseCaseMock,
+                    isMarkedAsDeleteList = mutableStateListOf(),
+                    emojiService = EmojiServiceStub,
+                    chatListContextItem = chatListItem,
+                    answerChatListItemState = { answer -> threadUseCase.getAnswerChatListItem(answer) },
+                    initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
+                    onCreatePost = { CompletableDeferred() },
+                    onEditPost = { _, _ -> CompletableDeferred() },
+                    onResolvePost = onResolvePost,
+                    onPinPost = onPinPost,
+                    onSavePost = { CompletableDeferred() },
+                    onDeletePost = { CompletableDeferred() },
+                    onUndoDeletePost = {},
+                    onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
+                    onRequestReload = {},
+                    onRequestRetrySend = { _, _ -> },
+                    onFileSelect = { _, _ -> },
+                )
+            }
         }
     }
 
@@ -273,59 +277,66 @@ abstract class BaseChatUITest : BaseComposeTest() {
         onPinPost: (IStandalonePost) -> Deferred<MetisModificationFailure> = { CompletableDeferred() }
     ) {
         composeTestRule.setContent {
-            CompositionLocalProvider(
-                LocalArtemisImageProvider provides ArtemisImageProviderStub(),
-                LocalVisibleMetisContextManager provides VisibleMetisContextManagerMock.also {
-                    it.registerMetisContext(VisiblePostList(MetisContext.Conversation(
-                        courseId = course.id!!,
-                        conversationId = conversation.id
-                    )))
-                }
-            ) {
-                val list = posts.map { post ->
-                    if (post.hasForwardedMessages == true) {
-                        ChatListItem.PostItem.IndexedItem.PostWithForwardedMessage(
-                            post = post,
-                            answers = post.answers.orEmpty(),
-                            forwardedPosts = forwardedPosts,
-                            courseId = course.id!!
+            BottomSheetClickWorkaroundTheme {
+                CompositionLocalProvider(
+                    LocalArtemisImageProvider provides ArtemisImageProviderStub(),
+                    LocalVisibleMetisContextManager provides VisibleMetisContextManagerMock.also {
+                        it.registerMetisContext(
+                            VisiblePostList(
+                                MetisContext.Conversation(
+                                    courseId = course.id!!,
+                                    conversationId = conversation.id
+                                )
+                            )
                         )
-                    } else {
-                        ChatListItem.PostItem.IndexedItem.Post(post, post.answers.orEmpty())
                     }
-                }.toMutableList()
-                val forwardMessageUseCaseMock = mockk<ForwardMessageUseCase>()
-                MetisChatList(
-                    modifier = Modifier.fillMaxSize(),
-                    initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
-                    posts = PostsDataState.Loaded.WithList(list, PostsDataState.NotLoading),
-                    clientId = currentUser.id,
-                    postActionFlags = PostActionFlags(
-                        isAbleToPin = isAbleToPin,
-                        isAtLeastTutorInCourse = isAtLeastTutorInCourse,
-                        hasModerationRights = hasModerationRights,),
-                    serverUrl = "",
-                    forwardMessageUseCase = forwardMessageUseCaseMock,
-                    courseId = course.id!!,
-                    state = rememberLazyListState(),
-                    emojiService = EmojiServiceStub,
-                    isMarkedAsDeleteList = mutableStateListOf(),
-                    bottomItem = null,
-                    isReplyEnabled = true,
-                    generateLinkPreviews = { _ -> linkPreviewStateFlow },
-                    onRemoveLinkPreview = { _, _, _ -> CompletableDeferred<MetisModificationFailure>() },
-                    onCreatePost = { CompletableDeferred() },
-                    onEditPost = { _, _ -> CompletableDeferred() },
-                    onPinPost = onPinPost,
-                    onSavePost = { CompletableDeferred() },
-                    onDeletePost = { CompletableDeferred() },
-                    onUndoDeletePost = {},
-                    onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
-                    onClickViewPost = {},
-                    onRequestRetrySend = { _ -> },
-                    conversationName = "Title",
-                    onFileSelected = { _ -> }
-                )
+                ) {
+                    val list = posts.map { post ->
+                        if (post.hasForwardedMessages == true) {
+                            ChatListItem.PostItem.IndexedItem.PostWithForwardedMessage(
+                                post = post,
+                                answers = post.answers.orEmpty(),
+                                forwardedPosts = forwardedPosts,
+                                courseId = course.id!!
+                            )
+                        } else {
+                            ChatListItem.PostItem.IndexedItem.Post(post, post.answers.orEmpty())
+                        }
+                    }.toMutableList()
+                    val forwardMessageUseCaseMock = mockk<ForwardMessageUseCase>()
+                    MetisChatList(
+                        modifier = Modifier.fillMaxSize(),
+                        initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
+                        posts = PostsDataState.Loaded.WithList(list, PostsDataState.NotLoading),
+                        clientId = currentUser.id,
+                        postActionFlags = PostActionFlags(
+                            isAbleToPin = isAbleToPin,
+                            isAtLeastTutorInCourse = isAtLeastTutorInCourse,
+                            hasModerationRights = hasModerationRights,
+                        ),
+                        serverUrl = "",
+                        forwardMessageUseCase = forwardMessageUseCaseMock,
+                        courseId = course.id!!,
+                        state = rememberLazyListState(),
+                        emojiService = EmojiServiceStub,
+                        isMarkedAsDeleteList = mutableStateListOf(),
+                        bottomItem = null,
+                        isReplyEnabled = true,
+                        generateLinkPreviews = { _ -> linkPreviewStateFlow },
+                        onRemoveLinkPreview = { _, _, _ -> CompletableDeferred<MetisModificationFailure>() },
+                        onCreatePost = { CompletableDeferred() },
+                        onEditPost = { _, _ -> CompletableDeferred() },
+                        onPinPost = onPinPost,
+                        onSavePost = { CompletableDeferred() },
+                        onDeletePost = { CompletableDeferred() },
+                        onUndoDeletePost = {},
+                        onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
+                        onClickViewPost = {},
+                        onRequestRetrySend = { _ -> },
+                        conversationName = "Title",
+                        onFileSelected = { _ -> }
+                    )
+                }
             }
         }
     }
