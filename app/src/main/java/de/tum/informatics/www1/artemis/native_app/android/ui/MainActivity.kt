@@ -234,14 +234,11 @@ class MainActivity : AppCompatActivity(),
             val lifecycleOwner = LocalLifecycleOwner.current
             val updateRepository = koinInject<UpdateRepository>()
             val updateResult by updateRepository.updateResultFlow.collectAsState()
-            val isLoggedIn by accountService.authenticationData
-                .map { it is AccountService.AuthenticationData.LoggedIn }
-                .collectAsState(initial = false)
             val serverUrl by serverConfigurationService.serverUrl.collectAsState(initial = "")
 
             LaunchedEffect(serverUrl, lifecycleOwner) {
                 lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                    while (isLoggedIn) {
+                    while (true) {
                         updateRepository.triggerUpdateCheck()
                         delay(60.seconds)
                     }

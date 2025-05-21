@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.settings.service
+package de.tum.informatics.www1.artemis.native_app.feature.settings.service.impl
 
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
@@ -6,6 +6,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.LoggedInBasedServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
+import de.tum.informatics.www1.artemis.native_app.feature.settings.service.ChangeProfilePictureService
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
 import io.ktor.http.ContentType
@@ -14,13 +15,14 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.appendPathSegments
 import io.ktor.utils.io.InternalAPI
 
+
 // The backend ignores the file name, so we can use a placeholder here
 private const val PLACEHOLDER_FILE_NAME = "profile-picture"
 
 class ChangeProfilePictureServiceImpl(
     ktorProvider: KtorProvider,
     artemisContextProvider: ArtemisContextProvider
-): LoggedInBasedServiceImpl(ktorProvider, artemisContextProvider), ChangeProfilePictureService  {
+): LoggedInBasedServiceImpl(ktorProvider, artemisContextProvider), ChangeProfilePictureService {
 
     @OptIn(InternalAPI::class)
     override suspend fun upload(

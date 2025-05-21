@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.login
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -293,41 +294,47 @@ private fun AccountUi(
     onLoggedIn: () -> Unit,
     onClickSaml2Login: (rememberMe: Boolean) -> Unit
 ) {
-    Box(modifier = modifier) {
-        Column(
-            modifier = Modifier.imePadding()
-        ) {
-            Spacer(modifier = Modifier.fillMaxHeight(0.05f))
+    Column(
+        modifier = modifier
+            .imePadding()
+            .systemBarsPadding()
+    ) {
+        Spacer(modifier = Modifier.fillMaxHeight(0.05f))
 
-            ArtemisHeader(
-                modifier = Modifier.fillMaxWidth(),
-                selectedInstance = selectedInstance
-            )
+        ArtemisHeader(
+            modifier = Modifier.fillMaxWidth(),
+            selectedInstance = selectedInstance
+        )
 
-            Spacer(modifier = Modifier.fillMaxHeight(0.05f))
+        Spacer(modifier = Modifier.fillMaxHeight(0.05f))
 
-            RegisterLoginAccount(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-                serverProfileInfo = serverProfileInfo,
-                retryLoadServerProfileInfo = retryLoadServerProfileInfo,
-                onLoggedIn = onLoggedIn,
-                onNavigateToLoginScreen = onNavigateToLoginScreen,
-                onNavigateToRegisterScreen = onNavigateToRegisterScreen,
-                onClickSaml2Login = onClickSaml2Login
-            )
-        }
+        RegisterLoginAccount(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+            serverProfileInfo = serverProfileInfo,
+            retryLoadServerProfileInfo = retryLoadServerProfileInfo,
+            onLoggedIn = onLoggedIn,
+            onNavigateToLoginScreen = onNavigateToLoginScreen,
+            onNavigateToRegisterScreen = onNavigateToRegisterScreen,
+            onClickSaml2Login = onClickSaml2Login
+        )
 
         if (canSwitchInstance) {
-            TextButton(
-                modifier = Modifier.align(Alignment.BottomCenter),
-                onClick = onNavigateToInstanceSelection
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(color = MaterialTheme.colorScheme.surface),
+                contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = stringResource(id = R.string.account_change_artemis_instance_label),
-                    style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.linkTextColor)
-                )
+                TextButton(
+                    onClick = onNavigateToInstanceSelection
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.account_change_artemis_instance_label),
+                        style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.linkTextColor)
+                    )
+                }
             }
         }
     }

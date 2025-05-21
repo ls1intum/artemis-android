@@ -1,13 +1,10 @@
 package de.tum.informatics.www1.artemis.native_app.feature.login.login.login_options
 
-import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -25,6 +22,7 @@ import androidx.compose.ui.platform.LocalAutofillTree
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.ButtonWithLoadingAnimation
 import de.tum.informatics.www1.artemis.native_app.feature.login.R
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.PasswordTextField
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.RememberLoginCheckBox
@@ -101,18 +99,13 @@ internal fun PasswordBasedLogin(
             updateRememberMe = updateRememberMe
         )
 
-        Button(
+        ButtonWithLoadingAnimation(
             modifier = Modifier.fillMaxWidth(),
+            isLoading = isLoggingIn,
             onClick = onClickLogin,
             enabled = isLoginButtonEnabled && !isLoggingIn
         ) {
-            Crossfade(targetState = isLoggingIn) { isLoggingInState ->
-                if (isLoggingInState) {
-                    CircularProgressIndicator()
-                } else {
-                    Text(text = stringResource(id = R.string.login_perform_login_button_text))
-                }
-            }
+            Text(text = stringResource(id = R.string.login_perform_login_button_text))
         }
 
         TextButton(

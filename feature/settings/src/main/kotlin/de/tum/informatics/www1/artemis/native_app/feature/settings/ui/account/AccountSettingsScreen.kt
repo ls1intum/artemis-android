@@ -17,8 +17,10 @@ import androidx.compose.material.icons.filled.AssignmentInd
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material.icons.filled.Upload
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -35,6 +37,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.attafitamim.krop.core.crop.rememberImageCropper
+import de.tum.informatics.www1.artemis.native_app.core.common.ActiveModuleFeature
+import de.tum.informatics.www1.artemis.native_app.core.common.FeatureAvailability
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
@@ -45,9 +49,12 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.pagePadding
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureData
 import de.tum.informatics.www1.artemis.native_app.feature.settings.R
+import de.tum.informatics.www1.artemis.native_app.feature.settings.service.dto.PasskeyDTO
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.LogoutButtonEntry
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.PreferenceEntry
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.SettingsViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.passkeys.PasskeysSection
+import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.passkeys.PasskeysUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.util.ProfilePictureUploadResult
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.util.getMessage
 import kotlinx.coroutines.Deferred
@@ -59,14 +66,24 @@ fun AccountSettingsScreen(
     viewModel: SettingsViewModel = koinInject(),
 ) {
     val account by viewModel.account.collectAsState()
+    val passkeysUseCase = viewModel.passkeysUseCase
+    val passkeysEnabled = FeatureAvailability.isEnabled(ActiveModuleFeature.Passkey)
+    val passkeys: DataState<List<PasskeyDTO>>? = if (passkeysEnabled) {
+        passkeysUseCase.passkeys.collectAsState().value
+    } else {
+        null
+    }
 
     AccountSettingsScreen(
         modifier = modifier,
         accountDataState = account,
+        passkeys = passkeys,
         onDeleteProfilePicture = viewModel::onDeleteProfilePicture,
         onUploadProfilePicture = viewModel::onUploadProfilePicture,
+        onCreatePasskey = passkeysUseCase::createPasskey,
         onLogout = viewModel::onRequestLogout,
-        onRequestReload = viewModel::onRequestReload)
+        onRequestReload = viewModel::onRequestReload
+    )
 }
 
 
@@ -74,13 +91,17 @@ fun AccountSettingsScreen(
 internal fun AccountSettingsScreen(
     modifier: Modifier = Modifier,
     accountDataState: DataState<Account>,
+    passkeys: DataState<List<PasskeyDTO>>?,
     onDeleteProfilePicture: () -> Unit,
     onUploadProfilePicture: (ImageBitmap) -> Deferred<ProfilePictureUploadResult>,
+    onCreatePasskey: () -> Deferred<PasskeysUseCase.CreationResult>,
     onLogout: () -> Unit,
     onRequestReload: () -> Unit
 ) {
     var showChangeActionsBottomSheet by remember { mutableStateOf(false) }
     var uploadJob: Deferred<ProfilePictureUploadResult>? by remember { mutableStateOf(null) }
+    var createPasskeyJob: Deferred<PasskeysUseCase.CreationResult>? by remember { mutableStateOf(null) }
+    var createPasskeyResult by remember { mutableStateOf<PasskeysUseCase.CreationResult?>(null) }
 
     val imageCropper = rememberImageCropper()
     val croppingImagePicker = rememberCroppingImagePicker(
@@ -101,6 +122,14 @@ internal fun AccountSettingsScreen(
                 it.getMessage(context),
                 Toast.LENGTH_SHORT
             ).show()
+        }
+    }
+
+    AwaitDeferredCompletion(job = createPasskeyJob) { result ->
+        createPasskeyJob = null
+        createPasskeyResult = result
+        if (result is PasskeysUseCase.CreationResult.Success) {
+            onRequestReload()
         }
     }
 
@@ -129,12 +158,16 @@ internal fun AccountSettingsScreen(
             AccountSettingsBody(
                 modifier = Modifier.fillMaxWidth(),
                 account = account,
-                onChangeClicked = {
+                passkeys = passkeys,
+                onChangeProfilePicture = {
                     if (account.hasCustomProfilePicture) {
                         showChangeActionsBottomSheet = true
                     } else {
                         launchImagePicker()
                     }
+                },
+                onCreatePasskey = {
+                    createPasskeyJob = onCreatePasskey()
                 },
                 onLogout = onLogout
             )
@@ -155,6 +188,13 @@ internal fun AccountSettingsScreen(
         ImagePickerAndCropper(
             imageCropper = imageCropper
         )
+
+        PasskeyCreationResultHandler(
+            result = createPasskeyResult,
+            onReset = {
+                createPasskeyResult = null
+            }
+        )
     }
 }
 
@@ -163,7 +203,9 @@ internal fun AccountSettingsScreen(
 private fun AccountSettingsBody(
     modifier: Modifier = Modifier,
     account: Account,
-    onChangeClicked: () -> Unit,
+    passkeys: DataState<List<PasskeyDTO>>?,  // null means passkeys are disabled
+    onChangeProfilePicture: () -> Unit,
+    onCreatePasskey: () -> Unit,
     onLogout: () -> Unit,
 ) {
     Column(
@@ -175,12 +217,20 @@ private fun AccountSettingsBody(
     ) {
         ChangeProfilePicture(
             account = account,
-            onChangeClicked = onChangeClicked
+            onChangeClicked = onChangeProfilePicture
         )
 
         DetailsSection(
             account = account,
         )
+
+        passkeys?.let {
+            PasskeysSection(
+                modifier = Modifier.fillMaxWidth(),
+                passkeysDataState = it,
+                onCreatePasskey = onCreatePasskey
+            )
+        }
 
         LogoutButtonEntry(
             modifier = Modifier.fillMaxWidth(),
@@ -288,5 +338,60 @@ private fun DetailsSection(
             valueText = account.email,
             onClick = {}
         )
+    }
+}
+
+@Composable
+private fun PasskeyCreationResultHandler(
+    result: PasskeysUseCase.CreationResult?,
+    onReset: () -> Unit,
+) {
+    when (result) {
+        is PasskeysUseCase.CreationResult.Success -> {
+            Toast.makeText(
+                LocalContext.current,
+                R.string.passkey_settings_create_success,
+                Toast.LENGTH_SHORT
+            ).show()
+            onReset()
+        }
+
+        is PasskeysUseCase.CreationResult.Cancelled -> {
+            Toast.makeText(
+                LocalContext.current,
+                R.string.passkey_settings_create_cancelled,
+                Toast.LENGTH_SHORT
+            ).show()
+            onReset()
+        }
+
+        is PasskeysUseCase.CreationResult.Failure -> {
+            // Show a dialog
+            AlertDialog(
+                onDismissRequest = onReset,
+                title = {
+                    Text(stringResource(R.string.passkey_settings_create_failure_dialog_title))
+                },
+                text = {
+                    Column {
+                        Text(stringResource(R.string.passkey_settings_create_failure_dialog_desc))
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = result.error,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                },
+                confirmButton = {
+                    FilledTonalButton(
+                        onClick = onReset
+                    ) {
+                        Text(stringResource(R.string.passkey_settings_create_failure_dialog_ok))
+                    }
+                }
+            )
+        }
+
+        null -> {}
     }
 }

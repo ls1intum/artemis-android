@@ -22,6 +22,7 @@ sealed class Api(
         data object Public : Api(*Core.path, "public")
         data object Courses : Api(*Core.path, "courses")
         data object Files : Api(*Core.path, "files")
+        data object Passkey : Api(*Core.path, "passkey")
 
         /**
          * This is a special case, because for the 8.0 API the image path for eg profile picture or

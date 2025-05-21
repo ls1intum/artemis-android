@@ -13,7 +13,8 @@ interface UpdateService {
 data class UpdateServiceResult(
     val minVersion: NormalizedAppVersion,
     val recommendedVersion: NormalizedAppVersion,
-    val features: List<String>
+    val features: List<String>,
+    val activeModuleFeatures: List<String> = emptyList()
 )
 
 class UpdateServiceImpl(
@@ -30,7 +31,8 @@ class UpdateServiceImpl(
                 UpdateServiceResult(
                     minVersion = NormalizedAppVersion.fromNullable(minVersionString),
                     recommendedVersion = NormalizedAppVersion.fromNullable(recommendedVersionString),
-                    features = profileInfo.features
+                    features = profileInfo.features,
+                    activeModuleFeatures = profileInfo.activeModuleFeatures
                 )
             }
     }
