@@ -14,7 +14,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRight
@@ -42,6 +44,8 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -111,6 +115,13 @@ internal fun ConversationList(
     trailingContent: LazyListScope.() -> Unit,
     selectedConversationId: Long?
 ) {
+    val scrollPosition by viewModel.scrollPosition.collectAsState()
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = scrollPosition)
+
+    LaunchedEffect(listState.firstVisibleItemIndex) {
+        viewModel.saveScrollPosition(listState.firstVisibleItemIndex)
+    }
+
     ConversationList(
         modifier = modifier,
         toggleFavoritesExpanded = viewModel::toggleFavoritesExpanded,
@@ -129,7 +140,8 @@ internal fun ConversationList(
         onToggleHidden = onToggleHidden,
         onToggleMuted = onToggleMuted,
         trailingContent = trailingContent,
-        selectedConversationId = selectedConversationId
+        selectedConversationId = selectedConversationId,
+        listState = listState
     )
 }
 
@@ -144,15 +156,16 @@ internal fun ConversationList(
     toggleGroupChatsExpanded: () -> Unit,
     togglePersonalConversationsExpanded: () -> Unit,
     toggleHiddenExpanded: () -> Unit,
-    collapsingContentState: CollapsingContentState,
     conversationCollections: ConversationCollections,
+    collapsingContentState: CollapsingContentState,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onNavigateToSavedPosts: () -> Unit,
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
     onToggleHidden: (conversationId: Long, hidden: Boolean) -> Unit,
     onToggleMuted: (conversationId: Long, muted: Boolean) -> Unit,
     trailingContent: LazyListScope.() -> Unit,
-    selectedConversationId: Long?
+    selectedConversationId: Long?,
+    listState: LazyListState
 ) {
     val listWithHeader: LazyListScope.(ConversationSectionState, String, String, Int, Int?, Long, () -> Unit, @Composable () -> Unit) -> Unit =
         { items, key, suffix, textRes, count, unreadCount, onClick, icon ->
@@ -178,10 +191,11 @@ internal fun ConversationList(
             )
         }
 
-    LazyColumn (
+    LazyColumn(
         modifier = modifier
             .nestedScroll(collapsingContentState.nestedScrollConnection)
-            .testTag(TEST_TAG_CONVERSATION_LIST)
+            .testTag(TEST_TAG_CONVERSATION_LIST),
+        state = listState
     ) {
         if (conversationCollections.favorites.conversations.isNotEmpty()) {
             listWithHeader(
