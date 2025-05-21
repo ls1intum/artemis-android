@@ -12,5 +12,6 @@ enum class DateFormats(val format: DateFormat) {
     EditTimestamp(SimpleDateFormat.getDateTimeInstance(
         SimpleDateFormat.SHORT,
         SimpleDateFormat.SHORT
-    ))
+    )),
+    OnlyDate(SimpleDateFormat.getDateInstance(SimpleDateFormat.LONG)),
 }

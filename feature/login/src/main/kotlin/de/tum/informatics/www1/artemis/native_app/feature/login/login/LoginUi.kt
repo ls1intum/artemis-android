@@ -24,12 +24,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.common.ActiveModuleFeature
+import de.tum.informatics.www1.artemis.native_app.core.common.FeatureAvailability
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.server_config.ProfileInfo
 import de.tum.informatics.www1.artemis.native_app.core.model.server_config.Saml2Config
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.feature.login.R
+import de.tum.informatics.www1.artemis.native_app.feature.login.login.login_options.PasskeyBasedLogin
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.login_options.PasswordBasedLogin
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.login_options.Saml2BasedLogin
 import io.ktor.http.URLBuilder
@@ -92,9 +95,20 @@ internal fun LoginUi(
     val saml2Config: Saml2Config? = fromProfileInfo(profileInfo, null) { it.saml2 }
 
     var loginJob: Deferred<Boolean>? by remember { mutableStateOf(null) }
+    var loginWithPasskeyJob: Deferred<Boolean>? by remember { mutableStateOf(null) }
 
     AwaitDeferredCompletion(job = loginJob) { wasSuccessful ->
         loginJob = null
+
+        if (wasSuccessful) {
+            onLoggedIn()
+        } else {
+            displayLoginFailedDialog = true
+        }
+    }
+
+    AwaitDeferredCompletion(job = loginWithPasskeyJob) { wasSuccessful ->
+        loginWithPasskeyJob = null
 
         if (wasSuccessful) {
             onLoggedIn()
@@ -110,6 +124,7 @@ internal fun LoginUi(
         hasUserAcceptedTerms = hasUserAcceptedTerms,
         saml2Config = saml2Config,
         isPasswordLoginDisabled = isPasswordLoginDisabled,
+        isPasskeyLoginEnabled = FeatureAvailability.isEnabled(ActiveModuleFeature.Passkey),
         updateUserAcceptedTerms = viewModel::updateUserAcceptedTerms,
         passwordBasedLoginContent = { loginModifier ->
             PasswordBasedLogin(
@@ -121,7 +136,7 @@ internal fun LoginUi(
                 updateUsername = viewModel::updateUsername,
                 updatePassword = viewModel::updatePassword,
                 updateRememberMe = viewModel::updateRememberMe,
-                isLoginButtonEnabled = isLoginButtonEnabled,
+                isLoginButtonEnabled = isLoginButtonEnabled && loginWithPasskeyJob == null,
                 onClickLogin = {
                     loginJob = viewModel.login()
                 },
@@ -144,6 +159,16 @@ internal fun LoginUi(
                 rememberMe = rememberMe,
                 updateRememberMe = viewModel::updateRememberMe,
                 onLoginButtonClicked = { onClickSaml2Login(rememberMe) }
+            )
+        },
+        passkeyLoginContent = { loginModifier ->
+            PasskeyBasedLogin(
+                modifier = loginModifier,
+                onPasskeyLogin = {
+                    loginWithPasskeyJob = viewModel.loginWithPasskey()
+                },
+                isLoggingIn = loginWithPasskeyJob != null,
+                isEnabled = loginJob == null
             )
         }
     )
@@ -178,9 +203,11 @@ internal fun LoginUi(
     hasUserAcceptedTerms: Boolean,
     saml2Config: Saml2Config?,
     isPasswordLoginDisabled: Boolean,
+    isPasskeyLoginEnabled: Boolean = false,
     updateUserAcceptedTerms: (Boolean) -> Unit,
     passwordBasedLoginContent: @Composable (modifier: Modifier) -> Unit,
-    saml2BasedLoginContent: @Composable (modifier: Modifier, config: Saml2Config) -> Unit
+    saml2BasedLoginContent: @Composable (modifier: Modifier, config: Saml2Config) -> Unit,
+    passkeyLoginContent: @Composable (modifier: Modifier) -> Unit = {},
 ) {
     Column(modifier = modifier.then(Modifier.verticalScroll(rememberScrollState()))) {
         Text(
@@ -202,18 +229,14 @@ internal fun LoginUi(
             passwordBasedLoginContent(loginModifier)
         }
 
+        if (isPasskeyLoginEnabled) {
+            Divider()
+            passkeyLoginContent(loginModifier)
+        }
+
         if (!isPasswordLoginDisabled && saml2Config != null) {
             //Both are visible, therefore we place a visual divider
-            DividerWithText(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                text = { modifier ->
-                    Text(
-                        modifier = modifier,
-                        text = stringResource(id = R.string.login_password_or_saml_divider_text),
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center,)
-                }
-            )
+            Divider()
         }
 
         if (saml2Config != null) {
@@ -229,6 +252,21 @@ internal fun LoginUi(
             )
         }
     }
+}
+
+@Composable
+private fun Divider() {
+    DividerWithText(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        text = { modifier ->
+            Text(
+                modifier = modifier,
+                text = stringResource(id = R.string.login_password_or_saml_divider_text),
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+            )
+        }
+    )
 }
 
 private fun <T> fromProfileInfo(

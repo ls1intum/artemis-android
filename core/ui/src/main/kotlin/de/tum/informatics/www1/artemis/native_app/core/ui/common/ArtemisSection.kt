@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.core.ui.common
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
@@ -21,7 +22,7 @@ fun ArtemisSection(
     description: String? = null,
     testTag: String? = null,
     spacing: Dp = 8.dp,
-    content: @Composable () -> Unit
+    content: @Composable ColumnScope.() -> Unit
 ) {
     Card(
         modifier = modifier,

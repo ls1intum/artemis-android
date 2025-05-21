@@ -54,8 +54,20 @@ object ArtemisInstances {
         type = ArtemisInstance.Type.TEST
     )
 
+    private val TumTs3 = ArtemisInstance(
+        host = "artemis-test3.artemis.cit.tum.de",
+        name = R.string.artemis_instance_tum_test_server_3,
+        type = ArtemisInstance.Type.TEST
+    )
+
+    private val TumTs4 = ArtemisInstance(
+        host = "artemis-test4.artemis.cit.tum.de",
+        name = R.string.artemis_instance_tum_test_server_4,
+        type = ArtemisInstance.Type.TEST
+    )
+
     val legacyTumInstances = listOf(LegacyTumArtemis1, LegacyTumArtemis2)
-    private val testInstances = listOf(TumTs0, TumTs1, TumTs2)
+    private val testInstances = listOf(TumTs0, TumTs1, TumTs2, TumTs3, TumTs4)
 
     val instances: List<ArtemisInstance> =
         (if (BuildConfig.DEBUG) {

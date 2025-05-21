@@ -14,10 +14,13 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.isLoggedIn
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.core.ui.ReloadableViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.login.service.AndroidCredentialService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
 import de.tum.informatics.www1.artemis.native_app.feature.push.unsubscribeFromNotifications
 import de.tum.informatics.www1.artemis.native_app.feature.settings.service.ChangeProfilePictureService
+import de.tum.informatics.www1.artemis.native_app.feature.settings.service.PasskeySettingsService
+import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.passkeys.PasskeysUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.util.ProfilePictureBitmapUtil
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.util.ProfilePictureUploadResult
 import io.ktor.http.ContentType
@@ -41,6 +44,8 @@ class SettingsViewModel(
     private val pushNotificationJobService: PushNotificationJobService,
     private val pushNotificationConfigurationService: PushNotificationConfigurationService,
     private val changeProfilePictureService: ChangeProfilePictureService,
+    passkeySettingsService: PasskeySettingsService,
+    androidCredentialService: AndroidCredentialService,
     appVersionProvider: AppVersionProvider,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : ReloadableViewModel() {
@@ -52,6 +57,14 @@ class SettingsViewModel(
     private val _account = MutableSharedFlow<DataState<Account>>(extraBufferCapacity = 1)
     val account: StateFlow<DataState<Account>> = _account
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
+
+    val passkeysUseCase = PasskeysUseCase(
+        networkStatusProvider = networkStatusProvider,
+        passkeySettingsService = passkeySettingsService,
+        androidCredentialService = androidCredentialService,
+        requestReload = requestReload,
+        coroutineScope = viewModelScope + coroutineContext,
+    )
 
     init {
         viewModelScope.launch(coroutineContext) {

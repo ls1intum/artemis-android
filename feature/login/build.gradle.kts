@@ -27,4 +27,8 @@ dependencies {
     testImplementation(project(":feature:login-test"))
 
     implementation(libs.androidx.dataStore.preferences)
+
+    // Supporting passkeys
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
 }

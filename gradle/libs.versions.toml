@@ -10,6 +10,7 @@ androidGradlePlugin = "8.7.1"
 androidxActivity = "1.10.1"
 androidxAppCompat = "1.7.0"
 androidxComposeBom = "2025.05.01"
+androidxCredentials = "1.5.0"
 androidxDataStore = "1.1.4"
 androidxLifecycle = "2.9.0"
 androidxNavigation = "2.8.9"
@@ -58,6 +59,8 @@ androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-te
 androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-compose-ui-util = { group = "androidx.compose.ui", name = "ui-util" }
+androidx-credentials = { group = "androidx.credentials", name = "credentials", version.ref = "androidxCredentials" }
+androidx-credentials-play-services-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "androidxCredentials" }
 androidx-dataStore-core = { group = "androidx.datastore", name = "datastore", version.ref = "androidxDataStore" }
 androidx-dataStore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "androidxDataStore" }
 androidx-lifecycle-viewModelCompose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "androidxLifecycle" }
