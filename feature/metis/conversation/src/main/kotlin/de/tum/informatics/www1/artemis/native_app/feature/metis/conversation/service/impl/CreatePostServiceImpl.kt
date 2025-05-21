@@ -150,6 +150,7 @@ internal class CreatePostServiceImpl(private val context: Context) : CreatePostS
             WorkManager
                 .getInstance(context)
                 .beginUniqueWork(
+                    // We might need to change the workname here for duplicated method calls: https://github.com/ls1intum/artemis-android/issues/587#issuecomment-2897544603
                     getWorkName(postId),
                     ExistingWorkPolicy.REPLACE,
                     createPostRequest

@@ -41,12 +41,13 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalSegmentedButtonBaseShapeProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.Scaling
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisSection
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.AdaptiveNavigationIcon
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
-import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.pagePadding
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.common.PotentiallyIllegalTextField
@@ -59,18 +60,28 @@ internal const val TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH = "TEST_TAG_SET_PRIVATE_PU
 internal const val TEST_TAG_SET_ANNOUNCEMENT_UNRESTRICTED_SWITCH = "TEST_TAG_SET_ANNOUNCEMENT_UNRESTRICTED_SWITCH"
 internal const val TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH = "TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH"
 
+internal fun getSegmentedSelectionTestTag(
+    testTag: String,
+    index: Int,
+    selected: Boolean
+): String {
+    return "$testTag$index$selected"
+}
+
 @Composable
 fun CreateChannelScreen(
     modifier: Modifier,
     courseId: Long,
     onConversationCreated: (conversationId: Long) -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onSidebarToggle: () -> Unit
 ) {
     CreateChannelScreen(
         modifier = modifier,
         viewModel = koinViewModel { parametersOf(courseId) },
         onConversationCreated = onConversationCreated,
-        onNavigateBack = onNavigateBack
+        onNavigateBack = onNavigateBack,
+        onSidebarToggle = onSidebarToggle
     )
 }
 
@@ -79,7 +90,8 @@ internal fun CreateChannelScreen(
     modifier: Modifier,
     viewModel: CreateChannelViewModel,
     onConversationCreated: (conversationId: Long) -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onSidebarToggle: () -> Unit
 ) {
     var isDisplayingErrorDialog by remember { mutableStateOf(false) }
 
@@ -103,7 +115,7 @@ internal fun CreateChannelScreen(
                     Text(text = stringResource(id = R.string.create_channel_title))
                 },
                 navigationIcon = {
-                    NavigationBackButton(onNavigateBack)
+                    AdaptiveNavigationIcon(onNavigateBack = onNavigateBack, onSidebarToggle = onSidebarToggle)
                 }
             )
         }
@@ -269,6 +281,8 @@ private fun SegmentedSelection(
     onCheckedChange: (Int) -> Unit,
     testTag: String = ""
 ) {
+    val baseShapeProvider = LocalSegmentedButtonBaseShapeProvider.current
+
     Column(
         modifier = modifier.padding(bottom = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -293,7 +307,8 @@ private fun SegmentedSelection(
                 buttonLabelOption.forEachIndexed { index, label ->
                     val selected = index == selectedOption
                     SegmentedButton(
-                        modifier = Modifier.testTag(testTag + index + selected),
+                        modifier = Modifier
+                            .testTag(getSegmentedSelectionTestTag(testTag, index, selected)),
                         selected = selected,
                         colors = SegmentedButtonDefaults.colors(
                             inactiveContainerColor = CardDefaults.cardColors().containerColor,
@@ -303,7 +318,11 @@ private fun SegmentedSelection(
                         onClick = {
                             onCheckedChange(index)
                         },
-                        shape = SegmentedButtonDefaults.itemShape(index, buttonLabelOption.size),
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = index,
+                            count = buttonLabelOption.size,
+                            baseShape = baseShapeProvider.getBaseShape()
+                        ),
                         icon = {    // This had to be added manually to add padding to the icon
                             SegmentedButtonDefaults.Icon(
                                 active = selected,

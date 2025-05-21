@@ -87,6 +87,7 @@
     <string name="login_username_label">Login</string>
     <string name="login_password_label">Password</string>
     <string name="login_remember_me_label">Automatic login</string>
+    <string name="login_passkey_button_label">Sign in with Passkey</string>
     <string name="login_perform_login_button_text">Sign in</string>
     <string name="login_password_forgot">Did you forget your password?</string>
 

@@ -17,5 +17,16 @@
     <string name="profile_picture_upload_error_could_not_be_compressed">Profile picture could not be compressed</string>
     <string name="profile_picture_upload_error_failed">Upload failed</string>
 
+    <string name="passkey_settings_section_title">Passkeys</string>
+    <string name="passkey_settings_section_desc">Passkeys are a safer and easier alternative to passwords.</string>
+    <string name="passkey_settings_add_key">Add new key</string>
+    <string name="passkey_settings_created_at_label">Created at %1$s</string>
+
+    <string name="passkey_settings_create_success">Successfully created new passkey</string>
+    <string name="passkey_settings_create_cancelled">Passkey creation was cancelled by the User</string>
+    <string name="passkey_settings_create_failure_dialog_title">Passkey creation failed!</string>
+    <string name="passkey_settings_create_failure_dialog_desc">Consider retrying the creation.\nDetails:</string>
+    <string name="passkey_settings_create_failure_dialog_ok">@android:string/ok</string>
+
 
 </resources>

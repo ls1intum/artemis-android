@@ -14,14 +14,14 @@ plugins {
     id("com.google.gms.google-services")
     id("com.google.firebase.appdistribution")
     id("com.google.android.gms.oss-licenses-plugin")
-    id("io.sentry.android.gradle") version "5.4.0"
+    id("io.sentry.android.gradle") version "5.6.0"
     id("artemis.android.room")
 }
 
 android {
     namespace = "de.tum.informatics.www1.artemis.native_app.android"
 
-    val versionName = "2.0.1"
+    val versionName = "2.0.2"
     val versionCode = 624
 
     setProperty("archivesBaseName", "artemis-android-$versionName-$versionCode")

@@ -1,12 +1,9 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.overview
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.assertIsNotSelected
-import androidx.compose.ui.test.assertIsOff
-import androidx.compose.ui.test.assertIsOn
-import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -17,6 +14,8 @@ import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTi
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalSegmentedButtonBaseShapeProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.TestSegmentedButtonBaseShapeProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_channel.CreateChannelScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_channel.CreateChannelViewModel
@@ -24,11 +23,11 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversati
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_channel.TEST_TAG_SET_ANNOUNCEMENT_UNRESTRICTED_SWITCH
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_channel.TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_channel.TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_channel.getSegmentedSelectionTestTag
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metistest.ConversationBaseTest
 import kotlinx.coroutines.runBlocking
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
@@ -43,62 +42,49 @@ import kotlin.test.assertIs
 class CreateChannelE2eTest : ConversationBaseTest() {
 
     private val privateIndex = 1
-    private val courseWideIndex = 0
+    private val selectiveIndex = 1
 
-    @Ignore("This test does not work anymore, see https://github.com/ls1intum/artemis-android/issues/495")
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can create channel`() {
         canCreateChannelTestImpl(
             channelName = "testchannel1",
-            channelDescription = "testchannel description",
-            isPrivate = false,
-            isAnnouncement = true,
-            isCourseWide = false
+            channelDescription = "testchannel description"
         )
     }
 
-    @Ignore("This test does not work anymore, see https://github.com/ls1intum/artemis-android/issues/495")
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `fun create channel without description`() {
         canCreateChannelTestImpl(
             channelName = "testchannel2",
-            channelDescription = "",
-            isPrivate = false,
-            isAnnouncement = true,
-            isCourseWide = false
+            channelDescription = ""
         )
     }
 
-    @Ignore("This test does not work anymore, see https://github.com/ls1intum/artemis-android/issues/495")
     @Test(timeout = DefaultTestTimeoutMillis)
-    fun `fun create private and unrestricted channel`() {
+    fun `fun create private and selective channel`() {
         canCreateChannelTestImpl(
             channelName = "testchannel3",
             channelDescription = "description",
             isPrivate = true,
-            isAnnouncement = false,
             isCourseWide = false
         )
     }
 
-    @Ignore("This test does not work anymore, see https://github.com/ls1intum/artemis-android/issues/495")
     @Test(timeout = DefaultTestTimeoutMillis)
-    fun `can create course-wide channel`() {
+    fun `can create announcement channel`() {
         canCreateChannelTestImpl(
             channelName = "testchannel4",
-            channelDescription = "Course-wide channel test",
-            isPrivate = false,
-            isAnnouncement = false,
-            isCourseWide = true
+            channelDescription = "Announcement channel test",
+            isAnnouncement = true,
         )
     }
 
     private fun canCreateChannelTestImpl(
         channelName: String,
         channelDescription: String,
-        isPrivate: Boolean,
-        isAnnouncement: Boolean,
-        isCourseWide: Boolean
+        isPrivate: Boolean = false,
+        isAnnouncement: Boolean = false,
+        isCourseWide: Boolean = true
     ) {
         Logger.info(
             "Testing create channel with properties: channelname=$channelName, channelDescription$channelDescription, isPublic=$isPrivate, isAnnouncement=$isAnnouncement, isCourseWide=$isCourseWide"
@@ -116,12 +102,17 @@ class CreateChannelE2eTest : ConversationBaseTest() {
         var createdConversationId: Long? = null
 
         composeTestRule.setContent {
-            CreateChannelScreen(
-                modifier = Modifier.fillMaxSize(),
-                viewModel = viewModel,
-                onConversationCreated = { createdConversationId = it },
-                onNavigateBack = {}
-            )
+            CompositionLocalProvider(
+                LocalSegmentedButtonBaseShapeProvider provides TestSegmentedButtonBaseShapeProvider
+            ) {
+                CreateChannelScreen(
+                    modifier = Modifier.fillMaxSize(),
+                    viewModel = viewModel,
+                    onConversationCreated = { createdConversationId = it },
+                    onNavigateBack = {},
+                    onSidebarToggle = {}
+                )
+            }
         }
 
         composeTestRule
@@ -134,44 +125,44 @@ class CreateChannelE2eTest : ConversationBaseTest() {
             .performScrollTo()
             .performTextInput(channelDescription)
 
+        // Public/Private switch (default: private)
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH)
+            .performScrollTo()
+
         if (isPrivate) {
             composeTestRule
-                .onNodeWithTag(TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH)
-                .performScrollTo()
-            composeTestRule
-                .onNodeWithTag(TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH + privateIndex)
-                .assertIsSelected()
-        } else {
-            composeTestRule
-                .onNodeWithTag(TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH + privateIndex)
-                .assertIsNotSelected()
+                .onNodeWithTag(
+                    getSegmentedSelectionTestTag(
+                        testTag = TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH,
+                        index = privateIndex,
+                        selected = false
+                    )
+                )
+                .performClick()
         }
 
+        // Course-wide/Selective switch (default: course-wide)
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH)
+            .performScrollTo()
+
+        if (!isCourseWide) {
+            composeTestRule
+                .onNodeWithTag(getSegmentedSelectionTestTag(
+                    testTag = TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH,
+                    index = selectiveIndex,
+                    selected = false
+                ))
+                .performClick()
+        }
+
+        // Announcement switch (default: false)
         if (isAnnouncement) {
             composeTestRule
                 .onNodeWithTag(TEST_TAG_SET_ANNOUNCEMENT_UNRESTRICTED_SWITCH)
                 .performScrollTo()
                 .performClick()
-            composeTestRule
-                .onNodeWithTag(TEST_TAG_SET_ANNOUNCEMENT_UNRESTRICTED_SWITCH)
-                .assertIsOn()
-        } else {
-            composeTestRule
-                .onNodeWithTag(TEST_TAG_SET_ANNOUNCEMENT_UNRESTRICTED_SWITCH)
-                .assertIsOff()
-        }
-
-        if (isCourseWide) {
-            composeTestRule
-                .onNodeWithTag(TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH)
-                .performScrollTo()
-            composeTestRule
-                .onNodeWithTag(TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH + courseWideIndex)
-                .assertIsSelected()
-        } else {
-            composeTestRule
-                .onNodeWithTag(TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH + courseWideIndex)
-                .assertIsNotSelected()
         }
 
         composeTestRule

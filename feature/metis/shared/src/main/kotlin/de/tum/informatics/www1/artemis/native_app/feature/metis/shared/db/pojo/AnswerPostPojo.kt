@@ -57,7 +57,7 @@ data class AnswerPostPojo(
     override val content: String? = basePostingCache.content
 
     @Ignore
-    override val authorRole: UserRole = basePostingCache.authorRole
+    override val authorRole: UserRole? = basePostingCache.authorRole
 
     @Ignore
     override val authorName: String = basePostingCache.authorName
@@ -98,7 +98,7 @@ data class AnswerPostPojo(
         @ColumnInfo(name = "content")
         val content: String?,
         @ColumnInfo(name = "author_role")
-        val authorRole: UserRole,
+        val authorRole: UserRole?,
         @Relation(
             entity = MetisUserEntity::class,
             entityColumn = "id",

@@ -33,13 +33,13 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.sav
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.FileValidationConstants.isImage
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.ReplyTextStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.asMetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.model.Link
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.model.LinkPreview
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.post.util.LinkPreviewUtil
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ConversationChatListUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.ForwardMessageUseCase
@@ -717,7 +717,7 @@ internal open class ConversationViewModel(
         }
     }
 
-    fun createReply(): Deferred<MetisModificationFailure?> {
+    fun createAnswerPost(): Deferred<MetisModificationFailure?> {
         return viewModelScope.async(coroutineContext) {
             val serverSideParentPostId =
                 getPostId() ?: return@async MetisModificationFailure.CREATE_POST
@@ -733,12 +733,15 @@ internal open class ConversationViewModel(
         }
     }
 
-    fun retryCreateReply(clientPostId: String, content: String) {
+    fun retryCreateAnswerPost(clientPostId: String, content: String) {
         viewModelScope.launch(coroutineContext) {
-            createPostService.retryCreatePost(
+            val serverSideParentPostId = getPostId() ?: return@launch
+
+            createPostService.retryCreateAnswerPost(
                 courseId = courseId,
                 conversationId = conversationId,
                 clientSidePostId = clientPostId,
+                parentPostId = serverSideParentPostId,
                 content = content
             )
         }

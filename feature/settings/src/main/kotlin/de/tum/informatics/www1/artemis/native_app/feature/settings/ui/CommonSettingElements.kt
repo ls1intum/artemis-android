@@ -3,9 +3,12 @@ package de.tum.informatics.www1.artemis.native_app.feature.settings.ui
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -82,6 +85,7 @@ fun LogoutButtonEntry(
     ButtonEntry(
         modifier = modifier,
         text = stringResource(id = R.string.settings_account_logout),
+        leadingIcon = Icons.AutoMirrored.Filled.Logout,
         isFocused = true,
         textColor = MaterialTheme.colorScheme.error,
         onClick = onRequestLogout
@@ -92,6 +96,7 @@ fun LogoutButtonEntry(
 fun ButtonEntry(
     modifier: Modifier = Modifier,
     text: String,
+    leadingIcon: ImageVector? = null,
     isFocused: Boolean = false,
     textColor: Color = MaterialTheme.colorScheme.onSurface,
     onClick: () -> Unit,
@@ -101,6 +106,16 @@ fun ButtonEntry(
         isFocused = isFocused,
         onClick = onClick
     ) {
+        leadingIcon?.let {
+            Icon(
+                imageVector = it,
+                contentDescription = null,
+                tint = textColor
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+        }
+
         Text(
             text = text,
             color = textColor,
@@ -114,7 +129,7 @@ fun ButtonEntry(
     modifier: Modifier = Modifier,
     isFocused: Boolean = false,
     onClick: () -> Unit,
-    content: @Composable () -> Unit
+    content: @Composable RowScope.() -> Unit
 ) {
     Row(
         modifier = modifier

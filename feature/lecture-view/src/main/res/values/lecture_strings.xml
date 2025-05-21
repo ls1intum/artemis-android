@@ -23,6 +23,11 @@
 
     <string name="lecture_view_open_link_button">Open link</string>
 
+    <string name="lecture_view_open_file_attachment_dialog_title">Download File?</string>
+    <string name="lecture_view_open_file_attachment_dialog_message">This file cannot be viewed. Do you want to download it instead?</string>
+    <string name="lecture_view_open_file_attachment_dialog_positive">Download</string>
+    <string name="lecture_view_open_file_attachment_dialog_negative">Cancel</string>
+
     <!--  Attachments Tab  -->
     <string name="lecture_view_attachments_empty">This lecture has no attachments.</string>
     <string name="lecture_view_attachments_pdf">PDF</string>
@@ -40,4 +45,12 @@
     <string name="lecture_view_lecture_unit_set_completed_failed_dialog_title">Error!</string>
     <string name="lecture_view_lecture_unit_set_completed_failed_dialog_message">Something went wrong while setting the lecture unit as completed.</string>
     <string name="lecture_view_lecture_unit_set_completed_failed_dialog_positive">@android:string/ok</string>
+
+    <!--  Lecture list  -->
+    <string name="lecture_list_lectures_no_search_results_title">No lectures found</string>
+    <string name="lecture_list_lectures_no_search_results_body">\"%s\" did not match any lectures.</string>
+    <string name="lecture_list_lecture_item_start_date_set">Start date: %1$s</string>
+    <string name="lecture_list_lecture_item_start_date_not_set">No due date</string>
+    <string name="lecture_list_lecture_item_not_selected">Please select a lecture from the list.</string>
+
 </resources>

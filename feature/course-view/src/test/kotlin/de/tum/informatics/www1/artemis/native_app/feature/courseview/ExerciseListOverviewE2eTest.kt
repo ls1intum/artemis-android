@@ -1,6 +1,10 @@
 package de.tum.informatics.www1.artemis.native_app.feature.courseview
 
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.hasAnyDescendant
+import androidx.compose.ui.test.hasContentDescriptionExactly
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -15,7 +19,7 @@ import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_cr
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createModelingExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createProgramingExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createTextExercise
-import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.exercise_list.TEST_TAG_EXERCISE_LIST_LAZY_COLUMN
+import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.TEST_TAG_EXERCISE_LIST_LAZY_COLUMN
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import org.junit.Ignore
 import org.junit.Test
@@ -86,6 +90,22 @@ class ExerciseListOverviewE2eTest : BaseCourseTest() {
 
         setupAndDisplayCourseUi()
 
+        // Click on the exercises tab
+        composeTestRule
+            .onNodeWithText(context.getString(R.string.course_ui_tab_exercises))
+            .performClick()
+
+        // Expand all sections by clicking their headers
+        composeTestRule
+            .onAllNodes(hasTestTagEndingWith("-header")
+                .and(hasAnyDescendant(hasContentDescriptionExactly("Expand list"))))
+            .fetchSemanticsNodes()
+            .forEach { header ->
+                composeTestRule
+                    .onNode(hasTestTag(header.config.getOrNull(SemanticsProperties.TestTag) ?: ""))
+                    .performClick()
+            }
+
         composeTestRule
             .waitUntilExactlyOneExists(
                 hasTestTag(TEST_TAG_EXERCISE_LIST_LAZY_COLUMN),
@@ -93,15 +113,13 @@ class ExerciseListOverviewE2eTest : BaseCourseTest() {
             )
 
         composeTestRule
-            .onNodeWithTag("noDate-header")
-            .performClick()
-
-        composeTestRule
             .onNodeWithTag(TEST_TAG_EXERCISE_LIST_LAZY_COLUMN)
             .performScrollToKey(exercise.id!!)
 
+        // Verify the exercise title is visible
         composeTestRule
             .onNodeWithText(exercise.title!!)
             .assertExists("Could not find created exercise.")
     }
+
 }

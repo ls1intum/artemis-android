@@ -10,12 +10,10 @@ import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.post.TEST_TAG_DELETED_FORWARDED_POST
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.post.TEST_TAG_FORWARDED_POST_COLUMN
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.post.testTagForForwardedPost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import kotlinx.coroutines.CompletableDeferred
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
@@ -25,114 +23,28 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class ConversationMessagesUITest : BaseChatUITest() {
 
-    private fun testTagForPost(postId: StandalonePostId?) = "post$postId"
-
     // ################################# PIN VISIBILITY TESTS #####################################
 
-    @Ignore("There is an open issue about onClick events not working for the ModalBottomSheetLayout with" +
-            "the robolectric test runner. Enable this test again as soon as the following issue is resolved:" +
-            "https://github.com/robolectric/robolectric/issues/9595")
     @Test
     fun `test GIVEN post is not pinned WHEN pinning the post THEN the correct post gets pinned`() {
-        var changedPost: IBasePost? = null
-
-        setupChatUi(posts = posts, onPinPost =  { post ->
-            changedPost = post
-            CompletableDeferred()
-        })
-
-        composeTestRule.onNodeWithTag(
-            testTagForPost(posts[0].standalonePostId),
-            useUnmergedTree = true
-        )
-            .performSemanticsAction(SemanticsActions.OnLongClick)
-        composeTestRule.onNodeWithText(context.getString(R.string.post_pin))
-            .performClick()
-
-        testPinDestination(changedPost)
+        testPostPinningCallback()
     }
-
-    @Ignore("There is an open issue about onClick events not working for the ModalBottomSheetLayout with" +
-            "the robolectric test runner. Enable this test again as soon as the following issue is resolved:" +
-            "https://github.com/robolectric/robolectric/issues/9595")
+    
     @Test
     fun `test GIVEN post is pinned WHEN unpinning the post THEN the correct post gets unpinned`() {
-        var changedPost: IBasePost? = null
-        val modifiedPosts = posts.toMutableList()
-        modifiedPosts[0] = modifiedPosts[0].copy(displayPriority = DisplayPriority.PINNED)
-
-        setupChatUi(posts = modifiedPosts, onPinPost =  { post ->
-            changedPost = post
-            CompletableDeferred()
-        })
-
-        composeTestRule.onNodeWithTag(
-            testTagForPost(posts[0].standalonePostId),
-            useUnmergedTree = true
-        )
-            .performSemanticsAction(SemanticsActions.OnLongClick)
-        composeTestRule.onNodeWithText(context.getString(R.string.post_unpin))
-            .performClick()
-
-        testPinDestination(changedPost)
+        testPostPinningCallback(unpin = true)
     }
 
-    @Ignore("There is an open issue about onClick events not working for the ModalBottomSheetLayout with" +
-            "the robolectric test runner. Enable this test again as soon as the following issue is resolved:" +
-            "https://github.com/robolectric/robolectric/issues/9595")
     @Test
     fun `test GIVEN post is not pinned in thread WHEN pinning the post THEN the correct post gets pinned in thread`() {
-        var changedPost: IBasePost? = null
-
-        setupThreadUi(
-            post = posts[0],
-            onPinPost = { post ->
-                changedPost = post
-                CompletableDeferred()
-            }
-        )
-
-        composeTestRule.onNodeWithTag(
-            testTagForPost(posts[0].standalonePostId),
-            useUnmergedTree = true
-        )
-            .performSemanticsAction(SemanticsActions.OnLongClick)
-        composeTestRule.onNodeWithText(context.getString(R.string.post_pin))
-            .performClick()
-
-        testPinDestination(changedPost)
+        testPostPinningCallback(inThread = true)
     }
 
-    @Ignore("There is an open issue about onClick events not working for the ModalBottomSheetLayout with" +
-            "the robolectric test runner. Enable this test again as soon as the following issue is resolved:" +
-            "https://github.com/robolectric/robolectric/issues/9595")
     @Test
     fun `test GIVEN post is pinned in thread WHEN unpinning the post THEN the correct post gets unpinned in thread`() {
-        var changedPost: IBasePost? = null
-        val modifiedPosts = posts.toMutableList()
-        modifiedPosts[0] = modifiedPosts[0].copy(displayPriority = DisplayPriority.PINNED)
-
-        setupThreadUi(
-            post = modifiedPosts[0],
-            onPinPost = { post ->
-                changedPost = post
-                CompletableDeferred()
-            })
-
-        composeTestRule.onNodeWithTag(
-            testTagForPost(posts[0].standalonePostId),
-            useUnmergedTree = true
-        )
-            .performSemanticsAction(SemanticsActions.OnLongClick)
-        composeTestRule.onNodeWithText(context.getString(R.string.post_unpin))
-            .performClick()
-
-        testPinDestination(changedPost)
+        testPostPinningCallback(inThread = true, unpin = true)
     }
 
-    @Ignore("There is an open issue about onClick events not working for the ModalBottomSheetLayout with" +
-            "the robolectric test runner. Enable this test again as soon as the following issue is resolved:" +
-            "https://github.com/robolectric/robolectric/issues/9595")
     @Test
     fun `test GIVEN the post is not pinned THEN the post is not shown as pinned`() {
         setupChatUi(posts)
@@ -140,9 +52,6 @@ class ConversationMessagesUITest : BaseChatUITest() {
         testPinnedLabelInvisibility()
     }
 
-    @Ignore("There is an open issue about onClick events not working for the ModalBottomSheetLayout with" +
-            "the robolectric test runner. Enable this test again as soon as the following issue is resolved:" +
-            "https://github.com/robolectric/robolectric/issues/9595")
     @Test
     fun `test GIVEN the post is not pinned in thread THEN the post is not shown as pinned in thread`() {
         setupThreadUi(posts[0])
@@ -150,9 +59,6 @@ class ConversationMessagesUITest : BaseChatUITest() {
         testPinnedLabelInvisibility()
     }
 
-    @Ignore("There is an open issue about onClick events not working for the ModalBottomSheetLayout with" +
-            "the robolectric test runner. Enable this test again as soon as the following issue is resolved:" +
-            "https://github.com/robolectric/robolectric/issues/9595")
     @Test
     fun `test GIVEN the post is pinned THEN the post is shown as pinned`() {
         val modifiedPosts = posts.toMutableList()
@@ -162,9 +68,6 @@ class ConversationMessagesUITest : BaseChatUITest() {
         testPinnedLabelVisibility()
     }
 
-    @Ignore("There is an open issue about onClick events not working for the ModalBottomSheetLayout with" +
-            "the robolectric test runner. Enable this test again as soon as the following issue is resolved:" +
-            "https://github.com/robolectric/robolectric/issues/9595")
     @Test
     fun `test GIVEN the post is pinned in thread THEN the post is shown as pinned in thread`() {
         setupThreadUi(posts[0].copy(displayPriority = DisplayPriority.PINNED))
@@ -226,6 +129,50 @@ class ConversationMessagesUITest : BaseChatUITest() {
             useUnmergedTree = true
         )
             .assertExists()
+    }
+
+    private fun testPostPinningCallback(
+        inThread: Boolean = false,
+        unpin: Boolean = false,
+    ) {
+        var changedPost: IBasePost? = null
+
+        val posts = posts.toMutableList()
+        if (unpin) {
+            posts[0] = posts[0].copy(displayPriority = DisplayPriority.PINNED)
+        }
+
+        if (inThread) {
+            setupThreadUi(
+                post = posts[0],
+                isAbleToPin = true,
+                onPinPost = { post ->
+                    changedPost = post
+                    CompletableDeferred()
+                }
+            )
+        } else {
+            setupChatUi(
+                posts = posts,
+                isAbleToPin = true,
+                onPinPost = { post ->
+                    changedPost = post
+                    CompletableDeferred()
+                }
+            )
+        }
+
+        composeTestRule.onNodeWithText(
+            this.posts[0].content,
+            useUnmergedTree = true
+        )
+            .performSemanticsAction(SemanticsActions.OnLongClick)
+
+        val text = if (unpin) context.getString(R.string.post_unpin) else context.getString(R.string.post_pin)
+        composeTestRule.onNodeWithText(text)
+            .performClick()
+
+        testPinDestination(changedPost)
     }
 
     private fun testPinnedLabelInvisibility() {

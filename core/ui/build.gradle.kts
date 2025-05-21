@@ -3,6 +3,7 @@ plugins {
     id("artemis.android.library.compose")
     kotlin("plugin.serialization")
     id("artemis.android.flavor.library.instanceSelection")
+    id("kotlin-parcelize")
 }
 
 android {
@@ -46,4 +47,6 @@ dependencies {
     implementation(libs.noties.markwon.image.coil)
 
     debugImplementation(libs.edge2edge.preview)
+
+    testImplementation(project(":core:common-test"))
 }

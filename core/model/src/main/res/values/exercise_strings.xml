@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="exercise_includedInOverallScore_includedCompletely">Included</string>
+    <string name="exercise_includedInOverallScore_includedAsBonus">Bonus</string>
+    <string name="exercise_includedInOverallScore_notIncluded">Not included</string>
+</resources>

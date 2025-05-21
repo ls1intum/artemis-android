@@ -75,7 +75,7 @@ internal class MetisStorageServiceImpl(
                 authorId = author?.id ?: return null,
                 creationDate = creationDate,
                 content = content,
-                authorRole = authorRole?.asDb ?: UserRole.USER,
+                authorRole = authorRole?.asDb,
                 updatedDate = updatedDate,
                 isSaved = isSaved,
                 hasForwardedMessages = hasForwardedMessages
@@ -107,7 +107,7 @@ internal class MetisStorageServiceImpl(
                 authorId = authorId ?: return null,
                 creationDate = creationDate ?: Instant.fromEpochSeconds(0),
                 content = content,
-                authorRole = authorRole?.asDb ?: UserRole.USER,
+                authorRole = authorRole?.asDb,
                 updatedDate = updatedDate,
                 isSaved = isSaved,
                 hasForwardedMessages = hasForwardedMessages
@@ -565,7 +565,9 @@ internal class MetisStorageServiceImpl(
         metisContext: MetisContext,
         answerPostId: Long?
     ) {
-        val authorRole = (if (isNewPost && answerPost.authorRole == null) {
+        // TODO: change below maybe already enough.
+        // TODO: if yes, undo the nullable authorRole changes in the pojos
+        val authorRole = (if (answerPost.authorRole == null) {
             metisDao.queryPostAuthorRole(answerPostClientSidePostId)
         } else answerPost.authorRole?.asDb)?.asNetwork
 

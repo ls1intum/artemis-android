@@ -24,10 +24,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
-import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
+import de.tum.informatics.www1.artemis.native_app.core.ui.date.DateFormats
+import de.tum.informatics.www1.artemis.native_app.core.ui.date.format
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseCategoryChipRow
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseInfoChip
-import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ExerciseColors
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
@@ -128,13 +128,12 @@ private fun ExerciseInformationContent(
 
 @Composable
 private fun ExerciseLeftColumn(exercise: Exercise) {
-    val nullableDateTextInfo = @Composable { dueDate: Instant?, hintRes: Int, showColor: Boolean ->
+    val nullableDateTextInfo = @Composable { dueDate: Instant?, hintRes: Int ->
         if (dueDate != null) {
             DateInfoText(
                 modifier = Modifier.fillMaxWidth(),
-                dueDate = getRelativeTime(to = dueDate, showDateAndTime = true),
-                hintRes = hintRes,
-                dataColor = if (showColor) ExerciseColors.getDueDateColor(dueDate) else null
+                dueDate = dueDate.format(DateFormats.DefaultDateAndTime.format),
+                hintRes = hintRes
             )
         }
     }
@@ -142,7 +141,6 @@ private fun ExerciseLeftColumn(exercise: Exercise) {
     nullableDateTextInfo(
         exercise.releaseDate,
         R.string.exercise_view_overview_hint_assessment_release_date,
-        false
     )
 
     if (exercise.dueDate == null) {
@@ -155,15 +153,13 @@ private fun ExerciseLeftColumn(exercise: Exercise) {
     } else {
         nullableDateTextInfo(
             exercise.dueDate,
-            R.string.exercise_view_overview_hint_submission_due_date,
-            true
+            R.string.exercise_view_overview_hint_submission_due_date
         )
     }
 
     nullableDateTextInfo(
         exercise.assessmentDueDate,
-        R.string.exercise_view_overview_hint_assessment_due_date,
-        true
+        R.string.exercise_view_overview_hint_assessment_due_date
     )
 }
 
@@ -183,62 +179,6 @@ private fun ExerciseRightColumn(
             hintRes = R.string.exercise_view_overview_hint_assessment_complaint_possible,
             value = complaintPossibleText
         )
-
-        if (exercise.includedInOverallScore != Exercise.IncludedInOverallScore.INCLUDED_COMPLETELY) {
-            val (text, color) = when (exercise.includedInOverallScore) {
-                Exercise.IncludedInOverallScore.INCLUDED_AS_BONUS -> Pair(
-                    R.string.exercise_view_overview_hint_exercise_type_bonus,
-                    ExerciseColors.Type.bonus
-                )
-                Exercise.IncludedInOverallScore.NOT_INCLUDED -> Pair(
-                    R.string.exercise_view_overview_hint_exercise_type_optional,
-                    ExerciseColors.Type.notIncluded
-                )
-                else -> Pair(R.string.exercise_type_unknown, null)
-            }
-
-            TextAndValueRow(
-                modifier = Modifier.fillMaxWidth(),
-                exercise = exercise,
-                hintRes = R.string.exercise_view_overview_hint_exercise_type,
-                value = text,
-                dataColor = color
-            )
-        }
-
-        if (exercise.difficulty != null) {
-            val (text, color) = when (exercise.difficulty) {
-                Exercise.Difficulty.EASY -> Pair(
-                    R.string.exercise_view_overview_hint_difficulty_easy,
-                    ExerciseColors.Difficulty.easy
-                )
-                Exercise.Difficulty.MEDIUM -> Pair(
-                    R.string.exercise_view_overview_hint_difficulty_medium,
-                    ExerciseColors.Difficulty.medium
-                )
-                Exercise.Difficulty.HARD -> Pair(
-                    R.string.exercise_view_overview_hint_difficulty_hard,
-                    ExerciseColors.Difficulty.hard
-                )
-                else -> Pair(R.string.exercise_type_unknown, null)
-            }
-
-            TextAndValueRow(
-                modifier = Modifier.fillMaxWidth(),
-                exercise = exercise,
-                hintRes = R.string.exercise_view_overview_hint_difficulty,
-                value = text,
-                dataColor = color
-            )
-        }
-
-        if (exercise.categories.isNotEmpty()) {
-            TextAndValueRow(
-                modifier = Modifier.fillMaxWidth(),
-                exercise = exercise,
-                hintRes = R.string.exercise_view_overview_hint_exercise_categories
-            )
-        }
     }
 }
 
@@ -292,8 +232,7 @@ private fun TextAndValueRow(
 private fun DateInfoText(
     modifier: Modifier,
     @StringRes hintRes: Int,
-    dueDate: CharSequence,
-    dataColor: Color?
+    dueDate: CharSequence
 ) {
     Row(
         modifier = modifier,
@@ -311,7 +250,7 @@ private fun DateInfoText(
         Text(
             modifier = exerciseInformationColumnModifier,
             text = dueDate.toString(),
-            color = dataColor ?: MaterialTheme.colorScheme.onSurface,
+            color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.bodyMedium,
         )
     }

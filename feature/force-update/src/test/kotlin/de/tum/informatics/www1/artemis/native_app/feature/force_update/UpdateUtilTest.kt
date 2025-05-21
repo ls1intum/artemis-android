@@ -1,5 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.force_update
 
+import de.tum.informatics.www1.artemis.native_app.core.common.Feature
+import de.tum.informatics.www1.artemis.native_app.core.common.FeatureAvailability
 import de.tum.informatics.www1.artemis.native_app.core.common.app_version.NormalizedAppVersion
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse

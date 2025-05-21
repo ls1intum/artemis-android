@@ -13,4 +13,17 @@
     <string name="course_header_lecture_count">Lectures: %1$d</string>
 
     <string name="course_registration_sign_up">Enroll</string>
+
+    <!--  Supplied with the from date and to date.   -->
+    <string name="course_weekly_list_week_header">%1$s - %2$s</string>
+    <string name="course_weekly_list_unbound_week_header">No date associated</string>
+    <!--  Screen reader information about the expand button to show weekly exercises  -->
+    <string name="course_list_expand_button_more_content_info">Expand  list</string>
+    <string name="course_list_expand_button_less_content_info">Collapse list</string>
+    <string name="course_list_time_frame_past">Past</string>
+    <string name="course_list_time_frame_current">Current</string>
+    <string name="course_list_time_frame_future">Future</string>
+    <string name="course_list_time_frame_no_date">No date</string>
+    <string name="course_list_time_frame_due_soon">Due soon</string>
+    <string name="course_sub_title_no_date">No Date Associated</string>
 </resources>

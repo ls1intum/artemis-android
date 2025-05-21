@@ -24,8 +24,8 @@ import com.google.accompanist.placeholder.material.placeholder
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.AdaptiveNavigationIcon
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
-import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.getExerciseTypeIconPainter
 
 
@@ -33,13 +33,23 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.getExerciseTy
 internal fun ExerciseScreenTopAppBar(
     modifier: Modifier,
     exerciseDataState: DataState<Exercise>,
+    onSidebarToggle: () -> Unit = {},
+    showSideBarIcon: Boolean
 ) {
     Column(modifier = modifier) {
         ArtemisTopAppBar(
             modifier = Modifier.fillMaxWidth(),
-            title = { TitleText(modifier = modifier, maxLines = 1, exerciseDataState = exerciseDataState) },
+            title = {
+                TitleText(
+                    modifier = modifier,
+                    maxLines = 1,
+                    exerciseDataState = exerciseDataState
+                )
+            },
             navigationIcon = {
-                NavigationBackButton()
+                AdaptiveNavigationIcon(
+                    onSidebarToggle = onSidebarToggle
+                )
             }
         )
     }

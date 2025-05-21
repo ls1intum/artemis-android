@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.core.model.exercise
 import de.tum.informatics.www1.artemis.native_app.core.common.hasPassedFlow
 import de.tum.informatics.www1.artemis.native_app.core.common.isInFutureFlow
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
+import de.tum.informatics.www1.artemis.native_app.core.model.R
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation.InitializationState
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
@@ -208,3 +209,10 @@ val Exercise.currentUserPoints: Float
 
 val Exercise.latestParticipation: Participation?
     get() = studentParticipations.orEmpty().firstOrNull()
+
+val Exercise.IncludedInOverallScore.label: Int
+    get() = when (this) {
+        Exercise.IncludedInOverallScore.INCLUDED_COMPLETELY -> R.string.exercise_includedInOverallScore_includedCompletely
+        Exercise.IncludedInOverallScore.INCLUDED_AS_BONUS -> R.string.exercise_includedInOverallScore_includedAsBonus
+        Exercise.IncludedInOverallScore.NOT_INCLUDED -> R.string.exercise_includedInOverallScore_notIncluded
+    }

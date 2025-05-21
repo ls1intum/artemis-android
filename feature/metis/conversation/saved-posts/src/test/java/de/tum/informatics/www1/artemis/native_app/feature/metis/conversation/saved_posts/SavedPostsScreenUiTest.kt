@@ -9,8 +9,10 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
+import de.tum.informatics.www1.artemis.native_app.core.ui.test.BottomSheetClickWorkaroundTheme
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.ui.SavedPostsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
@@ -18,7 +20,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getStr
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import org.junit.Assert.assertEquals
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
@@ -71,9 +72,6 @@ class SavedPostsScreenUiTest : BaseComposeTest() {
             .assertExists()
     }
 
-    @Ignore("There is an open issue about onClick events not working for the ModalBottomSheetLayout with" +
-            "the robolectric test runner. Enable this test again as soon as the following issue is resolved:" +
-            "https://github.com/robolectric/robolectric/issues/9595")
     @Test
     fun `test GIVEN a single Saved Post WHEN pressing 'Remove from saved' THEN the callback is called`() {
         var removeCalled = false
@@ -106,14 +104,23 @@ class SavedPostsScreenUiTest : BaseComposeTest() {
         onRemoveFromSavedPosts: (ISavedPost) -> Deferred<MetisModificationFailure?> = { CompletableDeferred() }
     ) {
         composeTestRule.setContent {
-            SavedPostsScreen(
-                modifier = Modifier,
-                savedPostsDataState = DataState.Success(listOf(savedPost)),
-                onRequestReload = {},
-                onNavigateToPost = { _ -> },
-                onChangeStatus = onChangeStatus,
-                onRemoveFromSavedPosts = onRemoveFromSavedPosts
-            )
+            BottomSheetClickWorkaroundTheme {
+                SavedPostsScreen(
+                    modifier = Modifier,
+                    savedPostsChatListItemsDataState = DataState.Success(
+                        listOf(
+                            ChatListItem.PostItem.SavedItem.SavedPost(
+                                savedPost
+                            )
+                        )
+                    ),
+                    onRequestReload = {},
+                    onNavigateToPost = { _ -> },
+                    onChangeStatus = onChangeStatus,
+                    onRemoveFromSavedPosts = onRemoveFromSavedPosts,
+                    onSidebarToggle = {}
+                )
+            }
         }
     }
 

@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.overview
 
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -48,7 +49,10 @@ class ConversationListUiTest : BaseComposeTest() {
                 onToggleMarkAsFavourite = { _, _ -> },
                 onToggleHidden = { _, _ -> },
                 onToggleMuted = { _, _ -> },
-                trailingContent = {}
+                trailingContent = {},
+                selectedConversationId = null,
+                listState = rememberLazyListState(),
+
             )
         }
     }

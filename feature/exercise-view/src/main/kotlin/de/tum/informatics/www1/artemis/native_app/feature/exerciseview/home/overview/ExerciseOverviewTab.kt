@@ -43,6 +43,7 @@ internal fun ExerciseOverviewTab(
         modifier = modifier
             .verticalScroll(rememberScrollState())
             .fillMaxSize()
+            .padding(bottom =  32.dp)
     ) {
         ParticipationStatusUi(
             modifier = Modifier
@@ -53,22 +54,9 @@ internal fun ExerciseOverviewTab(
             actions = actions
         )
 
-        // The Spacers in this Column are needed as verticalArrangement.spacedBy does lead to a gap under the ArtemisWebView
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
-        ExerciseInformation(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = Spacings.ScreenHorizontalSpacing)
-                .border(
-                    width = informationTableThickness,
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = MaterialTheme.shapes.extraSmall
-                ),
-            exercise = exercise,
-            exerciseChannel = exerciseChannel,
-            isLongToolbar = isLongToolbar
-        )
+       ExerciseOverviewChips(exercise = exercise)
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -87,8 +75,7 @@ internal fun ExerciseOverviewTab(
 
             ArtemisWebView(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
+                    .fillMaxWidth(),
                 webViewState = webViewState,
                 webView = webView,
                 adjustHeightForContent = true,
@@ -104,5 +91,22 @@ internal fun ExerciseOverviewTab(
                 style = MaterialTheme.typography.bodyMedium
             )
         }
+
+        // The Spacers in this Column are needed as verticalArrangement.spacedBy does lead to a gap under the ArtemisWebView
+        Spacer(modifier = Modifier.height(16.dp))
+
+        ExerciseInformation(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Spacings.ScreenHorizontalSpacing)
+                .border(
+                    width = informationTableThickness,
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = MaterialTheme.shapes.extraSmall
+                ),
+            exercise = exercise,
+            exerciseChannel = exerciseChannel,
+            isLongToolbar = isLongToolbar
+        )
     }
 }

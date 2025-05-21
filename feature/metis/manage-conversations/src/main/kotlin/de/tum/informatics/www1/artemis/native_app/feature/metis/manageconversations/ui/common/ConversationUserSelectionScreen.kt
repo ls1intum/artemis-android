@@ -28,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.AdaptiveNavigationIcon
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.JobAnimatedFloatingActionButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
@@ -51,7 +52,8 @@ internal fun <T> ConversationUserSelectionScreen(
     startJob: () -> Deferred<T?>,
     onJobCompleted: (T?) -> Unit,
     onNavigateBack: () -> Unit,
-    onDismissFailedDialog: () -> Unit
+    onDismissFailedDialog: () -> Unit,
+    onSidebarToggle: () -> Unit
 ) {
     var numberOfSelectedUsers by remember { mutableIntStateOf(0) }
 
@@ -61,7 +63,7 @@ internal fun <T> ConversationUserSelectionScreen(
             ArtemisTopAppBar(
                 title = { Text(stringResource(id = titleRes)) },
                 navigationIcon = {
-                    NavigationBackButton(onNavigateBack = onNavigateBack)
+                    AdaptiveNavigationIcon(onNavigateBack = onNavigateBack, onSidebarToggle = onSidebarToggle)
                 }
             )
         },
