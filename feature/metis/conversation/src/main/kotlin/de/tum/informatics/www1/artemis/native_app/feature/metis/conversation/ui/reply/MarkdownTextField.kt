@@ -40,11 +40,9 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,15 +51,12 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.isUnspecified
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicArtemisTextField
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.toPainter
@@ -71,7 +66,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.app
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.EmojiPickerModalBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.LocalReplyAutoCompleteHintProvider
-import kotlinx.coroutines.launch
 
 
 const val TEST_TAG_MARKDOWN_TEXTFIELD = "TEST_TAG_MARKDOWN_TEXTFIELD"
@@ -273,56 +267,29 @@ fun BasicMarkdownTextField(
     onFocusLost: () -> Unit = {}
 ) {
     var hadFocus by remember { mutableStateOf(false) }
-    val coroutineScope = rememberCoroutineScope()
-    val scrollState = rememberScrollState()
-
-    val localDensity = LocalDensity.current
     val localTextStyle = LocalTextStyle.current
 
-    // This check is needed for the UI Test to explicitly set the font size if it is unspecified
-    val lineHeight = with(localDensity) {
-        if (localTextStyle.lineHeight.isUnspecified) {
-            16.sp.toPx()
-        } else {
-            localTextStyle.lineHeight.toPx()
-        }
-    }
-
-    LaunchedEffect(textFieldValue.selection) {
-        val cursorLine = textFieldValue.text.take(textFieldValue.selection.start)
-            .count { it == '\n' }
-        val cursorOffset = (cursorLine * lineHeight).toInt()
-        coroutineScope.launch {
-            scrollState.animateScrollTo(cursorOffset)
-        }
-    }
-
-    Box(
+    BasicArtemisTextField(
         modifier = modifier
+            .fillMaxWidth()
             .heightIn(max = (localTextStyle.fontSize.value * maxVisibleLines).dp)
-            .verticalScroll(scrollState)
-    ) {
-        BasicArtemisTextField(
-            modifier = modifier
-                .fillMaxWidth()
-                .testTag(TEST_TAG_MARKDOWN_TEXTFIELD),
-            backgroundColor = backgroundColor,
-            value = textFieldValue,
-            onValueChange = onTextChanged,
-            focusRequester = focusRequester,
-            onFocusChanged = { hasFocus ->
-                if (hasFocus) {
-                    hadFocus = true
-                    onFocusAcquired()
-                }
-                if (!hasFocus && hadFocus) {
-                    onFocusLost()
-                    hadFocus = false
-                }
-            },
-            hint = hintText.text
-        )
-    }
+            .testTag(TEST_TAG_MARKDOWN_TEXTFIELD),
+        backgroundColor = backgroundColor,
+        value = textFieldValue,
+        onValueChange = onTextChanged,
+        focusRequester = focusRequester,
+        onFocusChanged = { hasFocus ->
+            if (hasFocus) {
+                hadFocus = true
+                onFocusAcquired()
+            }
+            if (!hasFocus && hadFocus) {
+                onFocusLost()
+                hadFocus = false
+            }
+        },
+        hint = hintText.text
+    )
 }
 
 @Composable
