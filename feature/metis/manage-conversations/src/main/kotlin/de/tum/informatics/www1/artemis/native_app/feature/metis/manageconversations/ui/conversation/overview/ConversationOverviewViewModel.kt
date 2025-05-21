@@ -144,6 +144,9 @@ class ConversationOverviewViewModel(
         MutableStateFlow<ConversationOverviewUtils.ConversationFilter>(ConversationOverviewUtils.ConversationFilter.All)
     val currentFilter: StateFlow<ConversationOverviewUtils.ConversationFilter> = _currentFilter
 
+    private val _scrollPosition = MutableStateFlow(0)
+    val scrollPosition: StateFlow<Int> = _scrollPosition
+
     private val conversationUpdates: Flow<ConversationWebsocketDto> = clientId
         .filterSuccess()
         .flatMapLatest { userId ->
@@ -621,4 +624,8 @@ class ConversationOverviewViewModel(
         isExpanded: Boolean,
         showPrefix: Boolean = true
     ) = ConversationCollection(this, isExpanded, showPrefix)
+
+    fun saveScrollPosition(position: Int) {
+        _scrollPosition.value = position
+    }
 }
