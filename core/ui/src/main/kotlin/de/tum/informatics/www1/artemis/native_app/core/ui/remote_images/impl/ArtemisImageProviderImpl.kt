@@ -62,6 +62,22 @@ class ArtemisImageProviderImpl(
     }
 
     @Composable
+    override fun rememberArtemisImageRequestByUrl(imageUrl: String): ImageRequest {
+        val artemisContext by artemisContextProvider.collectArtemisContextAsState()
+
+        val authToken = artemisContext.authTokenOrEmptyString
+        val context = LocalContext.current
+
+        return remember(imageUrl, authToken) {
+            imageProvider.createImageRequest(
+                context = context,
+                imageUrl = imageUrl,
+                authorizationToken = authToken,
+            )
+        }
+    }
+
+    @Composable
     override fun rememberArtemisImageLoader(): ImageLoader {
         val artemisContext by artemisContextProvider.collectArtemisContextAsState()
         val authorizationToken = artemisContext.authTokenOrEmptyString

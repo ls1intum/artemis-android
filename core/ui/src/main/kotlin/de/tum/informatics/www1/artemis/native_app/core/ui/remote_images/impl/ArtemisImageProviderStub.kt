@@ -46,6 +46,13 @@ class ArtemisImageProviderStub : ArtemisImageProvider {
     }
 
     @Composable
+    override fun rememberArtemisImageRequestByUrl(imageUrl: String): ImageRequest {
+        return ImageRequest.Builder(LocalContext.current)
+            .data(imageUrl)
+            .build()
+    }
+
+    @Composable
     override fun rememberArtemisImageLoader(): coil.ImageLoader {
         return coil.ImageLoader(LocalContext.current)
     }

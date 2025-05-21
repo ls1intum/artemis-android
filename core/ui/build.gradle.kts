@@ -47,4 +47,6 @@ dependencies {
     implementation(libs.noties.markwon.image.coil)
 
     debugImplementation(libs.edge2edge.preview)
+
+    testImplementation(project(":core:common-test"))
 }

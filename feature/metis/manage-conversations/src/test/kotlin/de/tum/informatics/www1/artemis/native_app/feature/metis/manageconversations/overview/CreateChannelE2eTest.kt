@@ -120,7 +120,8 @@ class CreateChannelE2eTest : ConversationBaseTest() {
                 modifier = Modifier.fillMaxSize(),
                 viewModel = viewModel,
                 onConversationCreated = { createdConversationId = it },
-                onNavigateBack = {}
+                onNavigateBack = {},
+                onSidebarToggle = {}
             )
         }
 

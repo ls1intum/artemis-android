@@ -28,7 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.common.UserRoleBadge
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.common.OptionalUserRoleBadge
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.LocalVisibleMetisContextManager
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -149,7 +149,7 @@ private fun UserProfileDialogHeader(
         Column(
             modifier = Modifier.padding(start = 16.dp),
         ) {
-            UserRoleBadge(
+            OptionalUserRoleBadge(
                 userRole = userRole,
             )
 

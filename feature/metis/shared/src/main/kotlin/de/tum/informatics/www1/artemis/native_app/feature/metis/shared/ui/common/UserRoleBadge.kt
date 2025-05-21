@@ -68,11 +68,23 @@ private fun UserRoleBadgesRow(
     }
 }
 
+@Composable
+fun OptionalUserRoleBadge(
+    modifier: Modifier = Modifier,
+    userRole: UserRole?
+) {
+    if (userRole != null) {
+        UserRoleBadge(
+            modifier = modifier,
+            userRole = userRole
+        )
+    }
+}
 
 @Composable
 fun UserRoleBadge(
     modifier: Modifier = Modifier,
-    userRole: UserRole?
+    userRole: UserRole
 ) {
     UserRoleBadge(
         modifier = modifier,

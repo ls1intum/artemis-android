@@ -100,7 +100,8 @@ class ConversationAddMemberSettingsE2eTest : ConversationBaseTest() {
                     isDone = it == true
                 },
                 onNavigateBack = { isDone = true },
-                onDismissFailedDialog = {}
+                onDismissFailedDialog = {},
+                onSidebarToggle = {}
             )
         }
 

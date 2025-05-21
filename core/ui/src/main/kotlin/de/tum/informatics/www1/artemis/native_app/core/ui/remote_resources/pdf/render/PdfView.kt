@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render
+package de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.render
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -30,9 +30,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
-import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.PdfImage
-import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.state.HorizontalPdfReaderState
-import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.state.VerticalPdfReaderState
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.PdfImage
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.render.state.HorizontalPdfReaderState
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.render.state.VerticalPdfReaderState
 import kotlinx.coroutines.launch
 
 @Composable

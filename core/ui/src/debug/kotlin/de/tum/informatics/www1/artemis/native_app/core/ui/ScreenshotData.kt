@@ -154,7 +154,7 @@ object ScreenshotData {
                     IMAGE_MARS -> marsImage
                     IMAGE_SATURN_5 -> saturnImage
                     IMAGE_ASTRONAUT -> astronautImage
-                    else -> null
+                    else -> marsImage
                 }
             }
         }
