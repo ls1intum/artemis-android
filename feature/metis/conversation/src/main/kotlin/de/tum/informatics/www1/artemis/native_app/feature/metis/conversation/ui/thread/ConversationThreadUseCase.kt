@@ -181,6 +181,9 @@ internal class ConversationThreadUseCase(
 
         return when (standalonePostDataState) {
             is DataState.Success -> {
+                // The transaction is needed to ensure that storing the post in the db and re-fetching it
+                // does not interfere with other transactions. Eg, when reloading, the ConversationChatListUseCase
+                // might delete older updated posts.
                 metisStorageService.withTransaction {
                     val post = standalonePostDataState.data
 
