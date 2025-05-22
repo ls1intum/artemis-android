@@ -8,6 +8,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ArtemisNotification
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ReplyPostCommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.parentId
 import kotlinx.datetime.Instant
 
@@ -33,24 +34,31 @@ interface PushCommunicationDao {
     @Insert
     suspend fun insertCommunicationMessage(communicationMessageEntity: CommunicationMessageEntity)
 
+    /**
+     * @return The parentId used for the communication and message entities.
+     */
     @Transaction
     suspend fun insertNotification(
         artemisNotification: ArtemisNotification<CommunicationNotificationType>,
         generateNotificationId: suspend () -> Int,
         isPostFromAppUser: suspend (CommunicationNotificationPlaceholderContent) -> Boolean
-    ) {
-        val parentId = artemisNotification.parentId
+    ): Long {
+        var parentId = artemisNotification.parentId
 
         val message: CommunicationMessageEntity = try {
             val content = CommunicationNotificationPlaceholderContent.fromNotificationsPlaceholders(
                 type = artemisNotification.type,
                 notificationPlaceholders = artemisNotification.notificationPlaceholders
-            ) ?: return
+            ) ?: return -1
+
+            if (artemisNotification.type is ReplyPostCommunicationNotificationType) {
+                parentId = content.messageId.toLong()
+            }
 
             if (isPostFromAppUser(content)) {
                 // As a temporary fix for receiving notifications for own posts.
                 // See: https://github.com/ls1intum/artemis-android/issues/326
-                return
+                return -1
             }
 
             if (hasPushCommunication(parentId)) {
@@ -82,10 +90,11 @@ interface PushCommunicationDao {
             )
         } catch (e: Exception) {
             Log.e(TAG, "Error while parsing artemis communication notification", e)
-            return
+            return -1
         }
 
         insertCommunicationMessage(message)
+        return parentId
     }
 
     @Transaction

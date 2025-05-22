@@ -5,7 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-class CommunicationPostTarget(
+data class CommunicationPostTarget(
     @SerialName("message")
     val message: String,
     @SerialName("entity")
