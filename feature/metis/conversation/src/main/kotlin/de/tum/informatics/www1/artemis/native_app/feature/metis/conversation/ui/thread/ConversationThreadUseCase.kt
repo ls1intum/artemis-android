@@ -198,9 +198,10 @@ internal class ConversationThreadUseCase(
                     )
 
                     if (clientSidePostId != null) {
-                        metisStorageService
-                            .getStandalonePost(clientSidePostId)
-                            .asDataStateFlow()
+                        val storedPost = metisStorageService
+                            .getStandalonePost(clientSidePostId).first()
+
+                        flowOf(storedPost).asDataStateFlow()
                     } else failureFlow
                 }
             }
