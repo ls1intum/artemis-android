@@ -42,12 +42,11 @@ import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitAttachment
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitAttachmentVideo
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitOnline
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitText
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitUnknown
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitVideo
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.DateFormats
@@ -335,7 +334,17 @@ private fun LectureUnitBottomSheetContent(
             .verticalScroll(rememberScrollState())
     ) {
         when (lectureUnit) {
-            is LectureUnitAttachment -> {}
+            is LectureUnitAttachmentVideo -> {
+                if (lectureUnit.hasVideo) {
+                    LectureUnitVideoUi(
+                        modifier = childModifier,
+                        lectureUnit = lectureUnit,
+                        onClickOpenLink = {
+                            onRequestViewLink(lectureUnit.videoSource.orEmpty())
+                        }
+                    )
+                }
+            }
 
             is LectureUnitExercise -> {}
 
@@ -357,16 +366,6 @@ private fun LectureUnitBottomSheetContent(
             }
 
             is LectureUnitUnknown -> {}
-
-            is LectureUnitVideo -> {
-                LectureUnitVideoUi(
-                    modifier = childModifier,
-                    lectureUnit = lectureUnit,
-                    onClickOpenLink = {
-                        onRequestViewLink(lectureUnit.source.orEmpty())
-                    }
-                )
-            }
         }
     }
 }

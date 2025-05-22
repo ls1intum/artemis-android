@@ -12,7 +12,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExerci
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitAttachment
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitAttachmentVideo
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateId
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
@@ -218,7 +218,7 @@ suspend fun KoinComponent.createAttachmentUnit(
     accessToken: String,
     lectureId: Long,
     lectureUnitName: String = "Attachment lecture unit ${generateId()}"
-): LectureUnitAttachment {
+): LectureUnitAttachmentVideo {
     return ktorProvider.ktorClient.submitFormWithBinaryData(
         formData {
             append(
