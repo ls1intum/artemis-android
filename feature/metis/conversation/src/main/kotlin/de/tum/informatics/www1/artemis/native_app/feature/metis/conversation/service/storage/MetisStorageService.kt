@@ -15,6 +15,10 @@ import kotlinx.coroutines.flow.Flow
  */
 interface MetisStorageService {
 
+    suspend fun <T> withTransaction(
+        block: suspend () -> T
+    ): T
+
     /**
      * Permanently store the given posts. If a post with an identical id already exists, the existing post is updated.
      * The answer posts are also updated by either being inserted or updated.
