@@ -23,7 +23,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotData.Images.
 import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotData.Images.IMAGE_MARS
 import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotData.Images.IMAGE_SATURN_5
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseSearchConfiguration
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import kotlinx.datetime.Clock
 import kotlin.time.Duration.Companion.days
 
@@ -158,16 +157,6 @@ object ScreenshotData {
                 }
             }
         }
-        
-        val emptyBoundExerciseActions = BoundExerciseActions(
-            onClickStartTextExercise = {},
-            onClickPracticeQuiz = {},
-            onClickOpenQuiz = {},
-            onClickStartQuiz = {},
-            onClickOpenTextExercise = { _, _ -> },
-            onClickViewResult = {},
-            onClickViewQuizResults = {}
-        )
 
         fun searchConfiguration(
             hint: String,
