@@ -10,6 +10,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.notification_mode
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ReplyPostCommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.parentId
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.util.NotificationTargetManager
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.util.NotificationTargetManager.toJsonString
 import kotlinx.datetime.Instant
 
 @Dao
@@ -44,6 +46,7 @@ interface PushCommunicationDao {
         isPostFromAppUser: suspend (CommunicationNotificationPlaceholderContent) -> Boolean
     ): Long {
         var parentId = artemisNotification.parentId
+        var targetString = artemisNotification.target
 
         val message: CommunicationMessageEntity = try {
             val content = CommunicationNotificationPlaceholderContent.fromNotificationsPlaceholders(
@@ -52,7 +55,13 @@ interface PushCommunicationDao {
             ) ?: return -1
 
             if (artemisNotification.type is ReplyPostCommunicationNotificationType) {
+                // For answer notifications, we set the parentId to the basePostId. This allows to group
+                // multiple answer notifications.
                 parentId = content.messageId.toLong()
+
+                // We also change the target postId to the basePostId. This allows to navigate to the thread of the post.
+                val target = NotificationTargetManager.getCommunicationNotificationTarget(artemisNotification.target)
+                targetString = target.copy(postId = parentId).toJsonString()
             }
 
             if (isPostFromAppUser(content)) {
@@ -73,7 +82,7 @@ interface PushCommunicationDao {
                     notificationTypeString = artemisNotification.type.toString(),
                     courseTitle = content.courseName,
                     containerTitle = content.channelName,
-                    targetString = artemisNotification.target,
+                    targetString = targetString,
                     conversationTypeString = content.conversationType?.rawValue
                 )
 
