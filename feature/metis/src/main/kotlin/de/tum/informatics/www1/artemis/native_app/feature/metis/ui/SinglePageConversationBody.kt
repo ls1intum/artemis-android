@@ -215,7 +215,8 @@ fun SinglePageConversationBody(
                             conversationOverview = conversationOverview
                         )
                     },
-                    title = title
+                    title = title,
+                    searchConfiguration = searchConfiguration
                 )
 
             }

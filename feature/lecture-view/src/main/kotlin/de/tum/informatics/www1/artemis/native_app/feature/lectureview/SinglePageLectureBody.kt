@@ -17,6 +17,7 @@ import androidx.compose.ui.res.stringResource
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.ui.ArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.R.drawable.sidebar_icon
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseSearchConfiguration
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.timeframe.TimeFrame
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.tablet.LayoutAwareTwoColumnLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
@@ -31,7 +32,8 @@ fun SinglePageLectureBody(
     collapsingContentState: CollapsingContentState,
     onViewExercise: (Long) -> Unit,
     onNavigateToLectureScreen: (Long) -> Unit,
-    title: String
+    title: String,
+    searchConfiguration: CourseSearchConfiguration
 ) {
     val layout = getArtemisAppLayout()
     val isTabletPortrait = layout.isTabletPortrait
@@ -98,7 +100,8 @@ fun SinglePageLectureBody(
                         }
                     }
                 },
-                title = title
+                title = title,
+                searchConfiguration = searchConfiguration
             )
         }
     }

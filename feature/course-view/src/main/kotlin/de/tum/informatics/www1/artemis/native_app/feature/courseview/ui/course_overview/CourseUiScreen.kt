@@ -331,7 +331,8 @@ internal fun CourseUiScreen(
                                 )
                             }
                         ),
-                        title = courseName
+                        title = courseName,
+                        searchConfiguration = exerciseSearchConfiguration
                     )
                 }
             }
@@ -348,7 +349,8 @@ internal fun CourseUiScreen(
                         collapsingContentState = collapsingContentState,
                         onViewExercise = onNavigateToExercise,
                         onNavigateToLectureScreen = { id -> onNavigateToLecture(id ?: 0L) },
-                        title = courseName
+                        title = courseName,
+                        searchConfiguration = lectureSearchConfiguration
                     )
                 }
             }
