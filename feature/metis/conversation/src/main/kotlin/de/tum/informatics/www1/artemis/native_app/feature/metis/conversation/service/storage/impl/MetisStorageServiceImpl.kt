@@ -476,9 +476,8 @@ internal class MetisStorageServiceImpl(
         }
 
         // First insert the users as they have no dependencies
-        // TODO: Do not update existing users, as for the reactions we always get null as image_url
-        //       Can be undone when https://github.com/ls1intum/Artemis/pull/9897 is merged.
-//        metisDao.updateUsers(standalonePostReactionsUsers)
+
+        // We explicitly do NOT update users, as we always get null as an user imageUrl for reactions.
         metisDao.insertUsers(standalonePostReactionsUsers)
 
         metisDao.insertOrUpdateUser(postingAuthor)
@@ -565,8 +564,6 @@ internal class MetisStorageServiceImpl(
         metisContext: MetisContext,
         answerPostId: Long?
     ) {
-        // TODO: change below maybe already enough.
-        // TODO: if yes, undo the nullable authorRole changes in the pojos
         val authorRole = (if (answerPost.authorRole == null) {
             metisDao.queryPostAuthorRole(answerPostClientSidePostId)
         } else answerPost.authorRole?.asDb)?.asNetwork
@@ -586,9 +583,7 @@ internal class MetisStorageServiceImpl(
 
         metisDao.insertOrUpdateUser(metisUserEntity)
 
-        // TODO: Do not update existing users, as for the reactions we always get null as image_url
-        //       Can be undone when https://github.com/ls1intum/Artemis/pull/9897 is merged.
-//        metisDao.updateUsers(answerPostReactionUsers)
+        // We explicitly do NOT update users, as we always get null as an user imageUrl for reactions.
         metisDao.insertUsers(answerPostReactionUsers)
 
         if (isNewPost) {
