@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.lectureview
 
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -44,14 +43,11 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedCom
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.ImageFile
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.PdfFile
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.canDisplayMetisOnDisplaySide
 import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.coroutines.Deferred
 import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
-
-const val METIS_RATIO = 0.3f
 
 @Serializable
 private data class LectureScreenUi(val lectureId: Long)
@@ -167,121 +163,113 @@ internal fun LectureScreen(
 
     val overviewListState = rememberLazyListState()
 
-    BoxWithConstraints(modifier = modifier) {
-        val displayCommunicationOnSide = canDisplayMetisOnDisplaySide(
-            parentWidth = maxWidth,
-            metisContentRatio = METIS_RATIO
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            ArtemisTopAppBar(
+                title = {
+                    Text(
+                        text = lectureTitle.orEmpty(),
+                        modifier = Modifier.placeholder(lectureTitle == null),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
+                navigationIcon = {
+                    AdaptiveNavigationIcon(onSidebarToggle = onSidebarToggle)
+                },
+                isElevated = false
+            )
+        }
+    ) { padding ->
+        LectureScreenBody(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = padding.calculateTopPadding())
+                .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top)),
+            lectureDataState = lectureDataState,
+            lectureChannel = lectureChannel,
+            lectureUnits = lectureUnits,
+            onViewExercise = onViewExercise,
+            overviewListState = overviewListState,
+            onRequestViewLink = { pendingOpenLink = it },
+            onRequestOpenAttachment = { pendingOpenFileAttachment = it },
+            onDisplaySetCompletedFailureDialog = {
+                displaySetCompletedFailureDialog = true
+            },
+            onReloadLecture = onReloadLecture,
+            onUpdateLectureUnitIsComplete = onUpdateLectureUnitIsComplete,
         )
 
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            topBar = {
-                ArtemisTopAppBar(
-                    title = {
-                        Text(
-                            text = lectureTitle.orEmpty(),
-                            modifier = Modifier.placeholder(lectureTitle == null),
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    },
-                    navigationIcon = {
-                        AdaptiveNavigationIcon(onSidebarToggle = onSidebarToggle)
-                    },
-                    isElevated = false
-                )
-            }
-        ) { padding ->
-            LectureScreenBody(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = padding.calculateTopPadding())
-                    .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top)),
-                displayCommunicationOnSide = displayCommunicationOnSide,
-                lectureDataState = lectureDataState,
-                lectureChannel = lectureChannel,
-                lectureUnits = lectureUnits,
-                onViewExercise = onViewExercise,
-                overviewListState = overviewListState,
-                onRequestViewLink = { pendingOpenLink = it },
-                onRequestOpenAttachment = { pendingOpenFileAttachment = it },
-                onDisplaySetCompletedFailureDialog = {
-                    displaySetCompletedFailureDialog = true
-                },
-                onReloadLecture = onReloadLecture,
-                onUpdateLectureUnitIsComplete = onUpdateLectureUnitIsComplete,
-            )
+        val currentPendingOpenFileAttachment = pendingOpenFileAttachment
+        if (currentPendingOpenFileAttachment != null) {
+            val fileName = currentPendingOpenFileAttachment.name.orEmpty()
+            val link = currentPendingOpenFileAttachment.link.orEmpty()
+            val type = LectureUnitAttachmentUtil.detectAttachmentType(link)
 
-            val currentPendingOpenFileAttachment = pendingOpenFileAttachment
-            if (currentPendingOpenFileAttachment != null) {
-                val fileName = currentPendingOpenFileAttachment.name.orEmpty()
-                val link = currentPendingOpenFileAttachment.link.orEmpty()
-                val type = LectureUnitAttachmentUtil.detectAttachmentType(link)
+            val url = LectureUnitAttachmentUtil.buildOpenAttachmentLink(serverUrl, link)
+            val formattedUrl = LectureUnitAttachmentUtil.createAttachmentFileUrl(url, fileName, true)
 
-                val url = LectureUnitAttachmentUtil.buildOpenAttachmentLink(serverUrl, link)
-                val formattedUrl = LectureUnitAttachmentUtil.createAttachmentFileUrl(url, fileName, true)
-
-                when (type)  {
-                    is LectureUnitAttachmentUtil.LectureAttachmentType.PDF -> {
-                        val pdfFile = PdfFile(formattedUrl, artemisContext.authTokenOrEmptyString, fileName)
-                        LinkBottomSheet(
-                            modifier = Modifier.fillMaxSize(),
-                            state = LinkBottomSheetState.PDFVIEWSTATE(pdfFile),
-                            onDismissRequest = { pendingOpenFileAttachment = null }
-                        )
-                    }
-                    is LectureUnitAttachmentUtil.LectureAttachmentType.Image -> {
-                        val imageFile = ImageFile(formattedUrl, artemisContext.authTokenOrEmptyString, fileName)
-                        LinkBottomSheet(
-                            modifier = Modifier.fillMaxSize(),
-                            state = LinkBottomSheetState.IMAGEVIEWSTATE(imageFile),
-                            onDismissRequest = { pendingOpenFileAttachment = null }
-                        )
-                    }
-                    is LectureUnitAttachmentUtil.LectureAttachmentType.Other -> {
-                        DownloadPendingAttachmentAlertDialog(
-                            onDismissRequest = { pendingOpenFileAttachment = null },
-                            onRequestDownloadFile = {
-                                LectureUnitAttachmentUtil.downloadAttachment(
-                                    context = context,
-                                    artemisContext = artemisContext,
-                                    link = formattedUrl,
-                                    name = currentPendingOpenFileAttachment.name
-                                )
-                                pendingOpenFileAttachment = null
-                            }
-                        )
-                    }
+            when (type)  {
+                is LectureUnitAttachmentUtil.LectureAttachmentType.PDF -> {
+                    val pdfFile = PdfFile(formattedUrl, artemisContext.authTokenOrEmptyString, fileName)
+                    LinkBottomSheet(
+                        modifier = Modifier.fillMaxSize(),
+                        state = LinkBottomSheetState.PDFVIEWSTATE(pdfFile),
+                        onDismissRequest = { pendingOpenFileAttachment = null }
+                    )
+                }
+                is LectureUnitAttachmentUtil.LectureAttachmentType.Image -> {
+                    val imageFile = ImageFile(formattedUrl, artemisContext.authTokenOrEmptyString, fileName)
+                    LinkBottomSheet(
+                        modifier = Modifier.fillMaxSize(),
+                        state = LinkBottomSheetState.IMAGEVIEWSTATE(imageFile),
+                        onDismissRequest = { pendingOpenFileAttachment = null }
+                    )
+                }
+                is LectureUnitAttachmentUtil.LectureAttachmentType.Other -> {
+                    DownloadPendingAttachmentAlertDialog(
+                        onDismissRequest = { pendingOpenFileAttachment = null },
+                        onRequestDownloadFile = {
+                            LectureUnitAttachmentUtil.downloadAttachment(
+                                context = context,
+                                artemisContext = artemisContext,
+                                link = formattedUrl,
+                                name = currentPendingOpenFileAttachment.name
+                            )
+                            pendingOpenFileAttachment = null
+                        }
+                    )
                 }
             }
+        }
 
-            if (pendingOpenLink != null) {
-                TextAlertDialog(
-                    title = stringResource(id = R.string.lecture_view_open_link_dialog_title),
-                    text = stringResource(
-                        id = R.string.lecture_view_open_link_dialog_message,
-                        pendingOpenLink.orEmpty()
-                    ),
-                    confirmButtonText = stringResource(id = R.string.lecture_view_open_link_dialog_positive),
-                    dismissButtonText = stringResource(id = R.string.lecture_view_open_link_dialog_negative),
-                    onPressPositiveButton = {
-                        linkOpener.openLink(pendingOpenLink.orEmpty())
-                        pendingOpenLink = null
-                    },
-                    onDismissRequest = { pendingOpenLink = null }
-                )
-            }
+        if (pendingOpenLink != null) {
+            TextAlertDialog(
+                title = stringResource(id = R.string.lecture_view_open_link_dialog_title),
+                text = stringResource(
+                    id = R.string.lecture_view_open_link_dialog_message,
+                    pendingOpenLink.orEmpty()
+                ),
+                confirmButtonText = stringResource(id = R.string.lecture_view_open_link_dialog_positive),
+                dismissButtonText = stringResource(id = R.string.lecture_view_open_link_dialog_negative),
+                onPressPositiveButton = {
+                    linkOpener.openLink(pendingOpenLink.orEmpty())
+                    pendingOpenLink = null
+                },
+                onDismissRequest = { pendingOpenLink = null }
+            )
+        }
 
-            if (displaySetCompletedFailureDialog) {
-                TextAlertDialog(
-                    title = stringResource(id = R.string.lecture_view_lecture_unit_set_completed_failed_dialog_title),
-                    text = stringResource(id = R.string.lecture_view_lecture_unit_set_completed_failed_dialog_message),
-                    confirmButtonText = stringResource(id = R.string.lecture_view_lecture_unit_set_completed_failed_dialog_positive),
-                    dismissButtonText = null,
-                    onPressPositiveButton = { displaySetCompletedFailureDialog = false },
-                    onDismissRequest = { displaySetCompletedFailureDialog = false }
-                )
-            }
+        if (displaySetCompletedFailureDialog) {
+            TextAlertDialog(
+                title = stringResource(id = R.string.lecture_view_lecture_unit_set_completed_failed_dialog_title),
+                text = stringResource(id = R.string.lecture_view_lecture_unit_set_completed_failed_dialog_message),
+                confirmButtonText = stringResource(id = R.string.lecture_view_lecture_unit_set_completed_failed_dialog_positive),
+                dismissButtonText = null,
+                onPressPositiveButton = { displaySetCompletedFailureDialog = false },
+                onDismissRequest = { displaySetCompletedFailureDialog = false }
+            )
         }
     }
 }
