@@ -437,8 +437,7 @@ internal open class ConversationViewModel(
     }
 
     fun toggleSavePost(post: IBasePost): Deferred<MetisModificationFailure?> {
-        // TODO: this is a quick fix to prevent multiple save requests.
-        //      https://github.com/ls1intum/artemis-android/issues/307
+        // To prevent multiple unnecessary calls to the server.
         if (currentlySavingPost) return CompletableDeferred(null)
         currentlySavingPost = true
 
