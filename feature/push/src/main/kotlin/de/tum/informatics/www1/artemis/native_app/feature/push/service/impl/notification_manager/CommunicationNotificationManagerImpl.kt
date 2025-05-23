@@ -27,7 +27,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.communication_not
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ArtemisNotification
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ReplyPostCommunicationNotificationType
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.parentId
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.delete.DeleteNotificationReceiver
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.mark_as_read.MarkAsReadReceiver
@@ -63,7 +62,7 @@ internal class CommunicationNotificationManagerImpl(
     ) {
         var isPostFromAppUser = false
         val (communication, messages) = dbProvider.database.withTransaction {
-            dbProvider.pushCommunicationDao.insertNotification(
+            val parentId = dbProvider.pushCommunicationDao.insertNotification(
                 artemisNotification = artemisNotification,
                 generateNotificationId = {
                     ArtemisNotificationManager.getNextNotificationId(context)
@@ -73,8 +72,6 @@ internal class CommunicationNotificationManagerImpl(
                     isPostFromAppUser
                 }
             )
-
-            val parentId = artemisNotification.parentId
 
             val communication = dbProvider.pushCommunicationDao.getCommunication(parentId)
 
@@ -148,9 +145,6 @@ internal class CommunicationNotificationManagerImpl(
         val notificationChannel: ArtemisNotificationChannel =
             ArtemisNotificationChannel.CommunicationNotificationChannel
 
-        val metisTarget =
-            NotificationTargetManager.getCommunicationNotificationTarget(communication.targetString)
-
         val notification = NotificationCompat.Builder(context, notificationChannel.id)
             .setStyle(buildMessagingStyle(communication, messages))
             .setSmallIcon(R.drawable.push_notification_icon)
@@ -158,7 +152,7 @@ internal class CommunicationNotificationManagerImpl(
             .setContentIntent(
                 NotificationTargetManager.getMetisContentIntent(
                     context = context,
-                    notificationTarget = metisTarget
+                    notificationTarget = communication.target
                 )
             )
             .setDeleteIntent(

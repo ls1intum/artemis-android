@@ -100,6 +100,10 @@ internal object NotificationTargetManager {
         return json.decodeFromString<CommunicationPostTarget>(target)
     }
 
+    fun CommunicationPostTarget.toJsonString(): String {
+        return json.encodeToString(CommunicationPostTarget.serializer(), this)
+    }
+
     private fun buildOpenAppIntent(context: Context): PendingIntent = PendingIntent.getActivity(
         context,
         0,
