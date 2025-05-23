@@ -42,7 +42,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.EmojiService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.MetisModificationTask
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostWithBottomSheet
@@ -53,6 +52,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.shouldDisplayHeader
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MetisReplyHandler
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MetisReplyHandlerInputActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.util.rememberDerivedConversationName
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
@@ -114,12 +114,15 @@ internal fun MetisChatList(
             bottomItem = bottomItem,
             forwardMessageUseCase = forwardMessageUseCase,
             isReplyEnabled = isReplyEnabled,
-            onCreatePost = viewModel::createPost,
-            onEditPost = viewModel::editPost,
-            onDeletePost = viewModel::deletePost,
-            onPinPost = viewModel::togglePinPost,
-            onSavePost = viewModel::toggleSavePost,
-            onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
+            actions = MetisReplyHandlerInputActions(
+                create = viewModel::createPost,
+                edit = viewModel::editPost,
+                delete = viewModel::deletePost,
+                react = viewModel::createOrDeleteReaction,
+                save = viewModel::toggleSavePost,
+                pin = viewModel::togglePinPost,
+                resolve = null
+            ),
             onClickViewPost = onClickViewPost,
             onRequestRetrySend = viewModel::retryCreatePost,
             onUndoDeletePost = viewModel::undoDeletePost,
@@ -148,12 +151,7 @@ fun MetisChatList(
     emojiService: EmojiService = koinInject(),
     isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     isReplyEnabled: Boolean,
-    onCreatePost: () -> MetisModificationTask,
-    onEditPost: (IStandalonePost, String) -> MetisModificationTask,
-    onDeletePost: (IStandalonePost) -> MetisModificationTask,
-    onPinPost: (IStandalonePost) -> MetisModificationTask,
-    onSavePost: (IStandalonePost) -> MetisModificationTask,
-    onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> MetisModificationTask,
+    actions: MetisReplyHandlerInputActions<IStandalonePost>,
     onClickViewPost: (StandalonePostId) -> Unit,
     onUndoDeletePost: (IStandalonePost) -> Unit,
     generateLinkPreviews: (String) -> StateFlow<List<LinkPreview>>,
@@ -164,14 +162,8 @@ fun MetisChatList(
 ) {
     MetisReplyHandler(
         initialReplyTextProvider = initialReplyTextProvider,
-        onCreatePost = onCreatePost,
-        onEditPost = onEditPost,
-        onResolvePost = null,
-        onPinPost = onPinPost,
-        onSavePost = onSavePost,
-        onDeletePost = onDeletePost,
-        onRequestReactWithEmoji = onRequestReactWithEmoji,
-    ) { replyMode, onEditPostDelegate, _, onRequestReactWithEmojiDelegate, onDeletePostDelegate, onPinPostDelegate, onSavePostDelegate, updateFailureStateDelegate ->
+        actions = actions,
+    ) { replyMode, actionsDelegate, updateFailureStateDelegate ->
         Column(modifier = modifier) {
             val informationModifier = Modifier
                 .fillMaxSize()
@@ -227,12 +219,12 @@ fun MetisChatList(
                             onClickViewPost = onClickViewPost,
                             postActionFlags = postActionFlags,
                             forwardMessageUseCase = forwardMessageUseCase,
-                            onRequestEdit = onEditPostDelegate,
-                            onRequestDelete = onDeletePostDelegate,
+                            onRequestEdit = actionsDelegate.edit,
+                            onRequestDelete = actionsDelegate.delete,
                             onRequestUndoDelete = onUndoDeletePost,
-                            onRequestPin = onPinPostDelegate,
-                            onRequestSave = onSavePostDelegate,
-                            onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
+                            onRequestPin = actionsDelegate.pin,
+                            onRequestSave = actionsDelegate.save,
+                            onRequestReactWithEmoji = actionsDelegate.react,
                             onRequestRetrySend = onRequestRetrySend,
                             generateLinkPreviews = generateLinkPreviews,
                             onRemoveLinkPreview = onRemoveLinkPreview

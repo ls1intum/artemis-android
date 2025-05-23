@@ -40,7 +40,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.MetisModificationTask
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisPostListHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.testTagForPost
@@ -56,6 +55,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.shouldDisplayHeader
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MetisReplyHandler
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MetisReplyHandlerInputActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.isReplyEnabled
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.util.rememberDerivedConversationName
@@ -122,43 +122,45 @@ internal fun MetisThreadUi(
             isMarkedAsDeleteList = viewModel.isMarkedAsDeleteList,
             clientId = clientId,
             answerChatListItemState = answerChatListItemState,
-            onCreatePost = viewModel::createAnswerPost,
-            onEditPost = { post, newText ->
-                val parentPost = postDataState.orNull()
+            actions = MetisReplyHandlerInputActions(
+                create = viewModel::createPost,
+                edit = { post, newText ->
+                    val parentPost = postDataState.orNull()
 
-                when (post) {
-                    is AnswerPostPojo -> {
+                    when (post) {
+                        is AnswerPostPojo -> {
+                            if (parentPost == null) CompletableDeferred(
+                                MetisModificationFailure.UPDATE_POST
+                            ) else viewModel.editAnswerPost(parentPost, post, newText)
+                        }
+
+                        is PostPojo -> viewModel.editPost(post, newText)
+                        else -> throw NotImplementedError()
+                    }
+                },
+                delete = viewModel::deletePost,
+                react = viewModel::createOrDeleteReaction,
+                save = viewModel::toggleSavePost,
+                pin =  { post ->
+                    if (post is PostPojo) {
+                        viewModel.togglePinPost(post)
+                    } else {
+                        throw NotImplementedError()
+                    }
+                },
+                resolve = { post ->
+                    val parentPost = postDataState.orNull()
+
+                    if (post is AnswerPostPojo) {
                         if (parentPost == null) CompletableDeferred(
                             MetisModificationFailure.UPDATE_POST
-                        ) else viewModel.editAnswerPost(parentPost, post, newText)
+                        ) else viewModel.toggleResolvePost(parentPost, post)
+                    } else {
+                        throw NotImplementedError()
                     }
-
-                    is PostPojo -> viewModel.editPost(post, newText)
-                    else -> throw NotImplementedError()
-                }
-            },
-            onResolvePost = { post ->
-                val parentPost = postDataState.orNull()
-
-                if (post is AnswerPostPojo) {
-                    if (parentPost == null) CompletableDeferred(
-                        MetisModificationFailure.UPDATE_POST
-                    ) else viewModel.toggleResolvePost(parentPost, post)
-                } else {
-                    throw NotImplementedError()
-                }
-            },
-            onPinPost = { post ->
-                if (post is PostPojo) {
-                    viewModel.togglePinPost(post)
-                } else {
-                    throw NotImplementedError()
-                }
-            },
-            onSavePost = viewModel::toggleSavePost,
-            onDeletePost = viewModel::deletePost,
+                },
+            ),
             onUndoDeletePost = viewModel::undoDeletePost,
-            onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
             onRequestReload = viewModel::onRequestReload,
             onRequestRetrySend = viewModel::retryCreateAnswerPost,
             generateLinkPreviews = viewModel::generateLinkPreviews,
@@ -187,14 +189,8 @@ internal fun MetisThreadUi(
     answerChatListItemState: (IAnswerPost) -> StateFlow<ChatListItem.PostItem.ThreadItem.Answer?>,
     generateLinkPreviews: (String) -> StateFlow<List<LinkPreview>>,
     onRemoveLinkPreview: (LinkPreview, IBasePost, IStandalonePost?) -> Unit,
-    onCreatePost: () -> MetisModificationTask,
-    onEditPost: (IBasePost, String) -> MetisModificationTask,
-    onResolvePost: ((IBasePost) -> MetisModificationTask)?,
-    onPinPost: ((IBasePost) -> MetisModificationTask)?,
-    onSavePost: ((IBasePost) -> MetisModificationTask)?,
-    onDeletePost: (IBasePost) -> MetisModificationTask,
+    actions: MetisReplyHandlerInputActions<IBasePost>,
     onUndoDeletePost: (IBasePost) -> Unit,
-    onRequestReactWithEmoji: (IBasePost, emojiId: String, create: Boolean) -> MetisModificationTask,
     onRequestReload: () -> Unit,
     onRequestRetrySend: (clientSidePostId: String, content: String) -> Unit,
     onFileSelect: (Uri, Context) -> Unit
@@ -207,14 +203,8 @@ internal fun MetisThreadUi(
     ProvideEmojis(emojiService) {
         MetisReplyHandler(
             initialReplyTextProvider = initialReplyTextProvider,
-            onCreatePost = onCreatePost,
-            onEditPost = onEditPost,
-            onResolvePost = onResolvePost,
-            onDeletePost = onDeletePost,
-            onPinPost = onPinPost,
-            onSavePost = onSavePost,
-            onRequestReactWithEmoji = onRequestReactWithEmoji
-        ) { replyMode, onEditPostDelegate, onResolvePostDelegate, onRequestReactWithEmojiDelegate, onDeletePostDelegate, onPinPostDelegate, onSavePostDelegate, updateFailureStateDelegate ->
+            actions = actions,
+        ) { replyMode, actionsDelegate, updateFailureStateDelegate ->
             BoxWithConstraints(modifier = modifier) {
                 Column(modifier = Modifier.fillMaxSize()) {
                     BasicDataStateUi(
@@ -250,13 +240,13 @@ internal fun MetisThreadUi(
                                 clientId = clientId,
                                 answerChatListItemState = answerChatListItemState,
                                 isMarkedAsDeleteList = isMarkedAsDeleteList,
-                                onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
-                                onRequestEdit = onEditPostDelegate,
-                                onRequestDelete = onDeletePostDelegate,
+                                onRequestReactWithEmoji = actionsDelegate.react,
+                                onRequestEdit = actionsDelegate.edit,
+                                onRequestDelete = actionsDelegate.delete,
                                 onRequestUndoDelete = onUndoDeletePost,
-                                onRequestResolve = onResolvePostDelegate,
-                                onRequestPin = onPinPostDelegate,
-                                onRequestSave = onSavePostDelegate,
+                                onRequestResolve = actionsDelegate.resolve,
+                                onRequestPin = actionsDelegate.pin,
+                                onRequestSave = actionsDelegate.save,
                                 generateLinkPreviews = generateLinkPreviews,
                                 onRemoveLinkPreview = onRemoveLinkPreview,
                                 state = listState,
