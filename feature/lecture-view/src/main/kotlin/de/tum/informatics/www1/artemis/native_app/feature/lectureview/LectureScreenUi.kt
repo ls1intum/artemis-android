@@ -12,7 +12,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,20 +66,11 @@ fun NavGraphBuilder.lecture(
                 LectureDeeplinks.ToLectureCourseAgnostic.generateLinks()
     ) { backStackEntry ->
         val route: LectureScreenUi = backStackEntry.toRoute()
-
         val lectureId = route.lectureId
 
-        val viewModel: LectureViewModel = koinViewModel { parametersOf(lectureId) }
-        val lectureDataState by viewModel.lectureDataState.collectAsState()
-        val courseId by remember(lectureDataState) {
-            derivedStateOf { lectureDataState.bind { it.course?.id ?: 0 }.orElse(0) }
-        }
-
-        LectureScreen(
-            modifier = Modifier.fillMaxSize(),
-            courseId = courseId,
-            viewModel = viewModel,
-            onViewExercise = onViewExercise
+        LectureDetailContent(
+            lectureId = lectureId,
+            onViewExercise = onViewExercise,
         )
     }
 }
@@ -89,19 +79,14 @@ fun NavGraphBuilder.lecture(
 fun LectureDetailContent(
     lectureId: Long,
     onViewExercise: (exerciseId: Long) -> Unit,
-    onSidebarToggle: () -> Unit
+    onSidebarToggle: () -> Unit = {}
 ) {
     val viewModel: LectureViewModel = koinViewModel(key = "lecture|$lectureId") {
         parametersOf(lectureId)
     }
-    val lectureDataState by viewModel.lectureDataState.collectAsState()
-    val courseId by remember(lectureDataState) {
-        derivedStateOf { lectureDataState.bind { it.course?.id ?: 0 }.orElse(0) }
-    }
 
     LectureScreen(
         modifier = Modifier.fillMaxSize(),
-        courseId = courseId,
         viewModel = viewModel,
         onViewExercise = onViewExercise,
         onSidebarToggle = onSidebarToggle
@@ -111,7 +96,6 @@ fun LectureDetailContent(
 @Composable
 internal fun LectureScreen(
     modifier: Modifier,
-    courseId: Long,
     viewModel: LectureViewModel,
     onViewExercise: (exerciseId: Long) -> Unit,
     onSidebarToggle: () -> Unit = {},
@@ -123,7 +107,6 @@ internal fun LectureScreen(
 
     LectureScreen(
         modifier = modifier,
-        courseId = courseId,
         serverUrl = serverUrl,
         lectureDataState = lectureDataState,
         lectureChannel = lectureChannel,
@@ -139,7 +122,6 @@ internal fun LectureScreen(
 internal fun LectureScreen(
     lectureDataState: DataState<Lecture>,
     modifier: Modifier,
-    courseId: Long,
     serverUrl: String,
     lectureChannel: DataState<ChannelChat>,
     lectureUnits: List<LectureUnit>,
