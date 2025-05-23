@@ -41,20 +41,18 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.InfoMessageCard
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.AdaptiveNavigationIcon
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
-import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.LocalMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.rememberPostArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.MetisModificationTask
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getIcon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getTintColor
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getUiText
-import kotlinx.coroutines.Deferred
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -114,8 +112,8 @@ internal fun SavedPostsScreen(
     savedPostsChatListItemsDataState: DataState<List<ChatListItem.PostItem.SavedItem>>,
     onRequestReload: () -> Unit,
     onNavigateToPost: (ISavedPost) -> Unit,
-    onChangeStatus: (ISavedPost, SavedPostStatus) -> Deferred<MetisModificationFailure?>,
-    onRemoveFromSavedPosts: (ISavedPost) -> Deferred<MetisModificationFailure?>,
+    onChangeStatus: (ISavedPost, SavedPostStatus) -> MetisModificationTask,
+    onRemoveFromSavedPosts: (ISavedPost) -> MetisModificationTask,
     onSidebarToggle: () -> Unit
 ) {
     var status by remember { mutableStateOf(SavedPostStatus.IN_PROGRESS) }
@@ -222,8 +220,8 @@ private fun SavedPostsList(
     status: SavedPostStatus,
     savedPostChatListItems: List<ChatListItem.PostItem.SavedItem>,
     onNavigateToPost: (ISavedPost) -> Unit,
-    onChangeStatus: (ISavedPost, SavedPostStatus) -> Deferred<MetisModificationFailure?>,
-    onRemoveFromSavedPosts: (ISavedPost) -> Deferred<MetisModificationFailure?>
+    onChangeStatus: (ISavedPost, SavedPostStatus) -> MetisModificationTask,
+    onRemoveFromSavedPosts: (ISavedPost) -> MetisModificationTask
 ) {
     val removalNotice = @Composable {
         if (status == SavedPostStatus.ARCHIVED || status == SavedPostStatus.COMPLETED) {

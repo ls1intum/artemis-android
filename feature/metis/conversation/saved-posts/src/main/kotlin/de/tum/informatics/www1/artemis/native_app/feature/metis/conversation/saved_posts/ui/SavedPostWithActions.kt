@@ -28,15 +28,14 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BottomSheetActionButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.MetisModificationTask
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.MetisModificationTaskHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getIcon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getTintColor
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getUiText
-import kotlinx.coroutines.Deferred
 
 
 @Composable
@@ -44,12 +43,12 @@ fun SavedPostWithActions(
     modifier: Modifier = Modifier,
     savedPostChatListItem: ChatListItem.PostItem.SavedItem,
     onClick: () -> Unit,
-    onChangeStatus: (newStatus: SavedPostStatus) -> Deferred<MetisModificationFailure?>,
-    onRemoveFromSavedPosts: () -> Deferred<MetisModificationFailure?>
+    onChangeStatus: (newStatus: SavedPostStatus) -> MetisModificationTask,
+    onRemoveFromSavedPosts: () -> MetisModificationTask
 ) {
     var displayBottomSheet by remember { mutableStateOf(false) }
     var metisModificationTask by remember {
-        mutableStateOf<Deferred<MetisModificationFailure?>?>(null)
+        mutableStateOf<MetisModificationTask?>(null)
     }
 
     MetisModificationTaskHandler(

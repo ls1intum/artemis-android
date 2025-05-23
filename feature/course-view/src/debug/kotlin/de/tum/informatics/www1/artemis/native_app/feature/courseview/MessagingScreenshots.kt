@@ -32,6 +32,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.ForwardMessageUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MetisReplyHandlerInputActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.network.impl.ChannelServiceStub
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.storage.ConversationPreferenceService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.ConversationOverviewBody
@@ -44,6 +45,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 
+@SuppressLint("ViewModelConstructorInComposable")
 @PlayStoreScreenshots
 @Composable
 fun `Metis - Conversation Overview`() {
@@ -172,13 +174,8 @@ fun `Metis - Conversation Channel`() {
                     state = rememberLazyListState(),
                     isReplyEnabled = true,
                     isMarkedAsDeleteList = mutableStateListOf(),
-                    onCreatePost = { CompletableDeferred() },
-                    onEditPost = { _, _ -> CompletableDeferred() },
-                    onDeletePost = { CompletableDeferred() },
+                    actions = MetisReplyHandlerInputActions.empty(),
                     onUndoDeletePost = {},
-                    onPinPost = { CompletableDeferred() },
-                    onSavePost = { CompletableDeferred() },
-                    onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                     generateLinkPreviews = { _ -> MutableStateFlow(emptyList()) },
                     onRemoveLinkPreview = { _, _, _ -> CompletableDeferred<MetisModificationFailure>() },
                     bottomItem = null,
