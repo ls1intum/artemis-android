@@ -28,12 +28,12 @@ abstract class MetisStorageBaseTest {
     private val parentClientPostId = "parent-client-id-0"
     internal val answerClientPostId = "answer-client-id-0"
 
-    private val course: MetisContext.Course = MetisContext.Course(courseId = 1)
+    private val courseId = 1L
     internal val conversation = OneToOneChat(id = 2)
-    internal val metisContext = MetisContext.Conversation(course.courseId, conversation.id)
+    internal val metisContext = MetisContext.Conversation(courseId, conversation.id)
 
     internal val conversationTwo = OneToOneChat(id = 3)
-    internal val metisContextTwo = MetisContext.Conversation(course.courseId, conversationTwo.id)
+    internal val metisContextTwo = MetisContext.Conversation(courseId, conversationTwo.id)
 
     internal val localAnswerPojo = AnswerPostPojo(
         parentPostId = parentClientPostId,

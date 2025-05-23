@@ -248,7 +248,6 @@ class LectureE2eTest : BaseComposeTest() {
         composeTestRule.setContent {
             LectureScreen(
                 modifier = Modifier.fillMaxSize(),
-                courseId = course.id!!,
                 viewModel = viewModel,
                 onViewExercise = {}
             )

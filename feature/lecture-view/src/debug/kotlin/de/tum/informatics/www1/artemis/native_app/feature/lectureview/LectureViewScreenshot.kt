@@ -16,7 +16,6 @@ fun `Lecture - Overview`() {
     ScreenshotFrame(title = "... and directly interact with your lectures within the app") {
         LectureScreen(
             modifier = Modifier.fillMaxSize(),
-            courseId = 1,
             serverUrl = "serverUrl",
             lectureDataState = DataState.Success(
                 data = ScreenshotData.lecture,

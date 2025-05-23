@@ -46,7 +46,7 @@ internal class MetisModificationServiceImpl(
                     appendPathSegments(RESOURCE_PATH_SEGMENTS)
                     appendPathSegments(
                         context.courseId.toString(),
-                        context.standalonePostResourceEndpoint
+                        Api.Communication.standalonePostSegment
                     )
                 }
 
@@ -70,7 +70,7 @@ internal class MetisModificationServiceImpl(
                     appendPathSegments(RESOURCE_PATH_SEGMENTS)
                     appendPathSegments(
                         context.courseId.toString(),
-                        context.answerPostResourceEndpoint
+                        Api.Communication.answerPostSegment
                     )
                 }
 
@@ -94,7 +94,7 @@ internal class MetisModificationServiceImpl(
                     appendPathSegments(RESOURCE_PATH_SEGMENTS)
                     appendPathSegments(
                         context.courseId.toString(),
-                        context.standalonePostResourceEndpoint
+                        Api.Communication.standalonePostSegment
                     )
                     appendPathSegments(post.id.toString())
                 }
@@ -118,7 +118,7 @@ internal class MetisModificationServiceImpl(
                     appendPathSegments(RESOURCE_PATH_SEGMENTS)
                     appendPathSegments(
                         context.courseId.toString(),
-                        context.standalonePostResourceEndpoint
+                        Api.Communication.standalonePostSegment
                     )
                     appendPathSegments(post.id.toString())
                     appendPathSegments("display-priority")
@@ -143,7 +143,7 @@ internal class MetisModificationServiceImpl(
                     appendPathSegments(RESOURCE_PATH_SEGMENTS)
                     appendPathSegments(
                         context.courseId.toString(),
-                        context.answerPostResourceEndpoint
+                        Api.Communication.answerPostSegment
                     )
                     appendPathSegments(post.serverPostId.toString())
                 }

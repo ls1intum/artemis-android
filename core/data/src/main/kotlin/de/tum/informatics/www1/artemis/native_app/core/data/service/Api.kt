@@ -37,6 +37,11 @@ sealed class Api(
         data object NotificationSettings : Api(*Communication.path, "notification-settings")
         data object PushNotification : Api(*Communication.path, "push_notification")
         data object SavedPosts : Api(*Communication.path, "saved-posts")
+
+        /** To be used as a appended path segment after Communication.Courses */
+        const val standalonePostSegment = "messages"
+        /** To be used as a appended path segment after Communication.Courses */
+        const val answerPostSegment = "answer-messages"
     }
 
     data object Lecture: Api(api, "lecture") {
