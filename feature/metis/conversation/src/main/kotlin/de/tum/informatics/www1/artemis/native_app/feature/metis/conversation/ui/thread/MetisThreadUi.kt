@@ -123,7 +123,7 @@ internal fun MetisThreadUi(
             clientId = clientId,
             answerChatListItemState = answerChatListItemState,
             actions = MetisReplyHandlerInputActions(
-                create = viewModel::createPost,
+                create = viewModel::createAnswerPost,
                 edit = { post, newText ->
                     val parentPost = postDataState.orNull()
 

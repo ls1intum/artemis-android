@@ -369,7 +369,7 @@ private fun ChatList(
                                 }
                             ),
                         onRemoveLinkPreview = { linkPreview ->
-                            onRemoveLinkPreview(linkPreview, post as IStandalonePost, null)
+                            onRemoveLinkPreview(linkPreview, post, null)
                         },
                         onClick = {
                             val standalonePostId = post.standalonePostId
