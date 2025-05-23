@@ -6,7 +6,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-@SerialName("attachmentVideo")
+@SerialName("attachment")
 data class LectureUnitAttachmentVideo(
     override val id: Long = 0,
     override val name: String? = null,
