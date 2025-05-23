@@ -80,18 +80,16 @@ internal fun <T : IBasePost> MetisReplyHandler(
     val outputActions = remember(actions) {
         MetisReplyHandlerOutputActions<T>(
             edit = { post -> editingPost = post },
-            delete = { post ->
-                actions.pin?.let {
-                    metisModificationTask = it(post)
-                }
-            },
+            delete = { post -> metisModificationTask = actions.delete(post) },
             react = { post, emojiId, create ->
                 metisModificationTask = actions.react(post, emojiId, create)
             },
-            save = { post -> metisModificationTask = actions.delete(post) },
-
-            pin = { post ->
+            save = { post ->
                 actions.save?.let {
+                    metisModificationTask = it(post)
+                } },
+            pin = { post ->
+                actions.pin?.let {
                     metisModificationTask = it(post)
                 }
             },
