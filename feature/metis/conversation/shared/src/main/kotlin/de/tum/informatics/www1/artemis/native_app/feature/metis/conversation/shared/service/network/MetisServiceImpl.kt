@@ -75,14 +75,6 @@ class MetisServiceImpl(
                 )
 
                 when (metisContext) {
-                    is MetisContext.Exercise -> {
-                        parameter("exerciseId", metisContext.exerciseId)
-                    }
-
-                    is MetisContext.Lecture -> {
-                        parameter("lectureId", metisContext.lectureId)
-                    }
-
                     is MetisContext.Conversation -> {
                         parameter("conversationIds", metisContext.conversationId)
                     }
