@@ -11,14 +11,13 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.core.ui.test.BottomSheetClickWorkaroundTheme
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.ui.SavedPostsScreen
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.MetisModificationTask
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getStringResId
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Deferred
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -100,8 +99,8 @@ class SavedPostsScreenUiTest : BaseComposeTest() {
 
     private fun setupUi(
         savedPost: ISavedPost = createSavedPost(),
-        onChangeStatus: (ISavedPost, SavedPostStatus) -> Deferred<MetisModificationFailure?> = { _, _ -> CompletableDeferred() },
-        onRemoveFromSavedPosts: (ISavedPost) -> Deferred<MetisModificationFailure?> = { CompletableDeferred() }
+        onChangeStatus: (ISavedPost, SavedPostStatus) -> MetisModificationTask = { _, _ -> CompletableDeferred() },
+        onRemoveFromSavedPosts: (ISavedPost) -> MetisModificationTask = { CompletableDeferred() }
     ) {
         composeTestRule.setContent {
             BottomSheetClickWorkaroundTheme {

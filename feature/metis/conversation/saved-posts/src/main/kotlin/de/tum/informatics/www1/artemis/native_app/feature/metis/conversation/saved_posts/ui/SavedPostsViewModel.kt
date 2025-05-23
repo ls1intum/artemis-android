@@ -18,13 +18,13 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.sha
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.asMetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.MetisModificationTask
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.util.ForwardedMessagesHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.PostingType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -117,7 +117,7 @@ class SavedPostsViewModel(
     fun changeSavedPostStatus(
         savedPost: ISavedPost,
         newStatus: SavedPostStatus
-    ): Deferred<MetisModificationFailure?> {
+    ): MetisModificationTask {
         return viewModelScope.async(coroutineContext) {
             savedPostService.changeSavedPostStatus(
                 post = savedPost,
@@ -130,7 +130,7 @@ class SavedPostsViewModel(
         }
     }
 
-    fun removeFromSavedPosts(savedPost: ISavedPost): Deferred<MetisModificationFailure?> {
+    fun removeFromSavedPosts(savedPost: ISavedPost): MetisModificationTask {
         return viewModelScope.async(coroutineContext) {
             savedPostService.deleteSavedPost(
                 post = savedPost,

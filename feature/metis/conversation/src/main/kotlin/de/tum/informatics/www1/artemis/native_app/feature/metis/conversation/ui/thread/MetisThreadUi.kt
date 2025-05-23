@@ -40,6 +40,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.MetisModificationTask
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisPostListHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.testTagForPost
@@ -67,7 +68,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.P
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleStandalonePostDetails
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.compose.koinInject
 
@@ -187,14 +187,14 @@ internal fun MetisThreadUi(
     answerChatListItemState: (IAnswerPost) -> StateFlow<ChatListItem.PostItem.ThreadItem.Answer?>,
     generateLinkPreviews: (String) -> StateFlow<List<LinkPreview>>,
     onRemoveLinkPreview: (LinkPreview, IBasePost, IStandalonePost?) -> Unit,
-    onCreatePost: () -> Deferred<MetisModificationFailure?>,
-    onEditPost: (IBasePost, String) -> Deferred<MetisModificationFailure?>,
-    onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure?>)?,
-    onPinPost: ((IBasePost) -> Deferred<MetisModificationFailure?>)?,
-    onSavePost: ((IBasePost) -> Deferred<MetisModificationFailure?>)?,
-    onDeletePost: (IBasePost) -> Deferred<MetisModificationFailure?>,
+    onCreatePost: () -> MetisModificationTask,
+    onEditPost: (IBasePost, String) -> MetisModificationTask,
+    onResolvePost: ((IBasePost) -> MetisModificationTask)?,
+    onPinPost: ((IBasePost) -> MetisModificationTask)?,
+    onSavePost: ((IBasePost) -> MetisModificationTask)?,
+    onDeletePost: (IBasePost) -> MetisModificationTask,
     onUndoDeletePost: (IBasePost) -> Unit,
-    onRequestReactWithEmoji: (IBasePost, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
+    onRequestReactWithEmoji: (IBasePost, emojiId: String, create: Boolean) -> MetisModificationTask,
     onRequestReload: () -> Unit,
     onRequestRetrySend: (clientSidePostId: String, content: String) -> Unit,
     onFileSelect: (Uri, Context) -> Unit
