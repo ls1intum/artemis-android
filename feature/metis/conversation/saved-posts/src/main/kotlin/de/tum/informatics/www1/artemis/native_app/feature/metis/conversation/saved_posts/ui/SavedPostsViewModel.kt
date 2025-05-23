@@ -48,6 +48,7 @@ class SavedPostsViewModel(
     val serverUrl: StateFlow<String> = serverConfigurationService.serverUrl
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, "")
 
+    @Suppress("USELESS_CAST")
     val savedPosts: StateFlow<DataState<List<ChatListItem.PostItem.SavedItem>>> = flatMapLatest(
         serverUrl,
         accountService.authToken,

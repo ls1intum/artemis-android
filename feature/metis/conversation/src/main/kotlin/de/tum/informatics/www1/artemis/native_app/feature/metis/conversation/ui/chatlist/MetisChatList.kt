@@ -279,6 +279,7 @@ private fun ChatList(
             count = posts.itemCount,
             key = posts::getItemKey
         ) { index ->
+            @Suppress("KotlinConstantConditions")
             when (val chatListItem = posts[index]) {
                 is ChatListItem.UnreadIndicator -> {
                     if (displayUnreadIndicator) {
