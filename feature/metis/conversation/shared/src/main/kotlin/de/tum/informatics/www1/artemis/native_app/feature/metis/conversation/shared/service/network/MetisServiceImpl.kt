@@ -52,7 +52,7 @@ class MetisServiceImpl(
                 url {
                     appendPathSegments(RESOURCE_PATH_SEGMENTS)
                     appendPathSegments(metisContext.courseId.toString())
-                    appendPathSegments(metisContext.standalonePostResourceEndpoint)
+                    appendPathSegments(Api.Communication.standalonePostSegment)
                 }
 
                 when (standalonePostsContext.sortingStrategy) {
