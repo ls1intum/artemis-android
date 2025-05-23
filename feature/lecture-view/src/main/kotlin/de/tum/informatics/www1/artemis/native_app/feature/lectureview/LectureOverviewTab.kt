@@ -335,6 +335,7 @@ private fun LectureUnitBottomSheetContent(
     ) {
         when (lectureUnit) {
             is LectureUnitAttachmentVideo -> {
+                // TODO: we also need to make the optional file accessible somehow
                 if (lectureUnit.hasVideo) {
                     LectureUnitVideoUi(
                         modifier = childModifier,
