@@ -20,4 +20,6 @@ data class LectureUnitAttachmentVideo(
     override fun withCompleted(newCompleted: Boolean): LectureUnit = copy(completed = newCompleted)
 
     val hasVideo = videoSource != null
+    val hasAttachment = attachment != null
+    val onlyHasAttachment = hasAttachment && !hasVideo
 }

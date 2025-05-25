@@ -85,7 +85,7 @@ internal fun LectureUnitHeader(
         modifier = modifier,
         onClick = {
             onMarkAsCompleted(true)
-            if (lectureUnit is LectureUnitAttachmentVideo) {
+            if (lectureUnit is LectureUnitAttachmentVideo && lectureUnit.onlyHasAttachment) {
                 onRequestOpenAttachment(lectureUnit.attachment ?: return@Card)
                 return@Card
             }

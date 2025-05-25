@@ -99,7 +99,8 @@ internal fun LectureOverviewTab(
             LectureUnitBottomSheetContent(
                 modifier = modifier,
                 lectureUnit = selectedLectureUnit ?: return@ModalBottomSheet,
-                onRequestViewLink = onRequestViewLink
+                onRequestViewLink = onRequestViewLink,
+                onRequestOpenAttachment = onRequestOpenAttachment
             )
         }
     }
@@ -325,7 +326,8 @@ private fun LazyListScope.lectureUnitSection(
 private fun LectureUnitBottomSheetContent(
     modifier: Modifier,
     lectureUnit: LectureUnit,
-    onRequestViewLink: (String) -> Unit
+    onRequestViewLink: (String) -> Unit,
+    onRequestOpenAttachment: (Attachment) -> Unit,
 ) {
     val childModifier = Modifier.fillMaxWidth()
     Column(
@@ -335,16 +337,14 @@ private fun LectureUnitBottomSheetContent(
     ) {
         when (lectureUnit) {
             is LectureUnitAttachmentVideo -> {
-                // TODO: we also need to make the optional file accessible somehow
-                if (lectureUnit.hasVideo) {
-                    LectureUnitVideoUi(
-                        modifier = childModifier,
-                        lectureUnit = lectureUnit,
-                        onClickOpenLink = {
-                            onRequestViewLink(lectureUnit.videoSource.orEmpty())
-                        }
-                    )
-                }
+                LectureUnitVideoUi(
+                    modifier = childModifier,
+                    lectureUnit = lectureUnit,
+                    onClickOpenLink = {
+                        onRequestViewLink(lectureUnit.videoSource.orEmpty())
+                    },
+                    onClickOpenAttachment = onRequestOpenAttachment
+                )
             }
 
             is LectureUnitExercise -> {}

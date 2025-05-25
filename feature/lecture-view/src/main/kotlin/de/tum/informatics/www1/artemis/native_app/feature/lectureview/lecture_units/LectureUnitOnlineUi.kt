@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture_units
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,7 +39,8 @@ internal fun LectureUnitWithLinkUi(
     modifier: Modifier,
     name: String,
     text: String?,
-    onClickOpenLink: () -> Unit
+    onClickOpenLink: () -> Unit,
+    trailingContent: @Composable (ColumnScope.() -> Unit)? = null
 ) {
     LectureUnitBody(modifier = modifier, name = name) {
         if (text != null) {
@@ -64,6 +66,11 @@ internal fun LectureUnitWithLinkUi(
                     text = stringResource(id = R.string.lecture_view_open_link_button)
                 )
             }
+        }
+
+        if (trailingContent != null) {
+            Spacer(modifier = Modifier.height(8.dp))
+            trailingContent()
         }
     }
 }
