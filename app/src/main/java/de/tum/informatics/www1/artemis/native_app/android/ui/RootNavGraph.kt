@@ -10,9 +10,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_o
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.navigateToCourse
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui.dashboard
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui.navigateToDashboard
+import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseScreenRoute
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseViewDestination
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseViewMode
-import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseViewUi
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.exercise
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.navigateToExercise
 import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.detail.faqDetail
@@ -20,7 +20,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.detail.navigate
 import de.tum.informatics.www1.artemis.native_app.feature.force_update.ui.updateNavGraph
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.navigateToLecture
-import de.tum.informatics.www1.artemis.native_app.feature.login.LoginScreen
+import de.tum.informatics.www1.artemis.native_app.feature.login.LoginScreenRoute
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginNavGraph
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.navigateToQuizParticipation
@@ -68,7 +68,7 @@ fun NavGraphBuilder.rootNavGraph(
             if (deepLink == null) {
                 // Navigate to the course overview and remove the login screen from the navigation stack.
                 navController.navigateToDashboard {
-                    popUpTo<LoginScreen> {
+                    popUpTo<LoginScreenRoute> {
                         inclusive = true
                     }
                 }
@@ -77,7 +77,7 @@ fun NavGraphBuilder.rootNavGraph(
                     navController.navigate(
                         Uri.parse(deepLink),
                         navOptions {
-                            popUpTo<LoginScreen>()
+                            popUpTo<LoginScreenRoute>()
                         }
                     )
                 } catch (_: IllegalArgumentException) {
@@ -157,7 +157,7 @@ fun NavGraphBuilder.rootNavGraph(
     quizParticipation(
         onLeaveQuiz = {
             val previousBackStackEntry = navController.previousBackStackEntry
-            if (previousBackStackEntry?.destination?.route == ExerciseViewUi::class.qualifiedName.orEmpty()) {
+            if (previousBackStackEntry?.destination?.route == ExerciseScreenRoute::class.qualifiedName.orEmpty()) {
                 previousBackStackEntry.savedStateHandle[ExerciseViewDestination.REQUIRE_RELOAD_KEY] =
                     true
             }
