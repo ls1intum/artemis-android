@@ -19,9 +19,9 @@ object ConversationCollectionInitUtil {
         return ConversationCollections(
             collections = listOf(
                 ConversationCollection(
-                    section = ConversationsOverviewSection.FAVOURITES,
+                    section = ConversationsOverviewSection.FAVORITES,
                     conversations = conversations.filter { it.isFavorite },
-                    isExpanded = preferences.isExpanded(ConversationsOverviewSection.FAVOURITES),
+                    isExpanded = preferences.isExpanded(ConversationsOverviewSection.FAVORITES),
                 ),
                 ConversationCollection(
                     section = ConversationsOverviewSection.CHANNELS,

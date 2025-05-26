@@ -15,7 +15,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversati
 enum class ConversationsOverviewSection(
     val expandedByDefault: Boolean = true,
 ) {
-    FAVOURITES,
+    FAVORITES,
     CHANNELS,
     EXERCISES,
     LECTURES,
@@ -26,7 +26,7 @@ enum class ConversationsOverviewSection(
 
     val textRes: Int
         get() =  when (this) {
-            FAVOURITES -> R.string.conversation_overview_section_favorites
+            FAVORITES -> R.string.conversation_overview_section_favorites
             HIDDEN -> R.string.conversation_overview_section_hidden
             CHANNELS -> R.string.conversation_overview_section_general_channels
             EXERCISES -> R.string.conversation_overview_section_exercise_channels
@@ -38,7 +38,7 @@ enum class ConversationsOverviewSection(
 
     val icon: ImageVector
         get() = when (this) {
-            FAVOURITES -> Icons.Default.Favorite
+            FAVORITES -> Icons.Default.Favorite
             HIDDEN -> Icons.Default.Archive
             CHANNELS -> Icons.Default.ChatBubble
             EXERCISES -> Icons.AutoMirrored.Filled.List

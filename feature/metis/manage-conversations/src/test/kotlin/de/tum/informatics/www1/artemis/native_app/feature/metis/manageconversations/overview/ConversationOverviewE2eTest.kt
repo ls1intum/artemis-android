@@ -26,18 +26,13 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Userna
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.ConversationOverviewBody
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.ConversationOverviewViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.KEY_SUFFIX_CHANNELS
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.KEY_SUFFIX_FAVORITES
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.KEY_SUFFIX_GROUPS
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.KEY_SUFFIX_HIDDEN
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.KEY_SUFFIX_PERSONAL
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.SECTION_CHANNELS_KEY
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.SECTION_HIDDEN_KEY
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.TEST_TAG_CONVERSATION_LIST
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.TEST_TAG_HEADER_EXPAND_ICON
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.model.ConversationCollections
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.model.ConversationsOverviewSection
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.tagForConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.tagForConversationOptions
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.tagForSection
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
@@ -122,9 +117,12 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
 
         markConversationImpl(
             originalTag = getTagForConversation(chat),
-            newTag = tagForConversation(chat.id, KEY_SUFFIX_FAVORITES),
+            newTag = tagForConversation(chat.id, ConversationsOverviewSection.FAVORITES),
             textToClick = context.getString(R.string.conversation_overview_conversation_item_mark_as_favorite),
-            checkExists = { favorites.conversations.any { conv -> conv.id == chat.id } }
+            checkExists = {
+                val favorites = collections.first { it.section == ConversationsOverviewSection.FAVORITES }
+                favorites.conversations.any { conv -> conv.id == chat.id }
+            }
         )
     }
 
@@ -145,10 +143,13 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
         }
 
         markConversationImpl(
-            originalTag = tagForConversation(chat.id, KEY_SUFFIX_FAVORITES),
+            originalTag = tagForConversation(chat.id, ConversationsOverviewSection.FAVORITES),
             newTag = getTagForConversation(chat),
             textToClick = context.getString(R.string.conversation_overview_conversation_item_unmark_as_favorite),
-            checkExists = { favorites.conversations.none { conv -> conv.id == chat.id } }
+            checkExists = {
+                val favorites = collections.first { it.section == ConversationsOverviewSection.FAVORITES }
+                favorites.conversations.none { conv -> conv.id == chat.id }
+            }
         )
     }
 
@@ -158,9 +159,12 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
 
         markConversationImpl(
             originalTag = getTagForConversation(chat),
-            newTag = tagForConversation(chat.id, KEY_SUFFIX_HIDDEN),
+            newTag = tagForConversation(chat.id, ConversationsOverviewSection.HIDDEN),
             textToClick = context.getString(R.string.conversation_overview_conversation_item_mark_as_hidden),
-            checkExists = { hidden.conversations.any { conv -> conv.id == chat.id } },
+            checkExists = {
+                val hidden = collections.first { it.section == ConversationsOverviewSection.HIDDEN }
+                hidden.conversations.any { conv -> conv.id == chat.id }
+            },
             doAfterAvailable = { viewModel ->
                 expandHiddenSection(viewModel)
             }
@@ -184,10 +188,13 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
         }
 
         markConversationImpl(
-            originalTag = tagForConversation(chat.id, KEY_SUFFIX_HIDDEN),
+            originalTag = tagForConversation(chat.id, ConversationsOverviewSection.HIDDEN),
             newTag = getTagForConversation(chat),
             textToClick = context.getString(R.string.conversation_overview_conversation_item_unmark_as_hidden),
-            checkExists = { hidden.conversations.none { conv -> conv.id == chat.id } },
+            checkExists = {
+                val hidden = collections.first { it.section == ConversationsOverviewSection.HIDDEN }
+                hidden.conversations.none { conv -> conv.id == chat.id }
+          },
             doInitially = { viewModel ->
                 expandHiddenSection(viewModel)
             }
@@ -200,7 +207,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
 
         markConversationImpl(
             originalTag = getTagForConversation(chat),
-            newTag = tagForConversation(chat.id, KEY_SUFFIX_PERSONAL),
+            newTag = tagForConversation(chat.id, ConversationsOverviewSection.DIRECT_MESSAGES),
             textToClick = context.getString(R.string.conversation_overview_conversation_item_mark_as_muted),
             checkExists = { conversations.any { conv -> conv.id == chat.id && conv.isMuted } }
         )
@@ -223,7 +230,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
         }
 
         markConversationImpl(
-            originalTag = tagForConversation(chat.id, KEY_SUFFIX_PERSONAL),
+            originalTag = tagForConversation(chat.id, ConversationsOverviewSection.DIRECT_MESSAGES),
             newTag = getTagForConversation(chat),
             textToClick = context.getString(R.string.conversation_overview_conversation_item_unmark_as_muted),
             checkExists = { conversations.none { conv -> conv.id == chat.id && conv.isMuted } }
@@ -303,13 +310,14 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
     }
 
     private fun expandHiddenSection(viewModel: ConversationOverviewViewModel) {
+        val hiddenSectionKey = tagForSection(ConversationsOverviewSection.HIDDEN)
         composeTestRule
             .onNodeWithTag(TEST_TAG_CONVERSATION_LIST)
-            .performScrollToKey(SECTION_HIDDEN_KEY)
+            .performScrollToKey(hiddenSectionKey)
 
         composeTestRule
             .onNode(
-                hasAnyAncestor(hasTestTag(SECTION_HIDDEN_KEY)) and hasTestTag(
+                hasAnyAncestor(hasTestTag(hiddenSectionKey)) and hasTestTag(
                     TEST_TAG_HEADER_EXPAND_ICON
                 )
             )
@@ -318,7 +326,10 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
         runBlockingWithTestTimeout {
             viewModel
                 .conversations
-                .filter { it.bind { conv -> conv.hidden.isExpanded }.orElse(false) }
+                .filter { dataState -> dataState.bind { conversationCollections ->
+                    val hiddenSection = conversationCollections.collections.first { it.section == ConversationsOverviewSection.HIDDEN }
+                    hiddenSection.isExpanded
+                }.orElse(false) }
                 .first()
         }
     }
@@ -385,13 +396,13 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
     }
 
     private fun getTagForConversation(conversation: Conversation): String {
-        val suffix = when (conversation) {
-            is ChannelChat -> KEY_SUFFIX_CHANNELS
-            is GroupChat -> KEY_SUFFIX_GROUPS
-            is OneToOneChat -> KEY_SUFFIX_PERSONAL
+        val section = when (conversation) {
+            is ChannelChat -> ConversationsOverviewSection.CHANNELS
+            is GroupChat -> ConversationsOverviewSection.GROUP_CHATS
+            is OneToOneChat -> ConversationsOverviewSection.DIRECT_MESSAGES
         }
 
-        return tagForConversation(conversation.id, suffix)
+        return tagForConversation(conversation.id, section)
     }
 
     private fun setupUiAndViewModel(): ConversationOverviewViewModel {
@@ -425,7 +436,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
         }
 
         composeTestRule.waitUntilAtLeastOneExists(
-            hasTestTag(SECTION_CHANNELS_KEY),
+            hasTestTag(tagForSection(ConversationsOverviewSection.CHANNELS)),
             DefaultTimeoutMillis
         )
 

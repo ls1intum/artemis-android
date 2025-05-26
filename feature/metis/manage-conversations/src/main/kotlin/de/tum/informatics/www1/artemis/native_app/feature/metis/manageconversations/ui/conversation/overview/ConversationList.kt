@@ -67,34 +67,11 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanR
 internal const val TEST_TAG_CONVERSATION_LIST = "conversation list"
 internal const val TEST_TAG_HEADER_EXPAND_ICON = "expand icon"
 
-internal const val SECTION_FAVORITES_KEY = "favorites"
-internal const val SECTION_HIDDEN_KEY = "hidden"
-internal const val SECTION_CHANNELS_KEY = "channels"
-internal const val SECTION_GROUPS_KEY = "groups"
-internal const val SECTION_EXERCISES_KEY = "exercises"
-internal const val SECTION_EXAMS_KEY = "exams"
-internal const val SECTION_LECTURES_KEY = "lectures"
-internal const val SECTION_DIRECT_MESSAGES_KEY = "direct-messages"
-internal const val SECTION_SAVED_POSTS_KEY = "saved-posts"
-internal const val SECTION_RECENT_KEY = "recent"
+internal const val SECTION_SAVED_POSTS_KEY = "saved_posts_section"
 
-internal const val KEY_SUFFIX_FAVORITES = "_f"
-internal const val KEY_SUFFIX_CHANNELS = "_c"
-internal const val KEY_SUFFIX_EXAMS = "_exa"
-internal const val KEY_SUFFIX_EXERCISES = "_exe"
-internal const val KEY_SUFFIX_LECTURES = "_l"
-internal const val KEY_SUFFIX_GROUPS = "_g"
-internal const val KEY_SUFFIX_PERSONAL = "_p"
-internal const val KEY_SUFFIX_HIDDEN = "_h"
-internal const val KEY_SUFFIX_SAVED_MESSAGES = "_s"
-
-internal fun tagForConversation(conversationId: Long, suffix: String) = "$conversationId$suffix"
+internal fun tagForSection(section: ConversationsOverviewSection) = "section_${section.name}"
+internal fun tagForConversation(conversationId: Long, section: ConversationsOverviewSection) = "$conversationId${section.name}"
 internal fun tagForConversationOptions(tagForConversation: String) = "${tagForConversation}_options"
-
-private sealed class ConversationSectionState(val isExpanded: Boolean) {
-    data class Conversations<T : Conversation>(val conversations: ConversationCollections.ConversationCollection<T>)
-        : ConversationSectionState(conversations.isExpanded)
-}
 
 @Composable
 internal fun ConversationList(
@@ -121,7 +98,7 @@ internal fun ConversationList(
         modifier = modifier,
         conversationCollections = conversationCollections,
         collapsingContentState = collapsingContentState,
-        onToggleSection = viewModel::toggleSectionExpanded,
+        onToggleSectionExpanded = viewModel::toggleSectionExpanded,
         onNavigateToConversation = onNavigateToConversation,
         onNavigateToSavedPosts = onNavigateToSavedPosts,
         onToggleMarkAsFavourite = onToggleMarkAsFavourite,
@@ -138,7 +115,7 @@ internal fun ConversationList(
     modifier: Modifier,
     conversationCollections: ConversationCollections,
     collapsingContentState: CollapsingContentState,
-    onToggleSection: (ConversationsOverviewSection) -> Unit,
+    onToggleSectionExpanded: (ConversationsOverviewSection) -> Unit,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onNavigateToSavedPosts: () -> Unit,
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
@@ -167,19 +144,18 @@ internal fun ConversationList(
                 icon = {
                     Icon(imageVector = section.icon, contentDescription = null)
                 },
-                key = section.name,
+                key = tagForSection(section),
                 isExpanded = conversationCollection.isExpanded,
                 conversationCount = conversations.size,
                 unreadCount = conversations.sumOf { it.unreadMessagesCount ?: 0 },
                 onClick = {
-                    onToggleSection(section)
+                    onToggleSectionExpanded(section)
                 },
             )
 
             conversationList(
-                keySuffix = section.name,
-                sectionState = ConversationSectionState.Conversations(conversationCollection),
-                allowFavoriteIndicator = section != ConversationsOverviewSection.FAVOURITES,
+                conversationCollection = conversationCollection,
+                allowFavoriteIndicator = section != ConversationsOverviewSection.FAVORITES,
                 onNavigateToConversation = onNavigateToConversation,
                 onToggleMarkAsFavourite = onToggleMarkAsFavourite,
                 onToggleHidden = onToggleHidden,
@@ -266,8 +242,7 @@ private fun LazyListScope.conversationSectionHeader(
 }
 
 private fun LazyListScope.conversationList(
-    keySuffix: String,
-    sectionState: ConversationSectionState,
+    conversationCollection: ConversationCollections.ConversationCollection<out Conversation>,
     allowFavoriteIndicator: Boolean,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
@@ -275,38 +250,34 @@ private fun LazyListScope.conversationList(
     onToggleMuted: (conversationId: Long, muted: Boolean) -> Unit,
     selectedConversationId: Long?
 ) {
-    if (!sectionState.isExpanded) return
+    if (!conversationCollection.isExpanded) return
+    val section = conversationCollection.section
 
-    when(sectionState) {
-        is ConversationSectionState.Conversations<*> -> {
-            val conversations = sectionState.conversations
-            items(
-                items = conversations.conversations,
-                key = { tagForConversation(it.id, keySuffix) }
-            ) { conversation ->
-                val itemTag = tagForConversation(conversation.id, keySuffix)
-                ConversationListItem(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .animateItem()
-                        .testTag(itemTag),
-                    itemBaseTag = itemTag,
-                    conversation = conversation,
-                    showPrefix = conversations.showPrefix,
-                    allowFavoriteIndicator = allowFavoriteIndicator,
-                    onNavigateToConversation = { onNavigateToConversation(conversation.id) },
-                    onToggleMarkAsFavourite = {
-                        onToggleMarkAsFavourite(
-                            conversation.id,
-                            !conversation.isFavorite
-                        )
-                    },
-                    onToggleHidden = { onToggleHidden(conversation.id, !conversation.isHidden) },
-                    onToggleMuted = { onToggleMuted(conversation.id, !conversation.isMuted) },
-                    selected = conversation.id == selectedConversationId
+    items(
+        items = conversationCollection.conversations,
+        key = { tagForConversation(it.id, section) }
+    ) { conversation ->
+        val itemTag = tagForConversation(conversation.id, section)
+        ConversationListItem(
+            modifier = Modifier
+                .fillMaxWidth()
+                .animateItem()
+                .testTag(itemTag),
+            itemBaseTag = itemTag,
+            conversation = conversation,
+            showPrefix = conversationCollection.showPrefix,
+            allowFavoriteIndicator = allowFavoriteIndicator,
+            onNavigateToConversation = { onNavigateToConversation(conversation.id) },
+            onToggleMarkAsFavourite = {
+                onToggleMarkAsFavourite(
+                    conversation.id,
+                    !conversation.isFavorite
                 )
-            }
-        }
+            },
+            onToggleHidden = { onToggleHidden(conversation.id, !conversation.isHidden) },
+            onToggleMuted = { onToggleMuted(conversation.id, !conversation.isMuted) },
+            selected = conversation.id == selectedConversationId
+        )
     }
 }
 
