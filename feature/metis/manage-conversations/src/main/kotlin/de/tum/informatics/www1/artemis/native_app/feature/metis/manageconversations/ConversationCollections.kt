@@ -1,29 +1,13 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations
 
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.ConversationsOverviewSection
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 
 data class ConversationCollections(
-    val favorites: ConversationCollection<Conversation>,
-    val channels: ConversationCollection<ChannelChat>,
-    val groupChats: ConversationCollection<GroupChat>,
-    val directChats: ConversationCollection<OneToOneChat>,
-    val hidden: ConversationCollection<Conversation>,
-    val exerciseChannels: ConversationCollection<ChannelChat>,
-    val lectureChannels: ConversationCollection<ChannelChat>,
-    val examChannels: ConversationCollection<ChannelChat>
+    val collections: List<ConversationCollection<out Conversation>>,
 ) {
     val conversations: List<Conversation>
-        get() = favorites.conversations +
-                channels.conversations +
-                groupChats.conversations +
-                directChats.conversations +
-                hidden.conversations +
-                exerciseChannels.conversations +
-                lectureChannels.conversations +
-                examChannels.conversations
+        get() = collections.flatMap { it.conversations }
 
     fun filtered(query: String): ConversationCollections = filterBy { it.filterPredicate(query) }
 
@@ -43,18 +27,14 @@ data class ConversationCollections(
 
     private fun filterBy(predicate: (Conversation) -> Boolean): ConversationCollections {
         return ConversationCollections(
-            channels = channels.filter(predicate),
-            groupChats = groupChats.filter(predicate),
-            directChats = directChats.filter(predicate),
-            favorites = favorites.filter(predicate),
-            hidden = hidden.filter(predicate),
-            exerciseChannels = exerciseChannels.filter(predicate),
-            lectureChannels = lectureChannels.filter(predicate),
-            examChannels = examChannels.filter(predicate)
+            collections = collections.map { collection ->
+                collection.filter(predicate)
+            }
         )
     }
 
     data class ConversationCollection<T : Conversation>(
+        val section: ConversationsOverviewSection,
         val conversations: List<T>,
         val isExpanded: Boolean,
         val showPrefix: Boolean = true

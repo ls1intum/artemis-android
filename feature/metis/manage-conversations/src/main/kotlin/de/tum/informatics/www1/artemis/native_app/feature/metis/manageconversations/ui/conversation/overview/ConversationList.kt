@@ -124,16 +124,9 @@ internal fun ConversationList(
 
     ConversationList(
         modifier = modifier,
-        toggleFavoritesExpanded = viewModel::toggleFavoritesExpanded,
-        toggleGeneralsExpanded = viewModel::toggleGeneralsExpanded,
-        toggleExercisesExpanded = viewModel::toggleExercisesExpanded,
-        toggleLecturesExpanded = viewModel::toggleLecturesExpanded,
-        toggleExamsExpanded = viewModel::toggleExamsExpanded,
-        toggleGroupChatsExpanded = viewModel::toggleGroupChatsExpanded,
-        togglePersonalConversationsExpanded = viewModel::togglePersonalConversationsExpanded,
-        toggleHiddenExpanded = viewModel::toggleHiddenExpanded,
         conversationCollections = conversationCollections,
         collapsingContentState = collapsingContentState,
+        onToggleSection = viewModel::toggleSectionExpanded,
         onNavigateToConversation = onNavigateToConversation,
         onNavigateToSavedPosts = onNavigateToSavedPosts,
         onToggleMarkAsFavourite = onToggleMarkAsFavourite,
@@ -148,16 +141,9 @@ internal fun ConversationList(
 @Composable
 internal fun ConversationList(
     modifier: Modifier,
-    toggleFavoritesExpanded: () -> Unit,
-    toggleGeneralsExpanded: () -> Unit,
-    toggleExercisesExpanded: () -> Unit,
-    toggleLecturesExpanded: () -> Unit,
-    toggleExamsExpanded: () -> Unit,
-    toggleGroupChatsExpanded: () -> Unit,
-    togglePersonalConversationsExpanded: () -> Unit,
-    toggleHiddenExpanded: () -> Unit,
     conversationCollections: ConversationCollections,
     collapsingContentState: CollapsingContentState,
+    onToggleSection: (ConversationsOverviewSection) -> Unit,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onNavigateToSavedPosts: () -> Unit,
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
@@ -167,131 +153,51 @@ internal fun ConversationList(
     selectedConversationId: Long?,
     listState: LazyListState
 ) {
-    val listWithHeader: LazyListScope.(ConversationSectionState, String, String, Int, Int?, Long, () -> Unit, @Composable () -> Unit) -> Unit =
-        { items, key, suffix, textRes, count, unreadCount, onClick, icon ->
-            conversationSectionHeader(
-                key = key,
-                text = textRes,
-                isExpanded = items.isExpanded,
-                conversationCount = count,
-                unreadCount = unreadCount,
-                onClick = onClick,
-                icon = icon
-            )
-
-            conversationList(
-                keySuffix = suffix,
-                section = items,
-                allowFavoriteIndicator = key != SECTION_FAVORITES_KEY,
-                onNavigateToConversation = onNavigateToConversation,
-                onToggleMarkAsFavourite = onToggleMarkAsFavourite,
-                onToggleHidden = onToggleHidden,
-                onToggleMuted = onToggleMuted,
-                selectedConversationId = selectedConversationId
-            )
-        }
-
     LazyColumn(
         modifier = modifier
             .nestedScroll(collapsingContentState.nestedScrollConnection)
             .testTag(TEST_TAG_CONVERSATION_LIST),
         state = listState
     ) {
-        if (conversationCollections.favorites.conversations.isNotEmpty()) {
-            listWithHeader(
-                ConversationSectionState.Conversations(conversationCollections.favorites),
-                SECTION_FAVORITES_KEY,
-                KEY_SUFFIX_FAVORITES,
-                R.string.conversation_overview_section_favorites,
-                conversationCollections.favorites.conversations.size,
-                conversationCollections.favorites.conversations.sumOf { it.unreadMessagesCount ?: 0 },
-                toggleFavoritesExpanded,
-                { Icon(imageVector = Icons.Default.Favorite, contentDescription = null) }
+        for (conversationCollection in conversationCollections.collections) {
+            val (textRes, icon) = when (conversationCollection.section) {
+                ConversationsOverviewSection.FAVOURITES -> Pair(R.string.conversation_overview_section_favorites, Icons.Default.Favorite)
+                ConversationsOverviewSection.HIDDEN -> Pair(R.string.conversation_overview_section_hidden, Icons.Default.Archive)
+                ConversationsOverviewSection.CHANNELS -> Pair(R.string.conversation_overview_section_general_channels, Icons.Default.ChatBubble)
+                ConversationsOverviewSection.EXERCISES -> Pair(R.string.conversation_overview_section_exercise_channels, Icons.AutoMirrored.Filled.List)
+                ConversationsOverviewSection.LECTURES -> Pair(R.string.conversation_overview_section_lecture_channels, Icons.AutoMirrored.Filled.InsertDriveFile)
+                ConversationsOverviewSection.EXAMS -> Pair(R.string.conversation_overview_section_exam_channels, Icons.Default.School)
+                ConversationsOverviewSection.GROUP_CHATS -> Pair(R.string.conversation_overview_section_groups, Icons.Default.Forum)
+                ConversationsOverviewSection.DIRECT_MESSAGES -> Pair(R.string.conversation_overview_section_direct_messages, Icons.AutoMirrored.Filled.Message)
+            }
+
+            val section = conversationCollection.section
+            val conversations = conversationCollection.conversations
+
+            conversationSectionHeader(
+                text = textRes,
+                icon = {
+                    Icon(imageVector = icon, contentDescription = null)
+                },
+                key = section.name,
+                isExpanded = conversationCollection.isExpanded,
+                conversationCount = conversations.size,
+                unreadCount = conversations.sumOf { it.unreadMessagesCount ?: 0 },
+                onClick = {
+                    onToggleSection(section)
+                },
             )
-        }
 
-        if (conversationCollections.channels.conversations.isNotEmpty()) {
-            listWithHeader(
-                ConversationSectionState.Conversations(conversationCollections.channels),
-                SECTION_CHANNELS_KEY,
-                KEY_SUFFIX_CHANNELS,
-                R.string.conversation_overview_section_general_channels,
-                conversationCollections.channels.conversations.size,
-                conversationCollections.channels.conversations.sumOf { it.unreadMessagesCount ?: 0 },
-                toggleGeneralsExpanded
-            ) { Icon(imageVector = Icons.Default.ChatBubble, contentDescription = null) }
-        }
-
-        if (conversationCollections.exerciseChannels.conversations.isNotEmpty()) {
-            listWithHeader(
-                ConversationSectionState.Conversations(conversationCollections.exerciseChannels),
-                SECTION_EXERCISES_KEY,
-                KEY_SUFFIX_EXERCISES,
-                R.string.conversation_overview_section_exercise_channels,
-                conversationCollections.exerciseChannels.conversations.size,
-                conversationCollections.exerciseChannels.conversations.sumOf { it.unreadMessagesCount ?: 0 },
-                toggleExercisesExpanded
-            ) { Icon(imageVector = Icons.AutoMirrored.Filled.List, contentDescription = null) }
-        }
-
-        if (conversationCollections.lectureChannels.conversations.isNotEmpty()) {
-            listWithHeader(
-                ConversationSectionState.Conversations(conversationCollections.lectureChannels),
-                SECTION_LECTURES_KEY,
-                KEY_SUFFIX_LECTURES,
-                R.string.conversation_overview_section_lecture_channels,
-                conversationCollections.lectureChannels.conversations.size,
-                conversationCollections.lectureChannels.conversations.sumOf { it.unreadMessagesCount ?: 0 },
-                toggleLecturesExpanded
-            ) { Icon(imageVector = Icons.AutoMirrored.Filled.InsertDriveFile, contentDescription = null) }
-        }
-
-        if (conversationCollections.examChannels.conversations.isNotEmpty()) {
-            listWithHeader(
-                ConversationSectionState.Conversations(conversationCollections.examChannels),
-                SECTION_EXAMS_KEY,
-                KEY_SUFFIX_EXAMS,
-                R.string.conversation_overview_section_exam_channels,
-                conversationCollections.examChannels.conversations.size,
-                conversationCollections.examChannels.conversations.sumOf { it.unreadMessagesCount ?: 0 },
-                toggleExamsExpanded
-            ) { Icon(imageVector = Icons.Default.School, contentDescription = null) }
-        }
-
-        if (conversationCollections.groupChats.conversations.isNotEmpty()) {
-            listWithHeader(
-                ConversationSectionState.Conversations(conversationCollections.groupChats),
-                SECTION_GROUPS_KEY,
-                KEY_SUFFIX_GROUPS,
-                R.string.conversation_overview_section_groups,
-                conversationCollections.groupChats.conversations.size,
-                conversationCollections.groupChats.conversations.sumOf { it.unreadMessagesCount ?: 0 },
-                toggleGroupChatsExpanded
-            ) { Icon(imageVector = Icons.Default.Forum, contentDescription = null) }
-        }
-
-        if (conversationCollections.directChats.conversations.isNotEmpty()) {
-            listWithHeader(
-                ConversationSectionState.Conversations(conversationCollections.directChats),
-                SECTION_DIRECT_MESSAGES_KEY,
-                KEY_SUFFIX_PERSONAL,
-                R.string.conversation_overview_section_direct_messages,
-                conversationCollections.directChats.conversations.size,
-                conversationCollections.directChats.conversations.sumOf { it.unreadMessagesCount ?: 0 },
-                togglePersonalConversationsExpanded
-            ) { Icon(imageVector = Icons.AutoMirrored.Filled.Message, contentDescription = null) }
-        }
-
-        if (conversationCollections.hidden.conversations.isNotEmpty()) {
-            listWithHeader(
-                ConversationSectionState.Conversations(conversationCollections.hidden),
-                SECTION_HIDDEN_KEY,
-                KEY_SUFFIX_HIDDEN,
-                R.string.conversation_overview_section_hidden,
-                conversationCollections.hidden.conversations.size,
-                conversationCollections.hidden.conversations.sumOf { it.unreadMessagesCount ?: 0 },
-                toggleHiddenExpanded
-            ) { Icon(imageVector = Icons.Default.Archive, contentDescription = null) }
+            conversationList(
+                keySuffix = section.name,
+                sectionState = ConversationSectionState.Conversations(conversationCollection),
+                allowFavoriteIndicator = section != ConversationsOverviewSection.FAVOURITES,
+                onNavigateToConversation = onNavigateToConversation,
+                onToggleMarkAsFavourite = onToggleMarkAsFavourite,
+                onToggleHidden = onToggleHidden,
+                onToggleMuted = onToggleMuted,
+                selectedConversationId = selectedConversationId
+            )
         }
 
         savedPostsHeaderRow(
@@ -373,7 +279,7 @@ private fun LazyListScope.conversationSectionHeader(
 
 private fun LazyListScope.conversationList(
     keySuffix: String,
-    section: ConversationSectionState,
+    sectionState: ConversationSectionState,
     allowFavoriteIndicator: Boolean,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
@@ -381,11 +287,11 @@ private fun LazyListScope.conversationList(
     onToggleMuted: (conversationId: Long, muted: Boolean) -> Unit,
     selectedConversationId: Long?
 ) {
-    if (!section.isExpanded) return
+    if (!sectionState.isExpanded) return
 
-    when(section) {
+    when(sectionState) {
         is ConversationSectionState.Conversations<*> -> {
-            val conversations = section.conversations
+            val conversations = sectionState.conversations
             items(
                 items = conversations.conversations,
                 key = { tagForConversation(it.id, keySuffix) }

@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.storage
 
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.ConversationsOverviewSection
 import kotlinx.coroutines.flow.Flow
 
 interface ConversationPreferenceService {
@@ -9,15 +10,15 @@ interface ConversationPreferenceService {
     suspend fun updatePreferences(serverUrl: String, courseId: Long, preferences: Preferences)
 
     data class Preferences(
-        val favouritesExpanded: Boolean,
-        val generalsExpanded: Boolean,
-        val examsExpanded: Boolean,
-        val exercisesExpanded: Boolean,
-        val lecturesExpanded: Boolean,
-        val groupChatsExpanded: Boolean,
-        val personalConversationsExpanded: Boolean,
-        val hiddenExpanded: Boolean,
-        val savedPostsExpanded: Boolean,
-        val recentExpanded: Boolean
-    )
+        val expandedStateBySection: Map<ConversationsOverviewSection, Boolean>
+    ) {
+        fun toggle(section: ConversationsOverviewSection): Preferences {
+            val currentState = expandedStateBySection[section] ?: section.expandedByDefault
+            return copy(expandedStateBySection = expandedStateBySection + (section to !currentState))
+        }
+
+        fun isExpanded(section: ConversationsOverviewSection): Boolean {
+            return expandedStateBySection[section] ?: section.expandedByDefault
+        }
+    }
 }

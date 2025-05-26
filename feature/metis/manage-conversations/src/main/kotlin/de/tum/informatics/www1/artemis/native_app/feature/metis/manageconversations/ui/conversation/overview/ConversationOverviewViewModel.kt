@@ -268,61 +268,14 @@ class ConversationOverviewViewModel(
             isFiltering
         ) { conversationsDataState, preferences, filterActive ->
             conversationsDataState.bind { conversations ->
-
-                ConversationCollections(
-                    channels = conversations.filterNotHidden<ChannelChat>()
-                        .filter {
-                            !it.filterPredicate("exercise") && !it.filterPredicate("lecture") && !it.filterPredicate(
-                                "exam"
-                            )
-                        }
-                        .asCollection(filterActive || preferences.generalsExpanded),
-
-                    groupChats = conversations.filterNotHidden<GroupChat>()
-                        .asCollection(filterActive || preferences.groupChatsExpanded),
-
-                    directChats = conversations.filterNotHidden<OneToOneChat>()
-                        .asCollection(filterActive || preferences.personalConversationsExpanded),
-
-                    favorites = conversations.filter { it.isFavorite }
-                        .asCollection(preferences.favouritesExpanded),
-
-                    hidden = conversations.filter { it.isHidden }
-                        .asCollection(preferences.hiddenExpanded),
-
-                    exerciseChannels = conversations.filter {
-                        it is ChannelChat && !it.isHidden && it.filterPredicate("exercise")
-                    }.map { it as ChannelChat }
-                        .asCollection(
-                            filterActive || preferences.exercisesExpanded,
-                            showPrefix = false
-                        ),
-
-                    lectureChannels = conversations.filter {
-                        it is ChannelChat && !it.isHidden && it.filterPredicate("lecture")
-                    }.map { it as ChannelChat }
-                        .asCollection(
-                            filterActive || preferences.lecturesExpanded,
-                            showPrefix = false
-                        ),
-
-                    examChannels = conversations.filter {
-                        it is ChannelChat && !it.isHidden && it.filterPredicate("exam")
-                    }.map { it as ChannelChat }
-                        .asCollection(filterActive || preferences.examsExpanded, showPrefix = false)
+                ConversationCollectionInitUtil.fromConversationList(
+                    conversations = conversations,
+                    preferences = preferences,
+                    filterActive = filterActive
                 )
             }
         }
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
-
-    val isSavedPostsExpanded: StateFlow<Boolean> =
-        combine(
-            currentPreferences,
-            isFiltering
-        ) { preferences, filterActive ->
-            preferences.savedPostsExpanded && !filterActive
-        }
-            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
 
     /**
@@ -573,57 +526,17 @@ class ConversationOverviewViewModel(
         }
     }
 
-    fun toggleFavoritesExpanded() {
-        expandOrCollapseSection { copy(favouritesExpanded = !favouritesExpanded) }
-    }
-
-    fun toggleGeneralsExpanded() {
-        expandOrCollapseSection { copy(generalsExpanded = !generalsExpanded) }
-    }
-
-    fun toggleExamsExpanded() {
-        expandOrCollapseSection { copy(examsExpanded = !examsExpanded) }
-    }
-
-    fun toggleExercisesExpanded() {
-        expandOrCollapseSection { copy(exercisesExpanded = !exercisesExpanded) }
-    }
-
-    fun toggleLecturesExpanded() {
-        expandOrCollapseSection { copy(lecturesExpanded = !lecturesExpanded) }
-    }
-
-    fun toggleGroupChatsExpanded() {
-        expandOrCollapseSection { copy(groupChatsExpanded = !groupChatsExpanded) }
-    }
-
-    fun togglePersonalConversationsExpanded() {
-        expandOrCollapseSection { copy(personalConversationsExpanded = !personalConversationsExpanded) }
-    }
-
-    fun toggleHiddenExpanded() {
-        expandOrCollapseSection { copy(hiddenExpanded = !hiddenExpanded) }
-    }
-
-    private fun expandOrCollapseSection(update: ConversationPreferenceService.Preferences.() -> ConversationPreferenceService.Preferences) {
+    fun toggleSectionExpanded(section: ConversationsOverviewSection) {
         viewModelScope.launch(coroutineContext) {
+            val currentPreferences = currentPreferences.first()
+
             conversationPreferenceService.updatePreferences(
                 serverUrl = serverConfigurationService.serverUrl.first(),
                 courseId = courseId,
-                preferences = update(currentPreferences.first())
+                preferences = currentPreferences.toggle(section)
             )
         }
     }
-
-    private inline fun <reified T : Conversation> List<*>.filterNotHidden(): List<T> {
-        return filterIsInstance<T>()
-            .filter { !it.isHidden }
-    }
-
-    private fun <T : Conversation> List<T>.asCollection(
-        isExpanded: Boolean,
-        showPrefix: Boolean = true
-    ) = ConversationCollection(this, isExpanded, showPrefix)
 
     fun saveScrollPosition(position: Int) {
         _scrollPosition.value = position
