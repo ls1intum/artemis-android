@@ -20,20 +20,14 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRight
-import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
-import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Forum
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.NotificationsOff
-import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Unarchive
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -60,8 +54,9 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.selectionBorder
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.model.ConversationCollections
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.model.ConversationsOverviewSection
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
@@ -160,17 +155,6 @@ internal fun ConversationList(
         state = listState
     ) {
         for (conversationCollection in conversationCollections.collections) {
-            val (textRes, icon) = when (conversationCollection.section) {
-                ConversationsOverviewSection.FAVOURITES -> Pair(R.string.conversation_overview_section_favorites, Icons.Default.Favorite)
-                ConversationsOverviewSection.HIDDEN -> Pair(R.string.conversation_overview_section_hidden, Icons.Default.Archive)
-                ConversationsOverviewSection.CHANNELS -> Pair(R.string.conversation_overview_section_general_channels, Icons.Default.ChatBubble)
-                ConversationsOverviewSection.EXERCISES -> Pair(R.string.conversation_overview_section_exercise_channels, Icons.AutoMirrored.Filled.List)
-                ConversationsOverviewSection.LECTURES -> Pair(R.string.conversation_overview_section_lecture_channels, Icons.AutoMirrored.Filled.InsertDriveFile)
-                ConversationsOverviewSection.EXAMS -> Pair(R.string.conversation_overview_section_exam_channels, Icons.Default.School)
-                ConversationsOverviewSection.GROUP_CHATS -> Pair(R.string.conversation_overview_section_groups, Icons.Default.Forum)
-                ConversationsOverviewSection.DIRECT_MESSAGES -> Pair(R.string.conversation_overview_section_direct_messages, Icons.AutoMirrored.Filled.Message)
-            }
-
             val section = conversationCollection.section
             val conversations = conversationCollection.conversations
 
@@ -179,9 +163,9 @@ internal fun ConversationList(
             }
 
             conversationSectionHeader(
-                text = textRes,
+                text = section.textRes,
                 icon = {
-                    Icon(imageVector = icon, contentDescription = null)
+                    Icon(imageVector = section.icon, contentDescription = null)
                 },
                 key = section.name,
                 isExpanded = conversationCollection.isExpanded,

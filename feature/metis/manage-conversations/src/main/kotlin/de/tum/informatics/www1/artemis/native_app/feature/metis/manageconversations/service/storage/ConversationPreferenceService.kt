@@ -1,6 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.storage
 
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.ConversationsOverviewSection
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.model.ConversationsOverviewSection
 import kotlinx.coroutines.flow.Flow
 
 interface ConversationPreferenceService {

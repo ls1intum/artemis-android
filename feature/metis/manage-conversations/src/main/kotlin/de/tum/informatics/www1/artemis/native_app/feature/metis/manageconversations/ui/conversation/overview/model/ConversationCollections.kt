@@ -1,6 +1,5 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations
+package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.model
 
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.ConversationsOverviewSection
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 
 data class ConversationCollections(
