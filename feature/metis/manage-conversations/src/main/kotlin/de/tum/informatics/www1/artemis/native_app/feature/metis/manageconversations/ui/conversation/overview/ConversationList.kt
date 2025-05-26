@@ -174,6 +174,10 @@ internal fun ConversationList(
             val section = conversationCollection.section
             val conversations = conversationCollection.conversations
 
+            if (conversations.isEmpty()) {
+                continue
+            }
+
             conversationSectionHeader(
                 text = textRes,
                 icon = {
