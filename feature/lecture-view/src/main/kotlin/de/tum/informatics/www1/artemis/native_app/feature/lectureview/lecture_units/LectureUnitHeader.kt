@@ -26,7 +26,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitAttachmentVideo
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitExercise
@@ -49,7 +48,6 @@ internal fun LectureUnitHeader(
     onClickExercise: (exerciseId: Long) -> Unit,
     isUploadingMarkedAsCompleted: Boolean,
     onMarkAsCompleted: (isCompleted: Boolean) -> Unit,
-    onRequestOpenAttachment: (Attachment) -> Unit,
     onHeaderClick: () -> Unit
 ) {
     val (icon, text) = when (lectureUnit) {
@@ -85,10 +83,6 @@ internal fun LectureUnitHeader(
         modifier = modifier,
         onClick = {
             onMarkAsCompleted(true)
-            if (lectureUnit is LectureUnitAttachmentVideo && lectureUnit.onlyHasAttachment) {
-                onRequestOpenAttachment(lectureUnit.attachment ?: return@Card)
-                return@Card
-            }
             onHeaderClick()
         }
     ) {

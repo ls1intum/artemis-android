@@ -1,7 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture_units
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitOnline
@@ -40,7 +40,6 @@ internal fun LectureUnitWithLinkUi(
     name: String,
     text: String?,
     onClickOpenLink: () -> Unit,
-    trailingContent: @Composable (ColumnScope.() -> Unit)? = null
 ) {
     LectureUnitBody(modifier = modifier, name = name) {
         if (text != null) {
@@ -52,25 +51,33 @@ internal fun LectureUnitWithLinkUi(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Button(
+        OpenLinkButton(
             modifier = Modifier.align(Alignment.CenterHorizontally),
-            onClick = onClickOpenLink
-        ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.OpenInNew,
-                    contentDescription = null
-                )
+            onClickOpenLink = onClickOpenLink
+        )
+    }
+}
 
-                Text(
-                    text = stringResource(id = R.string.lecture_view_open_link_button)
-                )
-            }
-        }
+@Composable
+internal fun OpenLinkButton(
+    modifier: Modifier = Modifier,
+    onClickOpenLink: () -> Unit,
+    text: String = stringResource(id = R.string.lecture_view_open_link_button),
+    icon: ImageVector = Icons.AutoMirrored.Filled.OpenInNew,
+) {
+    Button(
+        modifier = modifier,
+        onClick = onClickOpenLink
+    ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null
+            )
 
-        if (trailingContent != null) {
-            Spacer(modifier = Modifier.height(8.dp))
-            trailingContent()
+            Text(
+                text = text
+            )
         }
     }
 }

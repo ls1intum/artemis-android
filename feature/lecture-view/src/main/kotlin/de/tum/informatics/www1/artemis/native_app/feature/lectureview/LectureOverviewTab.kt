@@ -133,7 +133,6 @@ internal fun LectureOverviewTab(
                 lectureUnits = lectureUnits,
                 onViewExercise = onViewExercise,
                 onMarkAsCompleted = onMarkAsCompleted,
-                onRequestOpenAttachment = onRequestOpenAttachment,
                 onHeaderClick = { lectureUnit ->
                     selectedLectureUnit = lectureUnit
                     coroutineScope.launch {
@@ -285,7 +284,6 @@ private fun LazyListScope.lectureUnitSection(
     modifier: Modifier,
     lectureUnits: List<LectureUnitData>,
     onViewExercise: (exerciseId: Long) -> Unit,
-    onRequestOpenAttachment: (Attachment) -> Unit,
     onMarkAsCompleted: (lectureUnitId: Long, isCompleted: Boolean) -> Unit,
     onHeaderClick: (LectureUnit) -> Unit
 ) {
@@ -311,7 +309,6 @@ private fun LazyListScope.lectureUnitSection(
                     onMarkAsCompleted(lectureUnitWithData.lectureUnit.id, isCompleted)
                 },
                 isUploadingMarkedAsCompleted = lectureUnitWithData.isUploadingChanges,
-                onRequestOpenAttachment = onRequestOpenAttachment,
                 onHeaderClick = { onHeaderClick(lectureUnitWithData.lectureUnit) }
             )
         }
