@@ -24,7 +24,7 @@ object LectureUnitAttachmentUtil {
         attachmentLink: String
     ): String {
         return URLBuilder(serverUrl).apply {
-            appendPathSegments(*Api.Core.UploadedFile.path)
+            appendPathSegments(*Api.Core.Files.path)
             appendPathSegments(attachmentLink)
         }.buildString()
     }
@@ -40,7 +40,7 @@ object LectureUnitAttachmentUtil {
         } else {
             "$downloadName.$extension"
         }
-        return "$restOfUrl/$encodedDownloadName"
+        return "$restOfUrl/student/$encodedDownloadName"
     }
 
     internal fun detectAttachmentType(link: String?): LectureAttachmentType {

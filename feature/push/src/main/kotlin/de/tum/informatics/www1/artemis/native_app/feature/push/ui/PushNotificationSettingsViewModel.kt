@@ -6,7 +6,6 @@ import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.onFailure
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
-import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -31,6 +30,7 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
@@ -69,12 +69,14 @@ class PushNotificationSettingsViewModel internal constructor(
             accountService.authToken.filterNot { it.isBlank() }
         ) { _, serverUrl, authToken ->
             emitAll(
-                retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                    notificationSettingsService.getNotificationSettings(
-                        serverUrl,
-                        authToken
-                    )
-                }
+                // Dummy data because the settings are not supported anymore after the 8.0 notification system change.
+                flowOf(DataState.Success(emptyList<PushNotificationSetting>()))
+//                retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+//                    notificationSettingsService.getNotificationSettings(
+//                        serverUrl,
+//                        authToken
+//                    )
+//                }
             )
         }
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())

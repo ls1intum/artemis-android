@@ -33,18 +33,18 @@ import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 @Serializable
-private data class ViewQuizResultScreen(val courseId: Long, val exerciseId: Long)
+private data class ViewQuizResultScreenRoute(val courseId: Long, val exerciseId: Long)
 
 fun NavController.navigateToQuizResult(
     courseId: Long,
     exerciseId: Long
 ) {
-    navigate(ViewQuizResultScreen(courseId, exerciseId))
+    navigate(ViewQuizResultScreenRoute(courseId, exerciseId))
 }
 
 fun NavGraphBuilder.quizResults() {
-    animatedComposable<ViewQuizResultScreen> { backStackEntry ->
-        val route: ViewQuizResultScreen = backStackEntry.toRoute()
+    animatedComposable<ViewQuizResultScreenRoute> { backStackEntry ->
+        val route: ViewQuizResultScreenRoute = backStackEntry.toRoute()
 
         ViewQuizResultScreen(
             modifier = Modifier.fillMaxSize(),

@@ -44,7 +44,7 @@ import org.koin.core.parameter.parametersOf
 import kotlin.reflect.typeOf
 
 @Serializable
-private data class QuizParticipationScreen(
+private data class QuizParticipationScreenRoute(
     val courseId: Long,
     val exerciseId: Long,
     val quizType: QuizType.WorkableQuizType = QuizType.Live
@@ -55,11 +55,11 @@ fun NavController.navigateToQuizParticipation(
     exerciseId: Long,
     quizType: QuizType.WorkableQuizType
 ) {
-    navigate(QuizParticipationScreen(courseId, exerciseId, quizType))
+    navigate(QuizParticipationScreenRoute(courseId, exerciseId, quizType))
 }
 
 fun NavGraphBuilder.quizParticipation(onLeaveQuiz: () -> Unit) {
-    animatedComposable<QuizParticipationScreen>(
+    animatedComposable<QuizParticipationScreenRoute>(
         typeMap = mapOf(
             typeOf<QuizType.WorkableQuizType>() to KSerializableNavType(
                 isNullableAllowed = false,
@@ -68,7 +68,7 @@ fun NavGraphBuilder.quizParticipation(onLeaveQuiz: () -> Unit) {
         ),
         deepLinks = ExerciseDeeplinks.ToQuizParticipation.generateLinks()
     ) { backStackEntry ->
-        val screen = backStackEntry.toRoute<QuizParticipationScreen>()
+        val screen = backStackEntry.toRoute<QuizParticipationScreenRoute>()
         val courseId = screen.courseId
         val exerciseId = screen.exerciseId
         val quizType = screen.quizType

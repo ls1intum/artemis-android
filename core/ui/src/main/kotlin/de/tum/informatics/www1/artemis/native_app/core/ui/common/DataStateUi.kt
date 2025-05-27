@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.common
 
+import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -100,6 +101,7 @@ inline fun <T> Content(
 ) {
     when (dataState) {
         is DataState.Failure -> {
+            Log.e("DataStateUi", "Error loading data", dataState.throwable)
             Column(
                 modifier = Modifier
             ) {

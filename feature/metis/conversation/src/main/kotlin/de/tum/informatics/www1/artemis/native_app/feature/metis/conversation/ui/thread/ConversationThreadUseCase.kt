@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread
 
+import android.util.Log
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
@@ -36,6 +37,9 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.plus
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
+
+
+private const val TAG = "ConversationThreadUseCase"
 
 /**
  * ViewModel for the standalone view of communication posts. Handles loading of the singular post by the given post id.
@@ -80,6 +84,7 @@ internal class ConversationThreadUseCase(
      * The post data state flow as loading from the server.
      */
     val post: StateFlow<DataState<IStandalonePost>> = postId.flatMapLatest { postId ->
+        Log.d(TAG, "ConversationThreadUseCase loading with postId: $postId")
         when (postId) {
             is StandalonePostId.ClientSideId -> metisStorageService
                 .getStandalonePost(postId.clientSideId)
@@ -176,26 +181,32 @@ internal class ConversationThreadUseCase(
 
         return when (standalonePostDataState) {
             is DataState.Success -> {
-                val post = standalonePostDataState.data
+                // The transaction is needed to ensure that storing the post in the db and re-fetching it
+                // does not interfere with other transactions. Eg, when reloading, the ConversationChatListUseCase
+                // might delete older updated posts.
+                metisStorageService.withTransaction {
+                    val post = standalonePostDataState.data
 
-                val host = serverConfigurationService.host.first()
-                metisStorageService.insertOrUpdatePosts(
-                    host = host,
-                    metisContext = metisContext,
-                    posts = listOf(post)
-                )
+                    val host = serverConfigurationService.host.first()
+                    metisStorageService.insertOrUpdatePosts(
+                        host = host,
+                        metisContext = metisContext,
+                        posts = listOf(post)
+                    )
 
-                val clientSidePostId = metisStorageService.getClientSidePostId(
-                    host = host,
-                    serverSidePostId = post.id ?: 0L,
-                    postingType = BasePostingEntity.PostingType.STANDALONE
-                )
+                    val clientSidePostId = metisStorageService.getClientSidePostId(
+                        host = host,
+                        serverSidePostId = post.id ?: 0L,
+                        postingType = BasePostingEntity.PostingType.STANDALONE
+                    )
 
-                if (clientSidePostId != null) {
-                    metisStorageService
-                        .getStandalonePost(clientSidePostId)
-                        .asDataStateFlow()
-                } else failureFlow
+                    if (clientSidePostId != null) {
+                        val storedPost = metisStorageService
+                            .getStandalonePost(clientSidePostId).first()
+
+                        flowOf(storedPost).asDataStateFlow()
+                    } else failureFlow
+                }
             }
 
             is DataState.Failure -> flowOf(DataState.Failure(standalonePostDataState.throwable))

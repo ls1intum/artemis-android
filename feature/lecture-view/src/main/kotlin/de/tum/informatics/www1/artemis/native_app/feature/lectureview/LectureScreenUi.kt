@@ -54,23 +54,23 @@ import org.koin.core.parameter.parametersOf
 const val METIS_RATIO = 0.3f
 
 @Serializable
-private data class LectureScreenUi(val lectureId: Long)
+private data class LectureScreenRoute(val lectureId: Long)
 
 fun NavController.navigateToLecture(
     lectureId: Long,
     builder: NavOptionsBuilder.() -> Unit
 ) {
-    navigate(LectureScreenUi(lectureId), builder)
+    navigate(LectureScreenRoute(lectureId), builder)
 }
 
 fun NavGraphBuilder.lecture(
     onViewExercise: (exerciseId: Long) -> Unit,
 ) {
-    animatedComposable<LectureScreenUi>(
+    animatedComposable<LectureScreenRoute>(
         deepLinks = LectureDeeplinks.ToLecture.generateLinks() +
                 LectureDeeplinks.ToLectureCourseAgnostic.generateLinks()
     ) { backStackEntry ->
-        val route: LectureScreenUi = backStackEntry.toRoute()
+        val route: LectureScreenRoute = backStackEntry.toRoute()
 
         val lectureId = route.lectureId
 

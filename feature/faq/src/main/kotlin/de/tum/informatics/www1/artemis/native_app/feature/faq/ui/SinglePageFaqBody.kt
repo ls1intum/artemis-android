@@ -111,7 +111,8 @@ fun SinglePageFaqBody(
                             }
                         }
                     },
-                    title = title
+                    title = title,
+                    searchConfiguration = searchConfiguration
                 )
             }
         }

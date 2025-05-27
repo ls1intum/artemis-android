@@ -42,12 +42,11 @@ import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitAttachment
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitAttachmentVideo
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitOnline
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitText
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitUnknown
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitVideo
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.DateFormats
@@ -100,7 +99,8 @@ internal fun LectureOverviewTab(
             LectureUnitBottomSheetContent(
                 modifier = modifier,
                 lectureUnit = selectedLectureUnit ?: return@ModalBottomSheet,
-                onRequestViewLink = onRequestViewLink
+                onRequestViewLink = onRequestViewLink,
+                onRequestOpenAttachment = onRequestOpenAttachment
             )
         }
     }
@@ -133,7 +133,6 @@ internal fun LectureOverviewTab(
                 lectureUnits = lectureUnits,
                 onViewExercise = onViewExercise,
                 onMarkAsCompleted = onMarkAsCompleted,
-                onRequestOpenAttachment = onRequestOpenAttachment,
                 onHeaderClick = { lectureUnit ->
                     selectedLectureUnit = lectureUnit
                     coroutineScope.launch {
@@ -285,7 +284,6 @@ private fun LazyListScope.lectureUnitSection(
     modifier: Modifier,
     lectureUnits: List<LectureUnitData>,
     onViewExercise: (exerciseId: Long) -> Unit,
-    onRequestOpenAttachment: (Attachment) -> Unit,
     onMarkAsCompleted: (lectureUnitId: Long, isCompleted: Boolean) -> Unit,
     onHeaderClick: (LectureUnit) -> Unit
 ) {
@@ -311,7 +309,6 @@ private fun LazyListScope.lectureUnitSection(
                     onMarkAsCompleted(lectureUnitWithData.lectureUnit.id, isCompleted)
                 },
                 isUploadingMarkedAsCompleted = lectureUnitWithData.isUploadingChanges,
-                onRequestOpenAttachment = onRequestOpenAttachment,
                 onHeaderClick = { onHeaderClick(lectureUnitWithData.lectureUnit) }
             )
         }
@@ -326,7 +323,8 @@ private fun LazyListScope.lectureUnitSection(
 private fun LectureUnitBottomSheetContent(
     modifier: Modifier,
     lectureUnit: LectureUnit,
-    onRequestViewLink: (String) -> Unit
+    onRequestViewLink: (String) -> Unit,
+    onRequestOpenAttachment: (Attachment) -> Unit,
 ) {
     val childModifier = Modifier.fillMaxWidth()
     Column(
@@ -335,7 +333,16 @@ private fun LectureUnitBottomSheetContent(
             .verticalScroll(rememberScrollState())
     ) {
         when (lectureUnit) {
-            is LectureUnitAttachment -> {}
+            is LectureUnitAttachmentVideo -> {
+                LectureUnitVideoUi(
+                    modifier = childModifier,
+                    lectureUnit = lectureUnit,
+                    onClickOpenLink = {
+                        onRequestViewLink(lectureUnit.videoSource.orEmpty())
+                    },
+                    onClickOpenAttachment = onRequestOpenAttachment
+                )
+            }
 
             is LectureUnitExercise -> {}
 
@@ -357,16 +364,6 @@ private fun LectureUnitBottomSheetContent(
             }
 
             is LectureUnitUnknown -> {}
-
-            is LectureUnitVideo -> {
-                LectureUnitVideoUi(
-                    modifier = childModifier,
-                    lectureUnit = lectureUnit,
-                    onClickOpenLink = {
-                        onRequestViewLink(lectureUnit.source.orEmpty())
-                    }
-                )
-            }
         }
     }
 }

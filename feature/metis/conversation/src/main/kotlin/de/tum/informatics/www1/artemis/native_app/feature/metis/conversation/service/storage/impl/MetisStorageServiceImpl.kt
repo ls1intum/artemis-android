@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.impl
 
+import android.util.Log
 import androidx.paging.PagingSource
 import androidx.room.withTransaction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
@@ -25,6 +26,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.P
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Instant
 import java.util.UUID
+
+
+private const val TAG = "MetisStorageServiceImpl"
 
 /**
  * This implementation only displays live created posts, but ignores them when counting the posts for the next page request.
@@ -168,6 +172,10 @@ internal class MetisStorageServiceImpl(
         private val MetisContext.conversationId: Long get() = if (this is MetisContext.Conversation) conversationId else -1
     }
 
+    override suspend fun <T> withTransaction(block: suspend () -> T): T {
+        return databaseProvider.database.withTransaction(block)
+    }
+
     override suspend fun insertOrUpdatePosts(
         host: String,
         metisContext: MetisContext,
@@ -191,13 +199,18 @@ internal class MetisStorageServiceImpl(
     ) {
         // Extract the db entities from the network entities. With the schema invalid entities are discarded.
         for (sp in posts) {
+            if (sp.id == null) {
+                Log.w(TAG, "Post has no id. Cannot insert or update post.")
+                continue
+            }
+
             val queryClientPostId = metisDao.queryClientPostId(
                 serverId = host,
-                postId = sp.id ?: continue,
+                postId = sp.id!!,
                 postingType = BasePostingEntity.PostingType.STANDALONE
             )
 
-            insertOrUpdatePost(
+            val newClientPostId = insertOrUpdatePost(
                 metisDao = metisDao,
                 isNewPost = queryClientPostId == null,
                 host = host,
@@ -206,6 +219,10 @@ internal class MetisStorageServiceImpl(
                 sp = sp,
                 isLiveCreated = false
             )
+
+            if (newClientPostId == null) {
+                Log.w(TAG, "Post with id ${sp.id} could not be inserted or updated.")
+            }
         }
     }
 
@@ -240,6 +257,7 @@ internal class MetisStorageServiceImpl(
             )
 
             if (removeAllOlderPosts) {
+                Log.d(TAG, "Deleting all posts older than ${oldestPost.creationDate} for conversation ${metisContext.conversationId}")
                 metisDao.deletePostsOlderThanThreshold(
                     host = host,
                     courseId = metisContext.courseId,
@@ -476,9 +494,8 @@ internal class MetisStorageServiceImpl(
         }
 
         // First insert the users as they have no dependencies
-        // TODO: Do not update existing users, as for the reactions we always get null as image_url
-        //       Can be undone when https://github.com/ls1intum/Artemis/pull/9897 is merged.
-//        metisDao.updateUsers(standalonePostReactionsUsers)
+
+        // We explicitly do NOT update users, as we always get null as an user imageUrl for reactions.
         metisDao.insertUsers(standalonePostReactionsUsers)
 
         metisDao.insertOrUpdateUser(postingAuthor)
@@ -565,8 +582,6 @@ internal class MetisStorageServiceImpl(
         metisContext: MetisContext,
         answerPostId: Long?
     ) {
-        // TODO: change below maybe already enough.
-        // TODO: if yes, undo the nullable authorRole changes in the pojos
         val authorRole = (if (answerPost.authorRole == null) {
             metisDao.queryPostAuthorRole(answerPostClientSidePostId)
         } else answerPost.authorRole?.asDb)?.asNetwork
@@ -586,9 +601,7 @@ internal class MetisStorageServiceImpl(
 
         metisDao.insertOrUpdateUser(metisUserEntity)
 
-        // TODO: Do not update existing users, as for the reactions we always get null as image_url
-        //       Can be undone when https://github.com/ls1intum/Artemis/pull/9897 is merged.
-//        metisDao.updateUsers(answerPostReactionUsers)
+        // We explicitly do NOT update users, as we always get null as an user imageUrl for reactions.
         metisDao.insertUsers(answerPostReactionUsers)
 
         if (isNewPost) {

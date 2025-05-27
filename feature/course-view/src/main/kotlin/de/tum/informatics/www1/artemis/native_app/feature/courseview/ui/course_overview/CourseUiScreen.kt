@@ -63,7 +63,7 @@ import org.koin.core.parameter.parametersOf
 
 
 @Serializable
-private data class CourseUiScreen(
+private data class CourseScreenRoute(
     val courseId: Long,
     val conversationId: Long? = null,
     val postId: Long? = null,
@@ -87,7 +87,7 @@ sealed class CourseTab {
 }
 
 fun NavController.navigateToCourse(courseId: Long, builder: NavOptionsBuilder.() -> Unit) {
-    navigate(CourseUiScreen(courseId), builder)
+    navigate(CourseScreenRoute(courseId), builder)
 }
 
 fun NavGraphBuilder.course(
@@ -106,10 +106,10 @@ fun NavGraphBuilder.course(
             CommunicationDeeplinks.ToOneToOneChatByUsername.generateLinks() +
             CommunicationDeeplinks.ToOneToOneChatByUserId.generateLinks() +
             CommunicationDeeplinks.ToPostById.generateLinks()
-    animatedComposable<CourseUiScreen>(
+    animatedComposable<CourseScreenRoute>(
         deepLinks = deepLinks
     ) { backStackEntry ->
-        val route: CourseUiScreen = backStackEntry.toRoute()
+        val route: CourseScreenRoute = backStackEntry.toRoute()
         val courseId = route.courseId
 
         val artemisContextProvider = LocalArtemisContextProvider.current
@@ -331,7 +331,8 @@ internal fun CourseUiScreen(
                                 )
                             }
                         ),
-                        title = courseName
+                        title = courseName,
+                        searchConfiguration = exerciseSearchConfiguration
                     )
                 }
             }
@@ -347,8 +348,9 @@ internal fun CourseUiScreen(
                             lectureSearchConfiguration.query else "",
                         collapsingContentState = collapsingContentState,
                         onViewExercise = onNavigateToExercise,
-                        onNavigateToLectureScreen = { id -> onNavigateToLecture(id ?: 0L) },
-                        title = courseName
+                        onNavigateToLectureScreen = { id -> onNavigateToLecture(id) },
+                        title = courseName,
+                        searchConfiguration = lectureSearchConfiguration
                     )
                 }
             }
