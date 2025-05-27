@@ -12,13 +12,11 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExerci
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitAttachment
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateId
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
-import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
@@ -29,7 +27,6 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.appendPathSegments
 import io.ktor.http.contentType
 import kotlinx.coroutines.flow.first
-import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 
@@ -214,60 +211,6 @@ suspend fun KoinComponent.createLectureUnit(
     }.body()
 }
 
-suspend fun KoinComponent.createAttachmentUnit(
-    accessToken: String,
-    lectureId: Long,
-    lectureUnitName: String = "Attachment lecture unit ${generateId()}"
-): LectureUnitAttachment {
-    return ktorProvider.ktorClient.submitFormWithBinaryData(
-        formData {
-            append(
-                "file",
-                "file content".encodeToByteArray(),
-                Headers.build {
-                    append(HttpHeaders.ContentDisposition, "filename=file.txt")
-                }
-            )
-
-            append(
-                "attachment",
-                """
-                    {"name":"$lectureUnitName","releaseDate":null,"version":1,"attachmentType":"FILE"}
-                """.trimIndent(),
-                Headers.build {
-                    set("Content-Type", "application/json")
-                    set("filename", "blob")
-                }
-            )
-
-            append(
-                "attachmentUnit",
-                """
-                  {"competencies":[],"type":"attachment","description":"Description ${generateId()}"}  
-                """.trimIndent(),
-                Headers.build {
-                    set("Content-Type", "application/json")
-                    set("filename", "blob")
-                }
-            )
-        }
-    ) {
-        url(serverConfigurationService.serverUrl.first())
-
-        url {
-            appendPathSegments(*Api.Lecture.Lectures.path, lectureId.toString(), "attachment-units")
-        }
-
-        parameter("keepFilename", true)
-
-        cookieAuth(accessToken)
-
-        contentType(ContentType.MultiPart.FormData)
-        accept(ContentType.Application.Json)
-    }
-        .body()
-}
-
 suspend fun KoinComponent.createAttachment(
     accessToken: String,
     lectureId: Long,
@@ -349,6 +292,3 @@ suspend fun KoinComponent.startQuizExerciseBatch(
         contentType(ContentType.Application.Json)
     }.body()
 }
-
-@Serializable
-private data class FileUploadResponse(val path: String)

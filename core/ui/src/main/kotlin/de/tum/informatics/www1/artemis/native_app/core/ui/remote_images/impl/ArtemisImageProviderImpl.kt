@@ -28,7 +28,7 @@ class ArtemisImageProviderImpl(
 
     override suspend fun loadArtemisImage(context: Context, imagePath: String): ImageResult {
         val imageUrl = URLBuilder(artemisContext.serverUrl)
-            .appendPathSegments(*Api.Core.UploadedFile.path)
+            .appendPathSegments(*Api.Core.Files.path)
             .appendPathSegments(imagePath)
             .buildString()
         val request = imageProvider.createImageRequest(
@@ -46,7 +46,7 @@ class ArtemisImageProviderImpl(
         val artemisContext by artemisContextProvider.collectArtemisContextAsState()
 
         val imageUrl = URLBuilder(artemisContext.serverUrl)
-            .appendPathSegments(*Api.Core.UploadedFile.path)
+            .appendPathSegments(*Api.Core.Files.path)
             .appendPathSegments(imagePath)
             .buildString()
         val authToken = artemisContext.authTokenOrEmptyString
