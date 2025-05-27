@@ -40,7 +40,7 @@ object LectureUnitAttachmentUtil {
         } else {
             "$downloadName.$extension"
         }
-        return "$restOfUrl/$encodedDownloadName"
+        return "$restOfUrl/student/$encodedDownloadName"
     }
 
     internal fun detectAttachmentType(link: String?): LectureAttachmentType {

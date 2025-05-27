@@ -437,16 +437,6 @@ fun createExerciseLectureUnit(
     }
 """.trimIndent()
 
-fun createVideoLectureUnit(name: String) = """
-    {
-      "name": "$name",
-      "competencies": [],
-      "type": "video",
-      "description": "${generateId()}",
-      "source": "https://example.com/"
-    }
-""".trimIndent()
-
 fun createOnlineLectureUnit(name: String) = """
     {
       "name": "$name",
