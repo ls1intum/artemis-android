@@ -33,7 +33,7 @@ class UpdateReplyNotificationWorker(
                 val account = accountData.data
 
                 communicationNotificationManager.addSelfMessage(
-                    parentId = parentPostId ?: conversationId,
+                    parentId = parentPostId ?: return Result.failure(),
                     authorLoginName = account.username ?: "self",
                     authorName = account.humanReadableName,
                     authorImageUrl = account.imageUrl,

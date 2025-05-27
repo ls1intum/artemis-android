@@ -10,7 +10,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.wor
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.PushCommunicationEntity
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.BaseCommunicationNotificationReceiver
-import kotlinx.coroutines.runBlocking
 import org.koin.core.component.get
 
 /**
@@ -38,11 +37,6 @@ class ReplyReceiver : BaseCommunicationNotificationReceiver() {
                 parentPostId = communicationEntity.target.postId,
                 response = response
             )
-        }
-
-        // Repop the notification to tell the OS we handled the notification
-        runBlocking {
-            communicationNotificationManager.repopNotification(parentId = communicationEntity.parentId)
         }
     }
 
