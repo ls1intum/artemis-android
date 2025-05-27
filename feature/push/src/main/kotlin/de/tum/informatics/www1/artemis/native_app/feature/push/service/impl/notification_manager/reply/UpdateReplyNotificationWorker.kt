@@ -26,7 +26,6 @@ class UpdateReplyNotificationWorker(
         forwardedSourcePostList: List<ForwardedSourcePostContent>,
         parentPostId: Long?
     ): Result {
-        // We can add to the notification that the user has responded. However, this does not have super high priority
         val accountData = accountDataService.getAccountData()
 
         return when (accountData) {
@@ -34,7 +33,7 @@ class UpdateReplyNotificationWorker(
                 val account = accountData.data
 
                 communicationNotificationManager.addSelfMessage(
-                    parentId = conversationId,
+                    parentId = parentPostId ?: conversationId,
                     authorLoginName = account.username ?: "self",
                     authorName = account.humanReadableName,
                     authorImageUrl = account.imageUrl,

@@ -63,10 +63,10 @@ class ReplyReceiver : BaseCommunicationNotificationReceiver() {
                 OneTimeWorkRequestBuilder<UpdateReplyNotificationWorker>()
                     .setInputData(
                         BaseCreatePostWorker.createWorkInput(
-                            metisContext.courseId,
-                            metisContext.conversationId,
-                            clientSidePostId,
-                            response,
+                            courseId = metisContext.courseId,
+                            conversationId = metisContext.conversationId,
+                            clientSidePostId = clientSidePostId,
+                            content = response,
                             postType = BaseCreatePostWorker.PostType.ANSWER_POST,
                             parentPostId = parentPostId
                         )
