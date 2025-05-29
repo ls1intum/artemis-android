@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview
+package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.util
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
