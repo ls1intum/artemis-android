@@ -46,10 +46,10 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.WindowSizeClassProvide
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.link_resolving.LocalMarkdownLinkResolver
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
-import de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui.DashboardScreen
+import de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui.DashboardScreenRoute
 import de.tum.informatics.www1.artemis.native_app.feature.force_update.repository.UpdateRepository
 import de.tum.informatics.www1.artemis.native_app.feature.force_update.ui.navigateToUpdateScreen
-import de.tum.informatics.www1.artemis.native_app.feature.login.LoginScreen
+import de.tum.informatics.www1.artemis.native_app.feature.login.LoginScreenRoute
 import de.tum.informatics.www1.artemis.native_app.feature.login.navigateToLogin
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.LocalVisibleMetisContextManager
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContext
@@ -91,8 +91,8 @@ class MainActivity : AppCompatActivity(),
         // When the user is logged in, immediately display the course overview.
         val startDestination = runBlocking {
             when (accountService.authenticationData.first()) {
-                is AccountService.AuthenticationData.LoggedIn -> DashboardScreen
-                AccountService.AuthenticationData.NotLoggedIn -> LoginScreen(null)
+                is AccountService.AuthenticationData.LoggedIn -> DashboardScreenRoute
+                AccountService.AuthenticationData.NotLoggedIn -> LoginScreenRoute(null)
             }
         }
 
@@ -202,7 +202,7 @@ class MainActivity : AppCompatActivity(),
                 .collect { (wasLoggedIn, isLoggedIn) ->
                     if (wasLoggedIn == true && !isLoggedIn) {
                         navController.navigateToLogin {
-                            popUpTo(DashboardScreen) {
+                            popUpTo(DashboardScreenRoute) {
                                 inclusive = true
                             }
                         }

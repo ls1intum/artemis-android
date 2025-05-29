@@ -61,7 +61,7 @@ sealed interface ExerciseViewUiNestedNavigation {
 }
 
 @Serializable
-data class ExerciseViewUi(
+data class ExerciseScreenRoute(
     val exerciseId: Long,
     val viewMode: ExerciseViewMode = ExerciseViewMode.Overview,
     val showSideBarIcon: Boolean = true
@@ -73,7 +73,7 @@ fun NavController.navigateToExercise(
     viewMode: ExerciseViewMode,
     builder: NavOptionsBuilder.() -> Unit
 ) {
-    navigate(ExerciseViewUi(exerciseId, viewMode, showSideBarIcon), builder)
+    navigate(ExerciseScreenRoute(exerciseId, viewMode, showSideBarIcon), builder)
 }
 
 fun NavGraphBuilder.exercise(
@@ -81,7 +81,7 @@ fun NavGraphBuilder.exercise(
     onParticipateInQuiz: (courseId: Long, exerciseId: Long, isPractice: Boolean) -> Unit,
     onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit
 ) {
-    animatedComposable<ExerciseViewUi>(
+    animatedComposable<ExerciseScreenRoute>(
         typeMap = mapOf(
             typeOf<ExerciseViewMode>() to KSerializableNavType(
                 isNullableAllowed = false,
@@ -91,7 +91,7 @@ fun NavGraphBuilder.exercise(
         deepLinks = ExerciseDeeplinks.ToExercise.generateLinks() +
                 ExerciseDeeplinks.ToExerciseCourseAgnostic.generateLinks(),
     ) { backStackEntry ->
-        val route: ExerciseViewUi = backStackEntry.toRoute()
+        val route: ExerciseScreenRoute = backStackEntry.toRoute()
 
         val exerciseId = route.exerciseId
         val viewMode: ExerciseViewMode = route.viewMode

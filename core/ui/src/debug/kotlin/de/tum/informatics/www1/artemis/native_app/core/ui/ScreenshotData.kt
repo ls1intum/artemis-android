@@ -17,13 +17,12 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participat
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.UnknownSubmission
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitAttachmentVideo
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitText
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitVideo
 import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotData.Images.IMAGE_ASTRONAUT
 import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotData.Images.IMAGE_MARS
 import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotData.Images.IMAGE_SATURN_5
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseSearchConfiguration
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import kotlinx.datetime.Clock
 import kotlin.time.Duration.Companion.days
 
@@ -128,7 +127,7 @@ object ScreenshotData {
                 name = "Introduction to Fuel Types",
                 completed = true,
             ),
-            LectureUnitVideo(
+            LectureUnitAttachmentVideo(
                 id = 1L,
                 name = "Rocket Fuel Types",
                 completed = true,
@@ -158,16 +157,6 @@ object ScreenshotData {
                 }
             }
         }
-        
-        val emptyBoundExerciseActions = BoundExerciseActions(
-            onClickStartTextExercise = {},
-            onClickPracticeQuiz = {},
-            onClickOpenQuiz = {},
-            onClickStartQuiz = {},
-            onClickOpenTextExercise = { _, _ -> },
-            onClickViewResult = {},
-            onClickViewQuizResults = {}
-        )
 
         fun searchConfiguration(
             hint: String,

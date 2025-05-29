@@ -66,10 +66,10 @@ internal const val TEST_TAG_COURSE_LIST = "TEST_TAG_COURSE_LIST"
 internal fun testTagForCourse(courseId: Long) = "Course$courseId"
 
 @Serializable
-data object DashboardScreen
+data object DashboardScreenRoute
 
 fun NavController.navigateToDashboard(builder: NavOptionsBuilder.() -> Unit) {
-    navigate(DashboardScreen, builder)
+    navigate(DashboardScreenRoute, builder)
 }
 
 fun NavGraphBuilder.dashboard(
@@ -77,7 +77,7 @@ fun NavGraphBuilder.dashboard(
     onClickRegisterForCourse: () -> Unit,
     onViewCourse: (courseId: Long) -> Unit
 ) {
-    animatedComposable<DashboardScreen> {
+    animatedComposable<DashboardScreenRoute> {
         val artemisContextProvider = LocalArtemisContextProvider.current
         LaunchedEffect(true) {
             artemisContextProvider.clearCourseId()

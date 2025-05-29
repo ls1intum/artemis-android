@@ -26,14 +26,12 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitAttachment
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitAttachmentVideo
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitOnline
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitText
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitUnknown
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitVideo
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.RoundGreenCheckbox
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseListItem
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.R
@@ -50,11 +48,22 @@ internal fun LectureUnitHeader(
     onClickExercise: (exerciseId: Long) -> Unit,
     isUploadingMarkedAsCompleted: Boolean,
     onMarkAsCompleted: (isCompleted: Boolean) -> Unit,
-    onRequestOpenAttachment: (Attachment) -> Unit,
     onHeaderClick: () -> Unit
 ) {
     val (icon, text) = when (lectureUnit) {
-        is LectureUnitAttachment -> Icons.Default.Description to R.string.lecture_view_lecture_unit_type_attachment
+        is LectureUnitAttachmentVideo -> {
+            val icon = if (lectureUnit.hasVideo) {
+                Icons.Default.Videocam
+            } else {
+                Icons.Default.Description
+            }
+            val text = if (lectureUnit.hasVideo) {
+                R.string.lecture_view_lecture_unit_type_video
+            } else {
+                R.string.lecture_view_lecture_unit_type_attachment
+            }
+            icon to text
+        }
         is LectureUnitExercise -> {
             val exercise = lectureUnit.exercise ?: return
             val exerciseId = exercise.id ?: return
@@ -68,17 +77,12 @@ internal fun LectureUnitHeader(
         is LectureUnitOnline -> Icons.Default.Link to R.string.lecture_view_lecture_unit_type_online
         is LectureUnitText -> Icons.AutoMirrored.Default.Assignment to R.string.lecture_view_lecture_unit_type_text
         is LectureUnitUnknown -> Icons.Default.QuestionMark to R.string.lecture_view_lecture_unit_type_unknown
-        is LectureUnitVideo -> Icons.Default.Videocam to R.string.lecture_view_lecture_unit_type_video
     }
 
     Card(
         modifier = modifier,
         onClick = {
             onMarkAsCompleted(true)
-            if (lectureUnit is LectureUnitAttachment) {
-                onRequestOpenAttachment(lectureUnit.attachment ?: return@Card)
-                return@Card
-            }
             onHeaderClick()
         }
     ) {

@@ -25,7 +25,6 @@ import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
 import de.tum.informatics.www1.artemis.native_app.core.test.testWebsocketModule
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createAttachment
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createAttachmentUnit
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createCourse
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createExerciseLectureUnit
@@ -34,7 +33,6 @@ import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_cr
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createOnlineLectureUnit
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createTextExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createTextLectureUnit
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createVideoLectureUnit
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.LectureScreen
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.LectureViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.R
@@ -129,22 +127,8 @@ class LectureE2eTest : BaseComposeTest() {
     }
 
     @Test(timeout = DefaultTestTimeoutMillis)
-    fun `shows video lecture unit`() {
-        verifyLectureUnit(createLectureUnit("video-units", ::createVideoLectureUnit))
-    }
-
-    @Test(timeout = DefaultTestTimeoutMillis)
     fun `shows online lecture unit`() {
         verifyLectureUnit(createLectureUnit("online-units", ::createOnlineLectureUnit))
-    }
-
-    @Test(timeout = DefaultTestTimeoutMillis)
-    fun `shows attachment lecture unit`() {
-        val lectureUnit = runBlocking {
-            createAttachmentUnit(getAdminAccessToken(), lecture.id!!)
-        }
-
-        verifyLectureUnit(lectureUnit)
     }
 
     @Test(timeout = DefaultTestTimeoutMillis)
