@@ -4,6 +4,7 @@ import android.util.Log
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ReplyPostCommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.StandalonePostCommunicationNotificationType
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.CommunicationPostTarget
 
 
 // The code in this file is heavily inspired by the iOS implementation.
@@ -32,6 +33,7 @@ data class CommunicationNotificationPlaceholderContent(
         fun fromNotificationsPlaceholders(
             type: CommunicationNotificationType,
             notificationPlaceholders: List<String>,
+            target: CommunicationPostTarget? = null,
         ): CommunicationNotificationPlaceholderContent? {
             Log.d(TAG, "Parsing notification placeholders ($type): $notificationPlaceholders")
 
@@ -76,6 +78,15 @@ data class CommunicationNotificationPlaceholderContent(
                     // ["courseTitle", "postContent", "postCreationData", "postAuthorName", "answerPostContent", "answerPostCreationDate", "authorName", "conversationName", "imageUrl", "userId", "postingId", "parentPostId"]
                     if (notificationPlaceholders.size <= 11) return null
                     val profilePic = notificationPlaceholders[8].takeIf { it.isNotEmpty() }
+                    var content = notificationPlaceholders[4]
+
+                    // There is a bug for notifications for user mentions in conversations. The placeholders
+                    // are filled like they would for a new reply, even when the notification is for a user mention
+                    // in a base post. We treat this case here.
+                    if (type == ReplyPostCommunicationNotificationType.CONVERSATION_USER_MENTIONED &&
+                        target?.message == CommunicationPostTarget.MESSAGE_NEW_MESSAGE) {
+                        content = notificationPlaceholders[1]
+                    }
 
                     CommunicationNotificationPlaceholderContent(
                         authorName = notificationPlaceholders[6],
@@ -84,7 +95,7 @@ data class CommunicationNotificationPlaceholderContent(
                         authorId = notificationPlaceholders[9],
                         messageId = notificationPlaceholders[11],
                         authorImageUrl = profilePic,
-                        messageContent = notificationPlaceholders[4],
+                        messageContent = content,
                         conversationType = null,
                         isReply = true
                     )
