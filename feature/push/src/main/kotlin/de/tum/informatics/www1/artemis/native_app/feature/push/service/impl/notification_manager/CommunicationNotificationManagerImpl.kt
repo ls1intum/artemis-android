@@ -134,13 +134,14 @@ internal class CommunicationNotificationManagerImpl(
         }
 
         if (communication != null && messages != null) {
-            popCommunicationNotification(communication, messages)
+            popCommunicationNotification(communication, messages, silent = true)
         }
     }
 
     private fun popCommunicationNotification(
         communication: PushCommunicationEntity,
-        messages: List<CommunicationMessageEntity>
+        messages: List<CommunicationMessageEntity>,
+        silent: Boolean = false
     ) {
         val notificationChannel: ArtemisNotificationChannel =
             ArtemisNotificationChannel.CommunicationNotificationChannel
@@ -149,6 +150,7 @@ internal class CommunicationNotificationManagerImpl(
             .setStyle(buildMessagingStyle(communication, messages))
             .setSmallIcon(R.drawable.push_notification_icon)
             .setAutoCancel(true)
+            .setSilent(silent)
             .setContentIntent(
                 NotificationTargetManager.getMetisContentIntent(
                     context = context,

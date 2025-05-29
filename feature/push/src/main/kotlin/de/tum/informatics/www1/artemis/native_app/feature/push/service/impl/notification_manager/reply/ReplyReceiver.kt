@@ -10,7 +10,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.wor
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.PushCommunicationEntity
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.BaseCommunicationNotificationReceiver
-import kotlinx.coroutines.runBlocking
 import org.koin.core.component.get
 
 /**
@@ -39,11 +38,6 @@ class ReplyReceiver : BaseCommunicationNotificationReceiver() {
                 response = response
             )
         }
-
-        // Repop the notification to tell the OS we handled the notification
-        runBlocking {
-            communicationNotificationManager.repopNotification(parentId = communicationEntity.parentId)
-        }
     }
 
     @SuppressLint("EnqueueWork")        // This is already done in CreatePostServiceImpl.scheduleCreatePostWork
@@ -63,10 +57,10 @@ class ReplyReceiver : BaseCommunicationNotificationReceiver() {
                 OneTimeWorkRequestBuilder<UpdateReplyNotificationWorker>()
                     .setInputData(
                         BaseCreatePostWorker.createWorkInput(
-                            metisContext.courseId,
-                            metisContext.conversationId,
-                            clientSidePostId,
-                            response,
+                            courseId = metisContext.courseId,
+                            conversationId = metisContext.conversationId,
+                            clientSidePostId = clientSidePostId,
+                            content = response,
                             postType = BaseCreatePostWorker.PostType.ANSWER_POST,
                             parentPostId = parentPostId
                         )

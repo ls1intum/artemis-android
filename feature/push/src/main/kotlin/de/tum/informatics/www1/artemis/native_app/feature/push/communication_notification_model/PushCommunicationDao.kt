@@ -51,7 +51,8 @@ interface PushCommunicationDao {
         val message: CommunicationMessageEntity = try {
             val content = CommunicationNotificationPlaceholderContent.fromNotificationsPlaceholders(
                 type = artemisNotification.type,
-                notificationPlaceholders = artemisNotification.notificationPlaceholders
+                notificationPlaceholders = artemisNotification.notificationPlaceholders,
+                target = NotificationTargetManager.getCommunicationNotificationTarget(targetString)
             ) ?: return -1
 
             if (artemisNotification.type is ReplyPostCommunicationNotificationType) {
