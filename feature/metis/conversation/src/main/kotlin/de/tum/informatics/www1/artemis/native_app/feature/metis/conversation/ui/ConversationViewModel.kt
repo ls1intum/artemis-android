@@ -40,6 +40,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.sha
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.model.Link
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.network.MetisService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.MetisModificationTask
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.post.util.LinkPreviewUtil
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ConversationChatListUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.ForwardMessageUseCase
@@ -72,7 +73,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.n
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.subscribeToConversationUpdates
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.MetisViewModel
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -327,7 +327,7 @@ internal open class ConversationViewModel(
         post: IBasePost,
         emojiId: String,
         create: Boolean
-    ): Deferred<MetisModificationFailure?> {
+    ): MetisModificationTask {
         return viewModelScope.async(coroutineContext) {
             if (create) {
                 createReactionImpl(
@@ -386,7 +386,7 @@ internal open class ConversationViewModel(
     fun toggleResolvePost(
         parentPost: IStandalonePost,
         post: AnswerPostPojo
-    ): Deferred<MetisModificationFailure?> {
+    ): MetisModificationTask {
         return viewModelScope.async(coroutineContext) {
             val conversation =
                 loadConversation() ?: return@async MetisModificationFailure.UPDATE_POST
@@ -405,7 +405,7 @@ internal open class ConversationViewModel(
         }
     }
 
-    fun togglePinPost(post: IStandalonePost): Deferred<MetisModificationFailure?> {
+    fun togglePinPost(post: IStandalonePost): MetisModificationTask {
         return viewModelScope.async(coroutineContext) {
             val conversation =
                 loadConversation() ?: return@async MetisModificationFailure.UPDATE_POST
@@ -436,7 +436,7 @@ internal open class ConversationViewModel(
         }
     }
 
-    fun toggleSavePost(post: IBasePost): Deferred<MetisModificationFailure?> {
+    fun toggleSavePost(post: IBasePost): MetisModificationTask {
         // To prevent multiple unnecessary calls to the server.
         if (currentlySavingPost) return CompletableDeferred(null)
         currentlySavingPost = true
@@ -463,7 +463,7 @@ internal open class ConversationViewModel(
         }
     }
 
-    fun deletePost(post: IBasePost): Deferred<MetisModificationFailure?> {
+    fun deletePost(post: IBasePost): MetisModificationTask {
         isMarkedAsDeleteList.add(post)
         deleteJobs[post]?.cancel()
 
@@ -500,7 +500,7 @@ internal open class ConversationViewModel(
         isMarkedAsDeleteList.remove(post)
     }
 
-    fun editPost(post: IStandalonePost, newText: String): Deferred<MetisModificationFailure?> {
+    fun editPost(post: IStandalonePost, newText: String): MetisModificationTask {
         return viewModelScope.async(coroutineContext) {
             val conversation =
                 loadConversation() ?: return@async MetisModificationFailure.UPDATE_POST
@@ -529,7 +529,7 @@ internal open class ConversationViewModel(
         parentPost: IStandalonePost,
         post: AnswerPostPojo,
         newText: String
-    ): Deferred<MetisModificationFailure?> {
+    ): MetisModificationTask {
         return viewModelScope.async(coroutineContext) {
             val conversation =
                 loadConversation() ?: return@async MetisModificationFailure.UPDATE_POST
@@ -551,7 +551,7 @@ internal open class ConversationViewModel(
         linkPreview: LinkPreview,
         post: IBasePost,
         parentPost: IStandalonePost?
-    ): Deferred<MetisModificationFailure?> {
+    ): MetisModificationTask {
         val newContent = LinkPreviewUtil.removeLinkPreview(post.content.orEmpty(), linkPreview.url)
         return when (post) {
             is IStandalonePost -> editPost(post, newContent)
@@ -687,7 +687,7 @@ internal open class ConversationViewModel(
             null -> null
         }
 
-    fun createPost(): Deferred<MetisModificationFailure?> {
+    fun createPost(): MetisModificationTask {
         createPostService.createPost(courseId, conversationId, newMessageText.value.text)
 
         return CompletableDeferred(value = null)
@@ -716,7 +716,7 @@ internal open class ConversationViewModel(
         }
     }
 
-    fun createAnswerPost(): Deferred<MetisModificationFailure?> {
+    fun createAnswerPost(): MetisModificationTask {
         return viewModelScope.async(coroutineContext) {
             val serverSideParentPostId =
                 getPostId() ?: return@async MetisModificationFailure.CREATE_POST

@@ -5,27 +5,26 @@ import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performSemanticsAction
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.core.ui.test.BottomSheetClickWorkaroundTheme
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.ui.SavedPostsScreen
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.MetisModificationTask
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getStringResId
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Deferred
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
 @Category(UnitTest::class)
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestRunner::class)
 class SavedPostsScreenUiTest : BaseComposeTest() {
 
     private val postContent = "Post content"
@@ -100,8 +99,8 @@ class SavedPostsScreenUiTest : BaseComposeTest() {
 
     private fun setupUi(
         savedPost: ISavedPost = createSavedPost(),
-        onChangeStatus: (ISavedPost, SavedPostStatus) -> Deferred<MetisModificationFailure?> = { _, _ -> CompletableDeferred() },
-        onRemoveFromSavedPosts: (ISavedPost) -> Deferred<MetisModificationFailure?> = { CompletableDeferred() }
+        onChangeStatus: (ISavedPost, SavedPostStatus) -> MetisModificationTask = { _, _ -> CompletableDeferred() },
+        onRemoveFromSavedPosts: (ISavedPost) -> MetisModificationTask = { CompletableDeferred() }
     ) {
         composeTestRule.setContent {
             BottomSheetClickWorkaroundTheme {
