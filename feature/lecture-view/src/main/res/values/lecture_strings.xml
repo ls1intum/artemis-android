@@ -22,6 +22,8 @@
     <string name="lecture_view_lecture_unit_type_unknown">Unknown</string>
 
     <string name="lecture_view_open_link_button">Open link</string>
+    <string name="lecture_view_open_video_link_button">Open video link</string>
+    <string name="lecture_view_open_attachment_button">Open attachment</string>
 
     <string name="lecture_view_open_file_attachment_dialog_title">Download File?</string>
     <string name="lecture_view_open_file_attachment_dialog_message">This file cannot be viewed. Do you want to download it instead?</string>

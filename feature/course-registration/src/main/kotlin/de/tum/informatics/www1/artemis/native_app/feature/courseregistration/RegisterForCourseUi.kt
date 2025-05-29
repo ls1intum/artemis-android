@@ -58,16 +58,16 @@ internal const val TEST_TAG_REGISTRABLE_COURSE_LIST = "registrable course list"
 internal fun testTagForRegistrableCourse(courseId: Long) = "registrableCourse$courseId"
 
 @Serializable
-private data object CourseRegistrationScreen
+private data object CourseRegistrationScreenRoute
 
 fun NavController.navigateToCourseRegistration(builder: NavOptionsBuilder.() -> Unit) {
-    navigate(CourseRegistrationScreen, builder)
+    navigate(CourseRegistrationScreenRoute, builder)
 }
 
 fun NavGraphBuilder.courseRegistration(
     onRegisteredInCourse: (courseId: Long) -> Unit
 ) {
-    animatedComposable<CourseRegistrationScreen> {
+    animatedComposable<CourseRegistrationScreenRoute> {
         RegisterForCourseScreen(
             modifier = Modifier.fillMaxSize(),
             viewModel = koinViewModel(),

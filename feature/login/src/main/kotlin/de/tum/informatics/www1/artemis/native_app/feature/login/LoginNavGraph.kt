@@ -25,7 +25,7 @@ import org.koin.compose.koinInject
 
 
 @Serializable
-data class LoginScreen(val nextDestination: String?)
+data class LoginScreenRoute(val nextDestination: String?)
 
 /**
  * @param nextDestination the deep link to a destination that should be opened after a successful login
@@ -34,7 +34,7 @@ fun NavController.navigateToLogin(
     nextDestination: String? = null,
     builder: NavOptionsBuilder.() -> Unit
 ) {
-    navigate(LoginScreen(nextDestination), builder)
+    navigate(LoginScreenRoute(nextDestination), builder)
 }
 
 /**
@@ -44,10 +44,10 @@ fun NavGraphBuilder.loginNavGraph(
     onFinishedLoginFlow: (deepLink: String?) -> Unit,
     onRequestOpenSettings: () -> Unit
 ) {
-    animatedComposable<LoginScreen>(
+    animatedComposable<LoginScreenRoute>(
         enterTransition = { DefaultTransition.fadeIn },
     ) {
-        val screen = it.toRoute<LoginScreen>()
+        val screen = it.toRoute<LoginScreenRoute>()
         val nextDestinationValue = screen.nextDestination
 
         var nextDestination by remember(nextDestinationValue) {

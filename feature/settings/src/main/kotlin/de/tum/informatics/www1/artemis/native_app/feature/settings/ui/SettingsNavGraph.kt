@@ -8,13 +8,13 @@ import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.navigation
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.DefaultTransition
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
-import de.tum.informatics.www1.artemis.native_app.feature.login.LoginScreen
+import de.tum.informatics.www1.artemis.native_app.feature.login.LoginScreenRoute
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.account.AccountSettingsScreen
 import kotlinx.serialization.Serializable
 
 @Serializable
-private object Settings {
+private object SettingsSceenRoute {
     @Serializable
     data object Main
 
@@ -26,19 +26,19 @@ private object Settings {
 }
 
 fun NavController.navigateToSettings(builder: NavOptionsBuilder.() -> Unit) {
-    navigate(Settings, builder)
+    navigate(SettingsSceenRoute, builder)
 }
 
 fun NavGraphBuilder.settingsNavGraph(
     navController: NavController,
     onDisplayThirdPartyLicenses: () -> Unit
 ) {
-    navigation<Settings>(
-        startDestination = Settings.Main,
+    navigation<SettingsSceenRoute>(
+        startDestination = SettingsSceenRoute.Main,
     ) {
-        animatedComposable<Settings.Main>(
+        animatedComposable<SettingsSceenRoute.Main>(
             exitTransition = {
-                val toLoginScreen = targetState.destination.route?.startsWith(LoginScreen::class.qualifiedName!!) ?: false
+                val toLoginScreen = targetState.destination.route?.startsWith(LoginScreenRoute::class.qualifiedName!!) ?: false
                 if (toLoginScreen) {
                     return@animatedComposable DefaultTransition.fadeOut
                 }
@@ -49,22 +49,22 @@ fun NavGraphBuilder.settingsNavGraph(
                 modifier = Modifier.fillMaxSize(),
                 onDisplayThirdPartyLicenses = onDisplayThirdPartyLicenses,
                 onRequestOpenAccountSettings = {
-                    navController.navigate(Settings.AccountDetails)
+                    navController.navigate(SettingsSceenRoute.AccountDetails)
                 },
                 onRequestOpenNotificationSettings = {
-                    navController.navigate(Settings.PushNotification)
+                    navController.navigate(SettingsSceenRoute.PushNotification)
                 }
             )
         }
 
-        animatedComposable<Settings.PushNotification> {
+        animatedComposable<SettingsSceenRoute.PushNotification> {
             PushNotificationSettingsScreen(
                 modifier = Modifier.fillMaxSize(),
                 onDone = navController::navigateUp
             )
         }
 
-        animatedComposable<Settings.AccountDetails> {
+        animatedComposable<SettingsSceenRoute.AccountDetails> {
             AccountSettingsScreen(
                 modifier = Modifier.fillMaxSize()
             )

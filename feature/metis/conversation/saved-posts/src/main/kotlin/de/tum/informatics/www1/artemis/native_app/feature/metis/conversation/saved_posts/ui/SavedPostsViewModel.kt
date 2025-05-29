@@ -105,8 +105,6 @@ class SavedPostsViewModel(
                 .filterIsInstance<NetworkResponse.Response<List<ChatListItem.PostItem.SavedItem>>>()
                 .map { it.data }
                 .flatten()
-                // TODO: this is currently required of a bug allowing duplicate items in the list
-                // https://github.com/ls1intum/artemis-android/issues/307
                 .distinctBy { savedPost -> savedPost.key }
 
             NetworkResponse.Response(data = posts)

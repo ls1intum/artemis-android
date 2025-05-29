@@ -47,7 +47,7 @@ import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 @Serializable
-data class FaqDetailUi(
+data class FaqDetailScreenRoute(
     val faqId: Long,
 )
 
@@ -55,14 +55,14 @@ fun NavController.navigateToFaqDetail(
     faqId: Long,
     builder: NavOptionsBuilder.() -> Unit
 ) {
-    navigate(FaqDetailUi(faqId), builder)
+    navigate(FaqDetailScreenRoute(faqId), builder)
 }
 
 fun NavGraphBuilder.faqDetail() {
-    animatedComposable<FaqDetailUi>(
+    animatedComposable<FaqDetailScreenRoute>(
         deepLinks = FaqDeeplinks.ToFaq.generateLinks(),
     ) { backStackEntry ->
-        val route: FaqDetailUi = backStackEntry.toRoute()
+        val route: FaqDetailScreenRoute = backStackEntry.toRoute()
         val faqId = route.faqId
 
         FaqDetailContent(faqId)
