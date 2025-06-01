@@ -188,7 +188,7 @@ private fun MemberSelectionItemChip(
     Box(
         modifier = modifier
             .clip(MaterialTheme.shapes.small)
-            .background(MaterialTheme.colorScheme.primaryContainer)
+            .background(MaterialTheme.colorScheme.primary)
             .clickable(onClick = onClickRemove)
             .testTag(memberSelectionItem.getTestTag())
     ) {
