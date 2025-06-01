@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.common
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -26,10 +27,12 @@ fun ArtemisSection(
 ) {
     Card(
         modifier = modifier,
-        shape = MaterialTheme.shapes.medium
+        shape = MaterialTheme.shapes.medium,
+
     ) {
         Column(
             modifier = Modifier
+                .background(MaterialTheme.colorScheme.surfaceContainer)
                 .padding(16.dp)
                 .testTag(testTag ?: getSectionTestTag(title)),
             verticalArrangement = Arrangement.spacedBy(spacing)

@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
+import de.tum.informatics.www1.artemis.native_app.core.ui.backgroundColor1
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.selectionBorder
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ExerciseColors
@@ -49,6 +51,7 @@ fun ExerciseListItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(IntrinsicSize.Min)
+                .background(MaterialTheme.colorScheme.surfaceContainer)
         ) {
             exercise.difficulty?.let { DifficultyRectangle(modifier = Modifier, difficulty = it) }
 
