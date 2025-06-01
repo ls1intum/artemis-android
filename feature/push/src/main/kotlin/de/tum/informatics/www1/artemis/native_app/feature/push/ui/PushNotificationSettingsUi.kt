@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.push.ui
 
 import android.Manifest
 import android.os.Build
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -136,7 +137,9 @@ private fun ReceivePushNotificationsSwitch(
         shape = MaterialTheme.shapes.medium
     ) {
         Column(
-            modifier = modifier.padding(16.dp),
+            modifier = modifier
+                .background(MaterialTheme.colorScheme.surfaceContainer)
+                .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             var isInfoTextExpanded: Boolean by rememberSaveable { mutableStateOf(false) }
