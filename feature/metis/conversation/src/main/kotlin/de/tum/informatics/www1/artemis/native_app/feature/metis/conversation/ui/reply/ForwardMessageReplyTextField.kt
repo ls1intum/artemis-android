@@ -18,11 +18,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.MetisModificationTask
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.util.MarkdownListContinuationUtil.continueListIfApplicable
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.util.MarkdownStyleUtil
-import kotlinx.coroutines.Deferred
 
 /**
  * An alternative version of the ReplyTextField that is used when forwarding a message.
@@ -38,7 +37,7 @@ fun ForwardMessageReplyTextField(
     backgroundColor: Color = BottomSheetDefaults.ContainerColor,
     sendButton: @Composable RowScope.() -> Unit = {},
     textOptionsTopContent: @Composable ColumnScope.() -> Unit,
-    onCreateForwardedMessage: () -> Deferred<MetisModificationFailure?>,
+    onCreateForwardedMessage: () -> MetisModificationTask,
 ) {
     val prevReplyContent by remember { mutableStateOf("") }
     val focusRequester = FocusRequester()

@@ -40,7 +40,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.service.EmojiService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.model.LinkPreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationViewModel
@@ -53,6 +52,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.shouldDisplayHeader
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MetisReplyHandler
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MetisReplyHandlerInputActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.util.rememberDerivedConversationName
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
@@ -62,7 +62,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.P
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.PagingStateError
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisiblePostList
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -115,12 +114,15 @@ internal fun MetisChatList(
             bottomItem = bottomItem,
             forwardMessageUseCase = forwardMessageUseCase,
             isReplyEnabled = isReplyEnabled,
-            onCreatePost = viewModel::createPost,
-            onEditPost = viewModel::editPost,
-            onDeletePost = viewModel::deletePost,
-            onPinPost = viewModel::togglePinPost,
-            onSavePost = viewModel::toggleSavePost,
-            onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
+            actions = MetisReplyHandlerInputActions(
+                create = viewModel::createPost,
+                edit = viewModel::editPost,
+                delete = viewModel::deletePost,
+                react = viewModel::createOrDeleteReaction,
+                save = viewModel::toggleSavePost,
+                pin = viewModel::togglePinPost,
+                resolve = null
+            ),
             onClickViewPost = onClickViewPost,
             onRequestRetrySend = viewModel::retryCreatePost,
             onUndoDeletePost = viewModel::undoDeletePost,
@@ -149,12 +151,7 @@ fun MetisChatList(
     emojiService: EmojiService = koinInject(),
     isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     isReplyEnabled: Boolean,
-    onCreatePost: () -> Deferred<MetisModificationFailure?>,
-    onEditPost: (IStandalonePost, String) -> Deferred<MetisModificationFailure?>,
-    onDeletePost: (IStandalonePost) -> Deferred<MetisModificationFailure?>,
-    onPinPost: (IStandalonePost) -> Deferred<MetisModificationFailure?>,
-    onSavePost: (IStandalonePost) -> Deferred<MetisModificationFailure?>,
-    onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
+    actions: MetisReplyHandlerInputActions<IStandalonePost>,
     onClickViewPost: (StandalonePostId) -> Unit,
     onUndoDeletePost: (IStandalonePost) -> Unit,
     generateLinkPreviews: (String) -> StateFlow<List<LinkPreview>>,
@@ -165,14 +162,8 @@ fun MetisChatList(
 ) {
     MetisReplyHandler(
         initialReplyTextProvider = initialReplyTextProvider,
-        onCreatePost = onCreatePost,
-        onEditPost = onEditPost,
-        onResolvePost = null,
-        onPinPost = onPinPost,
-        onSavePost = onSavePost,
-        onDeletePost = onDeletePost,
-        onRequestReactWithEmoji = onRequestReactWithEmoji,
-    ) { replyMode, onEditPostDelegate, _, onRequestReactWithEmojiDelegate, onDeletePostDelegate, onPinPostDelegate, onSavePostDelegate, updateFailureStateDelegate ->
+        actions = actions,
+    ) { replyMode, actionsDelegate, updateFailureStateDelegate ->
         Column(modifier = modifier) {
             val informationModifier = Modifier
                 .fillMaxSize()
@@ -228,12 +219,12 @@ fun MetisChatList(
                             onClickViewPost = onClickViewPost,
                             postActionFlags = postActionFlags,
                             forwardMessageUseCase = forwardMessageUseCase,
-                            onRequestEdit = onEditPostDelegate,
-                            onRequestDelete = onDeletePostDelegate,
+                            onRequestEdit = actionsDelegate.edit,
+                            onRequestDelete = actionsDelegate.delete,
                             onRequestUndoDelete = onUndoDeletePost,
-                            onRequestPin = onPinPostDelegate,
-                            onRequestSave = onSavePostDelegate,
-                            onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
+                            onRequestPin = actionsDelegate.pin,
+                            onRequestSave = actionsDelegate.save,
+                            onRequestReactWithEmoji = actionsDelegate.react,
                             onRequestRetrySend = onRequestRetrySend,
                             generateLinkPreviews = generateLinkPreviews,
                             onRemoveLinkPreview = onRemoveLinkPreview
@@ -266,7 +257,7 @@ private fun ChatList(
     forwardMessageUseCase: ForwardMessageUseCase,
     isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     clientId: Long,
-    displayUnreadIndicator: Boolean = false,        // See https://github.com/ls1intum/artemis-android/pull/375#issuecomment-2656030353
+    displayUnreadIndicator: Boolean = false,        // See https://github.com/ls1intum/artemis-android/pull/375#issuecomment-2656030353 and https://github.com/ls1intum/artemis-android/issues/394#issuecomment-2911878771
     onClickViewPost: (StandalonePostId) -> Unit,
     onRequestEdit: (IStandalonePost) -> Unit,
     onRequestDelete: (IStandalonePost) -> Unit,
@@ -288,6 +279,7 @@ private fun ChatList(
             count = posts.itemCount,
             key = posts::getItemKey
         ) { index ->
+            @Suppress("KotlinConstantConditions")
             when (val chatListItem = posts[index]) {
                 is ChatListItem.UnreadIndicator -> {
                     if (displayUnreadIndicator) {
@@ -378,7 +370,7 @@ private fun ChatList(
                                 }
                             ),
                         onRemoveLinkPreview = { linkPreview ->
-                            onRemoveLinkPreview(linkPreview, post as IStandalonePost, null)
+                            onRemoveLinkPreview(linkPreview, post, null)
                         },
                         onClick = {
                             val standalonePostId = post.standalonePostId

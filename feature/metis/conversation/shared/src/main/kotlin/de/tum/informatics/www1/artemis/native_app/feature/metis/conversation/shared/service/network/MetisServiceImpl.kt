@@ -52,7 +52,7 @@ class MetisServiceImpl(
                 url {
                     appendPathSegments(RESOURCE_PATH_SEGMENTS)
                     appendPathSegments(metisContext.courseId.toString())
-                    appendPathSegments(metisContext.standalonePostResourceEndpoint)
+                    appendPathSegments(Api.Communication.standalonePostSegment)
                 }
 
                 when (standalonePostsContext.sortingStrategy) {
@@ -75,14 +75,6 @@ class MetisServiceImpl(
                 )
 
                 when (metisContext) {
-                    is MetisContext.Exercise -> {
-                        parameter("exerciseId", metisContext.exerciseId)
-                    }
-
-                    is MetisContext.Lecture -> {
-                        parameter("lectureId", metisContext.lectureId)
-                    }
-
                     is MetisContext.Conversation -> {
                         parameter("conversationIds", metisContext.conversationId)
                     }

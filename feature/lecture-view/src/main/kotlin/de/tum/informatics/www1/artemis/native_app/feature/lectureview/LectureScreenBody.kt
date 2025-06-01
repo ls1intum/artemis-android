@@ -32,7 +32,6 @@ import kotlinx.coroutines.Deferred
 @Composable
 internal fun LectureScreenBody(
     modifier: Modifier,
-    displayCommunicationOnSide: Boolean,
     lectureDataState: DataState<Lecture>,
     lectureChannel: DataState<ChannelChat>,
     lectureUnits: List<LectureUnit>,
@@ -50,12 +49,8 @@ internal fun LectureScreenBody(
 
     val overviewTabIndex = 0
     val attachmentsTabIndex = 1
-    val qnaTabIndex = 2
 
-    val selectedTabIndex =
-        if (selectedTabIndexState.intValue == qnaTabIndex && displayCommunicationOnSide) {
-            overviewTabIndex
-        } else selectedTabIndexState.intValue
+    val selectedTabIndex = selectedTabIndexState.intValue
 
     val markLectureUnitDeferredMap = remember { SnapshotStateMap<Long, Deferred<Boolean>>() }
 
