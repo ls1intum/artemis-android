@@ -6,6 +6,7 @@ import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -222,6 +223,7 @@ fun ConversationOverviewBody(
             contentWindowInsets = { WindowInsets.statusBars },
             onDismissRequest = { showCodeOfConduct = false },
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            containerColor = MaterialTheme.colorScheme.background,
         ) {
             CodeOfConductUi(
                 modifier = Modifier

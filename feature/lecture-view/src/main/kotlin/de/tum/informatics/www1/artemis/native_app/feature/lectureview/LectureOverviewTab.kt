@@ -249,6 +249,7 @@ private fun LazyListScope.channelSection(
         ) {
             Row(
                 modifier = Modifier
+                    .background(MaterialTheme.colorScheme.surfaceContainer)
                     .fillMaxWidth()
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
