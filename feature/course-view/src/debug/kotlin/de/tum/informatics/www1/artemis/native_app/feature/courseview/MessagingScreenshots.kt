@@ -32,10 +32,12 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.ForwardMessageUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MetisReplyHandlerInputActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.network.impl.ChannelServiceStub
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.storage.ConversationPreferenceService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.ConversationOverviewBody
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.ConversationOverviewViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.model.ConversationsOverviewSection
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ConversationServiceStub
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisFilter
 import io.mockk.mockk
@@ -44,6 +46,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 
+@SuppressLint("ViewModelConstructorInComposable")
 @PlayStoreScreenshots
 @Composable
 fun `Metis - Conversation Overview`() {
@@ -64,16 +67,11 @@ fun `Metis - Conversation Overview`() {
                 courseId: Long
             ): Flow<ConversationPreferenceService.Preferences> = flowOf(
                 ConversationPreferenceService.Preferences(
-                    favouritesExpanded = true,
-                    generalsExpanded = true,
-                    groupChatsExpanded = true,
-                    personalConversationsExpanded = true,
-                    hiddenExpanded = false,
-                    examsExpanded = true,
-                    exercisesExpanded = true,
-                    lecturesExpanded = true,
-                    savedPostsExpanded = false,
-                    recentExpanded = true
+                    expandedStateBySection = mapOf(
+                        ConversationsOverviewSection.CHANNELS to true,
+                        ConversationsOverviewSection.GROUP_CHATS to true,
+                        ConversationsOverviewSection.DIRECT_MESSAGES to true,
+                    )
                 ),
             )
 
@@ -172,13 +170,8 @@ fun `Metis - Conversation Channel`() {
                     state = rememberLazyListState(),
                     isReplyEnabled = true,
                     isMarkedAsDeleteList = mutableStateListOf(),
-                    onCreatePost = { CompletableDeferred() },
-                    onEditPost = { _, _ -> CompletableDeferred() },
-                    onDeletePost = { CompletableDeferred() },
+                    actions = MetisReplyHandlerInputActions.empty(),
                     onUndoDeletePost = {},
-                    onPinPost = { CompletableDeferred() },
-                    onSavePost = { CompletableDeferred() },
-                    onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                     generateLinkPreviews = { _ -> MutableStateFlow(emptyList()) },
                     onRemoveLinkPreview = { _, _, _ -> CompletableDeferred<MetisModificationFailure>() },
                     bottomItem = null,

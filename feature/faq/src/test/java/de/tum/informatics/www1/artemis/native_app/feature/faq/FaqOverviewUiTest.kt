@@ -4,7 +4,6 @@ import android.graphics.Color
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
@@ -20,9 +19,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.faq_test.FaqRepository
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
 @Category(UnitTest::class)
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestRunner::class)
 class FaqOverviewUiTest : BaseComposeTest() {
 
     private val category1 = FaqCategory(

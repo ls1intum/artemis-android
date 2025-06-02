@@ -9,7 +9,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.TextFieldValue
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
-import kotlinx.coroutines.Deferred
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.MetisModificationTask
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 
@@ -31,7 +31,7 @@ internal fun rememberReplyState(
     replyMode: ReplyMode,
     updateFailureState: (MetisModificationFailure?) -> Unit
 ): ReplyState {
-    var isCreatingReplyJob: Deferred<MetisModificationFailure?>? by remember { mutableStateOf(null) }
+    var isCreatingReplyJob: MetisModificationTask? by remember { mutableStateOf(null) }
     var displaySendSuccess by remember { mutableStateOf(false) }
 
     AwaitDeferredCompletion(job = isCreatingReplyJob) { failure ->

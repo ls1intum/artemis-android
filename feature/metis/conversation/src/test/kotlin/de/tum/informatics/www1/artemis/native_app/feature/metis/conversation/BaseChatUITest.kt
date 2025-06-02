@@ -28,6 +28,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.PostsDataState
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.ForwardMessageUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MetisReplyHandlerInputActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyMode
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteHint
@@ -250,14 +251,11 @@ abstract class BaseChatUITest : BaseComposeTest() {
                     chatListContextItem = chatListItem,
                     answerChatListItemState = { answer -> threadUseCase.getAnswerChatListItem(answer) },
                     initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
-                    onCreatePost = { CompletableDeferred() },
-                    onEditPost = { _, _ -> CompletableDeferred() },
-                    onResolvePost = onResolvePost,
-                    onPinPost = onPinPost,
-                    onSavePost = { CompletableDeferred() },
-                    onDeletePost = { CompletableDeferred() },
+                    actions = MetisReplyHandlerInputActions.empty<IBasePost>().copy(
+                        pin = onPinPost,
+                        resolve = onResolvePost,
+                    ),
                     onUndoDeletePost = {},
-                    onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                     onRequestReload = {},
                     onRequestRetrySend = { _, _ -> },
                     onFileSelect = { _, _ -> },
@@ -324,13 +322,10 @@ abstract class BaseChatUITest : BaseComposeTest() {
                         isReplyEnabled = true,
                         generateLinkPreviews = { _ -> linkPreviewStateFlow },
                         onRemoveLinkPreview = { _, _, _ -> CompletableDeferred<MetisModificationFailure>() },
-                        onCreatePost = { CompletableDeferred() },
-                        onEditPost = { _, _ -> CompletableDeferred() },
-                        onPinPost = onPinPost,
-                        onSavePost = { CompletableDeferred() },
-                        onDeletePost = { CompletableDeferred() },
+                        actions = MetisReplyHandlerInputActions.empty<IStandalonePost>().copy(
+                            pin = onPinPost,
+                        ),
                         onUndoDeletePost = {},
-                        onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                         onClickViewPost = {},
                         onRequestRetrySend = { _ -> },
                         conversationName = "Title",

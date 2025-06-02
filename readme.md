@@ -37,6 +37,9 @@ The following libraries and tools are utilized:
 - Koin: Dependency Injection
 - Kotlin Flows: Reactive programing
 - AndroidX DataStore: Persistently store key-value pairs
+- Coil: Async image loading
+- Ktor: Webclient
+- Krossbow: Client for WebSockets
 
 ## Development setup
 To run this project, you need a recent version of [Android Studio](https://developer.android.com/studio) or IntelliJ (not guaranteed to work) and the AndroidSDK installed.
@@ -65,9 +68,13 @@ For AndroidStudio, there are also preconfigured run configurations available.
 Screenshots can be generated using preview-composables in the `debug` source sets. They are annotated with `@PlayStoreScreenshots`. To get the screenshots, right click the rendered preview
 in AndroidStudio and select copy-image.
 
-## Related repositories
+## Useful Links
+### Related Repos
 - [Native iOS app](https://github.com/ls1intum/artemis-ios)
 - [Backend and Webapp](https://github.com/ls1intum/artemis)
+
+### Further docs
+- See the `/developerDocs` directory
 
 ## License
 By building the dockerfile or using its derived images, you accept the terms in the following license agreements:
