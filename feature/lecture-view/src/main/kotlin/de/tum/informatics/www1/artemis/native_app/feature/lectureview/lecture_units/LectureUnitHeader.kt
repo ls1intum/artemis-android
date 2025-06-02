@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture_units
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -87,7 +88,9 @@ internal fun LectureUnitHeader(
         }
     ) {
         Row(
-            modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.surfaceContainer)
+                .padding(vertical = 8.dp, horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {

@@ -219,7 +219,11 @@ private fun FaqPreviewItem(
             .clickable(onClick = onClick)
             .selectionBorder(selected),
     ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
+        Box(
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.surfaceContainer)
+                .fillMaxWidth()
+        ) {
             Column(
                 modifier = Modifier
                     .padding(16.dp)
@@ -236,7 +240,8 @@ private fun FaqPreviewItem(
                 FaqCategoryChipFlowRow(categories = faq.categories)
 
                 MarkdownText(
-                    modifier = Modifier.padding(vertical = 8.dp).padding(bottom = 0.dp),
+                    modifier = Modifier
+                        .padding(vertical = 8.dp),
                     markdown = faq.questionAnswer + "\n\n\n.",
                     style = MaterialTheme.typography.bodyLarge,
                     maxLines = 8,

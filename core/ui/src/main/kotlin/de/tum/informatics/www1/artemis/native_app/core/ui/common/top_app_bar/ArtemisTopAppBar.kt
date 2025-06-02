@@ -128,12 +128,8 @@ fun ArtemisSearchTopAppBar(
                     BasicSearchTextField(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(end = 8.dp)
-                            .innerShadow(
-                                offset = 2.dp,
-                                color = ComponentColors.ArtemisTopAppBar.searchBarShadow
-                            ),
-                        backgroundColor = MaterialTheme.colorScheme.background,
+                            .padding(end = 8.dp),
+                        backgroundColor = MaterialTheme.colorScheme.surfaceContainer,
                         textStyle = MaterialTheme.typography.bodyLarge,
                         hint = searchBarHint,
                         query = query,
@@ -203,20 +199,16 @@ private fun CollapsingSurface(
                 .onSizeChanged {
                     collapsingContentState.collapsingHeight = it.height.toFloat()
                 },
-            color = MaterialTheme.colorScheme.surfaceContainer,
+            color = MaterialTheme.colorScheme.surface,
         ) {
             FakeBasicSearchTextField(
                 modifier = Modifier
                     .testTag(TEST_TAG_FAQ_ARTEMIS_TOP_APP_BAR_FAKE_SEARCH)
                     .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                     .padding(bottom = 16.dp)
-                    .then(if (lineCount > 1) Modifier.padding(top = 16.dp) else Modifier)
-                    .innerShadow(
-                        offset = 2.dp,
-                        color = ComponentColors.ArtemisTopAppBar.searchBarShadow
-                    ),
+                    .then(if (lineCount > 1) Modifier.padding(top = 16.dp) else Modifier),
                 hint = searchBarHint,
-                backgroundColor = MaterialTheme.colorScheme.background,
+                backgroundColor = MaterialTheme.colorScheme.surfaceContainer,
                 onClick = onClick
             )
         }

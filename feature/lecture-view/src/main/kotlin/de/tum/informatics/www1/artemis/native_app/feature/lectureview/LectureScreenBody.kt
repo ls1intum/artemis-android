@@ -71,7 +71,7 @@ internal fun LectureScreenBody(
         ){
             TabRow(
                 selectedTabIndex = selectedTabIndex,
-                containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                containerColor = MaterialTheme.colorScheme.background,
                 divider = {},
             ) {
                 DefaultTab(

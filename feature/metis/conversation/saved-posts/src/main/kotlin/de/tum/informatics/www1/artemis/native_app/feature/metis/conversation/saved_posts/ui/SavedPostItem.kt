@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.saved_posts.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -92,7 +93,9 @@ private fun ConversationContextInfo(
         }
 
         Column(
-            modifier = Modifier.padding(8.dp),
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.surfaceContainer)
+                .padding(8.dp),
         ) {
             ConversationContextInfoHeader(
                 modifier = Modifier.fillMaxWidth(),

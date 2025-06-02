@@ -523,7 +523,7 @@ private fun UnreadMessages(modifier: Modifier = Modifier, unreadMessagesCount: L
                 .size(24.dp)
                 .aspectRatio(1f)
                 .background(
-                    MaterialTheme.colorScheme.primaryContainer,
+                    MaterialTheme.colorScheme.primary,
                     CircleShape
                 ),
             contentAlignment = Alignment.Center
