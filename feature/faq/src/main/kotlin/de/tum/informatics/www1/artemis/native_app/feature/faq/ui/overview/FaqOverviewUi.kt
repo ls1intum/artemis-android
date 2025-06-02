@@ -241,8 +241,7 @@ private fun FaqPreviewItem(
 
                 MarkdownText(
                     modifier = Modifier
-                        .padding(vertical = 8.dp)
-                        .padding(bottom = 0.dp),
+                        .padding(vertical = 8.dp),
                     markdown = faq.questionAnswer + "\n\n\n.",
                     style = MaterialTheme.typography.bodyLarge,
                     maxLines = 8,
