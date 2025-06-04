@@ -26,7 +26,7 @@ fun ExerciseActionButtons(
     modifier: Modifier,
     exercise: Exercise,
     templateStatus: ResultTemplateStatus? = LocalTemplateStatusProvider.current(),
-    showResult: Boolean,
+    showResult: Boolean = true,
     actions: ExerciseActions
 ) {
     // TODO: Team mode is currently not supported. Therefore, the buttons are disabled in team mode exercises

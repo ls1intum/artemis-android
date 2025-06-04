@@ -21,9 +21,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ProvideDefaul
 @Composable
 internal fun ParticipationStatusUi(
     modifier: Modifier,
-    exercise: Exercise,
-    showResult: Boolean = true,
-    actions: ExerciseActions
+    exercise: Exercise
 ) {
     ProvideDefaultExerciseTemplateStatus(exercise) {
         Column(
@@ -38,13 +36,6 @@ internal fun ParticipationStatusUi(
                     infoText = stringResource(de.tum.informatics.www1.artemis.native_app.core.ui.R.string.exercise_participation_not_possible),
                 )
             }
-
-            ExerciseActionButtons(
-                modifier = Modifier,
-                exercise = exercise,
-                showResult = showResult,
-                actions = actions
-            )
         }
     }
 }
