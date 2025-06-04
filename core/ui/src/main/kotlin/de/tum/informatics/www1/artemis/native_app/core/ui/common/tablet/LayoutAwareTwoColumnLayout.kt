@@ -200,12 +200,8 @@ fun SidebarHeader(
                 BasicSearchTextField(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(end = 8.dp)
-                        .innerShadow(
-                            offset = 2.dp,
-                            color = ComponentColors.ArtemisTopAppBar.searchBarShadow
-                        ),
-                    backgroundColor = MaterialTheme.colorScheme.background, // No gray tint
+                        .padding(end = 8.dp),
+                    backgroundColor = MaterialTheme.colorScheme.surfaceContainer,
                     textStyle = MaterialTheme.typography.bodyLarge,
                     hint = searchConfiguration.hint,
                     query = searchConfiguration.query,
@@ -216,13 +212,9 @@ fun SidebarHeader(
                 FakeBasicSearchTextField(
                     modifier = Modifier
                         .testTag(TEST_TAG_FAQ_ARTEMIS_TOP_APP_BAR_FAKE_SEARCH)
-                        .fillMaxWidth()
-                        .innerShadow(
-                            offset = 2.dp,
-                            color = ComponentColors.ArtemisTopAppBar.searchBarShadow
-                        ),
+                        .fillMaxWidth(),
                     hint = searchConfiguration.hint,
-                    backgroundColor = MaterialTheme.colorScheme.background, // No gray tint
+                    backgroundColor = MaterialTheme.colorScheme.surfaceContainer,
                     onClick = { isSearchActive = it }
                 )
             }

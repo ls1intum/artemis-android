@@ -46,7 +46,7 @@ fun CourseTabletNavigation(
                 Row(
                     modifier = Modifier
                         .background(
-                            color = MaterialTheme.colorScheme.background,
+                            color = MaterialTheme.colorScheme.surfaceContainer,
                             shape = RoundedCornerShape(24.dp)
                         )
                         .padding(horizontal = 4.dp, vertical = 4.dp),
@@ -60,7 +60,7 @@ fun CourseTabletNavigation(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(24.dp))
                                 .background(
-                                    if (selected) MaterialTheme.colorScheme.surfaceContainer else Color.Transparent
+                                    if (selected) MaterialTheme.colorScheme.background  else MaterialTheme.colorScheme.surfaceContainer
                                 )
                                 .clickable { onUpdateSelectedTab(item.route) }
                                 .padding(horizontal = 16.dp, vertical = 8.dp),
