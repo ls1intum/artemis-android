@@ -14,6 +14,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.hasEnded
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.isStartExerciseAvailable
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.hasPassed
 
 /**
@@ -25,7 +26,7 @@ fun ExerciseActionButtons(
     modifier: Modifier,
     exercise: Exercise,
     templateStatus: ResultTemplateStatus? = LocalTemplateStatusProvider.current(),
-    showResult: Boolean,
+    showResult: Boolean = true,
     actions: ExerciseActions
 ) {
     // TODO: Team mode is currently not supported. Therefore, the buttons are disabled in team mode exercises
@@ -75,46 +76,44 @@ private fun TextExerciseButtons(
     templateStatus: ResultTemplateStatus?,
     showResult: Boolean,
     actions: ExerciseActions
-){
-    if (latestParticipation == null && isStartExerciseAvailable) {
-        Button(
+) {
+    // Has due date passed
+    val isExerciseAvailable = exercise.dueDate?.let { !it.hasPassed() } ?: true
+
+    if (latestParticipation == null && isStartExerciseAvailable && isExerciseAvailable) {
+        ArtemisButton(
             modifier = modifier,
             onClick = actions.onClickStartTextExercise,
-            enabled = !exercise.teamMode
-        ) {
-            Text(
-                text = stringResource(id = R.string.exercise_actions_start_exercise_button)
-            )
-        }
+            enabled = !exercise.teamMode,
+            text = stringResource(id = R.string.exercise_actions_start_exercise_button)
+        )
     }
 
     if (templateStatus != null) {
         when (latestParticipation?.initializationState) {
             Participation.InitializationState.INITIALIZED -> {
-                Button(
-                    modifier = modifier,
-                    onClick = {
-                        actions.onClickOpenTextExercise(
-                            latestParticipation.id ?: return@Button
-                        )
-                    }
-                ) {
-                    Text(text = stringResource(id = R.string.exercise_actions_open_exercise_button))
-                }
+                    ArtemisButton(
+                        modifier = modifier,
+                        onClick = {
+                            actions.onClickOpenTextExercise(
+                                latestParticipation.id ?: return@ArtemisButton
+                            )
+                        },
+                        text = stringResource(id = R.string.exercise_actions_open_exercise_button)
+                    )
             }
 
             Participation.InitializationState.FINISHED -> {
                 if (latestParticipation.results.isNullOrEmpty() || !showResult) {
-                    Button(
+                    ArtemisButton(
                         modifier = modifier,
                         onClick = {
                             actions.onClickOpenTextExercise(
-                                latestParticipation.id ?: return@Button
+                                latestParticipation.id ?: return@ArtemisButton
                             )
-                        }
-                    ) {
-                        Text(text = stringResource(id = R.string.exercise_actions_view_submission_button))
-                    }
+                        },
+                        text = stringResource(id = R.string.exercise_actions_view_submission_button)
+                    )
                 }
             }
 
@@ -131,14 +130,11 @@ private fun QuizExerciseButtons(
     actions: ExerciseActions
 ) {
     if (isStartPracticeAvailable(exercise = exercise)) {
-        Button(
+        ArtemisButton(
             modifier = modifier,
-            onClick = actions.onClickPracticeQuiz
-        ) {
-            Text(
-                text = stringResource(id = R.string.exercise_actions_practice_quiz_button)
-            )
-        }
+            onClick = actions.onClickPracticeQuiz,
+            text = stringResource(id = R.string.exercise_actions_practice_quiz_button)
+        )
     }
 
     val openQuizAvailable =
