@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -28,6 +29,7 @@ import com.google.accompanist.web.WebView
 import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.authTokenOrEmptyString
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.collectArtemisContextAsState
 import kotlin.math.roundToInt
 
@@ -56,6 +58,7 @@ fun ArtemisWebView(
     WebView(
         modifier = if (adjustHeightForContent) {
             Modifier
+                .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                 .fillMaxWidth()
                 .height(webViewHeight.dp)
         } else {

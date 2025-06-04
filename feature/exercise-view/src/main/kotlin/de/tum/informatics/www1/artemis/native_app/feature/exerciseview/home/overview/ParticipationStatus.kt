@@ -10,8 +10,6 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.isParticipationAvailable
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.InfoMessageCard
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseActionButtons
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ProvideDefaultExerciseTemplateStatus
 
 /**

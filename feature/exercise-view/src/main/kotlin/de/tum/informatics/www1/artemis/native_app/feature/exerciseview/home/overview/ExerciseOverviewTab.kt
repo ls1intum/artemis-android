@@ -92,7 +92,8 @@ internal fun ExerciseOverviewTab(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 ArtemisWebView(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth(),
                     webViewState = webViewState,
                     webView = webView,
                     adjustHeightForContent = true,
