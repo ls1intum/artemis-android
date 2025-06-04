@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.ArtemisWebView
@@ -59,7 +60,7 @@ internal fun ExerciseOverviewTab(
                 .verticalScroll(rememberScrollState())
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(bottom =  32.dp)
+                .padding(bottom = 72.dp)
         ) {
             ParticipationStatusUi(
                 modifier = Modifier
@@ -75,15 +76,17 @@ internal fun ExerciseOverviewTab(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = Spacings.ScreenHorizontalSpacing),
-                text = stringResource(id = R.string.exercise_view_overview_problem_statement),
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.Medium
+            if (exercise is ProgrammingExercise) {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = Spacings.ScreenHorizontalSpacing),
+                    text = stringResource(id = R.string.exercise_view_overview_problem_statement),
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Medium
+                    )
                 )
-            )
+            }
 
             if (exercise !is QuizExercise && webViewState != null) {
                 Spacer(modifier = Modifier.height(8.dp))
