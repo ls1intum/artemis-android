@@ -145,7 +145,7 @@ fun NavGraphBuilder.course(
             onNavigateToLecture = { lectureId -> onNavigateToLecture(courseId, lectureId) },
             onNavigateToFaq = onNavigateToFaq,
             onNavigateBack = onNavigateBack,
-            onNavigateNotificationSection = { courseId ->  onNavigateNotificationSection(courseId) }
+            onNavigateNotificationSection = { id ->  onNavigateNotificationSection(id) }
         )
     }
 }

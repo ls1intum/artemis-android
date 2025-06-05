@@ -5,7 +5,6 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.LoggedInBasedServiceImpl
-import de.tum.informatics.www1.artemis.native_app.core.model.Dashboard
 import io.ktor.http.appendPathSegments
 
 /**

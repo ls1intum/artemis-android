@@ -17,15 +17,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
-import androidx.navigation.NavController
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NotificationButton
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.model.ConversationsOverviewSection
 
 @Composable
 fun CourseTabletNavigation(

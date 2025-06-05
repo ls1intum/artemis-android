@@ -39,7 +39,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBack
 import de.tum.informatics.www1.artemis.native_app.core.ui.getArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
 import io.github.fornewid.placeholder.material3.placeholder
-import androidx.navigation.NavController
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NotificationButton
 
 @Composable
