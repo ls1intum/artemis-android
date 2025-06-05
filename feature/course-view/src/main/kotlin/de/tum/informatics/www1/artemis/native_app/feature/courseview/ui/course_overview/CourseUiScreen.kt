@@ -98,7 +98,8 @@ fun NavGraphBuilder.course(
     onViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
     onNavigateToLecture: (courseId: Long, lectureId: Long) -> Unit,
     onNavigateToFaq: (faqId: Long) -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateNotificationSection: (courseId: Long) -> Unit
 ) {
     val deepLinks = CourseDeeplinks.ToCourse.generateLinks() +
             ExerciseDeeplinks.ToExerciseOverview.generateLinks() +
@@ -143,7 +144,8 @@ fun NavGraphBuilder.course(
             onClickViewQuizResults = onViewQuizResults,
             onNavigateToLecture = { lectureId -> onNavigateToLecture(courseId, lectureId) },
             onNavigateToFaq = onNavigateToFaq,
-            onNavigateBack = onNavigateBack
+            onNavigateBack = onNavigateBack,
+            onNavigateNotificationSection = { courseId ->  onNavigateNotificationSection(courseId) }
         )
     }
 }
@@ -164,7 +166,8 @@ fun CourseUiScreen(
     onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
     onNavigateToLecture: (lectureId: Long) -> Unit,
     onNavigateToFaq: (faqId: Long) -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateNotificationSection: (courseId: Long) -> Unit
 ) {
     ReportVisibleMetisContext(VisibleCourse(MetisContext.Course(courseId)))
 
@@ -220,7 +223,8 @@ fun CourseUiScreen(
                     participationId
                 )
             }
-        }
+        },
+        onNavigateNotificationSection = { onNavigateNotificationSection(courseId) }
     )
 }
 
@@ -248,6 +252,7 @@ internal fun CourseUiScreen(
     onNavigateToFaq: (faqId: Long) -> Unit,
     onNavigateBack: () -> Unit,
     onReloadCourse: () -> Unit,
+    onNavigateNotificationSection: () -> Unit
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -259,6 +264,8 @@ internal fun CourseUiScreen(
             else -> ""
         }
     }
+
+
 
     // This scaffold function is needed because of the way the navigation in the communication tab
     // is handled and the fact that the communicationTab supports the tablet layout. In the tablet
@@ -288,7 +295,8 @@ internal fun CourseUiScreen(
                 onReloadCourse = onReloadCourse,
                 searchConfiguration = searchConfiguration,
                 collapsingContentState = collapsingContentState,
-                content = content
+                content = content,
+                onNavigateNotificationSection = onNavigateNotificationSection
             )
         }
 

@@ -91,7 +91,8 @@ fun ArtemisSearchTopAppBar(
     colors: TopAppBarColors = TopAppBarDefaults.topAppBarColors(
         containerColor = ComponentColors.ArtemisTopAppBar.background,
     ),
-    updateQuery: (String) -> Unit
+    updateQuery: (String) -> Unit,
+    notificationIcon: @Composable () -> Unit = {}
 ) {
     var isSearchActive by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
@@ -118,6 +119,7 @@ fun ArtemisSearchTopAppBar(
                 ) { searchActive ->
                     if (!searchActive) {
                         title()
+                        notificationIcon()
                         return@AnimatedContent
                     }
 
