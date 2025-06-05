@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.coursenotifications
+package de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.ui.settings
 
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -9,6 +9,9 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.ReloadableViewModel
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
+import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.course_notification_model.CourseNotification
+import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.course_notification_model.NotificationCategory
+import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.service.CourseNotificationService
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine

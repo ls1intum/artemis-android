@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.coursenotifications
+package de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.course_notification_model
 
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ArtemisNotification
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.NotificationType

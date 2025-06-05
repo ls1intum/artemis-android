@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.coursenotifications
+package de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.ui.settings
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,6 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
+import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.course_notification_model.CourseNotification
+import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.R
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 

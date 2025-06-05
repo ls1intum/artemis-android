@@ -1,7 +1,8 @@
-package de.tum.informatics.www1.artemis.native_app.feature.coursenotifications
+package de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.service
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.LoggedInBasedService
+import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.course_notification_model.CourseNotification
 
 /*
 * Service where you can make requests about the course-wide notifications.

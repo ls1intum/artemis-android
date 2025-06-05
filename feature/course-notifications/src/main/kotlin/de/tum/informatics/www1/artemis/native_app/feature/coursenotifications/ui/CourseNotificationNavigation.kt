@@ -1,9 +1,10 @@
-package de.tum.informatics.www1.artemis.native_app.feature.coursenotifications
+package de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.ui
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.toRoute
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
+import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.ui.settings.CourseNotificationScreen
 import kotlinx.serialization.Serializable
 
 @Serializable

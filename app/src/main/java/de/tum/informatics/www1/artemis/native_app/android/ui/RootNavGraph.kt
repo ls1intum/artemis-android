@@ -4,8 +4,8 @@ import android.net.Uri
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.navOptions
-import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.courseNotificationScreen
-import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.navigateToCourseNotification
+import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.ui.courseNotificationScreen
+import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.ui.navigateToCourseNotification
 import de.tum.informatics.www1.artemis.native_app.feature.courseregistration.courseRegistration
 import de.tum.informatics.www1.artemis.native_app.feature.courseregistration.navigateToCourseRegistration
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.course
