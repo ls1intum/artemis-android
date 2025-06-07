@@ -5,16 +5,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -36,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Scaling
@@ -146,49 +146,65 @@ private fun PresetDropdown(
     var expanded by remember { mutableStateOf(false) }
     val selectedPreset = presets.find { it.typeId == currentPreset }
 
-    Column {
-        ExposedDropdownMenuBox(
-            modifier = Modifier.fillMaxWidth(),
-            expanded = expanded,
-            onExpandedChange = { expanded = !expanded }
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Card(
+            shape = MaterialTheme.shapes.medium,
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
-            TextField(
-                value = selectedPreset?.identifier?.let { stringResource(it.titleResId) } ?: "",
-                onValueChange = {},
-                readOnly = true,
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                modifier = Modifier.menuAnchor()
-            )
-
-            ExposedDropdownMenu(
+            ExposedDropdownMenuBox(
+                modifier = Modifier.fillMaxWidth(),
                 expanded = expanded,
-                onDismissRequest = { expanded = false }
+                onExpandedChange = { expanded = !expanded }
             ) {
-                presets.forEach { preset ->
-                    DropdownMenuItem(
-                        text = {
-                            Column {
-                                Text(text = stringResource(preset.identifier.titleResId))
-                                Text(
-                                    text = stringResource(preset.identifier.descriptionResId),
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
-                        },
-                        onClick = {
-                            onPresetSelected(preset.typeId)
-                            expanded = false
-                        }
+                TextField(
+                    value = selectedPreset?.identifier?.let { stringResource(it.titleResId) } ?: "",
+                    onValueChange = {},
+                    readOnly = true,
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                    modifier = Modifier
+                        .menuAnchor()
+                        .fillMaxWidth()
+                        .background(Color.Transparent),
+                    colors = ExposedDropdownMenuDefaults.textFieldColors(
+                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent
                     )
+                )
+
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    presets.forEach { preset ->
+                        DropdownMenuItem(
+                            text = {
+                                Column {
+                                    Text(text = stringResource(preset.identifier.titleResId))
+                                    Text(
+                                        text = stringResource(preset.identifier.descriptionResId),
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
+                            },
+                            onClick = {
+                                onPresetSelected(preset.typeId)
+                                expanded = false
+                            }
+                        )
+                    }
                 }
             }
         }
 
         selectedPreset?.identifier?.descriptionResId?.let {
-            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = stringResource(id = it),
-                style = MaterialTheme.typography.bodySmall
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
