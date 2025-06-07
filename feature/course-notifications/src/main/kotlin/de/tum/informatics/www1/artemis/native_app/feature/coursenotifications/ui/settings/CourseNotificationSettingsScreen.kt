@@ -45,6 +45,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.co
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.course_notification_model.settingsTitle
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.model.NotificationChannel
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.model.NotificationSettingsPreset
+import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.model.NotificationSettingsPresetIdentifier
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,7 +53,7 @@ internal fun CourseNotificationSettingsScreen(
     viewModel: CourseNotificationSettingsViewModel,
     onNavigateBack: () -> Unit
 ) {
-    val presets by viewModel.presets.collectAsState()
+    val presets = NotificationSettingsPresetIdentifier.entries
     val currentPreset by viewModel.currentPreset.collectAsState()
     val currentSettings by viewModel.currentSettings.collectAsState()
 
@@ -77,7 +78,6 @@ internal fun CourseNotificationSettingsScreen(
         ) {
             item {
                 PresetDropdown(
-                    presets = presets,
                     currentPreset = currentPreset,
                     onPresetSelected = { viewModel.selectPreset(it) }
                 )
@@ -139,12 +139,12 @@ private fun NotificationSettingToggle(
 
 @Composable
 private fun PresetDropdown(
-    presets: List<NotificationSettingsPreset>,
     currentPreset: Int,
     onPresetSelected: (Int) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val selectedPreset = presets.find { it.typeId == currentPreset }
+    val presets = NotificationSettingsPresetIdentifier.entries.filter { it != NotificationSettingsPresetIdentifier.UNKNOWN }
+    val selectedPreset = presets.find { it.presetId == currentPreset }
 
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -161,7 +161,7 @@ private fun PresetDropdown(
                 onExpandedChange = { expanded = !expanded }
             ) {
                 TextField(
-                    value = selectedPreset?.identifier?.let { stringResource(it.titleResId) } ?: "",
+                    value = selectedPreset?.let { stringResource(it.titleResId) } ?: "",
                     onValueChange = {},
                     readOnly = true,
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
@@ -183,15 +183,15 @@ private fun PresetDropdown(
                         DropdownMenuItem(
                             text = {
                                 Column {
-                                    Text(text = stringResource(preset.identifier.titleResId))
+                                    Text(text = stringResource(preset.titleResId))
                                     Text(
-                                        text = stringResource(preset.identifier.descriptionResId),
+                                        text = stringResource(preset.descriptionResId),
                                         style = MaterialTheme.typography.bodySmall
                                     )
                                 }
                             },
                             onClick = {
-                                onPresetSelected(preset.typeId)
+                                onPresetSelected(preset.presetId)
                                 expanded = false
                             }
                         )
@@ -200,7 +200,7 @@ private fun PresetDropdown(
             }
         }
 
-        selectedPreset?.identifier?.descriptionResId?.let {
+        selectedPreset?.descriptionResId?.let {
             Text(
                 text = stringResource(id = it),
                 style = MaterialTheme.typography.bodySmall,

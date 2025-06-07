@@ -119,6 +119,9 @@ internal class CourseNotificationSettingsViewModel(
                 val updatedSettings = settings.data.notificationTypeChannels.toMutableMap()
                 updatedSettings[typeNumber] = currentSettings
 
+                // Set preset to Custom (typeId = 0) locally before sending the update
+                settings.data.selectedPreset = 0
+
                 courseNotificationSettingsService.updateSetting(
                     courseId = courseId,
                     typeNumber = typeNumber,
