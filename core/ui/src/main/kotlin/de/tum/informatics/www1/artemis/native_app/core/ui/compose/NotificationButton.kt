@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 
 @Composable
@@ -15,7 +16,8 @@ fun NotificationButton(
     ) {
         Icon(
             imageVector = Icons.Default.Notifications,
-            contentDescription = null
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary
         )
     }
 } 

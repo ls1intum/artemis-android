@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="notifications_title">Notifications</string>
-    <string name="communication">Communication</string>
-    <string name="general">General</string>
-    <string name="no_notifications">No notifications</string>
-    <string name="settings">Settings</string>
-</resources>

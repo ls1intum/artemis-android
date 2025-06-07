@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.ui.settings
+package de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.ui.notification
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,7 +22,8 @@ import org.koin.core.parameter.parametersOf
 fun CourseNotificationScreen(
     modifier: Modifier = Modifier,
     courseId: Long,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToSettings: () -> Unit
 ) {
     val viewModel: CourseNotificationViewModel = koinViewModel { parametersOf(courseId) }
     var selectedFilter by remember { mutableStateOf(NotificationFilter.COMMUNICATION) }
@@ -38,10 +39,11 @@ fun CourseNotificationScreen(
                     Text(text = stringResource(id = R.string.notifications_title))
                 },
                 actions = {
-                    IconButton({}) {
+                    IconButton(onClick = onNavigateToSettings) {
                         Icon(
                             imageVector = Icons.Default.Settings,
-                            contentDescription = stringResource(id = R.string.settings)
+                            contentDescription = stringResource(id = R.string.settings),
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
