@@ -116,15 +116,8 @@ internal class CourseNotificationSettingsViewModel(
                 val currentSettings = settings.data.notificationTypeChannels[typeNumber]?.toMutableMap() ?: mutableMapOf()
                 currentSettings[NotificationChannel.PUSH] = enabled
                 
-                // Create a new map with the updated settings
                 val updatedSettings = settings.data.notificationTypeChannels.toMutableMap()
                 updatedSettings[typeNumber] = currentSettings
-                
-                // Create a new settings object with the updated map
-                val newSettings = settings.data.copy(
-                    notificationTypeChannels = updatedSettings,
-                    selectedPreset = 0
-                )
 
                 courseNotificationSettingsService.updateSetting(
                     courseId = courseId,
@@ -147,21 +140,13 @@ internal class CourseNotificationSettingsViewModel(
             val settings = settingsState.first()
 
             if (info is DataState.Success && settings is DataState.Success) {
-                val oldSettings = settings.data
                 val newPreset = info.data.presets.firstOrNull { it.typeId == presetId }
 
-                // Create a new map for the settings
                 val newSettings = mutableMapOf<String, Map<NotificationChannel, Boolean>>()
                 newPreset?.presetMap?.forEach { (type, value) ->
                     val number = info.data.notificationTypes.entries.firstOrNull { it.value == type }?.key ?: "0"
                     newSettings[number] = value
                 }
-
-                // Create a new settings object with the updated map
-                val updatedSettings = settings.data.copy(
-                    notificationTypeChannels = newSettings,
-                    selectedPreset = newPreset?.typeId ?: 0
-                )
 
                 try {
                     courseNotificationSettingsService.selectPreset(
@@ -172,8 +157,7 @@ internal class CourseNotificationSettingsViewModel(
                     )
                     onRequestReload()
                 } catch (e: Exception) {
-                   //check later
-
+                    // display error message to user
                 }
             }
         }
