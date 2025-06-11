@@ -2,7 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.push.notification_mod
 
 import androidx.annotation.StringRes
 import de.tum.informatics.www1.artemis.native_app.feature.push.R
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable

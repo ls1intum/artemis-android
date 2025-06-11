@@ -8,7 +8,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.notification_mode
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import java.util.Date
 
 @Serializable
 data class CourseNotification(
