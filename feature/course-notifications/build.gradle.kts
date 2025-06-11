@@ -13,4 +13,6 @@ dependencies {
     implementation(project(":core:device"))
 
     implementation(project(":feature:push"))
+    testImplementation(project(":feature:login"))
+    testImplementation(project(":feature:login-test"))
 }
