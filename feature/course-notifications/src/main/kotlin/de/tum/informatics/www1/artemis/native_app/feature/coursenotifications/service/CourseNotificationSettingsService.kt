@@ -1,7 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.service
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
-import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.model.NotificationChannel
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.model.NotificationSettings
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.model.NotificationSettingsInfo
 

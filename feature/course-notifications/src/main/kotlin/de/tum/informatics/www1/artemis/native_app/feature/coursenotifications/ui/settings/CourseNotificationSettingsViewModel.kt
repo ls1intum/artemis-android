@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.ui.settings
 
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.onFailure

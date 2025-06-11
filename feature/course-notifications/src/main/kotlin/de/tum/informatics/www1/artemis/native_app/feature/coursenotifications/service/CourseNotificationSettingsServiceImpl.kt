@@ -6,7 +6,6 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.LoggedInBasedServiceImpl
-import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.model.NotificationChannel
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.model.NotificationSettings
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.model.NotificationSettingsInfo
 import io.ktor.client.request.setBody
