@@ -20,6 +20,7 @@ data class NotificationSettings(
     var notificationTypeChannels: Map<String, Map<NotificationChannel, Boolean>>
 )
 
+
 @Serializable
 data class NotificationSettingsPreset(
     val identifier: NotificationSettingsPresetIdentifier,

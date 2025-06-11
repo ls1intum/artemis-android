@@ -49,19 +49,17 @@ class CourseNotificationSettingsServiceImpl(
 
     override suspend fun updateSetting(
         courseId: Long,
-        typeNumber: String,
-        setting: Map<NotificationChannel, Boolean>,
+        setting: NotificationSettings,
         serverUrl: String,
         authToken: String
     ): NetworkResponse<Unit> {
         return putRequest {
-
             url {
                 appendPathSegments(*Api.Communication.CourseNotifications.path, courseId.toString(),"setting-specification" )
             }
-            Log.d(TAG, "Updating setting for type: $typeNumber with value: $setting")
-            setBody(mapOf(typeNumber to setting))
-            Log.d(TAG, "Updating notification setting for course $courseId and type $typeNumber with: $setting - URL: $url")
+            Log.d(TAG, "Updating setting for with value: $setting")
+            setBody(setting)
+            Log.d(TAG, "Updating notification setting for course $courseId and with: $setting - URL: $url")
 
         }
     }

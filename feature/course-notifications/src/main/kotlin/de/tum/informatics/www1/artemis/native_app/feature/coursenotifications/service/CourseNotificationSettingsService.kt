@@ -28,8 +28,7 @@ interface CourseNotificationSettingsService {
      */
     suspend fun updateSetting(
         courseId: Long,
-        typeNumber: String,
-        setting: Map<NotificationChannel, Boolean>,
+        setting: NotificationSettings,
         serverUrl: String,
         authToken: String
     ): NetworkResponse<Unit>

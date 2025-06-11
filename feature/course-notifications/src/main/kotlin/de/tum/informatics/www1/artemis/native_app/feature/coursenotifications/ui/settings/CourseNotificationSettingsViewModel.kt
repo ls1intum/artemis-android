@@ -1,29 +1,31 @@
 package de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.ui.settings
 
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.data.onFailure
+import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.ReloadableViewModel
-import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.course_notification_model.CourseNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.model.NotificationChannel
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.model.NotificationSettings
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.model.NotificationSettingsInfo
-import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.model.NotificationSettingsPreset
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.service.CourseNotificationSettingsService
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlin.coroutines.CoroutineContext
@@ -38,7 +40,8 @@ internal class CourseNotificationSettingsViewModel(
     coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : ReloadableViewModel() {
 
-    val serverUrl: StateFlow<String> = serverUrlStateFlow(serverConfigurationService)
+    private val localChanges =
+        MutableStateFlow<Map<String, Map<NotificationChannel, Boolean>>>(emptyMap())
 
     private val settingsInfoState: StateFlow<DataState<NotificationSettingsInfo>> =
         combine(
@@ -73,67 +76,21 @@ internal class CourseNotificationSettingsViewModel(
             }
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
 
-    val presets: StateFlow<List<NotificationSettingsPreset>> =
-        settingsInfoState
-            .filterIsInstance<DataState.Success<NotificationSettingsInfo>>()
-            .map { it.data.presets }
-            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, emptyList())
+    val combinedState: StateFlow<DataState<Pair<NotificationSettingsInfo, NotificationSettings>>> =
+        combine(settingsInfoState, settingsState) { infoState, settingsState ->
+            when {
+                infoState is DataState.Success && settingsState is DataState.Success ->
+                    DataState.Success(infoState.data to settingsState.data)
 
-    val currentPreset: StateFlow<Int> =
-        settingsState
-            .filterIsInstance<DataState.Success<NotificationSettings>>()
-            .map { it.data.selectedPreset }
-            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, 0)
+                infoState is DataState.Failure -> DataState.Failure(infoState.throwable)
+                settingsState is DataState.Failure -> DataState.Failure(settingsState.throwable)
 
-    val currentSettings: StateFlow<List<Pair<CourseNotificationType, Map<NotificationChannel, Boolean>>>> =
-        combine(
-            settingsInfoState.filterIsInstance<DataState.Success<NotificationSettingsInfo>>(),
-            settingsState.filterIsInstance<DataState.Success<NotificationSettings>>()
-        ) { info, settings ->
-            val types = info.data.notificationTypes
-            val sorted = settings.data.notificationTypeChannels.toList().sortedBy { (key, _) ->
-                key.toIntOrNull() ?: 0
+                infoState is DataState.Loading || settingsState is DataState.Loading ->
+                    DataState.Loading()
+
+                else -> DataState.Loading()
             }
-            sorted.map { (key, value) ->
-                val type = types[key] ?: CourseNotificationType.UNKNOWN
-                type to value
-            }
-        }
-        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, emptyList())
-
-    fun updateNotificationSetting(
-        type: CourseNotificationType,
-        enabled: Boolean
-    ) {
-        viewModelScope.launch {
-            val serverUrl = serverConfigurationService.serverUrl.first()
-            val authToken = accountService.authToken.first()
-            val info = settingsInfoState.first()
-            val settings = settingsState.first()
-
-            if (info is DataState.Success && settings is DataState.Success) {
-                val typeNumber = info.data.notificationTypes.entries.firstOrNull { it.value.name == type.name }?.key ?: "0"
-                val currentSettings = settings.data.notificationTypeChannels[typeNumber]?.toMutableMap() ?: mutableMapOf()
-                currentSettings[NotificationChannel.PUSH] = enabled
-                
-                val updatedSettings = settings.data.notificationTypeChannels.toMutableMap()
-                updatedSettings[typeNumber] = currentSettings
-
-                // Set preset to Custom (typeId = 0) locally before sending the update
-                settings.data.selectedPreset = 0
-
-                courseNotificationSettingsService.updateSetting(
-                    courseId = courseId,
-                    typeNumber = typeNumber,
-                    setting = currentSettings,
-                    serverUrl = serverUrl,
-                    authToken = authToken
-                )
-
-                onRequestReload()
-            }
-        }
-    }
+        }.stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
 
     fun selectPreset(presetId: Int) {
         viewModelScope.launch {
@@ -143,26 +100,63 @@ internal class CourseNotificationSettingsViewModel(
             val settings = settingsState.first()
 
             if (info is DataState.Success && settings is DataState.Success) {
-                val newPreset = info.data.presets.firstOrNull { it.typeId == presetId }
-
-                val newSettings = mutableMapOf<String, Map<NotificationChannel, Boolean>>()
-                newPreset?.presetMap?.forEach { (type, value) ->
-                    val number = info.data.notificationTypes.entries.firstOrNull { it.value == type }?.key ?: "0"
-                    newSettings[number] = value
-                }
-
-                try {
-                    courseNotificationSettingsService.selectPreset(
-                        courseId = courseId,
-                        presetId = presetId,
-                        serverUrl = serverUrl,
-                        authToken = authToken
-                    )
-                    onRequestReload()
-                } catch (e: Exception) {
-                    // display error message to user
-                }
+                localChanges.update { emptyMap() }
+                courseNotificationSettingsService
+                    .selectPreset(courseId, presetId, serverUrl, authToken)
+                onRequestReload()
             }
         }
     }
-} 
+
+    val currentSettings: StateFlow<List<Pair<CourseNotificationType, Map<NotificationChannel, Boolean>>>> =
+        combine(
+            settingsInfoState.filterIsInstance<DataState.Success<NotificationSettingsInfo>>(),
+            settingsState.filterIsInstance<DataState.Success<NotificationSettings>>(),
+            localChanges
+        ) { info, settings, local ->
+            val merged = settings.data.notificationTypeChannels.toMutableMap()
+            local.forEach { (k, v) -> merged[k] = v }
+
+            val types = info.data.notificationTypes
+            merged
+                .toList()
+                .sortedBy { (k, _) -> k.toIntOrNull() ?: 0 }
+                .map { (k, v) -> (types[k] ?: CourseNotificationType.UNKNOWN) to v }
+        }
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, emptyList())
+
+    fun updateNotificationSetting(
+        type: CourseNotificationType,
+        enabled: Boolean
+    ) = viewModelScope.launch {
+        val (serverUrl, authToken) = serverConfigurationService.serverUrl.first() to
+                accountService.authToken.first()
+        val info = settingsInfoState.first() as? DataState.Success ?: return@launch
+        val settings = settingsState.first() as? DataState.Success ?: return@launch
+
+        val typeNumber = info.data.notificationTypes
+            .entries.firstOrNull { it.value == type }?.key ?: return@launch
+
+        val newChannels =
+            (settings.data.notificationTypeChannels[typeNumber] ?: emptyMap())
+                .toMutableMap()
+                .apply { this[NotificationChannel.PUSH] = enabled }
+
+        localChanges.update { it + (typeNumber to newChannels) }
+
+        val setting = NotificationSettings(
+            selectedPreset = settings.data.selectedPreset,
+            notificationTypeChannels = settings.data.notificationTypeChannels + (typeNumber to newChannels)
+        )
+        courseNotificationSettingsService
+            .updateSetting(courseId, setting, serverUrl, authToken)
+            .onSuccess {
+                onRequestReload()
+            }
+            .onFailure {
+                localChanges.update { it - typeNumber }
+            }
+
+
+    }
+}

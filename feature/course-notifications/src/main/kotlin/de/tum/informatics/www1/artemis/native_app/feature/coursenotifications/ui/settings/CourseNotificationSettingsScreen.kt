@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,23 +40,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Scaling
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.InfoMessageCard
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.R
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.course_notification_model.CourseNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.course_notification_model.settingsTitle
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.model.NotificationChannel
-import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.model.NotificationSettingsPreset
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.model.NotificationSettingsPresetIdentifier
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun CourseNotificationSettingsScreen(
     viewModel: CourseNotificationSettingsViewModel,
     onNavigateBack: () -> Unit
 ) {
-    val presets = NotificationSettingsPresetIdentifier.entries
-    val currentPreset by viewModel.currentPreset.collectAsState()
-    val currentSettings by viewModel.currentSettings.collectAsState()
+    val state by viewModel.combinedState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -68,37 +67,47 @@ internal fun CourseNotificationSettingsScreen(
                 }
             )
         }
-    ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            item {
-                PresetDropdown(
-                    currentPreset = currentPreset,
-                    onPresetSelected = { viewModel.selectPreset(it) }
-                )
-            }
+    ) { padding ->
+        BasicDataStateUi(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+            dataState = state,
+            loadingText = "Loading notification settings...",
+                failureText = "Failed to load notification settings",
+            retryButtonText = "Try again",
+            onClickRetry = viewModel::onRequestReload,
+        ) { (info, settings) ->
 
-            item {
-                InfoMessageCard(infoText = stringResource(R.string.setting_disclaimer))
-            }
+            val current = viewModel.currentSettings.collectAsState()
 
-            items(currentSettings) { (type, setting) ->
-                NotificationSettingToggle(
-                    type = type,
-                    enabled = setting[NotificationChannel.PUSH] ?: false,
-                    onToggle = { enabled ->
-                        viewModel.updateNotificationSetting(type, enabled)
-                    }
-                )
+            LazyColumn(
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item {
+                    PresetDropdown(
+                        currentPreset = settings.selectedPreset,
+                        onPresetSelected = { viewModel.selectPreset(it) }
+                    )
+                }
+
+                item {
+                    InfoMessageCard(infoText = stringResource(R.string.setting_disclaimer))
+                }
+
+                items(current.value) { (type, setting) ->
+                    NotificationSettingToggle(
+                        type = type,
+                        enabled = setting[NotificationChannel.PUSH] ?: false,
+                        onToggle = { viewModel.updateNotificationSetting(type, it) }
+                    )
+                }
             }
         }
     }
 }
+
 
 
 @Composable
@@ -107,35 +116,36 @@ private fun NotificationSettingToggle(
     enabled: Boolean,
     onToggle: (Boolean) -> Unit
 ) {
-    Card(
-        shape = MaterialTheme.shapes.medium
-    ) {
-        Column(
+    var localEnabled by remember { mutableStateOf(enabled) }
+
+    LaunchedEffect(enabled) { localEnabled = enabled }
+
+    Card(shape = MaterialTheme.shapes.medium) {
+        Row(
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.surfaceContainer),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surfaceContainer)
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Text(
-                    text = type.settingsTitle(),
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.weight(1f)
-                )
-                Switch(
-                    modifier = Modifier.scale(Scaling.SWITCH),
-                    checked = enabled,
-                    onCheckedChange = onToggle
-                )
-            }
+            Text(
+                text = type.settingsTitle(),
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.weight(1f)
+            )
+            Switch(
+                modifier = Modifier.scale(Scaling.SWITCH),
+                checked = localEnabled,
+                onCheckedChange = { new ->
+                    localEnabled = new
+                    onToggle(new)
+                }
+            )
         }
     }
 }
+
 
 @Composable
 private fun PresetDropdown(
@@ -143,7 +153,8 @@ private fun PresetDropdown(
     onPresetSelected: (Int) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val presets = NotificationSettingsPresetIdentifier.entries.filter { it != NotificationSettingsPresetIdentifier.UNKNOWN }
+    val presets =
+        NotificationSettingsPresetIdentifier.entries.filter { it != NotificationSettingsPresetIdentifier.UNKNOWN }
     val selectedPreset = presets.find { it.presetId == currentPreset }
 
     Column(
