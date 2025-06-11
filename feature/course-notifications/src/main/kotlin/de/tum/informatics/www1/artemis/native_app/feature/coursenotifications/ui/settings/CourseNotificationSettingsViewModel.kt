@@ -11,9 +11,9 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.ReloadableViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.course_notification_model.CourseNotificationType
-import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.model.NotificationChannel
-import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.model.NotificationSettings
-import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.model.NotificationSettingsInfo
+import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.course_notification_model.NotificationChannel
+import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.course_notification_model.NotificationSettings
+import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.course_notification_model.NotificationSettingsInfo
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.service.CourseNotificationSettingsService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

@@ -4,39 +4,24 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.toRoute
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
-import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.ui.notification.CourseNotificationScreen
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.ui.settings.CourseNotificationSettingsScreen
 import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
-@Serializable
-private data class CourseNotificationScreenRoute(val courseId: Long)
 
 @Serializable
 private data class CourseNotificationSettingRoute(val courseId: Long)
 
 fun NavController.navigateToCourseNotification(courseId: Long) {
-    navigate(CourseNotificationScreenRoute(courseId))
+    navigate(CourseNotificationSettingRoute(courseId))
 }
 
 fun NavGraphBuilder.courseNotificationScreen(
     navController: NavController,
 ) {
-    animatedComposable<CourseNotificationScreenRoute> { backStackEntry ->
-        val route: CourseNotificationScreenRoute = backStackEntry.toRoute()
-
-        CourseNotificationScreen(
-            courseId = route.courseId,
-            onNavigateBack = navController::navigateUp,
-            onNavigateToSettings = {
-                navController.navigate(CourseNotificationSettingRoute(route.courseId))
-            }
-        )
-    }
-
     animatedComposable<CourseNotificationSettingRoute> { backStackEntry ->
-        val route: CourseNotificationScreenRoute = backStackEntry.toRoute()
+        val route: CourseNotificationSettingRoute = backStackEntry.toRoute()
 
         CourseNotificationSettingsScreen(
             viewModel =  koinViewModel { parametersOf(route.courseId) },

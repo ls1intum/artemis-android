@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.model
+package de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.course_notification_model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

@@ -44,8 +44,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.InfoMessageCard
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.R
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.course_notification_model.CourseNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.course_notification_model.settingsTitle
-import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.model.NotificationChannel
-import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.model.NotificationSettingsPresetIdentifier
+import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.course_notification_model.NotificationChannel
+import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.course_notification_model.NotificationSettingsPresetIdentifier
 
 @Composable
 internal fun CourseNotificationSettingsScreen(

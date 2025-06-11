@@ -1,8 +1,8 @@
 package de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.service
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
-import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.model.NotificationSettings
-import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.model.NotificationSettingsInfo
+import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.course_notification_model.NotificationSettings
+import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.course_notification_model.NotificationSettingsInfo
 
 interface CourseNotificationSettingsService {
     /**

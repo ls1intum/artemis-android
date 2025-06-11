@@ -5,27 +5,39 @@ import androidx.compose.ui.res.stringResource
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.R
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ArtemisNotification
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.NotificationType
+import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.util.Date
 
-
+@Serializable
 data class CourseNotification(
-    val notificationType: NotificationType,
+    val notificationType: CourseNotificationType,
     val notificationId: Int,
     val courseId: Int,
-    val creationDate: Date,
+    val creationDate: Instant,
     val category: NotificationCategory,
     val status: NotificationStatus,
     val notification: ArtemisNotification<NotificationType>
-) {
-    val id: Int get() = notificationId
-}
+)
 
+@Serializable
+data class NotificationPage(
+    val pageNumber: Int,
+    val pageSize: Int,
+    val totalElements: Int,
+    val totalPages: Int,
+    val content: List<CourseNotification>?
+)
 enum class NotificationCategory {
     COMMUNICATION,
     GENERAL,
     UNKNOWN
+}
+
+enum class NotificationFilter {
+    COMMUNICATION,
+    GENERAL
 }
 
 enum class NotificationStatus {
@@ -121,7 +133,6 @@ enum class CourseNotificationType {
                 ?: UNKNOWN
     }
 }
-
 
 @Composable
 fun CourseNotificationType.settingsTitle(): String = when (this) {
