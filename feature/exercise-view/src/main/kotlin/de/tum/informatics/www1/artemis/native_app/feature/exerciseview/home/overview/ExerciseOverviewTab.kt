@@ -66,8 +66,7 @@ internal fun ExerciseOverviewTab(
                 .padding(horizontal = Spacings.ScreenHorizontalSpacing),
             text = stringResource(id = R.string.exercise_view_overview_problem_statement),
             style = MaterialTheme.typography.titleMedium.copy(
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Medium
             )
         )
 

@@ -168,8 +168,7 @@ private fun LazyListScope.overviewSection(
                     .background(MaterialTheme.colorScheme.background),
                 text = stringResource(id = R.string.lecture_view_overview_section_title),
                 style = MaterialTheme.typography.headlineSmall.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+                    fontWeight = FontWeight.Bold
                 )
             )
         }
@@ -342,8 +341,7 @@ private fun LazyListScope.attachmentsSection(
                     .padding(vertical = 16.dp),
                 text = stringResource(id = R.string.lecture_view_tab_attachments),
                 style = MaterialTheme.typography.headlineSmall.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+                    fontWeight = FontWeight.Bold
                 )
             )
         }
@@ -373,8 +371,7 @@ private fun LazyListScope.lectureUnitSection(
                 .background(MaterialTheme.colorScheme.background),
             text = stringResource(id = R.string.lecture_view_overview_section_lecture_units),
             style = MaterialTheme.typography.headlineSmall.copy(
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                fontWeight = FontWeight.Bold
             )
         )
     }
