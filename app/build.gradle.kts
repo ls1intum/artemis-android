@@ -112,6 +112,7 @@ dependencies {
     implementation(project(":core:device"))
     implementation(project(":core:websocket"))
 
+    implementation(project(":feature:course-notifications"))
     implementation(project(":feature:course-registration"))
     implementation(project(":feature:course-view"))
     implementation(project(":feature:dashboard"))
@@ -132,6 +133,7 @@ dependencies {
     kover(project(":core:ui"))
     kover(project(":core:device"))
     kover(project(":core:websocket"))
+    kover(project(":feature:course-notifications"))
     kover(project(":feature:course-registration"))
     kover(project(":feature:course-view"))
     kover(project(":feature:dashboard"))

@@ -9,6 +9,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -26,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.layout.onSizeChanged
@@ -91,7 +93,8 @@ fun ArtemisSearchTopAppBar(
     colors: TopAppBarColors = TopAppBarDefaults.topAppBarColors(
         containerColor = ComponentColors.ArtemisTopAppBar.background,
     ),
-    updateQuery: (String) -> Unit
+    updateQuery: (String) -> Unit,
+    notificationIcon: @Composable () -> Unit = {}
 ) {
     var isSearchActive by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
@@ -117,7 +120,15 @@ fun ArtemisSearchTopAppBar(
                     }
                 ) { searchActive ->
                     if (!searchActive) {
-                        title()
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically ){
+                            title()
+                            Spacer(modifier = Modifier.weight(1f))
+                            notificationIcon()
+                        }
+
                         return@AnimatedContent
                     }
 
