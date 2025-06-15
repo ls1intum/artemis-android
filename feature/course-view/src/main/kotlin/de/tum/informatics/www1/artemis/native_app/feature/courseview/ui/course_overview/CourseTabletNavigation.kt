@@ -46,6 +46,8 @@ fun CourseTabletNavigation(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center
             ) {
+                Spacer( modifier = Modifier.weight(1f) )
+
                 Row(
                     modifier = Modifier
                         .background(
