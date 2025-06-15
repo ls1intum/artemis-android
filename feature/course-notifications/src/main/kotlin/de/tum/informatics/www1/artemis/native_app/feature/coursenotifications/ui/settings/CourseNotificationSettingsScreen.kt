@@ -67,13 +67,13 @@ internal fun CourseNotificationSettingsScreen(
         }
     ) { padding ->
         BasicDataStateUi(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
             dataState = state,
-            loadingText = "Loading notification settings...",
-                failureText = "Failed to load notification settings",
-            retryButtonText = "Try again",
+            loadingText = stringResource(R.string.loading_notification_settings),
+            failureText = stringResource(R.string.failed_to_load_notification_settings),
+            retryButtonText = stringResource(R.string.try_again),
             onClickRetry = viewModel::onRequestReload,
         ) { (info, settings) ->
 
@@ -105,7 +105,6 @@ internal fun CourseNotificationSettingsScreen(
         }
     }
 }
-
 
 
 @Composable

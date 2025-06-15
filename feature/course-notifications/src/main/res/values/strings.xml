@@ -51,4 +51,8 @@
     <string name="tutorial_assigned_settings_name">Tutorial Group Assigned</string>
     <string name="tutorial_deleted_settings_name">Tutorial Group Deleted</string>
     <string name="tutorial_unassigned_settings_name">Tutorial Group Unassigned</string>
+
+    <string name="loading_notification_settings">Loading notification settings…</string>
+    <string name="failed_to_load_notification_settings">Failed to load notification settings</string>
+    <string name="try_again">Try again</string>
 </resources> 
