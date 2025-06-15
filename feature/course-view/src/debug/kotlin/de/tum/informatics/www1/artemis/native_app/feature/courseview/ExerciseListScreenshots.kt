@@ -41,7 +41,8 @@ fun `Course View - Exercise List`() {
             collapsingContentState = CollapsingContentState(),
             updateSelectedCourseTab = {},
             onNavigateBack = {},
-            onReloadCourse = {}
+            onReloadCourse = {},
+            onNavigateNotificationSection = {}
         ) {
             ExerciseOverviewBody(
                 modifier = Modifier
