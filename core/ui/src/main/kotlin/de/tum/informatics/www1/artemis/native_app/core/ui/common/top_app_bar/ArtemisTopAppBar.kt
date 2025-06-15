@@ -8,6 +8,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -115,7 +116,8 @@ fun ArtemisSearchTopAppBar(
                     targetState = isSearchActive,
                     transitionSpec = {
                         val titleEnter = fadeIn(tween(animatingDuration)) + slideInVertically { it }
-                        val titleExit = fadeOut(tween(animatingDuration)) + slideOutVertically { -it }
+                        val titleExit =
+                            fadeOut(tween(animatingDuration)) + slideOutVertically { -it }
                         titleEnter.togetherWith(titleExit)
                     }
                 ) { searchActive ->
@@ -123,12 +125,13 @@ fun ArtemisSearchTopAppBar(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically ){
-                            title()
-                            Spacer(modifier = Modifier.weight(1f))
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(modifier = Modifier.weight(1f)) {
+                                title()
+                            }
                             notificationIcon()
                         }
-
                         return@AnimatedContent
                     }
 
