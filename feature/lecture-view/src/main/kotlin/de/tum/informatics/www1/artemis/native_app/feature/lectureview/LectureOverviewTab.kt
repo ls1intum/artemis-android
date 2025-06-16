@@ -161,42 +161,45 @@ private fun LazyListScope.overviewSection(
     channel: ChannelChat?,
     lecture: Lecture
 ) {
-    if (startDate != null || description != null || channel != null) {
-        stickyHeader {
-            Text(
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.background),
-                text = stringResource(id = R.string.lecture_view_overview_section_title),
-                style = MaterialTheme.typography.headlineSmall.copy(
-                    fontWeight = FontWeight.Bold
-                )
-            )
-        }
+    if (startDate == null && description == null && channel == null) {
+        return
+    }
 
-        startDate?.let {
-            dateSection(
-                modifier = modifier.fillMaxWidth(),
-                startDate = it,
-                endDate = endDate
+    stickyHeader {
+        Text(
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.background),
+            text = stringResource(id = R.string.lecture_view_overview_section_title),
+            style = MaterialTheme.typography.headlineSmall.copy(
+                fontWeight = FontWeight.Bold
             )
-        }
+        )
+    }
 
-        description?.let {
-            descriptionSection(
-                modifier = modifier.fillMaxWidth(),
-                description = it
-            )
-        }
+    startDate?.let {
+        dateSection(
+            modifier = modifier.fillMaxWidth(),
+            startDate = it,
+            endDate = endDate
+        )
+    }
 
-        channel?.let {
-            channelSection(
-                modifier = modifier.fillMaxWidth(),
-                channel = it,
-                lecture = lecture
-            )
-        }
+    description?.let {
+        descriptionSection(
+            modifier = modifier.fillMaxWidth(),
+            description = it
+        )
+    }
+
+    channel?.let {
+        channelSection(
+            modifier = modifier.fillMaxWidth(),
+            channel = it,
+            lecture = lecture
+        )
     }
 }
+
 
 private fun LazyListScope.dateSection(
     modifier: Modifier,
@@ -333,27 +336,29 @@ private fun LazyListScope.attachmentsSection(
     onClickFileAttachment: (Attachment) -> Unit,
     onClickOpenLinkAttachment: (Attachment) -> Unit
 ) {
-    if (attachments.isNotEmpty()) {
-        stickyHeader {
-            Text(
-                modifier = modifier
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(vertical = 16.dp),
-                text = stringResource(id = R.string.lecture_view_tab_attachments),
-                style = MaterialTheme.typography.headlineSmall.copy(
-                    fontWeight = FontWeight.Bold
-                )
-            )
-        }
+    if (attachments.isEmpty()) {
+       return
+    }
 
-        item {
-            AttachmentsSection(
-                modifier = Modifier.fillMaxSize(),
-                attachments = attachments,
-                onClickFileAttachment = onClickFileAttachment,
-                onClickOpenLinkAttachment = onClickOpenLinkAttachment
+    stickyHeader {
+        Text(
+            modifier = modifier
+                .background(MaterialTheme.colorScheme.background)
+                .padding(vertical = 16.dp),
+            text = stringResource(id = R.string.lecture_view_tab_attachments),
+            style = MaterialTheme.typography.headlineSmall.copy(
+                fontWeight = FontWeight.Bold
             )
-        }
+        )
+    }
+
+    item {
+        AttachmentsSection(
+            modifier = Modifier.fillMaxSize(),
+            attachments = attachments,
+            onClickFileAttachment = onClickFileAttachment,
+            onClickOpenLinkAttachment = onClickOpenLinkAttachment
+        )
     }
 }
 
