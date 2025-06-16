@@ -1,10 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.feature.coursenotifications
 
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.ui.settings.CourseNotificationSettingsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.ui.settings.CourseNotificationSettingsViewModel
 import org.junit.Test
@@ -25,8 +27,14 @@ class CourseNotificationSettingsScreenE2eTest : BaseCourseNotificationTest() {
     fun `can change notification toggle`() {
         setupUi()
 
+        val tag = "NEW_EXERCISE_NOTIFICATION"
+
+        composeTestRule.waitUntil(DefaultTimeoutMillis) {
+            composeTestRule.onAllNodes(hasTestTag(tag)).fetchSemanticsNodes().isNotEmpty()
+        }
+
         composeTestRule
-            .onNodeWithTag("NEW_EXERCISE_NOTIFICATION")
+            .onNodeWithTag(tag)
             .performScrollTo()
             .assertExists()
             .performClick()
