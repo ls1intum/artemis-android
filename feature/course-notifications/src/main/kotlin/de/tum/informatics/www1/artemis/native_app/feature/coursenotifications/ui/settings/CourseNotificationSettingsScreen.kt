@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Scaling
@@ -125,10 +126,15 @@ private fun NotificationSettingToggle(
             Text(
                 text = type.settingsTitle(),
                 style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .weight(1f)
+                    .testTag(type.name)
             )
+
             Switch(
-                modifier = Modifier.scale(Scaling.SWITCH),
+                modifier = Modifier
+                    .scale(Scaling.SWITCH)
+                    .testTag(type.name),
                 checked = localEnabled,
                 onCheckedChange = { new ->
                     localEnabled = new
@@ -170,7 +176,8 @@ private fun PresetDropdown(
                     modifier = Modifier
                         .menuAnchor()
                         .fillMaxWidth()
-                        .background(Color.Transparent),
+                        .background(Color.Transparent)
+                        .testTag("PresetDropdownTextField"),
                     colors = ExposedDropdownMenuDefaults.textFieldColors(
                         unfocusedIndicatorColor = Color.Transparent,
                         focusedIndicatorColor = Color.Transparent
@@ -183,6 +190,7 @@ private fun PresetDropdown(
                 ) {
                     presets.forEach { preset ->
                         DropdownMenuItem(
+                            modifier = Modifier.testTag(preset.name),
                             text = {
                                 Column {
                                     Text(text = stringResource(preset.titleResId))
