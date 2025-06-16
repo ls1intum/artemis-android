@@ -13,8 +13,6 @@ val courseNotificationsModule = module {
         CourseNotificationSettingsViewModel(
             courseId = courseId,
             courseNotificationSettingsService = get(),
-            serverConfigurationService = get(),
-            accountService = get(),
             networkStatusProvider = get()
         )
     }

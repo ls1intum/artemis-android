@@ -22,10 +22,7 @@ class CourseNotificationSettingsServiceImpl(
         private const val TAG = "CourseNotificationSettingsServiceImpl"
     }
 
-    override suspend fun getNotificationSettingsInfo(
-        serverUrl: String,
-        authToken: String
-    ): NetworkResponse<NotificationSettingsInfo> {
+    override suspend fun getNotificationSettingsInfo(): NetworkResponse<NotificationSettingsInfo> {
         return getRequest {
             url {
                 appendPathSegments(*Api.Communication.CourseNotifications.path, "info")
@@ -35,13 +32,15 @@ class CourseNotificationSettingsServiceImpl(
     }
 
     override suspend fun getNotificationSettings(
-        courseId: Long,
-        serverUrl: String,
-        authToken: String
+        courseId: Long
     ): NetworkResponse<NotificationSettings> {
         return getRequest {
             url {
-                appendPathSegments(*Api.Communication.CourseNotifications.path, courseId.toString(), "settings")
+                appendPathSegments(
+                    *Api.Communication.CourseNotifications.path,
+                    courseId.toString(),
+                    "settings"
+                )
             }
             Log.d(TAG, "Fetching notification settings for course $courseId - URL: $url")
 
@@ -50,31 +49,37 @@ class CourseNotificationSettingsServiceImpl(
 
     override suspend fun updateSetting(
         courseId: Long,
-        setting: NotificationSettings,
-        serverUrl: String,
-        authToken: String
+        setting: NotificationSettings
     ): NetworkResponse<Unit> {
         return putRequest {
             url {
-                appendPathSegments(*Api.Communication.CourseNotifications.path, courseId.toString(),"setting-specification" )
+                appendPathSegments(
+                    *Api.Communication.CourseNotifications.path,
+                    courseId.toString(),
+                    "setting-specification"
+                )
             }
             Log.d(TAG, "Updating setting for with value: $setting")
             setBody(setting)
-            Log.d(TAG, "Updating notification setting for course $courseId and with: $setting - URL: $url")
+            Log.d(
+                TAG,
+                "Updating notification setting for course $courseId and with: $setting - URL: $url"
+            )
 
         }
     }
 
     override suspend fun selectPreset(
         courseId: Long,
-        presetId: Int,
-        serverUrl: String,
-        authToken: String
+        presetId: Int
     ): NetworkResponse<Unit> {
         return putRequest {
-
             url {
-                appendPathSegments(*Api.Communication.CourseNotifications.path, courseId.toString(), "setting-preset")
+                appendPathSegments(
+                    *Api.Communication.CourseNotifications.path,
+                    courseId.toString(),
+                    "setting-preset"
+                )
             }
             setBody(presetId)
             Log.d(TAG, "Selecting preset $presetId for course $courseId - URL: $url")

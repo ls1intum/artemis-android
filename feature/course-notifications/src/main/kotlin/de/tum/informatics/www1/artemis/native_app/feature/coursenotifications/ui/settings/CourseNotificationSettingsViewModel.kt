@@ -4,10 +4,8 @@ import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.onFailure
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
-import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
-import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
+import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.performAutoReloadingNetworkCall
+import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.ReloadableViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.course_notification_model.CourseNotificationType
@@ -21,8 +19,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -33,9 +29,7 @@ import kotlin.coroutines.EmptyCoroutineContext
 internal class CourseNotificationSettingsViewModel(
     private val courseId: Long,
     private val courseNotificationSettingsService: CourseNotificationSettingsService,
-    private val serverConfigurationService: ServerConfigurationService,
-    private val accountService: AccountService,
-    private val networkStatusProvider: NetworkStatusProvider,
+    networkStatusProvider: NetworkStatusProvider,
     coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : ReloadableViewModel() {
 
@@ -43,37 +37,18 @@ internal class CourseNotificationSettingsViewModel(
         MutableStateFlow<Map<String, Map<NotificationChannel, Boolean>>>(emptyMap())
 
     private val settingsInfoState: StateFlow<DataState<NotificationSettingsInfo>> =
-        combine(
-            serverConfigurationService.serverUrl,
-            accountService.authToken,
-            requestReload.onStart { emit(Unit) }
-        ) { serverUrl, authToken, _ -> serverUrl to authToken }
-            .flatMapLatest { (serverUrl, authToken) ->
-                retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                    courseNotificationSettingsService.getNotificationSettingsInfo(
-                        serverUrl = serverUrl,
-                        authToken = authToken
-                    )
-                }
+        courseNotificationSettingsService
+            .performAutoReloadingNetworkCall(networkStatusProvider, requestReload) {
+                getNotificationSettingsInfo()
             }
-            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     private val settingsState: StateFlow<DataState<NotificationSettings>> =
-        combine(
-            serverConfigurationService.serverUrl,
-            accountService.authToken,
-            requestReload.onStart { emit(Unit) }
-        ) { serverUrl, authToken, _ -> serverUrl to authToken }
-            .flatMapLatest { (serverUrl, authToken) ->
-                retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                    courseNotificationSettingsService.getNotificationSettings(
-                        courseId = courseId,
-                        serverUrl = serverUrl,
-                        authToken = authToken
-                    )
-                }
+        courseNotificationSettingsService
+            .performAutoReloadingNetworkCall(networkStatusProvider, requestReload) {
+                getNotificationSettings(courseId)
             }
-            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     val combinedState: StateFlow<DataState<Pair<NotificationSettingsInfo, NotificationSettings>>> =
         combine(settingsInfoState, settingsState) { infoState, settingsState ->
@@ -89,19 +64,17 @@ internal class CourseNotificationSettingsViewModel(
 
                 else -> DataState.Loading()
             }
-        }.stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
+        }.stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     fun selectPreset(presetId: Int) {
         viewModelScope.launch {
-            val serverUrl = serverConfigurationService.serverUrl.first()
-            val authToken = accountService.authToken.first()
             val info = settingsInfoState.first()
             val settings = settingsState.first()
 
             if (info is DataState.Success && settings is DataState.Success) {
                 localChanges.update { emptyMap() }
                 courseNotificationSettingsService
-                    .selectPreset(courseId, presetId, serverUrl, authToken)
+                    .selectPreset(courseId, presetId)
                 onRequestReload()
             }
         }
@@ -128,8 +101,6 @@ internal class CourseNotificationSettingsViewModel(
         type: CourseNotificationType,
         enabled: Boolean
     ) = viewModelScope.launch {
-        val (serverUrl, authToken) = serverConfigurationService.serverUrl.first() to
-                accountService.authToken.first()
         val info = settingsInfoState.first() as? DataState.Success ?: return@launch
         val settings = settingsState.first() as? DataState.Success ?: return@launch
 
@@ -148,14 +119,12 @@ internal class CourseNotificationSettingsViewModel(
             notificationTypeChannels = settings.data.notificationTypeChannels + (typeNumber to newChannels)
         )
         courseNotificationSettingsService
-            .updateSetting(courseId, setting, serverUrl, authToken)
+            .updateSetting(courseId, setting)
             .onSuccess {
                 onRequestReload()
             }
             .onFailure {
                 localChanges.update { it - typeNumber }
             }
-
-
     }
 }

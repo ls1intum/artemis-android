@@ -22,7 +22,7 @@
     <string name="settings_preset_description_all_activity">Receive all notifications to stay on track at all times.</string>
     <string name="settings_preset_description_ignore_all">Receive no notifications for the course.</string>
 
-    <string name="setting_disclaimer">These settings manage push notifications. To manage Email notifications, please use a browser.;
+    <string name="setting_disclaimer">These settings manage push notifications. To manage Email notifications, please use a browser.
 
 </string>
     <!-- Notification Type Titles -->

@@ -5,20 +5,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
@@ -41,11 +37,12 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Scaling
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.InfoMessageCard
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.R
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.course_notification_model.CourseNotificationType
-import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.course_notification_model.settingsTitle
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.course_notification_model.NotificationChannel
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.course_notification_model.NotificationSettingsPresetIdentifier
+import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.course_notification_model.settingsTitle
 
 @Composable
 internal fun CourseNotificationSettingsScreen(
@@ -59,9 +56,7 @@ internal fun CourseNotificationSettingsScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.notification_settings)) },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = null)
-                    }
+                    NavigationBackButton(onNavigateBack)
                 }
             )
         }
@@ -69,13 +64,14 @@ internal fun CourseNotificationSettingsScreen(
         BasicDataStateUi(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
+                .padding(padding)
+                .consumeWindowInsets(padding),
             dataState = state,
             loadingText = stringResource(R.string.loading_notification_settings),
             failureText = stringResource(R.string.failed_to_load_notification_settings),
             retryButtonText = stringResource(R.string.try_again),
             onClickRetry = viewModel::onRequestReload,
-        ) { (info, settings) ->
+        ) { (_, settings) ->
 
             val current = viewModel.currentSettings.collectAsState()
 
@@ -159,9 +155,7 @@ private fun PresetDropdown(
         modifier = Modifier.fillMaxWidth()
     ) {
         Card(
-            shape = MaterialTheme.shapes.medium,
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            shape = MaterialTheme.shapes.medium
         ) {
             ExposedDropdownMenuBox(
                 modifier = Modifier.fillMaxWidth(),
