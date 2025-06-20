@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,6 +39,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.Art
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.LinkBottomSheet
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.LinkBottomSheetState
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.LectureDeeplinks
+import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.LocalMarkdownTransformer
+import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.ImageFile
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.PdfFile
@@ -164,24 +167,29 @@ internal fun LectureScreen(
             )
         }
     ) { padding ->
-        LectureScreenBody(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = padding.calculateTopPadding())
-                .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top)),
-            lectureDataState = lectureDataState,
-            lectureChannel = lectureChannel,
-            lectureUnits = lectureUnits,
-            onViewExercise = onViewExercise,
-            overviewListState = overviewListState,
-            onRequestViewLink = { pendingOpenLink = it },
-            onRequestOpenAttachment = { pendingOpenFileAttachment = it },
-            onDisplaySetCompletedFailureDialog = {
-                displaySetCompletedFailureDialog = true
-            },
-            onReloadLecture = onReloadLecture,
-            onUpdateLectureUnitIsComplete = onUpdateLectureUnitIsComplete,
-        )
+        val markdownTransformer = rememberLectureArtemisMarkdownTransformer(serverUrl)
+        CompositionLocalProvider(LocalMarkdownTransformer provides markdownTransformer) {
+            ProvideMarkwon {
+                LectureScreenBody(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = padding.calculateTopPadding())
+                        .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top)),
+                    lectureDataState = lectureDataState,
+                    lectureChannel = lectureChannel,
+                    lectureUnits = lectureUnits,
+                    onViewExercise = onViewExercise,
+                    overviewListState = overviewListState,
+                    onRequestViewLink = { pendingOpenLink = it },
+                    onRequestOpenAttachment = { pendingOpenFileAttachment = it },
+                    onDisplaySetCompletedFailureDialog = {
+                        displaySetCompletedFailureDialog = true
+                    },
+                    onReloadLecture = onReloadLecture,
+                    onUpdateLectureUnitIsComplete = onUpdateLectureUnitIsComplete,
+                )
+            }
+        }
 
         val currentPendingOpenFileAttachment = pendingOpenFileAttachment
         if (currentPendingOpenFileAttachment != null) {
