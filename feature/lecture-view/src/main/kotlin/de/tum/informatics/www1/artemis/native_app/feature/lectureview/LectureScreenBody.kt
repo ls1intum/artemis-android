@@ -27,6 +27,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.DefaultTab
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
+import io.noties.markwon.LinkResolver
 import kotlinx.coroutines.Deferred
 
 @Composable
@@ -42,6 +43,7 @@ internal fun LectureScreenBody(
     onDisplaySetCompletedFailureDialog: () -> Unit,
     onReloadLecture: () -> Unit,
     onUpdateLectureUnitIsComplete: (lectureUnitId: Long, isCompleted: Boolean) -> Deferred<Boolean>,
+    linkResolver: LinkResolver
 ) {
     val selectedTabIndexState = rememberSaveable {
         mutableIntStateOf(0)
@@ -128,6 +130,7 @@ internal fun LectureScreenBody(
                         },
                         onRequestViewLink = onRequestViewLink,
                         onRequestOpenAttachment = onRequestOpenAttachment,
+                        linkResolver = linkResolver,
                         state = overviewListState
                     )
                 }

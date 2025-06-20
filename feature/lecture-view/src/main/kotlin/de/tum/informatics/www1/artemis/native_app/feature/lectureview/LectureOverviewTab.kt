@@ -60,6 +60,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture_un
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.common.getChannelIconImageVector
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
+import io.noties.markwon.LinkResolver
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 
@@ -78,6 +79,7 @@ internal fun LectureOverviewTab(
     onMarkAsCompleted: (lectureUnitId: Long, isCompleted: Boolean) -> Unit,
     onRequestViewLink: (String) -> Unit,
     onRequestOpenAttachment: (Attachment) -> Unit,
+    linkResolver: LinkResolver,
     state: LazyListState
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
@@ -123,7 +125,8 @@ internal fun LectureOverviewTab(
         description?.let {
             descriptionSection(
                 modifier = Modifier.fillMaxWidth(),
-                description = it
+                description = it,
+                linkResolver = linkResolver
             )
         }
 
@@ -186,7 +189,8 @@ private fun LazyListScope.dateSection(
 
 private fun LazyListScope.descriptionSection(
     modifier: Modifier,
-    description: String
+    description: String,
+    linkResolver: LinkResolver
 ) {
     stickyHeader {
         Text(
@@ -204,7 +208,8 @@ private fun LazyListScope.descriptionSection(
         MarkdownText(
             modifier = modifier.animateItem(),
             markdown = description,
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyMedium,
+            linkResolver = linkResolver
         )
         Spacer(modifier = Modifier.height(8.dp))
     }
