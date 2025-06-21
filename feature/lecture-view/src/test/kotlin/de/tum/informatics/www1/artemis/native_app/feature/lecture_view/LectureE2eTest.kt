@@ -35,7 +35,6 @@ import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_cr
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createTextLectureUnit
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.LectureScreen
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.LectureViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.lectureview.R
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.TEST_TAG_OVERVIEW_LIST
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.getLectureUnitTestTag
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lectureModule
@@ -148,10 +147,6 @@ class LectureE2eTest : BaseComposeTest() {
         }
 
         assertEquals(loadedAttachments.size, 3, "Expected 3 attachments")
-
-        composeTestRule
-            .onNodeWithText(context.getString(R.string.lecture_view_tab_attachments))
-            .performClick()
 
         attachments.forEach { attachment ->
             composeTestRule.onNodeWithText(attachment.name!!).assertExists()
