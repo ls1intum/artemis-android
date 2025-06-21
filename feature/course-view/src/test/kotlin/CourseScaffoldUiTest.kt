@@ -53,7 +53,8 @@ class CourseScaffoldUiTest : BaseComposeTest() {
                 onReloadCourse = {},
                 content = {},
                 searchConfiguration = CourseSearchConfiguration.Search("", "", {}),
-                collapsingContentState = CollapsingContentState()
+                collapsingContentState = CollapsingContentState(),
+                onNavigateNotificationSection = {}
             )
         }
     }

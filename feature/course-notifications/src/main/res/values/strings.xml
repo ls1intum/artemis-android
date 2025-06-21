@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notifications_title">Notifications</string>
+    <string name="settings">Settings</string>
+    <string name="no_notifications">No notifications</string>
+    <string name="communication">Communication</string>
+    <string name="general">General</string>
+    <string name="notification_presets">Notification Presets</string>
+    <string name="notification_settings">Notification Settings</string>
+    <string name="error">Error</string>
+    <string name="ok">OK</string>
+
+    <!-- Notification Preset Titles -->
+    <string name="settings_preset_custom">Custom</string>
+    <string name="settings_preset_default">Default</string>
+    <string name="settings_preset_all_activity">All Activity</string>
+    <string name="settings_preset_ignore_all">Ignore All</string>
+
+    <!-- Notification Preset Descriptions -->
+    <string name="settings_preset_description_custom">Set the settings to your specific needs.</string>
+    <string name="settings_preset_description_default">Receive only essential notifications about the course.</string>
+    <string name="settings_preset_description_all_activity">Receive all notifications to stay on track at all times.</string>
+    <string name="settings_preset_description_ignore_all">Receive no notifications for the course.</string>
+
+    <string name="setting_disclaimer">These settings manage push notifications. To manage Email notifications, please use a browser.
+
+</string>
+    <!-- Notification Type Titles -->
+    <string name="add_channel_settings_name">Added to Channel</string>
+    <string name="delete_channel_settings_name">Channel Deleted</string>
+    <string name="new_announcement_settings_name">New Announcement</string>
+    <string name="new_reply_settings_name">New Reply</string>
+    <string name="new_mention_settings_name">New Mention</string>
+    <string name="new_message_settings_name">New Message</string>
+    <string name="remove_channel_settings_name">Removed from Channel</string>
+    <string name="attachment_changed_settings_name">Attachment Changed</string>
+    <string name="tutorial_deregistered_settings_name">Tutorial Group Deregistered</string>
+    <string name="duplicate_test_settings_name">Duplicate Test Case</string>
+    <string name="exercise_assessed_settings_name">Exercise Assessed</string>
+    <string name="exercise_open_for_practice_settings_name">Exercise Open for Practice</string>
+    <string name="exercise_updated_settings_name">Exercise Updated</string>
+    <string name="new_similarity_settings_name">New Similarity Case</string>
+    <string name="exercise_released_settings_name">Exercise Released</string>
+    <string name="feedback_request_settings_name">New Feedback Request</string>
+    <string name="new_plagiarism_settings_name">New Plagiarism Case</string>
+    <string name="plagiarism_verdict_settings_name">Plagiarism Case Verdict</string>
+    <string name="build_update_settings_name">Build Update</string>
+    <string name="test_case_changed_settings_name">Test Cases Changed</string>
+    <string name="quiz_started_settings_name">Quiz Started</string>
+    <string name="tutorial_registered_settings_name">Tutorial Group Registered</string>
+    <string name="tutorial_assigned_settings_name">Tutorial Group Assigned</string>
+    <string name="tutorial_deleted_settings_name">Tutorial Group Deleted</string>
+    <string name="tutorial_unassigned_settings_name">Tutorial Group Unassigned</string>
+
+    <string name="loading_notification_settings">Loading notification settings…</string>
+    <string name="failed_to_load_notification_settings">Failed to load notification settings</string>
+    <string name="try_again">Try again</string>
+</resources> 
