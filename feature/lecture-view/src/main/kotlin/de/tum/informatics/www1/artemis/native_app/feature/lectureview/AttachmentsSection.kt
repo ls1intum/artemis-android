@@ -24,7 +24,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 
 @Composable
-internal fun AttachmentsTab(
+internal fun AttachmentsSection(
     modifier: Modifier,
     attachments: List<Attachment>,
     onClickFileAttachment: (Attachment) -> Unit,
