@@ -122,7 +122,8 @@ internal fun LectureOverviewTab(
             endDate = endDate,
             description = description,
             channel = channel,
-            lecture = lecture
+            lecture = lecture,
+            linkResolver = linkResolver
         )
 
         if (lectureUnits.isNotEmpty()) {
@@ -161,7 +162,8 @@ private fun LazyListScope.overviewSection(
     endDate: Instant?,
     description: String?,
     channel: ChannelChat?,
-    lecture: Lecture
+    lecture: Lecture,
+    linkResolver: LinkResolver
 ) {
     if (startDate == null && description == null && channel == null) {
         return
@@ -189,7 +191,8 @@ private fun LazyListScope.overviewSection(
     description?.let {
         descriptionSection(
             modifier = modifier.fillMaxWidth(),
-            description = it
+            description = it,
+            linkResolver = linkResolver
         )
     }
 
