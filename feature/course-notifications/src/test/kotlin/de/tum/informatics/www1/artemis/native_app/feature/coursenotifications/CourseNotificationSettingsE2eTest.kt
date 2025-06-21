@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.coursenotifications
 
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -23,15 +24,17 @@ class CourseNotificationSettingsScreenE2eTest : BaseCourseNotificationTest() {
         composeTestRule.onNodeWithTag("PresetDropdownTextField").assertExists()
     }
 
+    @OptIn(ExperimentalTestApi::class)
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can change notification toggle`() {
         setupUi()
 
         val tag = "NEW_EXERCISE_NOTIFICATION"
 
-        composeTestRule.waitUntil(DefaultTimeoutMillis) {
-            composeTestRule.onAllNodes(hasTestTag(tag)).fetchSemanticsNodes().isNotEmpty()
-        }
+        composeTestRule.waitUntilAtLeastOneExists(
+            hasTestTag(tag),
+            DefaultTestTimeoutMillis
+        )
 
         composeTestRule
             .onNodeWithTag(tag)
