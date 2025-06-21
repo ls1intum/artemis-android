@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.lectureview
+package de.tum.informatics.www1.artemis.native_app.core.ui.markdown
 
 import android.content.Context
 import android.webkit.MimeTypeMap
@@ -11,15 +11,15 @@ import io.ktor.http.appendPathSegments
 import java.io.File
 import java.net.URLEncoder
 
-object LectureUnitAttachmentUtil {
+object AttachmentUtil {
 
-    sealed class LectureAttachmentType(val mimeTypePattern: String) {
-        data object PDF : LectureAttachmentType("application/pdf")
-        data object Image : LectureAttachmentType("image/")
-        data object Other : LectureAttachmentType("*/*")
+    sealed class AttachmentType(val mimeTypePattern: String) {
+        data object PDF : AttachmentType("application/pdf")
+        data object Image : AttachmentType("image/")
+        data object Other : AttachmentType("*/*")
     }
 
-    internal fun buildOpenAttachmentLink(
+    fun buildOpenAttachmentLink(
         serverUrl: String,
         attachmentLink: String
     ): String {
@@ -31,7 +31,7 @@ object LectureUnitAttachmentUtil {
 
     // Necessary to encode the file name for the attachment URL, see
     // https://github.com/ls1intum/Artemis/blob/develop/src/main/webapp/app/shared/http/file.service.ts
-    internal fun createAttachmentFileUrl(downloadUrl: String, downloadName: String, encodeName: Boolean): String {
+    fun createAttachmentFileUrl(downloadUrl: String, downloadName: String, encodeName: Boolean): String {
         val downloadUrlComponents = downloadUrl.split("/")
         val extension = downloadUrlComponents.lastOrNull()?.substringAfterLast('.', "") ?: ""
         val restOfUrl = downloadUrlComponents.dropLast(1).joinToString("/")
@@ -43,20 +43,20 @@ object LectureUnitAttachmentUtil {
         return "$restOfUrl/student/$encodedDownloadName"
     }
 
-    internal fun detectAttachmentType(link: String?): LectureAttachmentType {
-        if (link.isNullOrEmpty()) return LectureAttachmentType.Other
+    fun detectAttachmentType(link: String?): AttachmentType {
+        if (link.isNullOrEmpty()) return AttachmentType.Other
 
-        val extension = MimeTypeMap.getFileExtensionFromUrl(link)?.lowercase() ?: return LectureAttachmentType.Other
-        val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension) ?: return LectureAttachmentType.Other
+        val extension = MimeTypeMap.getFileExtensionFromUrl(link)?.lowercase() ?: return AttachmentType.Other
+        val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension) ?: return AttachmentType.Other
 
         return when {
-            mimeType == LectureAttachmentType.PDF.mimeTypePattern -> LectureAttachmentType.PDF
-            mimeType.startsWith(LectureAttachmentType.Image.mimeTypePattern) -> LectureAttachmentType.Image
-            else -> LectureAttachmentType.Other
+            mimeType == AttachmentType.PDF.mimeTypePattern -> AttachmentType.PDF
+            mimeType.startsWith(AttachmentType.Image.mimeTypePattern) -> AttachmentType.Image
+            else -> AttachmentType.Other
         }
     }
 
-    internal fun downloadAttachment(
+    fun downloadAttachment(
         context: Context,
         artemisContext: ArtemisContext,
         name: String?,

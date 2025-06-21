@@ -25,28 +25,22 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.toRoute
-import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.authTokenOrEmptyString
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
-import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.AttachmentHandler
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
-import de.tum.informatics.www1.artemis.native_app.core.ui.collectArtemisContextAsState
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.AdaptiveNavigationIcon
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
-import de.tum.informatics.www1.artemis.native_app.core.ui.compose.LinkBottomSheet
-import de.tum.informatics.www1.artemis.native_app.core.ui.compose.LinkBottomSheetState
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.LectureDeeplinks
+import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.AttachmentUtil
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.LocalMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.LocalMarkwon
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownRenderFactory
-import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
-import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.ImageFile
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
-import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.PdfFile
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.coroutines.Deferred
@@ -138,7 +132,6 @@ internal fun LectureScreen(
 ) {
     val context = LocalContext.current
     val linkOpener = LocalLinkOpener.current
-    val artemisContext by LocalArtemisContextProvider.current.collectArtemisContextAsState()
 
     val lectureTitle = lectureDataState.bind<String?> { it.title }.orElse(null)
 
@@ -210,111 +203,24 @@ internal fun LectureScreen(
                 linkResolver = linkResolver
             )
 
+            AttachmentHandler(
+                url = pendingOpenFileAttachmentByUrl,
+                onDismiss = { pendingOpenFileAttachmentByUrl = null }
+            )
+
             val currentPendingOpenFileAttachment = pendingOpenFileAttachment
             if (currentPendingOpenFileAttachment != null) {
                 val fileName = currentPendingOpenFileAttachment.name.orEmpty()
                 val link = currentPendingOpenFileAttachment.link.orEmpty()
-                val type = LectureUnitAttachmentUtil.detectAttachmentType(link)
 
-                val url = LectureUnitAttachmentUtil.buildOpenAttachmentLink(serverUrl, link)
+                val url = AttachmentUtil.buildOpenAttachmentLink(serverUrl, link)
                 val formattedUrl =
-                    LectureUnitAttachmentUtil.createAttachmentFileUrl(url, fileName, true)
+                    AttachmentUtil.createAttachmentFileUrl(url, fileName, true)
 
-                when (type) {
-                    is LectureUnitAttachmentUtil.LectureAttachmentType.PDF -> {
-                        val pdfFile = PdfFile(
-                            formattedUrl,
-                            artemisContext.authTokenOrEmptyString,
-                            fileName
-                        )
-                        LinkBottomSheet(
-                            modifier = Modifier.fillMaxSize(),
-                            state = LinkBottomSheetState.PDFVIEWSTATE(pdfFile),
-                            onDismissRequest = { pendingOpenFileAttachment = null }
-                        )
-                    }
-
-                    is LectureUnitAttachmentUtil.LectureAttachmentType.Image -> {
-                        val imageFile = ImageFile(
-                            formattedUrl,
-                            artemisContext.authTokenOrEmptyString,
-                            fileName
-                        )
-                        LinkBottomSheet(
-                            modifier = Modifier.fillMaxSize(),
-                            state = LinkBottomSheetState.IMAGEVIEWSTATE(imageFile),
-                            onDismissRequest = { pendingOpenFileAttachment = null }
-                        )
-                    }
-
-                    is LectureUnitAttachmentUtil.LectureAttachmentType.Other -> {
-                        DownloadPendingAttachmentAlertDialog(
-                            onDismissRequest = { pendingOpenFileAttachment = null },
-                            onRequestDownloadFile = {
-                                LectureUnitAttachmentUtil.downloadAttachment(
-                                    context = context,
-                                    artemisContext = artemisContext,
-                                    link = formattedUrl,
-                                    name = currentPendingOpenFileAttachment.name
-                                )
-                                pendingOpenFileAttachment = null
-                            }
-                        )
-                    }
-                }
-            }
-
-            val currentPendingOpenFileAttachmentByUrl = pendingOpenFileAttachmentByUrl
-            if (currentPendingOpenFileAttachmentByUrl != null) {
-                val fileName =
-                    currentPendingOpenFileAttachmentByUrl.substringAfterLast("/")
-                val type =
-                    LectureUnitAttachmentUtil.detectAttachmentType(
-                        currentPendingOpenFileAttachmentByUrl
-                    )
-
-                when (type) {
-                    is LectureUnitAttachmentUtil.LectureAttachmentType.PDF -> {
-                        val pdfFile = PdfFile(
-                            currentPendingOpenFileAttachmentByUrl,
-                            artemisContext.authTokenOrEmptyString,
-                            fileName
-                        )
-                        LinkBottomSheet(
-                            modifier = Modifier.fillMaxSize(),
-                            state = LinkBottomSheetState.PDFVIEWSTATE(pdfFile),
-                            onDismissRequest = { pendingOpenFileAttachmentByUrl = null }
-                        )
-                    }
-
-                    is LectureUnitAttachmentUtil.LectureAttachmentType.Image -> {
-                        val imageFile = ImageFile(
-                            currentPendingOpenFileAttachmentByUrl,
-                            artemisContext.authTokenOrEmptyString,
-                            fileName
-                        )
-                        LinkBottomSheet(
-                            modifier = Modifier.fillMaxSize(),
-                            state = LinkBottomSheetState.IMAGEVIEWSTATE(imageFile),
-                            onDismissRequest = { pendingOpenFileAttachmentByUrl = null }
-                        )
-                    }
-
-                    is LectureUnitAttachmentUtil.LectureAttachmentType.Other -> {
-                        DownloadPendingAttachmentAlertDialog(
-                            onDismissRequest = { pendingOpenFileAttachmentByUrl = null },
-                            onRequestDownloadFile = {
-                                LectureUnitAttachmentUtil.downloadAttachment(
-                                    context = context,
-                                    artemisContext = artemisContext,
-                                    link = currentPendingOpenFileAttachmentByUrl,
-                                    name = fileName
-                                )
-                                pendingOpenFileAttachmentByUrl = null
-                            }
-                        )
-                    }
-                }
+                AttachmentHandler(
+                    url = formattedUrl,
+                    onDismiss = { pendingOpenFileAttachment = null }
+                )
             }
 
             if (pendingOpenLink != null) {
@@ -346,19 +252,4 @@ internal fun LectureScreen(
             }
         }
     }
-}
-
-@Composable
-private fun DownloadPendingAttachmentAlertDialog(
-    onDismissRequest: () -> Unit,
-    onRequestDownloadFile: () -> Unit
-) {
-    TextAlertDialog(
-        title = stringResource(id = R.string.lecture_view_open_file_attachment_dialog_title),
-        text = stringResource(id = R.string.lecture_view_open_file_attachment_dialog_message),
-        confirmButtonText = stringResource(id = R.string.lecture_view_open_file_attachment_dialog_positive),
-        dismissButtonText = stringResource(id = R.string.lecture_view_open_file_attachment_dialog_negative),
-        onPressPositiveButton = onRequestDownloadFile,
-        onDismissRequest = onDismissRequest
-    )
 }
