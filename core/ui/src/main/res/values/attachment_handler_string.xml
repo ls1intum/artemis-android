@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="download_attachment_dialog_title">Download File?</string>
+    <string name="download_attachment_dialog_message">This file cannot be viewed. Do you want to download it instead?</string>
+    <string name="download_file_attachment_dialog_positive">Download</string>
+    <string name="download__file_attachment_dialog_negative">Cancel</string>
+</resources>
