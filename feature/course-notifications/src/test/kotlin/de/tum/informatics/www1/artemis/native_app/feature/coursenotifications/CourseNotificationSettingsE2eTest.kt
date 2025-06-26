@@ -29,7 +29,7 @@ class CourseNotificationSettingsScreenE2eTest : BaseCourseNotificationTest() {
     fun `can change notification toggle`() {
         setupUi()
 
-        val tag = "NEW_EXERCISE_NOTIFICATION"
+        val tag = "NEW_POST_NOTIFICATION"
 
         composeTestRule.waitUntilAtLeastOneExists(
             hasTestTag(tag),
