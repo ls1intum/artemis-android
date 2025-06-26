@@ -102,7 +102,8 @@ fun `Metis - Conversation Overview`() {
             updateSelectedCourseTab = {},
             onNavigateBack = {},
             onReloadCourse = {},
-            collapsingContentState = CollapsingContentState()
+            collapsingContentState = CollapsingContentState(),
+            onNavigateNotificationSection = {},
         ) {
             ConversationOverviewBody(
                 modifier = Modifier.fillMaxSize(),

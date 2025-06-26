@@ -65,13 +65,14 @@ abstract class BaseCourseTest : BaseComposeTest() {
                     viewModel = viewModel,
                     courseId = course.id!!,
                     onNavigateToExercise = {},
-                    onNavigateToExerciseResultView = {},
-                    onNavigateToTextExerciseParticipation = { _, _ -> },
-                    onParticipateInQuiz = { _, _ -> },
-                    onClickViewQuizResults = { _, _ -> },
+                    onNavigateToExerciseResultView = { _: Long -> },
+                    onNavigateToTextExerciseParticipation = { _: Long, _: Long -> },
+                    onParticipateInQuiz = { _: Long, _: Boolean -> },
+                    onClickViewQuizResults = { _: Long, _: Long -> },
                     onNavigateToLecture = {},
                     onNavigateToFaq = {},
-                    onNavigateBack = {}
+                    onNavigateBack = {},
+                    onNavigateNotificationSection = { _: Long -> }
                 )
             }
         }
