@@ -197,7 +197,14 @@ val Exercise.isStartExerciseAvailable: Flow<Boolean>
 private val Exercise.currentUserScore: Float?
     get() = studentParticipations
         .orEmpty()
-        .firstOrNull()?.results?.maxBy { it.completionDate ?: Instant.fromEpochSeconds(0L) }
+        .flatMap { participation ->
+            participation.submissions.orEmpty()
+                .flatMap { submission ->
+                    submission.results.orEmpty()
+                }
+        }
+        .filter { it.rated == true }
+        .maxByOrNull { it.completionDate ?: Instant.fromEpochSeconds(0L) }
         ?.score
 
 val Exercise.currentUserPoints: Float

@@ -1,7 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.exercise
 
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
@@ -34,6 +33,8 @@ fun ExerciseActionButtons(
     val latestParticipation = exercise.getSpecificStudentParticipation(false)
     val isStartExerciseAvailable = exercise.isStartExerciseAvailable.collectAsState(initial = false).value
 
+    Log.d("ExerciseActionButtons", "isStartExerciseAvailable for exercise ${exercise.id}: $isStartExerciseAvailable")
+
     if (exercise is TextExercise) {
         TextExerciseButtons(
             modifier = modifier,
@@ -57,12 +58,11 @@ fun ExerciseActionButtons(
 
     if (templateStatus != null) {
         if (templateStatus is ResultTemplateStatus.WithResult) {
-            Button(
+            ArtemisButton(
                 modifier = modifier,
-                onClick = if (exercise is QuizExercise) actions.onClickViewQuizResults else actions.onClickViewResult
-            ) {
-                Text(text = stringResource(id = R.string.exercise_actions_view_result_button))
-            }
+                onClick = if (exercise is QuizExercise) actions.onClickViewQuizResults else actions.onClickViewResult,
+                text = stringResource(id = R.string.exercise_actions_view_result_button)
+            )
         }
     }
 }
@@ -104,7 +104,7 @@ private fun TextExerciseButtons(
             }
 
             Participation.InitializationState.FINISHED -> {
-                if (latestParticipation.results.isNullOrEmpty() || !showResult) {
+                if (latestParticipation.submissions.isNullOrEmpty() || !showResult) {
                     ArtemisButton(
                         modifier = modifier,
                         onClick = {

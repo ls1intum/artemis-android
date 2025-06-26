@@ -39,8 +39,12 @@ fun ParticipationStatusUi(
 
     val participation =
         remember(exercise) { exercise.getSpecificStudentParticipation(showUngradedResults) }
-    val result = if (showUngradedResults) participation?.results.orEmpty()
-        .first() else participation?.results?.firstOrNull { it.rated == true }
+    val result = if (showUngradedResults) participation
+        ?.submissions
+        ?.firstOrNull()?.results.orEmpty()
+    else participation
+        ?.submissions
+        ?.firstOrNull()?.results?.filter { it.rated == true }?.sortedBy { it.completionDate }
 
     val length = if (isChip) TextLength.Short else TextLength.Full
     val textStyle =  if (isChip)  MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)

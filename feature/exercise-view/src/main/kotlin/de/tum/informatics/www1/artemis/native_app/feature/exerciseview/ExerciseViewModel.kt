@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.plus
+import kotlinx.datetime.Instant
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -99,11 +100,8 @@ internal class ExerciseViewModel(
     val latestResultDataState: StateFlow<DataState<Result?>> =
         exerciseDataState.map { exerciseData ->
             exerciseData.bind { exercise ->
-                val participation =
-                    exercise.getSpecificStudentParticipation(false)
-
-                participation?.results.orEmpty().sortedByDescending { it.completionDate }
-                    .firstOrNull()
+                val participation = exercise.getSpecificStudentParticipation(false)
+                participation?.findLatestRatedResult()
             }
         }
             .flowOn(coroutineContext)
@@ -136,5 +134,20 @@ internal class ExerciseViewModel(
                 .bind { it.id ?: 0L }
                 .orNull()
         }
+    }
+
+    private fun Participation.findLatestRatedResult(): Result? {
+        return submissions
+            ?.flatMap { submission ->
+                submission.results
+                    ?.filter { it.rated == true }
+                    ?.map { it to (it.completionDate ?: Instant.fromEpochSeconds(0L)) }
+                    ?: emptyList()
+            }
+            ?.maxByOrNull { it.second }
+            ?.first
+            ?: results.orEmpty()
+                .filter { it.rated == true }
+                .maxByOrNull { it.completionDate ?: Instant.fromEpochSeconds(0L) }
     }
 }
