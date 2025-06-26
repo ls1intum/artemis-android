@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.exercise
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
@@ -32,8 +31,6 @@ fun ExerciseActionButtons(
 
     val latestParticipation = exercise.getSpecificStudentParticipation(false)
     val isStartExerciseAvailable = exercise.isStartExerciseAvailable.collectAsState(initial = false).value
-
-    Log.d("ExerciseActionButtons", "isStartExerciseAvailable for exercise ${exercise.id}: $isStartExerciseAvailable")
 
     if (exercise is TextExercise) {
         TextExerciseButtons(

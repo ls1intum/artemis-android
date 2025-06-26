@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.exerciseview.viewresult
 
-import android.util.Log
 import android.webkit.WebView
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
@@ -66,8 +65,6 @@ internal fun ViewResultScreen(
                     resultId = result?.id ?: return@ProvideDefaultExerciseTemplateStatus,
                     templateStatus = resultTemplateStatus ?: return@ProvideDefaultExerciseTemplateStatus
                 )
-
-                Log.d("ViewResultScreen", "Generated feedback URL: ${webViewState.content.getCurrentUrl()}")
 
                 var webView: WebView? by remember { mutableStateOf(null) }
 
