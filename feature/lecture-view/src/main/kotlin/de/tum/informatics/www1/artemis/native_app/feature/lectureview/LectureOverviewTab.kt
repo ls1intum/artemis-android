@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -61,6 +62,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture_un
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.common.getChannelIconImageVector
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
+import io.noties.markwon.LinkResolver
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 
@@ -80,6 +82,7 @@ internal fun LectureOverviewTab(
     onMarkAsCompleted: (lectureUnitId: Long, isCompleted: Boolean) -> Unit,
     onRequestViewLink: (String) -> Unit,
     onRequestOpenAttachment: (Attachment) -> Unit,
+    linkResolver: LinkResolver,
     state: LazyListState
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
@@ -120,7 +123,8 @@ internal fun LectureOverviewTab(
             endDate = endDate,
             description = description,
             channel = channel,
-            lecture = lecture
+            lecture = lecture,
+            linkResolver = linkResolver
         )
 
         if (lectureUnits.isNotEmpty()) {
@@ -159,7 +163,8 @@ private fun LazyListScope.overviewSection(
     endDate: Instant?,
     description: String?,
     channel: ChannelChat?,
-    lecture: Lecture
+    lecture: Lecture,
+    linkResolver: LinkResolver
 ) {
     if (startDate == null && description == null && channel == null) {
         return
@@ -187,7 +192,8 @@ private fun LazyListScope.overviewSection(
     description?.let {
         descriptionSection(
             modifier = modifier.fillMaxWidth(),
-            description = it
+            description = it,
+            linkResolver = linkResolver
         )
     }
 
@@ -199,7 +205,6 @@ private fun LazyListScope.overviewSection(
         )
     }
 }
-
 
 private fun LazyListScope.dateSection(
     modifier: Modifier,
@@ -235,7 +240,8 @@ private fun LazyListScope.dateSection(
 
 private fun LazyListScope.descriptionSection(
     modifier: Modifier,
-    description: String
+    description: String,
+    linkResolver: LinkResolver
 ) {
     stickyHeader {
         Text(
@@ -253,7 +259,8 @@ private fun LazyListScope.descriptionSection(
         MarkdownText(
             modifier = modifier.animateItem(),
             markdown = description,
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyMedium,
+            linkResolver = linkResolver
         )
         Spacer(modifier = Modifier.height(8.dp))
     }
@@ -410,7 +417,8 @@ private fun LectureUnitBottomSheetContent(
     onRequestViewLink: (String) -> Unit,
     onRequestOpenAttachment: (Attachment) -> Unit,
 ) {
-    val childModifier = Modifier.fillMaxWidth()
+    val childModifier = Modifier.fillMaxWidth().navigationBarsPadding()
+
     Column(
         modifier = modifier
             .padding(8.dp)

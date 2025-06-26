@@ -20,7 +20,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -29,19 +33,26 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.toRoute
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.ui.AttachmentHandler
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
+import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.AdaptiveNavigationIcon
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.FaqDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.LocalMarkdownTransformer
+import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.LocalMarkwon
+import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownRenderFactory
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
-import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
 import de.tum.informatics.www1.artemis.native_app.feature.faq.R
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.Faq
+import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.FaqLinkResolver
 import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.rememberFaqArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.FaqCategoryChipFlowRow
+import io.noties.markwon.LinkResolver
 import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -87,7 +98,8 @@ fun FaqDetailContent(
             modifier = Modifier.fillMaxSize(),
             faqDataState = faq,
             onReloadRequest = viewModel::onRequestReload,
-            onSidebarToggle = onSidebarToggle
+            onSidebarToggle = onSidebarToggle,
+            serverUrl = serverUrl
         )
     }
 }
@@ -98,6 +110,7 @@ fun FaqDetailUi(
     faqDataState: DataState<Faq>,
     onReloadRequest: () -> Unit,
     onSidebarToggle: () -> Unit,
+    serverUrl: String
 ) {
     Scaffold(
         modifier = modifier,
@@ -124,15 +137,60 @@ fun FaqDetailUi(
             retryButtonText = stringResource(id = R.string.faq_loading_faq_try_again),
             onClickRetry = onReloadRequest
         ) { faq ->
-            ProvideMarkwon(
-                useOriginalImageSize = true
+
+            val context = LocalContext.current
+            val markdownTransformer = rememberFaqArtemisMarkdownTransformer(serverUrl)
+            val imageLoader = LocalArtemisImageProvider.current.rememberArtemisImageLoader()
+            val linkOpener = LocalLinkOpener.current
+
+            var pendingOpenFileAttachmentByUrl: String? by remember { mutableStateOf(null) }
+            var pendingOpenLink: String? by remember { mutableStateOf(null) }
+
+            val linkResolver = remember(serverUrl) {
+                FaqLinkResolver(
+                    serverUrl = serverUrl,
+                    onRequestOpenAttachment = { pendingOpenFileAttachmentByUrl = it },
+                    onRequestOpenLink = { pendingOpenLink = it }
+                )
+            }
+
+            val markwon = remember(linkResolver, imageLoader) {
+                MarkdownRenderFactory.create(context, imageLoader, linkResolver)
+            }
+
+            CompositionLocalProvider(
+                LocalMarkdownTransformer provides markdownTransformer,
+                LocalMarkwon provides markwon
             ) {
                 FaqDetail(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
                         .navigationBarsPadding(),
-                    faq = faq
+                    faq = faq,
+                    linkResolver = linkResolver
+                )
+            }
+
+            AttachmentHandler(
+                url = pendingOpenFileAttachmentByUrl,
+                onDismiss = { pendingOpenFileAttachmentByUrl = null }
+            )
+
+            if (pendingOpenLink != null) {
+                TextAlertDialog(
+                    title = stringResource(id = R.string.faq_open_link_dialog_title),
+                    text = stringResource(
+                        id = R.string.faq_open_link_dialog_message,
+                        pendingOpenLink.orEmpty()
+                    ),
+                    confirmButtonText = stringResource(id = R.string.faq_link_dialog_positive),
+                    dismissButtonText = stringResource(id = R.string.faq_link_dialog_negative),
+                    onPressPositiveButton = {
+                        linkOpener.openLink(pendingOpenLink.orEmpty())
+                        pendingOpenLink = null
+                    },
+                    onDismissRequest = { pendingOpenLink = null }
                 )
             }
         }
@@ -143,6 +201,7 @@ fun FaqDetailUi(
 private fun FaqDetail(
     modifier: Modifier = Modifier,
     faq: Faq,
+    linkResolver: LinkResolver
 ) {
     Column(
         modifier = modifier,
@@ -160,6 +219,7 @@ private fun FaqDetail(
         MarkdownText(
             markdown = faq.questionAnswer,
             style = MaterialTheme.typography.bodyLarge,
+            linkResolver = linkResolver
         )
 
         Spacer(modifier = Modifier
