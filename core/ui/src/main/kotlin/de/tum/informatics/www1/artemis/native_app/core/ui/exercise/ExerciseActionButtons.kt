@@ -104,7 +104,7 @@ private fun TextExerciseButtons(
             }
 
             Participation.InitializationState.FINISHED -> {
-                if (latestParticipation.submissions.isNullOrEmpty() || !showResult) {
+                if (latestParticipation.submissions?.first()?.results.isNullOrEmpty() || !showResult) {
                     ArtemisButton(
                         modifier = modifier,
                         onClick = {

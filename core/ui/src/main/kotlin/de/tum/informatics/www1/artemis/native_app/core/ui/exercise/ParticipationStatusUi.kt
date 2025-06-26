@@ -110,11 +110,6 @@ private fun getSubmissionResultStatusText(
             TextLength.Short -> R.string.exercise_exercise_missed_deadline_short
         }
 
-        notSubmitted -> when (length) {
-            TextLength.Full -> R.string.exercise_exercise_not_submitted
-            TextLength.Short -> R.string.exercise_status_dash
-        }
-
         participation?.initializationState == InitializationState.FINISHED -> when (length) {
             TextLength.Full -> R.string.exercise_user_submitted
             TextLength.Short -> R.string.exercise_user_submitted_short
@@ -128,6 +123,11 @@ private fun getSubmissionResultStatusText(
         exercise is QuizExercise && exercise.notStartedC -> when (length) {
             TextLength.Full -> R.string.exercise_quiz_not_started
             TextLength.Short -> R.string.exercise_not_yet_started
+        }
+
+        notSubmitted -> when (length) {
+            TextLength.Full -> R.string.exercise_exercise_not_submitted
+            TextLength.Short -> R.string.exercise_status_dash
         }
 
         else -> if (length == TextLength.Full) return null else R.string.exercise_status_dash
