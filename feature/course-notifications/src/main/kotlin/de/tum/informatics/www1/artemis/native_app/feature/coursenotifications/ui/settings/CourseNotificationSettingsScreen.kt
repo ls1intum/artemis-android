@@ -128,13 +128,13 @@ private fun NotificationSettingToggle(
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier
                     .weight(1f)
-                    .testTag(type.name)
+                    .testTag("${type.name}_LABEL")
             )
 
             Switch(
                 modifier = Modifier
                     .scale(Scaling.SWITCH)
-                    .testTag(type.name),
+                    .testTag("${type.name}_SWITCH"),
                 checked = localEnabled,
                 onCheckedChange = { new ->
                     localEnabled = new
