@@ -7,7 +7,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.ui.settings.CourseNotificationSettingsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.ui.settings.CourseNotificationSettingsViewModel
 import org.junit.Test
