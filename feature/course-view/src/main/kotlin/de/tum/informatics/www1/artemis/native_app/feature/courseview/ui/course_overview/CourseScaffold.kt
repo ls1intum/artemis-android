@@ -42,6 +42,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBack
 import de.tum.informatics.www1.artemis.native_app.core.ui.getArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
 import io.github.fornewid.placeholder.material3.placeholder
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NotificationButton
 
 @Composable
 internal fun CourseScaffold(
@@ -53,6 +54,7 @@ internal fun CourseScaffold(
     updateSelectedCourseTab: (CourseTab) -> Unit,
     onNavigateBack: () -> Unit,
     onReloadCourse: () -> Unit,
+    onNavigateNotificationSection: () -> Unit,
     content: @Composable () -> Unit
 ) {
     val layout = getArtemisAppLayout()
@@ -65,13 +67,15 @@ internal fun CourseScaffold(
                     searchConfiguration = searchConfiguration,
                     collapsingContentState = collapsingContentState,
                     onNavigateBack = onNavigateBack,
+                    onNavigateNotificationSection = onNavigateNotificationSection
                 )
             } else {
                 CourseTabletNavigation(
                     courseDataState = courseDataState,
                     isSelected = isCourseTabSelected,
                     onUpdateSelectedTab = updateSelectedCourseTab,
-                    onNavigateBack = onNavigateBack
+                    onNavigateBack = onNavigateBack,
+                    onNavigateNotificationSection = onNavigateNotificationSection
                 )
             }
         },
@@ -108,7 +112,8 @@ private fun CourseTopAppBar(
     courseDataState: DataState<Course>,
     searchConfiguration: CourseSearchConfiguration,
     collapsingContentState: CollapsingContentState,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateNotificationSection: () -> Unit
 ) {
     val courseTitle = courseDataState.bind<String?> { it.title }.orElse(null)
     var lineCount by remember { mutableIntStateOf(1) }
@@ -130,7 +135,8 @@ private fun CourseTopAppBar(
             collapsingContentState = collapsingContentState,
             lineCount = lineCount,
             updateQuery = searchConfiguration.onUpdateQuery,
-            navigationIcon = { NavigationBackButton(onNavigateBack) }
+            navigationIcon = { NavigationBackButton(onNavigateBack) },
+            notificationIcon = { NotificationButton (onNavigateNotificationSection) }
         )
     } else {
         ArtemisTopAppBar(

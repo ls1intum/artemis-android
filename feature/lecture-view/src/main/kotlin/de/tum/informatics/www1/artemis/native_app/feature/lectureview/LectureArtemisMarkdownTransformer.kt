@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.faq.ui
+package de.tum.informatics.www1.artemis.native_app.feature.lectureview
 
 import android.view.View
 import androidx.compose.runtime.Composable
@@ -10,15 +10,15 @@ import io.noties.markwon.LinkResolver
 
 
 @Composable
-fun rememberFaqArtemisMarkdownTransformer(serverUrl: String): FaqArtemisMarkdownTransformer {
+fun rememberLectureArtemisMarkdownTransformer(serverUrl: String): LectureArtemisMarkdownTransformer {
     return remember(serverUrl) {
         val strippedServerUrl = serverUrl.removeSuffix("/")
-        FaqArtemisMarkdownTransformer(strippedServerUrl)
+        LectureArtemisMarkdownTransformer(strippedServerUrl)
     }
 }
 
 
-class FaqArtemisMarkdownTransformer(
+class LectureArtemisMarkdownTransformer(
     private val serverUrl: String
 ) : ArtemisMarkdownTransformer() {
 
@@ -36,17 +36,17 @@ class FaqArtemisMarkdownTransformer(
 }
 
 /**
- * Link resolver for markdown text in the faq view.
+ * Link resolver for markdown text in the lecture view.
  * If the link is a protected file, it will be opened in a bottom sheet.
  * Otherwise, it will be opened in a browser.
  */
-class FaqLinkResolver(
+class LectureLinkResolver(
     private val serverUrl: String,
     private val onRequestOpenAttachment: (String) -> Unit,
     private val onRequestOpenLink: (String) -> Unit
 ) : LinkResolver {
     override fun resolve(view: View, link: String) {
-        if (link.startsWith(serverUrl) && link.contains("/api/core/files/markdown")) {
+        if (link.startsWith(serverUrl) && (link.contains("/api/files/attachments/lecture") || link.contains("/api/core/files/markdown"))) {
             onRequestOpenAttachment(link)
         } else {
             onRequestOpenLink(link)
