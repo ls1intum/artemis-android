@@ -130,11 +130,19 @@ fun computeTemplateStatus(
             }
             .onStart { emit(false) }
 
-
-    val chosenResult: Result? =
-        result
-            ?: participation.results.orEmpty()
-                .maxByOrNull { it.completionDate ?: Instant.fromEpochSeconds(0L) }
+    val chosenResult: Result? = result
+        ?: participation.submissions
+            ?.flatMap { submission ->
+                submission.results
+                    ?.filter { it.rated == true }
+                    ?.map { it to (it.completionDate ?: Instant.fromEpochSeconds(0L)) }
+                    ?: emptyList()
+            }
+            ?.maxByOrNull { it.second }
+            ?.first
+        ?: participation.results.orEmpty()
+            .filter { it.rated == true }
+            .maxByOrNull { it.completionDate ?: Instant.fromEpochSeconds(0L) }
 
 
     return isBuildingFlow.flatMapLatest { isBuilding ->
@@ -155,7 +163,7 @@ private fun evaluateTemplateStatus(
 
     // If there is a problem, it has priority, and we show that instead
     if (missingResultInfo !== MissingResultInformation.NONE) {
-        return flowOf(ResultTemplateStatus.Missing);
+        return flowOf(ResultTemplateStatus.Missing)
     }
 
     // Evaluate status for modeling, text and file-upload exercises
