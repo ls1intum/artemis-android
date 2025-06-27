@@ -91,7 +91,7 @@ private fun getSubmissionResultStatusText(
         if (exercise is QuizExercise) exercise.isUninitializedC else !isAfterDueDate && participation == null
 
     val notSubmitted =
-        !isAfterDueDate && participation != null && participation.submissions.orEmpty()
+        isAfterDueDate && participation != null && participation.submissions.orEmpty()
             .isEmpty()
 
     val id = when {
