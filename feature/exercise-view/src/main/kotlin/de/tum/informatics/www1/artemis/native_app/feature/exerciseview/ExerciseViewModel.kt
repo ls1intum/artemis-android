@@ -12,6 +12,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
 import de.tum.informatics.www1.artemis.native_app.core.ui.ReloadableViewModel
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.util.ExerciseParticipationLastRatedUtil
 import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.network.ChannelService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
@@ -31,7 +32,6 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.plus
-import kotlinx.datetime.Instant
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -101,7 +101,7 @@ internal class ExerciseViewModel(
         exerciseDataState.map { exerciseData ->
             exerciseData.bind { exercise ->
                 val participation = exercise.getSpecificStudentParticipation(false)
-                participation?.findLatestRatedResult()
+                ExerciseParticipationLastRatedUtil.findLatestRatedResult(participation)
             }
         }
             .flowOn(coroutineContext)
@@ -136,18 +136,4 @@ internal class ExerciseViewModel(
         }
     }
 
-    private fun Participation.findLatestRatedResult(): Result? {
-        return submissions
-            ?.flatMap { submission ->
-                submission.results
-                    ?.filter { it.rated == true }
-                    ?.map { it to (it.completionDate ?: Instant.fromEpochSeconds(0L)) }
-                    ?: emptyList()
-            }
-            ?.maxByOrNull { it.second }
-            ?.first
-            ?: results.orEmpty()
-                .filter { it.rated == true }
-                .maxByOrNull { it.completionDate ?: Instant.fromEpochSeconds(0L) }
-    }
 }
