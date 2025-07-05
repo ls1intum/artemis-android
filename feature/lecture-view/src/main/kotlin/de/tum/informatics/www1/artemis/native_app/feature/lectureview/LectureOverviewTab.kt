@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -60,6 +62,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture_un
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.common.getChannelIconImageVector
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
+import io.noties.markwon.LinkResolver
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 
@@ -74,10 +77,12 @@ internal fun LectureOverviewTab(
     lecture: Lecture,
     lectureChannel: DataState<ChannelChat>,
     lectureUnits: List<LectureUnitData>,
+    attachments: List<Attachment>,
     onViewExercise: (exerciseId: Long) -> Unit,
     onMarkAsCompleted: (lectureUnitId: Long, isCompleted: Boolean) -> Unit,
     onRequestViewLink: (String) -> Unit,
     onRequestOpenAttachment: (Attachment) -> Unit,
+    linkResolver: LinkResolver,
     state: LazyListState
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
@@ -112,20 +117,15 @@ internal fun LectureOverviewTab(
         state = state,
         contentPadding = Spacings.calculateContentPaddingValues()
     ) {
-        startDate?.let {
-            dateSection(
-                modifier = Modifier.fillMaxWidth(),
-                startDate = it,
-                endDate = endDate
-            )
-        }
-
-        description?.let {
-            descriptionSection(
-                modifier = Modifier.fillMaxWidth(),
-                description = it
-            )
-        }
+        overviewSection(
+            modifier = Modifier,
+            startDate = startDate,
+            endDate = endDate,
+            description = description,
+            channel = channel,
+            lecture = lecture,
+            linkResolver = linkResolver
+        )
 
         if (lectureUnits.isNotEmpty()) {
             lectureUnitSection(
@@ -142,13 +142,67 @@ internal fun LectureOverviewTab(
             )
         }
 
-        channel?.let {
-            channelSection(
-                modifier = Modifier.fillMaxWidth(),
-                channel = channel,
-                lecture = lecture
+        if (attachments.isNotEmpty()) {
+            attachmentsSection(
+                modifier = Modifier.fillMaxSize(),
+                attachments = lecture.attachments,
+                onClickFileAttachment = onRequestOpenAttachment,
+                onClickOpenLinkAttachment = {
+                    onRequestViewLink(
+                        it.link ?: return@attachmentsSection
+                    )
+                }
             )
         }
+    }
+}
+
+private fun LazyListScope.overviewSection(
+    modifier: Modifier,
+    startDate: Instant?,
+    endDate: Instant?,
+    description: String?,
+    channel: ChannelChat?,
+    lecture: Lecture,
+    linkResolver: LinkResolver
+) {
+    if (startDate == null && description == null && channel == null) {
+        return
+    }
+
+    stickyHeader {
+        Text(
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.background),
+            text = stringResource(id = R.string.lecture_view_overview_section_title),
+            style = MaterialTheme.typography.headlineSmall.copy(
+                fontWeight = FontWeight.Bold
+            )
+        )
+    }
+
+    startDate?.let {
+        dateSection(
+            modifier = modifier.fillMaxWidth(),
+            startDate = it,
+            endDate = endDate
+        )
+    }
+
+    description?.let {
+        descriptionSection(
+            modifier = modifier.fillMaxWidth(),
+            description = it,
+            linkResolver = linkResolver
+        )
+    }
+
+    channel?.let {
+        channelSection(
+            modifier = modifier.fillMaxWidth(),
+            channel = it,
+            lecture = lecture
+        )
     }
 }
 
@@ -186,7 +240,8 @@ private fun LazyListScope.dateSection(
 
 private fun LazyListScope.descriptionSection(
     modifier: Modifier,
-    description: String
+    description: String,
+    linkResolver: LinkResolver
 ) {
     stickyHeader {
         Text(
@@ -204,7 +259,8 @@ private fun LazyListScope.descriptionSection(
         MarkdownText(
             modifier = modifier.animateItem(),
             markdown = description,
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyMedium,
+            linkResolver = linkResolver
         )
         Spacer(modifier = Modifier.height(8.dp))
     }
@@ -248,6 +304,7 @@ private fun LazyListScope.channelSection(
         ) {
             Row(
                 modifier = Modifier
+                    .background(MaterialTheme.colorScheme.surfaceContainer)
                     .fillMaxWidth()
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -280,6 +337,38 @@ private fun LazyListScope.channelSection(
     }
 }
 
+private fun LazyListScope.attachmentsSection(
+    modifier: Modifier,
+    attachments: List<Attachment>,
+    onClickFileAttachment: (Attachment) -> Unit,
+    onClickOpenLinkAttachment: (Attachment) -> Unit
+) {
+    if (attachments.isEmpty()) {
+       return
+    }
+
+    stickyHeader {
+        Text(
+            modifier = modifier
+                .background(MaterialTheme.colorScheme.background)
+                .padding(vertical = 16.dp),
+            text = stringResource(id = R.string.lecture_view_tab_attachments),
+            style = MaterialTheme.typography.headlineSmall.copy(
+                fontWeight = FontWeight.Bold
+            )
+        )
+    }
+
+    item {
+        AttachmentsSection(
+            modifier = Modifier.fillMaxSize(),
+            attachments = attachments,
+            onClickFileAttachment = onClickFileAttachment,
+            onClickOpenLinkAttachment = onClickOpenLinkAttachment
+        )
+    }
+}
+
 private fun LazyListScope.lectureUnitSection(
     modifier: Modifier,
     lectureUnits: List<LectureUnitData>,
@@ -289,10 +378,12 @@ private fun LazyListScope.lectureUnitSection(
 ) {
     stickyHeader {
         Text(
-            modifier = modifier.background(MaterialTheme.colorScheme.background),
+            modifier = modifier
+                .padding(vertical = 16.dp)
+                .background(MaterialTheme.colorScheme.background),
             text = stringResource(id = R.string.lecture_view_overview_section_lecture_units),
-            style = MaterialTheme.typography.titleMedium.copy(
-                fontWeight = FontWeight.Medium
+            style = MaterialTheme.typography.headlineSmall.copy(
+                fontWeight = FontWeight.Bold
             )
         )
     }
@@ -326,7 +417,8 @@ private fun LectureUnitBottomSheetContent(
     onRequestViewLink: (String) -> Unit,
     onRequestOpenAttachment: (Attachment) -> Unit,
 ) {
-    val childModifier = Modifier.fillMaxWidth()
+    val childModifier = Modifier.fillMaxWidth().navigationBarsPadding()
+
     Column(
         modifier = modifier
             .padding(8.dp)

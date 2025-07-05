@@ -13,6 +13,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participat
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.InstructorSubmission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.TestSubmission
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.util.ExerciseParticipationLastRatedUtil
 import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -130,12 +131,7 @@ fun computeTemplateStatus(
             }
             .onStart { emit(false) }
 
-
-    val chosenResult: Result? =
-        result
-            ?: participation.results.orEmpty()
-                .maxByOrNull { it.completionDate ?: Instant.fromEpochSeconds(0L) }
-
+    val chosenResult: Result? = result ?: ExerciseParticipationLastRatedUtil.findLatestRatedResult(participation)
 
     return isBuildingFlow.flatMapLatest { isBuilding ->
         evaluateTemplateStatus(participation, exercise, chosenResult, isBuilding)
@@ -155,7 +151,7 @@ private fun evaluateTemplateStatus(
 
     // If there is a problem, it has priority, and we show that instead
     if (missingResultInfo !== MissingResultInformation.NONE) {
-        return flowOf(ResultTemplateStatus.Missing);
+        return flowOf(ResultTemplateStatus.Missing)
     }
 
     // Evaluate status for modeling, text and file-upload exercises

@@ -39,8 +39,13 @@ fun ParticipationStatusUi(
 
     val participation =
         remember(exercise) { exercise.getSpecificStudentParticipation(showUngradedResults) }
-    val result = if (showUngradedResults) participation?.results.orEmpty()
-        .first() else participation?.results?.firstOrNull { it.rated == true }
+    var result = participation
+        ?.submissions
+        ?.firstOrNull()?.results.orEmpty()
+
+    if (showUngradedResults) {
+        result = result.filter { it.rated == true }.sortedBy { it.completionDate }
+    }
 
     val length = if (isChip) TextLength.Short else TextLength.Full
     val textStyle =  if (isChip)  MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
@@ -87,7 +92,7 @@ private fun getSubmissionResultStatusText(
         if (exercise is QuizExercise) exercise.isUninitializedC else !isAfterDueDate && participation == null
 
     val notSubmitted =
-        !isAfterDueDate && participation != null && participation.submissions.orEmpty()
+        isAfterDueDate && participation != null && participation.submissions.orEmpty()
             .isEmpty()
 
     val id = when {
@@ -106,11 +111,6 @@ private fun getSubmissionResultStatusText(
             TextLength.Short -> R.string.exercise_exercise_missed_deadline_short
         }
 
-        notSubmitted -> when (length) {
-            TextLength.Full -> R.string.exercise_exercise_not_submitted
-            TextLength.Short -> R.string.exercise_status_dash
-        }
-
         participation?.initializationState == InitializationState.FINISHED -> when (length) {
             TextLength.Full -> R.string.exercise_user_submitted
             TextLength.Short -> R.string.exercise_user_submitted_short
@@ -124,6 +124,11 @@ private fun getSubmissionResultStatusText(
         exercise is QuizExercise && exercise.notStartedC -> when (length) {
             TextLength.Full -> R.string.exercise_quiz_not_started
             TextLength.Short -> R.string.exercise_not_yet_started
+        }
+
+        notSubmitted -> when (length) {
+            TextLength.Full -> R.string.exercise_exercise_not_submitted
+            TextLength.Short -> R.string.exercise_status_dash
         }
 
         else -> if (length == TextLength.Full) return null else R.string.exercise_status_dash

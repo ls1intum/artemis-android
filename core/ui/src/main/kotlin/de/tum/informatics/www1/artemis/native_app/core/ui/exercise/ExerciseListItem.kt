@@ -49,6 +49,7 @@ fun ExerciseListItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(IntrinsicSize.Min)
+                .background(MaterialTheme.colorScheme.surfaceContainer)
         ) {
             exercise.difficulty?.let { DifficultyRectangle(modifier = Modifier, difficulty = it) }
 

@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.login.instance_selection
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -68,7 +69,8 @@ fun InstanceSelectionBottomSheet(
         modifier = modifier.statusBarsPadding(),
         contentWindowInsets = { WindowInsets.statusBars },
         onDismissRequest = onDismiss,
-        sheetState = sheetState
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.background,
     ) {
         InstanceSelectionScreen(
             modifier = Modifier
@@ -149,6 +151,7 @@ private fun ArtemisInstanceGridCell(
     Card(modifier = modifier, onClick = onClick) {
         Row(
             modifier = Modifier
+                .background(MaterialTheme.colorScheme.surfaceContainer)
                 .fillMaxWidth()
                 .padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),

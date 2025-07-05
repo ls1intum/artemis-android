@@ -51,6 +51,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.CourseWithScore
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.latestParticipation
 import de.tum.informatics.www1.artemis.native_app.core.model.upcomingExercises
+import de.tum.informatics.www1.artemis.native_app.core.ui.ArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
@@ -60,6 +61,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.util.Cou
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.BackgroundColorBasedTextColor
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ExerciseDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.CoursePointsDecimalFormat
+import de.tum.informatics.www1.artemis.native_app.core.ui.getArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.CourseColors
 import java.text.DecimalFormat
 
@@ -128,9 +130,11 @@ fun CourseItem(
                 )
 
                 if (currentPoints > 0f) {
+                    val isTablet = getArtemisAppLayout() == ArtemisAppLayout.Tablet
+
                     Box(
                         modifier = Modifier
-                            .weight(0.5f)
+                            .width(if (isTablet) 150.dp else 120.dp)
                             .aspectRatio(1f)
                     ) {
                         CircularCourseProgress(

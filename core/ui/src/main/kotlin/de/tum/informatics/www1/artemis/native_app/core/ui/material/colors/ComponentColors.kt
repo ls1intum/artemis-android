@@ -22,7 +22,7 @@ object ComponentColors {
 
     object ArtemisTopAppBar {
         val background: Color
-            @Composable get() = MaterialTheme.colorScheme.surfaceContainer
+            @Composable get() = MaterialTheme.colorScheme.surface
         val searchBarShadow: Color
             @Composable get() = if(isSystemInDarkTheme()) Color.Black.copy(alpha = 0.6f) else Color.Black.copy(alpha = 0.35f)
     }

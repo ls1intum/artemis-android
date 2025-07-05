@@ -18,10 +18,11 @@ import kotlinx.coroutines.Deferred
 
 internal const val TEST_TAG_METIS_MODIFICATION_FAILURE_DIALOG = "TEST_TAG_METIS_MODIFICATION_FAILURE_DIALOG"
 
+typealias MetisModificationTask = Deferred<MetisModificationFailure?>
 
 @Composable
 fun MetisModificationTaskHandler(
-    metisModificationTask: Deferred<MetisModificationFailure?>?,
+    metisModificationTask: MetisModificationTask?,
     onTaskCompletion: (MetisModificationFailure?) -> Unit = {},
     onSuccess: () -> Unit = {}
 ) {

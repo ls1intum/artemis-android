@@ -11,8 +11,10 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -22,6 +24,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -39,6 +42,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBack
 import de.tum.informatics.www1.artemis.native_app.core.ui.getArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
 import io.github.fornewid.placeholder.material3.placeholder
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NotificationButton
 
 @Composable
 internal fun CourseScaffold(
@@ -50,6 +54,7 @@ internal fun CourseScaffold(
     updateSelectedCourseTab: (CourseTab) -> Unit,
     onNavigateBack: () -> Unit,
     onReloadCourse: () -> Unit,
+    onNavigateNotificationSection: () -> Unit,
     content: @Composable () -> Unit
 ) {
     val layout = getArtemisAppLayout()
@@ -62,13 +67,15 @@ internal fun CourseScaffold(
                     searchConfiguration = searchConfiguration,
                     collapsingContentState = collapsingContentState,
                     onNavigateBack = onNavigateBack,
+                    onNavigateNotificationSection = onNavigateNotificationSection
                 )
             } else {
                 CourseTabletNavigation(
                     courseDataState = courseDataState,
                     isSelected = isCourseTabSelected,
                     onUpdateSelectedTab = updateSelectedCourseTab,
-                    onNavigateBack = onNavigateBack
+                    onNavigateBack = onNavigateBack,
+                    onNavigateNotificationSection = onNavigateNotificationSection
                 )
             }
         },
@@ -105,7 +112,8 @@ private fun CourseTopAppBar(
     courseDataState: DataState<Course>,
     searchConfiguration: CourseSearchConfiguration,
     collapsingContentState: CollapsingContentState,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateNotificationSection: () -> Unit
 ) {
     val courseTitle = courseDataState.bind<String?> { it.title }.orElse(null)
     var lineCount by remember { mutableIntStateOf(1) }
@@ -127,7 +135,8 @@ private fun CourseTopAppBar(
             collapsingContentState = collapsingContentState,
             lineCount = lineCount,
             updateQuery = searchConfiguration.onUpdateQuery,
-            navigationIcon = { NavigationBackButton(onNavigateBack) }
+            navigationIcon = { NavigationBackButton(onNavigateBack) },
+            notificationIcon = { NotificationButton (onNavigateNotificationSection) }
         )
     } else {
         ArtemisTopAppBar(
@@ -171,7 +180,12 @@ private fun BottomNavigationBar(
                     },
                     onClick = {
                         onUpdateSelectedTab(navigationItem.route)
-                    }
+                    },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary,
+                        indicatorColor = Color.Transparent
+                    )
                 )
             }
         }

@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,6 +22,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NotificationButton
 
 @Composable
 fun CourseTabletNavigation(
@@ -28,7 +30,8 @@ fun CourseTabletNavigation(
     courseDataState: DataState<Course>,
     isSelected: (CourseTab) -> Boolean,
     onUpdateSelectedTab: (CourseTab) -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateNotificationSection: () -> Unit,
 ) {
     val navItems = getNavigationItems(courseDataState)
     val selectedIndex = navItems.indexOfFirst { isSelected(it.route) }.coerceAtLeast(0)
@@ -43,10 +46,12 @@ fun CourseTabletNavigation(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center
             ) {
+                Spacer( modifier = Modifier.weight(1f) )
+
                 Row(
                     modifier = Modifier
                         .background(
-                            color = MaterialTheme.colorScheme.background,
+                            color = MaterialTheme.colorScheme.surfaceContainer,
                             shape = RoundedCornerShape(24.dp)
                         )
                         .padding(horizontal = 4.dp, vertical = 4.dp),
@@ -60,7 +65,7 @@ fun CourseTabletNavigation(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(24.dp))
                                 .background(
-                                    if (selected) MaterialTheme.colorScheme.surfaceContainer else Color.Transparent
+                                    if (selected) MaterialTheme.colorScheme.background  else MaterialTheme.colorScheme.surfaceContainer
                                 )
                                 .clickable { onUpdateSelectedTab(item.route) }
                                 .padding(horizontal = 16.dp, vertical = 8.dp),
@@ -74,6 +79,10 @@ fun CourseTabletNavigation(
                         }
                     }
                 }
+
+                Spacer( modifier = Modifier.weight(1f) )
+
+                NotificationButton { onNavigateNotificationSection() }
             }
         }
     )

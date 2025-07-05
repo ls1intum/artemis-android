@@ -2,11 +2,8 @@ package de.tum.informatics.www1.artemis.native_app.feature.exerciseview.particip
 
 import android.webkit.WebView
 import androidx.annotation.StringRes
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -20,7 +17,6 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -44,7 +40,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.Art
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.ArtemisWebView
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.isInFuture
-import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.R
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.getProblemStatementWebViewState
 
@@ -65,9 +60,6 @@ internal fun TextExerciseParticipationScreen(
     val participation = viewModel.initialParticipation.collectAsState().value
 
     var displayDiscardChangesDialog by rememberSaveable { mutableStateOf(false) }
-
-    val displayProblemStatementOnSide = getWindowSizeClass()
-        .widthSizeClass >= WindowWidthSizeClass.Medium
 
     val webViewState: WebViewState? = getProblemStatementWebViewState(
         serverUrl = artemisContext.serverUrl,
@@ -141,41 +133,20 @@ internal fun TextExerciseParticipationScreen(
                     .fillMaxSize()
                     .padding(padding)
             ) {
-                if (displayProblemStatementOnSide) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        participationUi(
-                            Modifier
-                                .fillMaxHeight()
-                                .weight(1f)
-                        )
+                val childModifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 8.dp)
+                    .padding(bottom = 8.dp)
 
-                        problemStatementUi(
-                            Modifier
-                                .fillMaxHeight()
-                                .weight(1f)
-                        )
+                TabView(
+                    modifier = Modifier.fillMaxSize(),
+                    submissionContent = {
+                        participationUi(childModifier)
+                    },
+                    problemStatementContent = {
+                        problemStatementUi(childModifier)
                     }
-                } else {
-                    val childModifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 8.dp)
-                        .padding(bottom = 8.dp)
-
-                    TabView(
-                        modifier = Modifier.fillMaxSize(),
-                        submissionContent = {
-                            participationUi(childModifier)
-                        },
-                        problemStatementContent = {
-                            problemStatementUi(childModifier)
-                        }
-                    )
-                }
+                )
             }
         }
     }
@@ -217,8 +188,10 @@ private fun TabView(
 
 private enum class Tab(@StringRes val title: Int, val icon: ImageVector, val index: Int) {
     SUBMISSION(R.string.participate_text_exercise_tab_submission, Icons.Default.EditNote, 0),
-    PROBLEM_STATEMENT(R.string.participate_text_exercise_tab_problem_statement,
-        Icons.AutoMirrored.Filled.ListAlt, 1)
+    PROBLEM_STATEMENT(
+        R.string.participate_text_exercise_tab_problem_statement,
+        Icons.AutoMirrored.Filled.ListAlt, 1
+    )
 }
 
 private fun isAlwaysActive(
@@ -237,7 +210,8 @@ private fun isActive(
     participation: Participation
 ): Boolean {
     val alwaysActive = isAlwaysActive(latestResult, exercise, participation)
-    val isDueDateInFuture = exercise.dueDate != null && exercise.getDueDate(participation)?.isInFuture() ?: true
+    val isDueDateInFuture =
+        exercise.dueDate != null && exercise.getDueDate(participation)?.isInFuture() ?: true
 
     return latestResult == null && (alwaysActive || isDueDateInFuture)
 }

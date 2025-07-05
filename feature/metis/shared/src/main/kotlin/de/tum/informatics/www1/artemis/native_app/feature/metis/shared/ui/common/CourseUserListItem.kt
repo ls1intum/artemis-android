@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.common
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -24,7 +25,8 @@ fun CourseUserListItem(
     trailingContent: @Composable (() -> Unit)? = null
 ) {
     ListItem(
-        modifier = modifier,
+        modifier = modifier
+            .background(MaterialTheme.colorScheme.surfaceContainer),
         leadingContent = {
             ProfilePictureWithDialog(
                 modifier = Modifier.size(LIST_ITEM_LEADING_AVATAR_HEIGHT),
