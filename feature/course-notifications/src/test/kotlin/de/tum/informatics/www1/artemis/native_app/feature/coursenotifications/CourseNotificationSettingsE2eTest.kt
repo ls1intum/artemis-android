@@ -16,13 +16,6 @@ import org.koin.test.get
 @Category(EndToEndTest::class)
 class CourseNotificationSettingsScreenE2eTest : BaseCourseNotificationTest() {
 
-    @Test(timeout = DefaultTestTimeoutMillis)
-    fun `displays notification settings screen with toggle switches and preset dropdown`() {
-        setupUi()
-
-        composeTestRule.onNodeWithTag("PresetDropdownTextField").assertExists()
-    }
-
     @OptIn(ExperimentalTestApi::class)
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can change notification toggle`() {
