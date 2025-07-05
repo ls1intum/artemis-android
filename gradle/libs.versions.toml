@@ -1,6 +1,6 @@
 [versions]
 compileSdk = "35"
-targetSdk = "34"
+targetSdk = "35"
 minSdk = "30"
 buildToolsVersion = "35.0.0"
 
