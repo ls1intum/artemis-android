@@ -12,6 +12,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
 import de.tum.informatics.www1.artemis.native_app.core.ui.ReloadableViewModel
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.util.ExerciseParticipationLastRatedUtil
 import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.network.ChannelService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
@@ -99,11 +100,8 @@ internal class ExerciseViewModel(
     val latestResultDataState: StateFlow<DataState<Result?>> =
         exerciseDataState.map { exerciseData ->
             exerciseData.bind { exercise ->
-                val participation =
-                    exercise.getSpecificStudentParticipation(false)
-
-                participation?.results.orEmpty().sortedByDescending { it.completionDate }
-                    .firstOrNull()
+                val participation = exercise.getSpecificStudentParticipation(false)
+                ExerciseParticipationLastRatedUtil.findLatestRatedResult(participation)
             }
         }
             .flowOn(coroutineContext)
@@ -137,4 +135,5 @@ internal class ExerciseViewModel(
                 .orNull()
         }
     }
+
 }
