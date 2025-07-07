@@ -21,20 +21,20 @@ object NotificationTargetGenerator {
         // For channel-related notifications, we might not have postId or channelId
         val postId = when (courseNotificationDTO.notificationType) {
             GeneralNotificationType.ADDED_TO_CHANNEL_NOTIFICATION -> 0L
-            ReplyPostCommunicationNotificationType.NEW_ANSWER_NOTIFICATION -> params.replyId ?.toLong() ?: 0L
-            else -> params.postId?.toLong() ?: 0L
+            ReplyPostCommunicationNotificationType.NEW_ANSWER_NOTIFICATION -> params.replyId ?: 0L
+            else -> params.postId ?: 0L
         }
 
         val conversationId = when (courseNotificationDTO.notificationType) {
-            GeneralNotificationType.ADDED_TO_CHANNEL_NOTIFICATION -> params.channelId?.toLong() ?: 0L
-            else -> params.channelId?.toLong() ?: 0L
+            GeneralNotificationType.ADDED_TO_CHANNEL_NOTIFICATION -> params.channelId ?: 0L
+            else -> params.channelId ?: 0L
         }
 
         return CommunicationPostTarget(
             message = "new-message",
             entity = "message",
             postId = postId,
-            courseId = courseNotificationDTO.courseId.toLong(),
+            courseId = courseNotificationDTO.courseId,
             conversationId = conversationId
         )
     }
@@ -45,8 +45,8 @@ object NotificationTargetGenerator {
     fun generateExerciseTarget(courseNotificationDTO: CourseNotificationDTO): ExerciseTarget {
         val params = courseNotificationDTO.parameters
         return ExerciseTarget(
-            exerciseId = params.exerciseId?.toLong() ?: 0L,
-            courseId = courseNotificationDTO.courseId.toLong()
+            exerciseId = params.exerciseId ?: 0L,
+            courseId = courseNotificationDTO.courseId
         )
     }
 

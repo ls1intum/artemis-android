@@ -1,8 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model
 
-import android.content.Context
 import android.util.Log
-import de.tum.informatics.www1.artemis.native_app.feature.push.R
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ReplyPostCommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.StandalonePostCommunicationNotificationType

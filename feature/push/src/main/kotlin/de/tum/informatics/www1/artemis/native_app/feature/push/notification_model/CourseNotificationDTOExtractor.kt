@@ -252,18 +252,4 @@ object CourseNotificationDTOExtractor {
     fun getNotificationType(courseNotificationDTO: CourseNotificationDTO): NotificationType {
         return courseNotificationDTO.notificationType
     }
-    
-    /**
-     * Gets the course ID from courseNotificationDTO
-     */
-    fun getCourseId(courseNotificationDTO: CourseNotificationDTO): Long {
-        return courseNotificationDTO.courseId
-    }
-    
-    /**
-     * Gets the notification ID from courseNotificationDTO
-     */
-    fun getNotificationId(courseNotificationDTO: CourseNotificationDTO): Long {
-        return courseNotificationDTO.notificationId
-    }
 } 
