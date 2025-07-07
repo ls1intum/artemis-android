@@ -2,7 +2,14 @@ package de.tum.informatics.www1.artemis.native_app.feature.push.notification_mod
 
 import androidx.annotation.StringRes
 import de.tum.informatics.www1.artemis.native_app.feature.push.R
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 
 @Serializable
 sealed interface NotificationType
@@ -12,55 +19,113 @@ sealed interface CommunicationNotificationType : NotificationType
 
 @Serializable
 enum class StandalonePostCommunicationNotificationType : CommunicationNotificationType {
-    NEW_EXERCISE_POST,
-    NEW_LECTURE_POST,
-    NEW_COURSE_POST,
-    NEW_ANNOUNCEMENT_POST,
-    CONVERSATION_NEW_MESSAGE
+    @SerialName("newPostNotification")
+    NEW_POST_NOTIFICATION,
+
+    @SerialName("newAnnouncementNotification")
+    NEW_ANNOUNCEMENT_NOTIFICATION
 }
 
 @Serializable
 enum class ReplyPostCommunicationNotificationType : CommunicationNotificationType {
-    NEW_REPLY_FOR_EXERCISE_POST,
-    NEW_REPLY_FOR_LECTURE_POST,
-    NEW_REPLY_FOR_COURSE_POST,
-    CONVERSATION_NEW_REPLY_MESSAGE,
-    CONVERSATION_USER_MENTIONED
+    @SerialName("newAnswerNotification")
+    NEW_ANSWER_NOTIFICATION,
+
+    @SerialName("newMentionNotification")
+    NEW_MENTION_NOTIFICATION
 }
 
 @Serializable
-enum class MiscNotificationType(@StringRes val title: Int, @StringRes val body: Int) : NotificationType {
-    EXERCISE_SUBMISSION_ASSESSED(R.string.push_notification_title_exerciseSubmissionAssessed, R.string.push_notification_text_exerciseSubmissionAssessed),
-    ATTACHMENT_CHANGE(R.string.push_notification_title_attachmentChange, R.string.push_notification_text_attachmentChange),
-    EXERCISE_RELEASED(R.string.push_notification_title_exerciseReleased, R.string.push_notification_text_exerciseReleased),
-    EXERCISE_PRACTICE(R.string.push_notification_title_exercisePractice, R.string.push_notification_text_exercisePractice),
-    QUIZ_EXERCISE_STARTED(R.string.push_notification_title_quizExerciseStarted, R.string.push_notification_text_quizExerciseStarted),
-    EXERCISE_UPDATED(R.string.push_notification_title_exerciseUpdated, R.string.push_notification_text_exerciseUpdated),
-    FILE_SUBMISSION_SUCCESSFUL(R.string.push_notification_title_fileSubmissionSuccessful, R.string.push_notification_text_fileSubmissionSuccessful),
-    COURSE_ARCHIVE_STARTED(R.string.push_notification_title_courseArchiveStarted, R.string.push_notification_text_courseArchiveStarted),
-    COURSE_ARCHIVE_FINISHED_WITH_ERRORS(R.string.push_notification_title_courseArchiveFinished, R.string.push_notification_text_courseArchiveFinishedWithErrors),
-    COURSE_ARCHIVE_FINISHED_WITHOUT_ERRORS(R.string.push_notification_title_courseArchiveFinished, R.string.push_notification_text_courseArchiveFinishedWithoutErrors),
-    COURSE_ARCHIVE_FAILED(R.string.push_notification_title_courseArchiveFailed, R.string.push_notification_text_courseArchiveFailed),
-    PROGRAMMING_TEST_CASES_CHANGED(R.string.push_notification_title_programmingTestCasesChanged, R.string.push_notification_text_programmingTestCasesChanged),
-    DUPLICATE_TEST_CASE(R.string.push_notification_title_duplicateTestCase, R.string.push_notification_text_duplicateTestCase),
-    EXAM_ARCHIVE_STARTED(R.string.push_notification_title_examArchiveStarted, R.string.push_notification_text_examArchiveStarted),
-    EXAM_ARCHIVE_FINISHED_WITH_ERRORS(R.string.push_notification_title_examArchiveFinished, R.string.push_notification_text_examArchiveFinishedWithErrors),
-    EXAM_ARCHIVE_FINISHED_WITHOUT_ERRORS(R.string.push_notification_title_examArchiveFinished, R.string.push_notification_text_examArchiveFinishedWithoutErrors),
-    EXAM_ARCHIVE_FAILED(R.string.push_notification_title_examArchiveFailed, R.string.push_notification_text_examArchiveFailed),
-    ILLEGAL_SUBMISSION(R.string.push_notification_title_illegalSubmission, R.string.push_notification_text_illegalSubmission),
-    NEW_PLAGIARISM_CASE_STUDENT(R.string.push_notification_title_newPlagiarismCaseStudent, R.string.push_notification_text_newPlagiarismCaseStudent),
-    PLAGIARISM_CASE_VERDICT_STUDENT(R.string.push_notification_title_plagiarismCaseVerdictStudent, R.string.push_notification_text_plagiarismCaseVerdictStudent),
-    NEW_MANUAL_FEEDBACK_REQUEST(R.string.push_notification_title_newManualFeedbackRequest, R.string.push_notification_text_newManualFeedbackRequest),
-    TUTORIAL_GROUP_REGISTRATION_STUDENT(R.string.push_notification_title_tutorialGroupRegistrationStudent, R.string.push_notification_text_tutorialGroupRegistrationStudent),
-    TUTORIAL_GROUP_DEREGISTRATION_STUDENT(R.string.push_notification_title_tutorialGroupDeregistrationStudent, R.string.push_notification_text_tutorialGroupDeregistrationStudent),
-    TUTORIAL_GROUP_REGISTRATION_TUTOR(R.string.push_notification_title_tutorialGroupRegistrationTutor, R.string.push_notification_text_tutorialGroupRegistrationTutor),
-    TUTORIAL_GROUP_MULTIPLE_REGISTRATION_TUTOR(R.string.push_notification_title_tutorialGroupMultipleRegistrationTutor, R.string.push_notification_text_tutorialGroupMultipleRegistrationTutor),
-    TUTORIAL_GROUP_DEREGISTRATION_TUTOR(R.string.push_notification_title_tutorialGroupDeregistrationTutor, R.string.push_notification_text_tutorialGroupDeregistrationTutor),
-    TUTORIAL_GROUP_DELETED(R.string.push_notification_title_tutorialGroupDeleted, R.string.push_notification_text_tutorialGroupDeleted),
-    TUTORIAL_GROUP_UPDATED(R.string.push_notification_title_tutorialGroupUpdated, R.string.push_notification_text_tutorialGroupUpdated),
-    TUTORIAL_GROUP_ASSIGNED(R.string.push_notification_title_tutorialGroupAssigned, R.string.push_notification_text_tutorialGroupAssigned),
-    TUTORIAL_GROUP_UNASSIGNED(R.string.push_notification_title_tutorialGroupUnassigned, R.string.push_notification_text_tutorialGroupUnassigned),
+enum class GeneralNotificationType(@StringRes val title: Int, @StringRes val body: Int) : NotificationType {
+    @SerialName("newExerciseNotification")
+    NEW_EXERCISE_NOTIFICATION(R.string.push_notification_title_exerciseReleased, R.string.push_notification_text_exerciseReleased),
+    @SerialName("exerciseOpenForPracticeNotification")
+    EXERCISE_OPEN_FOR_PRACTICE_NOTIFICATION(R.string.push_notification_title_exerciseOpenForPractice, R.string.push_notification_text_exercisePractice),
+    @SerialName("exerciseAssessedNotification")
+    EXERCISE_ASSESSED_NOTIFICATION(R.string.push_notification_title_exerciseSubmissionAssessed, R.string.push_notification_text_exerciseSubmissionAssessed),
+    @SerialName("exerciseUpdatedNotification")
+    EXERCISE_UPDATED_NOTIFICATION(R.string.push_notification_title_exerciseUpdated, R.string.push_notification_text_exerciseUpdated),
+    @SerialName("quizExerciseStartedNotification")
+    QUIZ_EXERCISE_STARTED_NOTIFICATION(R.string.push_notification_text_quizExerciseStarted, R.string.push_notification_text_quizExerciseStarted),
+    @SerialName("attachmentChangedNotification")
+    ATTACHMENT_CHANGED_NOTIFICATION(R.string.push_notification_title_attachmentChanged, R.string.push_notification_text_attachmentChange),
+    @SerialName("newManualFeedbackRequestNotification")
+    NEW_MANUAL_FEEDBACK_REQUEST_NOTIFICATION(R.string.push_notification_title_newManualFeedbackRequest, R.string.push_notification_text_newManualFeedbackRequest),
+    @SerialName("duplicateTestCaseNotification")
+    DUPLICATE_TEST_CASE_NOTIFICATION(R.string.push_notification_title_duplicateTestCase, R.string.push_notification_text_duplicateTestCase),
+    @SerialName("newCpcPlagiarismCaseNotification")
+    NEW_CPC_PLAGIARISM_CASE_NOTIFICATION(R.string.push_notification_title_newCpcPlagiarismCheck, R.string.push_notification_text_newCpcPlagiarismCheck),
+    @SerialName("newPlagiarismCaseNotification")
+    NEW_PLAGIARISM_CASE_NOTIFICATION(R.string.push_notification_title_newPlagiarismCaseStudent, R.string.push_notification_text_newPlagiarismCaseStudent),
+    @SerialName("programmingBuildRunUpdateNotification")
+    PROGRAMMING_BUILD_RUN_UPDATE_NOTIFICATION(R.string.push_notification_title_programmingBuildUpdate, R.string.push_notification_text_programmingBuildUpdate),
+    @SerialName("programmingTestCasesChangedNotification")
+    PROGRAMMING_TEST_CASES_CHANGED_NOTIFICATION(R.string.push_notification_title_programmingTestCasesChanged, R.string.push_notification_text_programmingTestCasesChanged),
+    @SerialName("plagiarismCaseVerdictNotification")
+    PLAGIARISM_CASE_VERDICT_NOTIFICATION(R.string.push_notification_title_plagiarismCaseVerdictStudent, R.string.push_notification_text_plagiarismCaseVerdictStudent),
+    @SerialName("channelDeletedNotification")
+    CHANNEL_DELETED_NOTIFICATION(R.string.push_notification_title_deleteChannel, R.string.push_notification_text_deleteChannel),
+    @SerialName("addedToChannelNotification")
+    ADDED_TO_CHANNEL_NOTIFICATION(R.string.push_notification_title_addUserChannel, R.string.push_notification_text_addUserChannel),
+    @SerialName("removedFromChannelNotification")
+    REMOVED_FROM_CHANNEL_NOTIFICATION(R.string.push_notification_title_removeUserChannel, R.string.push_notification_text_removeUserChannel),
+    @SerialName("tutorialGroupAssignedNotification")
+    TUTORIAL_GROUP_ASSIGNED_NOTIFICATION(R.string.push_notification_title_tutorialGroupAssigned, R.string.push_notification_text_tutorialGroupAssigned),
+    @SerialName("tutorialGroupUnassignedNotification")
+    TUTORIAL_GROUP_UNASSIGNED_NOTIFICATION(R.string.push_notification_title_tutorialGroupUnassigned, R.string.push_notification_text_tutorialGroupUnassigned),
+    @SerialName("registeredToTutorialGroupNotification")
+    REGISTERED_TO_TUTORIAL_GROUP_NOTIFICATION(R.string.push_notification_title_tutorialGroupRegistrationStudent, R.string.push_notification_text_tutorialGroupRegistrationStudent),
+    @SerialName("deregisteredFromTutorialGroupNotification")
+    DEREGISTERED_FROM_TUTORIAL_GROUP_NOTIFICATION(R.string.push_notification_title_tutorialGroupDeregistrationStudent, R.string.push_notification_text_tutorialGroupDeregistrationStudent),
+    @SerialName("tutorialGroupDeletedNotification")
+    TUTORIAL_GROUP_DELETED_NOTIFICATION(R.string.push_notification_title_tutorialGroupDeleted, R.string.push_notification_text_tutorialGroupDeleted)
+}
+
+fun GeneralNotificationType.isDisplayable(): Boolean {
+    return when (this) {
+        GeneralNotificationType.NEW_EXERCISE_NOTIFICATION,
+        GeneralNotificationType.EXERCISE_OPEN_FOR_PRACTICE_NOTIFICATION,
+        GeneralNotificationType.EXERCISE_ASSESSED_NOTIFICATION,
+        GeneralNotificationType.EXERCISE_UPDATED_NOTIFICATION,
+        GeneralNotificationType.QUIZ_EXERCISE_STARTED_NOTIFICATION,
+        GeneralNotificationType.ATTACHMENT_CHANGED_NOTIFICATION,
+        GeneralNotificationType.NEW_MANUAL_FEEDBACK_REQUEST_NOTIFICATION,
+        GeneralNotificationType.TUTORIAL_GROUP_ASSIGNED_NOTIFICATION,
+        GeneralNotificationType.TUTORIAL_GROUP_UNASSIGNED_NOTIFICATION,
+        GeneralNotificationType.REGISTERED_TO_TUTORIAL_GROUP_NOTIFICATION,
+        GeneralNotificationType.DEREGISTERED_FROM_TUTORIAL_GROUP_NOTIFICATION,
+        GeneralNotificationType.TUTORIAL_GROUP_DELETED_NOTIFICATION -> true
+
+        else -> false
+    }
+    //TODO: fix missing text and compare with iOS
 }
 
 @Serializable
 data object UnknownNotificationType : NotificationType
+
+object NotificationTypeSerializer : KSerializer<NotificationType> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("NotificationType", PrimitiveKind.STRING)
+
+    override fun deserialize(decoder: Decoder): NotificationType {
+        val value = decoder.decodeString()
+
+        return StandalonePostCommunicationNotificationType.entries.find { it.serialName == value }
+            ?: ReplyPostCommunicationNotificationType.entries.find { it.serialName == value }
+            ?: GeneralNotificationType.entries.find { it.serialName == value }
+            ?: UnknownNotificationType
+    }
+
+    override fun serialize(encoder: Encoder, value: NotificationType) {
+        when (value) {
+            is StandalonePostCommunicationNotificationType -> encoder.encodeString(value.serialName)
+            is ReplyPostCommunicationNotificationType -> encoder.encodeString(value.serialName)
+            is GeneralNotificationType -> encoder.encodeString(value.serialName)
+            UnknownNotificationType -> encoder.encodeString("unknown")
+        }
+    }
+
+    // Extension to get SerialName from enum
+    private val Enum<*>.serialName: String
+        get() = javaClass.getField(name).getAnnotation(SerialName::class.java)?.value ?: name
+}

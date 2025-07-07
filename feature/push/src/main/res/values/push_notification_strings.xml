@@ -5,29 +5,37 @@
 
     <string name="push_notification_action_reply">Reply</string>
 
-    <string name="push_notification_title_attachmentChange">Attachment updated</string>
-    <string name="push_notification_title_exerciseReleased">Exercise released</string>
-    <string name="push_notification_title_exercisePractice">Exercise open for practice</string>
-    <string name="push_notification_title_quizExerciseStarted">Quiz started</string>
-    <string name="push_notification_title_liveExamExerciseUpdate">Live Exam Exercise Update</string>
-    <string name="push_notification_title_exerciseUpdated">Exercise updated</string>
-    <string name="push_notification_title_programmingTestCasesChanged">Test cases for programming exercise changed</string>
-    <string name="push_notification_title_newManualFeedbackRequest">A new manual feedback request has been submitted</string>
-    <string name="push_notification_title_duplicateTestCase">Duplicate test case was found.</string>
-    <string name="push_notification_title_illegalSubmission">Illegal submission of a student.</string>
-    <string name="push_notification_title_newExercisePost">New exercise post</string>
-    <string name="push_notification_title_newLecturePost">New lecture post</string>
-    <string name="push_notification_title_newCoursePost">New course-wide post</string>
-    <string name="push_notification_title_newAnnouncementPost">New announcement</string>
-    <string name="push_notification_title_newReplyForExercisePost">New reply for exercise post</string>
-    <string name="push_notification_title_newReplyForLecturePost">New reply for lecture post</string>
-    <string name="push_notification_title_newReplyForCoursePost">New reply for course-wide post</string>
-    <string name="push_notification_title_courseArchiveStarted">Course archival started</string>
-    <string name="push_notification_title_courseArchiveFinished">Course archival finished</string>
-    <string name="push_notification_title_courseArchiveFailed">Course archival failed</string>
-    <string name="push_notification_title_examArchiveStarted">Exam archival started</string>
-    <string name="push_notification_title_examArchiveFinished">Exam archival finished</string>
-    <string name="push_notification_title_examArchiveFailed">Exam archival failed</string>
+    <!-- Notification Type Titles -->
+    <string name="push_notification_title_addChannel">Added to Channel</string>
+    <string name="push_notification_title_deleteChannel">Channel Deleted</string>
+    <string name="push_notification_title_newAnnouncement">New Announcement</string>
+    <string name="push_notification_title_newReply">New Reply</string>
+    <string name="push_notification_title_newMention">New Mention</string>
+    <string name="push_notification_title_newMessage">New Message</string>
+    <string name="push_notification_title_removeChannel">Removed from Channel</string>
+    <string name="push_notification_title_attachmentChanged">Attachment Changed</string>
+    <string name="push_notification_title_tutorialGroupDeregistered">Tutorial Group Deregistered</string>
+    <string name="push_notification_title_duplicateTestCase">Duplicate Test Case</string>
+    <string name="push_notification_title_exerciseSubmissionAssessed">Exercise Assessed</string>
+    <string name="push_notification_title_exerciseOpenForPractice">Exercise Open for Practice</string>
+    <string name="push_notification_title_exerciseUpdated">Exercise Updated</string>
+    <string name="push_notification_title_newSimilarityCase">New Similarity Case</string>
+    <string name="push_notification_title_exerciseReleased">Exercise Released</string>
+    <string name="push_notification_title_newManualFeedbackRequest">New Feedback Request</string>
+    <string name="push_notification_title_newPlagiarismCase">New Plagiarism Case</string>
+    <string name="push_notification_title_plagiarismCaseVerdict">Plagiarism Case Verdict</string>
+    <string name="push_notification_title_programmingBuildUpdate">Build Update</string>
+    <string name="push_notification_title_programmingTestCasesChanged">Test Cases Changed</string>
+    <string name="push_notification_title_quizStarted">Quiz Started</string>
+    <string name="push_notification_title_tutorialGroupRegistered">Tutorial Group Registered</string>
+    <string name="push_notification_title_tutorialGroupAssigned">Tutorial Group Assigned</string>
+    <string name="push_notification_title_tutorialGroupDeleted">Tutorial Group Deleted</string>
+    <string name="push_notification_title_tutorialGroupUnassigned">Tutorial Group Unassigned</string>
+    <string name="push_notification_title_newCpcPlagiarismCheck">New Similarity</string>
+
+    <string name="push_notification_text_newCpcPlagiarismCheck">New Similarity</string>
+    <string name="push_notification_text_programmingBuildUpdate">Build Update</string>
+
 
     <string name="push_notification_text_attachmentChange">The attachment "%2$s" of "%3$s" in the course "%1$s" was updated.</string>
     <string name="push_notification_text_exerciseReleased">A new exercise "%2$s" got released.</string>
@@ -49,7 +57,6 @@
     <string name="push_notification_text_examArchiveFinishedWithErrors">The exam "%2$s" has been archived. Some exercises couldn\'t be included in the archive: %2$s</string>
     <string name="push_notification_text_examArchiveFailed">There was a problem archiving exam "%2$s": %3$s"</string>
 
-    <string name="push_notification_title_exerciseSubmissionAssessed">Exercise Submission Assessed</string>
     <string name="push_notification_title_fileSubmissionSuccessful">File submission successful</string>
     <string name="push_notification_title_newPlagiarismCaseStudent">New plagiarism case</string>
     <string name="push_notification_title_plagiarismCaseVerdictStudent">Verdict for your plagiarism case</string>
@@ -58,8 +65,6 @@
     <string name="push_notification_title_tutorialGroupRegistrationTutor">A student has been registered to your tutorial group</string>
     <string name="push_notification_title_tutorialGroupDeregistrationTutor">A student has been deregistered from your tutorial group</string>
     <string name="push_notification_title_tutorialGroupMultipleRegistrationTutor">Multiple students have been registered to your tutorial group</string>
-    <string name="push_notification_title_tutorialGroupAssigned">You have been assigned to lead a tutorial group</string>
-    <string name="push_notification_title_tutorialGroupUnassigned">You have been unassigned from leading a tutorial group</string>
 
     <string name="push_notification_text_exerciseSubmissionAssessed">Your submission for the %2$s exercise "%3$s" in the course "%1$s" has been assessed.</string>
     <string name="push_notification_text_fileSubmissionSuccessful">Your file for the exercise "%2$s" was successfully submitted.</string>
@@ -73,10 +78,27 @@
     <string name="push_notification_text_tutorialGroupAssigned">You have been assigned to lead the tutorial group %2$s by %3$s.</string>
     <string name="push_notification_text_tutorialGroupUnassigned">You have been unassigned from leading the tutorial group %2$s by %3$s.</string>
 
-    <string name="push_notification_title_tutorialGroupDeleted">Tutorial Group deleted</string>
     <string name="push_notification_title_tutorialGroupUpdated">Tutorial Group updated</string>
     <string name="push_notification_text_tutorialGroupDeleted">The tutorial group %2$s has been deleted.</string>
     <string name="push_notification_text_tutorialGroupUpdated">The tutorial group %2$s has been updated.</string>
+
+    <!-- Channel notification strings -->
+    <string name="push_notification_title_removeUserChannel">You have been removed from a channel</string>
+    <string name="push_notification_title_addUserChannel">You have been added to a channel</string>
+    <string name="push_notification_title_removeUserGroupChat">You have been removed from a group chat</string>
+    <string name="push_notification_title_addUserGroupChat">You have been added to a group chat</string>
+    <string name="push_notification_title_createGroupChat">New group chat</string>
+    <string name="push_notification_title_createDirectChat">New direct chat</string>
+    <string name="push_notification_title_mentionedInMessage">You were mentioned</string>
+    
+    <string name="push_notification_text_deleteChannel">%1$s channel has been deleted by %2$s.</string>
+    <string name="push_notification_text_removeUserChannel">You have been removed from channel %1$s by %2$s.</string>
+    <string name="push_notification_text_addUserChannel">You have been added to channel %1$s by %2$s.</string>
+    <string name="push_notification_text_removeUserGroupChat">You have been removed from group chat by %2$s in course %1$s.</string>
+    <string name="push_notification_text_addUserGroupChat">You have been added to a new group chat by %2$s in course %1$s.</string>
+    <string name="push_notification_text_createGroupChat">You have been added to a new group chat by %2$s in course %1$s.</string>
+    <string name="push_notification_text_createDirectChat">You have been added to a new direct chat by %2$s in course %1$s.</string>
+    <string name="push_notification_text_mentionedInMessage">You were mentioned in a message.</string>
 
     <string name="conversation_title_course_post">%1$s: %2$s</string>
     <string name="conversation_title_exercise_post">%1$s/%2$s: %3$s</string>

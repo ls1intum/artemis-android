@@ -6,7 +6,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.notification_mode
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ReplyPostCommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.StandalonePostCommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.CommunicationPostTarget
-import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.util.NotificationTargetManager
+import kotlinx.serialization.json.Json
 
 /**
  * A communication grouping for push notifications.
@@ -36,6 +36,12 @@ data class PushCommunicationEntity(
     val conversationTypeString: String?,
 ) {
 
+    companion object {
+        private val json = Json {
+            ignoreUnknownKeys = true
+        }
+    }
+
     val conversationType: CommunicationNotificationConversationType?
         get() = conversationTypeString?.let { CommunicationNotificationConversationType.fromRawValue(it) }
 
@@ -47,5 +53,16 @@ data class PushCommunicationEntity(
             }
 
     val target: CommunicationPostTarget
-        get() = NotificationTargetManager.getCommunicationNotificationTarget(targetString)
+        get() = try {
+            json.decodeFromString<CommunicationPostTarget>(targetString)
+        } catch (e: Exception) {
+            // Fallback to a default target if parsing fails
+            CommunicationPostTarget(
+                message = "new-message",
+                entity = "message",
+                postId = parentId,
+                courseId = 0L,
+                conversationId = 0L
+            )
+        }
 }

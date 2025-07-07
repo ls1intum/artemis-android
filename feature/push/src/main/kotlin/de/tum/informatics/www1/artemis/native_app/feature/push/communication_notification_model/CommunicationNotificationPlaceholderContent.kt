@@ -1,6 +1,8 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model
 
+import android.content.Context
 import android.util.Log
+import de.tum.informatics.www1.artemis.native_app.feature.push.R
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ReplyPostCommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.StandalonePostCommunicationNotificationType
@@ -38,7 +40,7 @@ data class CommunicationNotificationPlaceholderContent(
             Log.d(TAG, "Parsing notification placeholders ($type): $notificationPlaceholders")
 
             return when (type) {
-                StandalonePostCommunicationNotificationType.NEW_ANNOUNCEMENT_POST -> {
+                StandalonePostCommunicationNotificationType.NEW_ANNOUNCEMENT_NOTIFICATION -> {
                     // ["courseTitle", "postTitle", "postContent", "postCreationDate", "postAuthorName", "imageUrl", "authorId", "postId"]
                     if (notificationPlaceholders.size <= 7) return null
                     val profilePic = notificationPlaceholders[5].takeIf { it.isNotEmpty() }
@@ -56,7 +58,8 @@ data class CommunicationNotificationPlaceholderContent(
                     )
                 }
 
-                is StandalonePostCommunicationNotificationType -> {
+                // Regular conversation message
+                StandalonePostCommunicationNotificationType.NEW_POST_NOTIFICATION -> {
                     // ["courseTitle", "messageContent", "messageCreationDate", "conversationName", "authorName", "conversationType", "imageUrl", "userId", "postId"]
                     if (notificationPlaceholders.size <= 8) return null
                     val profilePic = notificationPlaceholders[6].takeIf { it.isNotEmpty() }
@@ -83,7 +86,7 @@ data class CommunicationNotificationPlaceholderContent(
                     // There is a bug for notifications for user mentions in conversations. The placeholders
                     // are filled like they would for a new reply, even when the notification is for a user mention
                     // in a base post. We treat this case here.
-                    if (type == ReplyPostCommunicationNotificationType.CONVERSATION_USER_MENTIONED &&
+                    if (type == ReplyPostCommunicationNotificationType.NEW_MENTION_NOTIFICATION &&
                         target?.message == CommunicationPostTarget.MESSAGE_NEW_MESSAGE) {
                         content = notificationPlaceholders[1]
                     }

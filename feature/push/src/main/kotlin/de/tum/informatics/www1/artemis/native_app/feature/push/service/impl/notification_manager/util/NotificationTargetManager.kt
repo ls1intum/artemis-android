@@ -6,37 +6,33 @@ import android.content.Intent
 import android.net.Uri
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CommunicationDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ExerciseDeeplinks
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.MiscNotificationType
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.NotificationType
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ArtemisNotification
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CourseNotificationDTO
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.GeneralNotificationType
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.NotificationTargetGenerator
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.getNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.CommunicationPostTarget
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.ExerciseTarget
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.MetisTarget
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.NotificationTarget
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.UnknownNotificationTarget
-import kotlinx.serialization.json.Json
 
 internal object NotificationTargetManager {
+
+//TODO Reply navigation wont work for the new metis targets
 
     private val MainActivity
         get() = Class.forName("de.tum.informatics.www1.artemis.native_app.android.ui.MainActivity")
 
-    private val json = Json {
-        ignoreUnknownKeys = true
-    }
-
     fun buildOnClickIntent(
         context: Context,
-        type: NotificationType,
-        target: String
+        notification: ArtemisNotification<*>
     ): PendingIntent {
         try {
             val uriString: String? =
-                when (val notificationTarget = getNotificationTarget(type, target)) {
+                when (val notificationTarget = NotificationTargetGenerator.generateTarget(notification.courseNotificationDTO)) {
                     is MetisTarget -> getMetisDeeplink(notificationTarget)
 
                     is ExerciseTarget -> {
-                        if (type == MiscNotificationType.QUIZ_EXERCISE_STARTED) {
+                        if (notification.getNotificationType() == GeneralNotificationType.QUIZ_EXERCISE_STARTED_NOTIFICATION) {
                             ExerciseDeeplinks.ToQuizParticipation.inAppLink(
                                 notificationTarget.courseId,
                                 notificationTarget.exerciseId
@@ -82,26 +78,23 @@ internal object NotificationTargetManager {
         PendingIntent.FLAG_IMMUTABLE
     )
 
-    private fun getNotificationTarget(type: NotificationType, target: String): NotificationTarget {
-        return when (type) {
-            is CommunicationNotificationType -> getCommunicationNotificationTarget(target)
-
-            MiscNotificationType.QUIZ_EXERCISE_STARTED -> {
-                json.decodeFromString<ExerciseTarget>(target)
-            }
-
-            else -> UnknownNotificationTarget
-        }
-    }
-
     fun getCommunicationNotificationTarget(
-        target: String
+        courseNotificationDTO: CourseNotificationDTO
     ): CommunicationPostTarget {
-        return json.decodeFromString<CommunicationPostTarget>(target)
+        return NotificationTargetGenerator.generateCommunicationTarget(courseNotificationDTO)
     }
 
     fun CommunicationPostTarget.toJsonString(): String {
-        return json.encodeToString(CommunicationPostTarget.serializer(), this)
+        return """
+        {
+            "message": "new-message",
+            "entity": "message", 
+            "mainPage": "courses",
+            "id": $postId,
+            "course": $courseId,
+            "conversation": $conversationId
+        }
+        """.trimIndent()
     }
 
     private fun buildOpenAppIntent(context: Context): PendingIntent = PendingIntent.getActivity(
