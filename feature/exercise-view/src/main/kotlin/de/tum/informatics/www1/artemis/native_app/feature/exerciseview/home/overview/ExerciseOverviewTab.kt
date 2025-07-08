@@ -144,7 +144,6 @@ internal fun ExerciseOverviewTab(
                         shape = MaterialTheme.shapes.extraSmall
                     ),
                 exercise = exercise,
-                exerciseChannel = exerciseChannel,
                 isLongToolbar = isLongToolbar
             )
         }

@@ -1,7 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.exerciseview.home.overview
 
 import androidx.annotation.StringRes
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,10 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,14 +19,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
-import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.DateFormats
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.format
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseCategoryChipRow
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseInfoChip
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import kotlinx.datetime.Instant
 
 private val exerciseInformationColumnModifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
@@ -44,7 +37,6 @@ val informationTableThickness = 1.dp
 fun ExerciseInformation(
     modifier: Modifier,
     exercise: Exercise,
-    exerciseChannel: ChannelChat?,
     isLongToolbar: Boolean
 ) {
     Column(modifier = modifier) {
@@ -245,54 +237,5 @@ private fun DateInfoText(
             color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.bodyMedium,
         )
-    }
-}
-
-@Composable
-private fun ExerciseChannelLink(
-    modifier: Modifier,
-    exercise: Exercise,
-    exerciseChannel: ChannelChat
-) {
-    val localLinkOpener = LocalLinkOpener.current
-
-    Row(
-        modifier = modifier
-            .padding(start = 8.dp)
-            .padding(vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Text(
-            modifier = Modifier,
-            text = stringResource(R.string.exercise_view_overview_hint_exercise_communication),
-            style = MaterialTheme.typography.bodyMedium
-        )
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        Row(
-            modifier = Modifier.clickable {
-                val courseId = exercise.course?.id
-                courseId?.let {
-                    localLinkOpener.openLink("artemis://courses/$courseId/messages?conversationId=${exerciseChannel.id}")
-                }
-            },
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                modifier = Modifier,
-                text = exerciseChannel.humanReadableName.removePrefix("exercise-"),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
-
-            Icon(
-                modifier = Modifier,
-                imageVector = Icons.Default.ChevronRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
-            )
-        }
     }
 }
