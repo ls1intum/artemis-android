@@ -54,14 +54,6 @@ fun ExerciseInformation(
             exercise = exercise,
             isLongToolbar = isLongToolbar
         )
-
-        exerciseChannel?.let {
-            ExerciseChannelLink(
-                modifier = Modifier.fillMaxWidth(),
-                exercise = exercise,
-                exerciseChannel = exerciseChannel
-            )
-        }
     }
 }
 
