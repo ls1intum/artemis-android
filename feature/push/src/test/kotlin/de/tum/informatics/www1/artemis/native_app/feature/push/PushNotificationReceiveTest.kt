@@ -2,7 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.push
 
 import androidx.test.platform.app.InstrumentationRegistry
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ArtemisNotification
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CourseNotificationDTO
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CourseNotificationParameters
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.GeneralArtemisNotification
@@ -17,7 +16,6 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.datetime.Clock
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.Before
 import org.junit.Test
