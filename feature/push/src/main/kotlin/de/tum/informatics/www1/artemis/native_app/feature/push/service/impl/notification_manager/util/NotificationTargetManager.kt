@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CommunicationDeeplinks
-import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CourseDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ExerciseDeeplinks
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ArtemisNotification
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CourseNotificationDTO
