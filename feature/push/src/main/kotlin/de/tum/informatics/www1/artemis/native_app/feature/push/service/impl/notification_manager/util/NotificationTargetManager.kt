@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CommunicationDeeplinks
+import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CourseDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ExerciseDeeplinks
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ArtemisNotification
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CourseNotificationDTO
@@ -17,8 +18,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.notification_mode
 
 internal object NotificationTargetManager {
 
-//TODO Reply navigation wont work for the new metis targets
-
     private val MainActivity
         get() = Class.forName("de.tum.informatics.www1.artemis.native_app.android.ui.MainActivity")
 
@@ -28,7 +27,8 @@ internal object NotificationTargetManager {
     ): PendingIntent {
         try {
             val uriString: String? =
-                when (val notificationTarget = NotificationTargetGenerator.generateTarget(notification.courseNotificationDTO)) {
+                when (val notificationTarget =
+                    NotificationTargetGenerator.generateTarget(notification.courseNotificationDTO)) {
                     is MetisTarget -> getMetisDeeplink(notificationTarget)
 
                     is ExerciseTarget -> {
@@ -37,7 +37,12 @@ internal object NotificationTargetManager {
                                 notificationTarget.courseId,
                                 notificationTarget.exerciseId
                             )
-                        } else null
+                        } else {
+                            ExerciseDeeplinks.ToExercise.inAppLink(
+                                notificationTarget.courseId,
+                                notificationTarget.exerciseId
+                            )
+                        }
                     }
 
                     else -> null
@@ -54,29 +59,42 @@ internal object NotificationTargetManager {
     private fun getMetisDeeplink(notificationTarget: MetisTarget): String {
         return when (notificationTarget) {
             is CommunicationPostTarget -> {
-                CommunicationDeeplinks.ToPostById.inAppLink(
-                    notificationTarget.courseId,
-                    notificationTarget.conversationId,
-                    notificationTarget.postId
-                )
+                if (notificationTarget.postId == 0L) {
+                    if (notificationTarget.conversationId == 0L) {
+                        " " //In case remove from channel/channel deleted
+                    } else {
+                        CommunicationDeeplinks.ToConversation.inAppLink(
+                            notificationTarget.courseId,
+                            notificationTarget.conversationId
+                        )
+                    }
+                } else {
+                    CommunicationDeeplinks.ToPostById.inAppLink(
+                        notificationTarget.courseId,
+                        notificationTarget.conversationId,
+                        notificationTarget.postId
+                    )
+                }
             }
         }
     }
 
-    fun getMetisContentIntent(context: Context, notificationTarget: MetisTarget): PendingIntent = getDeeplinkIntent(
-        context,
-        getMetisDeeplink(notificationTarget)
-    )
+    fun getMetisContentIntent(context: Context, notificationTarget: MetisTarget): PendingIntent =
+        getDeeplinkIntent(
+            context,
+            getMetisDeeplink(notificationTarget)
+        )
 
-    private fun getDeeplinkIntent(context: Context, deeplink: String): PendingIntent = PendingIntent.getActivity(
-        context,
-        0,
-        Intent(
-            Intent.ACTION_VIEW,
-            Uri.parse(deeplink)
-        ),
-        PendingIntent.FLAG_IMMUTABLE
-    )
+    private fun getDeeplinkIntent(context: Context, deeplink: String): PendingIntent =
+        PendingIntent.getActivity(
+            context,
+            0,
+            Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse(deeplink)
+            ),
+            PendingIntent.FLAG_IMMUTABLE
+        )
 
     fun getCommunicationNotificationTarget(
         courseNotificationDTO: CourseNotificationDTO

@@ -101,6 +101,61 @@ data class CommunicationNotificationPlaceholderContent(
                         isReply = true
                     )
                 }
+
+                // Channel management notification
+                StandalonePostCommunicationNotificationType.ADDED_TO_CHANNEL_NOTIFICATION -> {
+                    // ["courseTitle", "channelName", "channelModerator", "authorImageUrl", "authorId"]
+                    if (notificationPlaceholders.size < 5) return null
+                    val profilePic = notificationPlaceholders[3].takeIf { it.isNotEmpty() }
+
+                    CommunicationNotificationPlaceholderContent(
+                        authorName = notificationPlaceholders[2],
+                        channelName = notificationPlaceholders[1],
+                        courseName = notificationPlaceholders[0],
+                        authorId = notificationPlaceholders[4],
+                        messageId = "0",
+                        authorImageUrl = profilePic,
+                        messageContent = "You have been added to the channel",
+                        conversationType = null,
+                        isReply = false
+                    )
+                }
+
+                StandalonePostCommunicationNotificationType.REMOVED_FROM_CHANNEL_NOTIFICATION -> {
+                    // ["courseTitle", "channelName", "channelModerator", "authorImageUrl", "authorId"]
+                    if (notificationPlaceholders.size < 5) return null
+                    val profilePic = notificationPlaceholders[3].takeIf { it.isNotEmpty() }
+
+                    CommunicationNotificationPlaceholderContent(
+                        authorName = notificationPlaceholders[2],
+                        channelName = notificationPlaceholders[1],
+                        courseName = notificationPlaceholders[0],
+                        authorId = notificationPlaceholders[4],
+                        messageId = "0",
+                        authorImageUrl = profilePic,
+                        messageContent = "You have been removed from the channel",
+                        conversationType = null,
+                        isReply = false
+                    )
+                }
+
+                StandalonePostCommunicationNotificationType.CHANNEL_DELETED_NOTIFICATION -> {
+                    // ["courseTitle", "channelName", "deletingUser", "authorImageUrl", "authorId"]
+                    if (notificationPlaceholders.size < 5) return null
+                    val profilePic = notificationPlaceholders[3].takeIf { it.isNotEmpty() }
+
+                    CommunicationNotificationPlaceholderContent(
+                        authorName = notificationPlaceholders[2],
+                        channelName = notificationPlaceholders[1],
+                        courseName = notificationPlaceholders[0],
+                        authorId = notificationPlaceholders[4],
+                        messageId = "0",
+                        authorImageUrl = profilePic,
+                        messageContent = "The channel has been deleted",
+                        conversationType = null,
+                        isReply = false
+                    )
+                }
             }
         }
     }

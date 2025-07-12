@@ -20,18 +20,27 @@ object NotificationTargetGenerator {
 
         // For channel-related notifications, we might not have postId or channelId
         val postId = when (courseNotificationDTO.notificationType) {
-            GeneralNotificationType.ADDED_TO_CHANNEL_NOTIFICATION -> 0L
+            StandalonePostCommunicationNotificationType.ADDED_TO_CHANNEL_NOTIFICATION,
+            StandalonePostCommunicationNotificationType.REMOVED_FROM_CHANNEL_NOTIFICATION,
+            StandalonePostCommunicationNotificationType.CHANNEL_DELETED_NOTIFICATION -> 0L
             ReplyPostCommunicationNotificationType.NEW_ANSWER_NOTIFICATION -> params.replyId ?: 0L
             else -> params.postId ?: 0L
         }
 
         val conversationId = when (courseNotificationDTO.notificationType) {
-            GeneralNotificationType.ADDED_TO_CHANNEL_NOTIFICATION -> params.channelId ?: 0L
+            StandalonePostCommunicationNotificationType.ADDED_TO_CHANNEL_NOTIFICATION -> params.channelId ?: 0L
+            StandalonePostCommunicationNotificationType.REMOVED_FROM_CHANNEL_NOTIFICATION,
+            StandalonePostCommunicationNotificationType.CHANNEL_DELETED_NOTIFICATION -> 0L
             else -> params.channelId ?: 0L
         }
 
+        val message = when (courseNotificationDTO.notificationType) {
+            ReplyPostCommunicationNotificationType.NEW_ANSWER_NOTIFICATION -> MESSAGE_NEW_REPLY
+            else -> CommunicationPostTarget.MESSAGE_NEW_MESSAGE
+        }
+
         return CommunicationPostTarget(
-            message = "new-message",
+            message = message,
             entity = "message",
             postId = postId,
             courseId = courseNotificationDTO.courseId,
@@ -57,11 +66,23 @@ object NotificationTargetGenerator {
         return when (courseNotificationDTO.notificationType) {
             StandalonePostCommunicationNotificationType.NEW_POST_NOTIFICATION,
             StandalonePostCommunicationNotificationType.NEW_ANNOUNCEMENT_NOTIFICATION,
+            StandalonePostCommunicationNotificationType.ADDED_TO_CHANNEL_NOTIFICATION,
+            StandalonePostCommunicationNotificationType.REMOVED_FROM_CHANNEL_NOTIFICATION,
+            StandalonePostCommunicationNotificationType.CHANNEL_DELETED_NOTIFICATION,
             ReplyPostCommunicationNotificationType.NEW_ANSWER_NOTIFICATION,
-            ReplyPostCommunicationNotificationType.NEW_MENTION_NOTIFICATION -> generateCommunicationTarget(courseNotificationDTO)
+            ReplyPostCommunicationNotificationType.NEW_MENTION_NOTIFICATION -> generateCommunicationTarget(
+                courseNotificationDTO
+            )
 
-            GeneralNotificationType.QUIZ_EXERCISE_STARTED_NOTIFICATION -> generateExerciseTarget(courseNotificationDTO)
-
+            GeneralNotificationType.QUIZ_EXERCISE_STARTED_NOTIFICATION,
+            GeneralNotificationType.NEW_EXERCISE_NOTIFICATION,
+            GeneralNotificationType.NEW_MANUAL_FEEDBACK_REQUEST_NOTIFICATION,
+            GeneralNotificationType.EXERCISE_UPDATED_NOTIFICATION,
+            GeneralNotificationType.EXERCISE_OPEN_FOR_PRACTICE_NOTIFICATION,
+            GeneralNotificationType.EXERCISE_ASSESSED_NOTIFICATION -> generateExerciseTarget(
+                courseNotificationDTO
+            )
+         
             else -> UnknownNotificationTarget
         }
     }
@@ -74,7 +95,6 @@ object NotificationTargetGenerator {
         return when (target) {
             is CommunicationPostTarget -> {
                 if (target.message == MESSAGE_NEW_REPLY) {
-                    // Special format for channel notifications
                     """
                     {
                         "message": "new-reply",
@@ -86,7 +106,6 @@ object NotificationTargetGenerator {
                     }
                     """.trimIndent()
                 } else {
-                    // Regular communication target
                     """
                     {
                         "message": "new-message",

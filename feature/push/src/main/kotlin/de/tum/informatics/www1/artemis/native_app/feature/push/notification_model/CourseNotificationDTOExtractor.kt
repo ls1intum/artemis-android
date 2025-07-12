@@ -15,6 +15,9 @@ object CourseNotificationDTOExtractor {
             // Communication
             StandalonePostCommunicationNotificationType.NEW_POST_NOTIFICATION -> extractNewPostPlaceholders(courseNotificationDTO.parameters)
             StandalonePostCommunicationNotificationType.NEW_ANNOUNCEMENT_NOTIFICATION -> extractNewAnnouncementPlaceholders(courseNotificationDTO.parameters)
+            StandalonePostCommunicationNotificationType.ADDED_TO_CHANNEL_NOTIFICATION -> extractChannelManagementPlaceholders(courseNotificationDTO.parameters)
+            StandalonePostCommunicationNotificationType.REMOVED_FROM_CHANNEL_NOTIFICATION -> extractChannelManagementPlaceholders(courseNotificationDTO.parameters)
+            StandalonePostCommunicationNotificationType.CHANNEL_DELETED_NOTIFICATION -> extractChannelDeletedPlaceholders(courseNotificationDTO.parameters)
             ReplyPostCommunicationNotificationType.NEW_ANSWER_NOTIFICATION -> extractNewAnswerPlaceholders(courseNotificationDTO.parameters)
             ReplyPostCommunicationNotificationType.NEW_MENTION_NOTIFICATION -> extractNewMentionPlaceholders(courseNotificationDTO.parameters)
 
@@ -32,15 +35,11 @@ object CourseNotificationDTOExtractor {
             GeneralNotificationType.PROGRAMMING_BUILD_RUN_UPDATE_NOTIFICATION -> extractProgrammingTestCasesChangedPlaceholders(courseNotificationDTO.parameters)
             GeneralNotificationType.PROGRAMMING_TEST_CASES_CHANGED_NOTIFICATION -> extractProgrammingTestCasesChangedPlaceholders(courseNotificationDTO.parameters)
             GeneralNotificationType.PLAGIARISM_CASE_VERDICT_NOTIFICATION -> extractPlagiarismCaseVerdictPlaceholders(courseNotificationDTO.parameters)
-            GeneralNotificationType.CHANNEL_DELETED_NOTIFICATION -> extractChannelDeletedPlaceholders(courseNotificationDTO.parameters)
-            GeneralNotificationType.ADDED_TO_CHANNEL_NOTIFICATION -> extractChannelManagementPlaceholders(courseNotificationDTO.parameters)
-            GeneralNotificationType.REMOVED_FROM_CHANNEL_NOTIFICATION -> extractChannelManagementPlaceholders(courseNotificationDTO.parameters)
             GeneralNotificationType.TUTORIAL_GROUP_ASSIGNED_NOTIFICATION -> extractTutorialGroupAssignedPlaceholders(courseNotificationDTO.parameters)
             GeneralNotificationType.TUTORIAL_GROUP_UNASSIGNED_NOTIFICATION -> extractTutorialGroupUnassignedPlaceholders(courseNotificationDTO.parameters)
             GeneralNotificationType.REGISTERED_TO_TUTORIAL_GROUP_NOTIFICATION -> extractRegisteredToTutorialGroupPlaceholders(courseNotificationDTO.parameters)
             GeneralNotificationType.DEREGISTERED_FROM_TUTORIAL_GROUP_NOTIFICATION -> extractDeregisteredFromTutorialGroupPlaceholders(courseNotificationDTO.parameters)
             GeneralNotificationType.TUTORIAL_GROUP_DELETED_NOTIFICATION -> extractTutorialGroupDeletedPlaceholders(courseNotificationDTO.parameters)
-
             // Unknown fallback
             else -> emptyList()
         }
@@ -66,7 +65,7 @@ object CourseNotificationDTOExtractor {
             params.courseTitle ?: "",
             params.postTitle ?: "",
             params.postMarkdownContent ?: "",
-            params.postCreationDate ?: "", // creation date placeholder
+            params.postCreationDate ?: "",
             params.authorName ?: "",
             params.authorImageUrl ?: "",
             params.authorId?.toString() ?: "0",
@@ -234,15 +233,21 @@ object CourseNotificationDTOExtractor {
 
     private fun extractChannelManagementPlaceholders(params: CourseNotificationParameters): List<String> {
         return listOf(
+            params.courseTitle ?: "",
             params.channelName ?: "",
-            params.channelModerator ?: ""
+            params.channelModerator ?: "",
+            params.authorImageUrl ?: "",
+            params.authorId?.toString() ?: "0"
         )
     }
 
     private fun extractChannelDeletedPlaceholders(params: CourseNotificationParameters): List<String> {
         return listOf(
+            params.courseTitle ?: "",
             params.channelName ?: "",
-            params.deletingUser ?: ""
+            params.deletingUser ?: "",
+            params.authorImageUrl ?: "",
+            params.authorId?.toString() ?: "0"
         )
     }
     

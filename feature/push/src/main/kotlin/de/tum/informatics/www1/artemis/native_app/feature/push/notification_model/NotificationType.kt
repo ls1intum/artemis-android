@@ -23,7 +23,16 @@ enum class StandalonePostCommunicationNotificationType : CommunicationNotificati
     NEW_POST_NOTIFICATION,
 
     @SerialName("newAnnouncementNotification")
-    NEW_ANNOUNCEMENT_NOTIFICATION
+    NEW_ANNOUNCEMENT_NOTIFICATION,
+
+    @SerialName("addedToChannelNotification")
+    ADDED_TO_CHANNEL_NOTIFICATION,
+
+    @SerialName("removedFromChannelNotification")
+    REMOVED_FROM_CHANNEL_NOTIFICATION,
+
+    @SerialName("channelDeletedNotification")
+    CHANNEL_DELETED_NOTIFICATION
 }
 
 @Serializable
@@ -63,12 +72,6 @@ enum class GeneralNotificationType(@StringRes val title: Int, @StringRes val bod
     PROGRAMMING_TEST_CASES_CHANGED_NOTIFICATION(R.string.push_notification_title_programmingTestCasesChanged, R.string.push_notification_text_programmingTestCasesChanged),
     @SerialName("plagiarismCaseVerdictNotification")
     PLAGIARISM_CASE_VERDICT_NOTIFICATION(R.string.push_notification_title_plagiarismCaseVerdictStudent, R.string.push_notification_text_plagiarismCaseVerdictStudent),
-    @SerialName("channelDeletedNotification")
-    CHANNEL_DELETED_NOTIFICATION(R.string.push_notification_title_deleteChannel, R.string.push_notification_text_deleteChannel),
-    @SerialName("addedToChannelNotification")
-    ADDED_TO_CHANNEL_NOTIFICATION(R.string.push_notification_title_addUserChannel, R.string.push_notification_text_addUserChannel),
-    @SerialName("removedFromChannelNotification")
-    REMOVED_FROM_CHANNEL_NOTIFICATION(R.string.push_notification_title_removeUserChannel, R.string.push_notification_text_removeUserChannel),
     @SerialName("tutorialGroupAssignedNotification")
     TUTORIAL_GROUP_ASSIGNED_NOTIFICATION(R.string.push_notification_title_tutorialGroupAssigned, R.string.push_notification_text_tutorialGroupAssigned),
     @SerialName("tutorialGroupUnassignedNotification")
