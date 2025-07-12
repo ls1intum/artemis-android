@@ -20,7 +20,7 @@ object NotificationTargetGenerator {
 
         // For channel-related notifications, we might not have postId or channelId
         val postId = when (courseNotificationDTO.notificationType) {
-            StandalonePostCommunicationNotificationType.ADDED_TO_CHANNEL_NOTIFICATION,
+            StandalonePostCommunicationNotificationType.ADDED_TO_CHANNEL_NOTIFICATION -> -1L
             StandalonePostCommunicationNotificationType.REMOVED_FROM_CHANNEL_NOTIFICATION,
             StandalonePostCommunicationNotificationType.CHANNEL_DELETED_NOTIFICATION -> 0L
             ReplyPostCommunicationNotificationType.NEW_ANSWER_NOTIFICATION -> params.replyId ?: 0L
@@ -28,7 +28,6 @@ object NotificationTargetGenerator {
         }
 
         val conversationId = when (courseNotificationDTO.notificationType) {
-            StandalonePostCommunicationNotificationType.ADDED_TO_CHANNEL_NOTIFICATION -> params.channelId ?: 0L
             StandalonePostCommunicationNotificationType.REMOVED_FROM_CHANNEL_NOTIFICATION,
             StandalonePostCommunicationNotificationType.CHANNEL_DELETED_NOTIFICATION -> 0L
             else -> params.channelId ?: 0L

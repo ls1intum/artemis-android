@@ -58,16 +58,15 @@ internal object NotificationTargetManager {
     private fun getMetisDeeplink(notificationTarget: MetisTarget): String {
         return when (notificationTarget) {
             is CommunicationPostTarget -> {
-                if (notificationTarget.postId == 0L) {
-                    if (notificationTarget.conversationId == 0L) {
-                        " " //In case remove from channel/channel deleted
-                    } else {
-                        CommunicationDeeplinks.ToConversation.inAppLink(
-                            notificationTarget.courseId,
-                            notificationTarget.conversationId
-                        )
-                    }
-                } else {
+                if (notificationTarget.postId == -1L) {
+                    CommunicationDeeplinks.ToConversation.inAppLink(
+                        notificationTarget.courseId,
+                        notificationTarget.conversationId
+                    )
+                } else if (notificationTarget.postId == 0L) {
+                    " " // This case is for channel deletion or removal, which does not have a specific deeplink
+                }
+                else {
                     CommunicationDeeplinks.ToPostById.inAppLink(
                         notificationTarget.courseId,
                         notificationTarget.conversationId,
