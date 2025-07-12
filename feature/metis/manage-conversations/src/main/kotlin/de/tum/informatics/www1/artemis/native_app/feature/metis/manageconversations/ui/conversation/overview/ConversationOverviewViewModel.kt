@@ -444,7 +444,14 @@ class ConversationOverviewViewModel(
 
     fun markConversationAsHidden(conversationId: Long, hidden: Boolean): Deferred<Boolean> {
         return viewModelScope.async(coroutineContext) {
-            conversationService.markConversationAsHidden(
+            // Get current conversation state to check if it's favorite
+            val currentConversations = updatedConversations.value.orNull() ?: emptyList()
+            val conversation = currentConversations.find { it.id == conversationId }
+            
+            // If we're hiding a favorite conversation, also unfavorite it
+            val shouldUnfavorite = hidden && conversation?.isFavorite == true
+            
+            val hideResult = conversationService.markConversationAsHidden(
                 courseId,
                 conversationId,
                 hidden,
@@ -457,6 +464,25 @@ class ConversationOverviewViewModel(
                     }
                 }
                 .or(false)
+            
+            // If hiding was successful and we need to unfavorite, do that too
+            if (hideResult && shouldUnfavorite) {
+                conversationService.markConversationAsFavorite(
+                    courseId = courseId,
+                    conversationId = conversationId,
+                    favorite = false,
+                    authToken = accountService.authToken.first(),
+                    serverUrl = serverConfigurationService.serverUrl.first()
+                )
+                    .onSuccess { successful ->
+                        if (successful) {
+                            requestReload.tryEmit(Unit)
+                        }
+                    }
+                    .or(false)
+            } else {
+                hideResult
+            }
         }
     }
 
@@ -480,7 +506,14 @@ class ConversationOverviewViewModel(
 
     fun markConversationAsFavorite(conversationId: Long, favorite: Boolean): Deferred<Boolean> {
         return viewModelScope.async(coroutineContext) {
-            conversationService.markConversationAsFavorite(
+            // Get current conversation state to check if it's hidden
+            val currentConversations = updatedConversations.value.orNull() ?: emptyList()
+            val conversation = currentConversations.find { it.id == conversationId }
+            
+            // If we're favoriting a hidden conversation, also unhide it
+            val shouldUnhide = favorite && conversation?.isHidden == true
+            
+            val favoriteResult = conversationService.markConversationAsFavorite(
                 courseId = courseId,
                 conversationId = conversationId,
                 favorite = favorite,
@@ -493,6 +526,25 @@ class ConversationOverviewViewModel(
                     }
                 }
                 .or(false)
+            
+            // If favoriting was successful and we need to unhide, do that too
+            if (favoriteResult && shouldUnhide) {
+                conversationService.markConversationAsHidden(
+                    courseId,
+                    conversationId,
+                    hidden = false,
+                    accountService.authToken.first(),
+                    serverConfigurationService.serverUrl.first()
+                )
+                    .onSuccess { isSuccessful ->
+                        if (isSuccessful) {
+                            requestReload.tryEmit(Unit)
+                        }
+                    }
+                    .or(false)
+            } else {
+                favoriteResult
+            }
         }
     }
 
