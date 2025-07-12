@@ -8,6 +8,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visibleme
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ArtemisNotification
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationArtemisNotification
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CourseNotificationDTO
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CourseNotificationParameters
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.NotificationCategory
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.NotificationStatus
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ReplyPostCommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.StandalonePostCommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.CommunicationPostTarget
@@ -30,7 +34,7 @@ class PushNotificationVisibleContextTest {
     @Test
     fun `test GIVEN no visible context WHEN calling isNotificationContextInVisibleMetisContexts THEN return false`() {
         val notification = buildNotification(
-            type = StandalonePostCommunicationNotificationType.CONVERSATION_NEW_MESSAGE,
+            type = StandalonePostCommunicationNotificationType.NEW_POST_NOTIFICATION,
             target = buildTarget()
         )
         val visibleMetisContexts = emptyList<VisibleMetisContext>()
@@ -46,7 +50,7 @@ class PushNotificationVisibleContextTest {
     @Test
     fun `test GIVEN a visible chat context and related notification target WHEN calling isNotificationContextInVisibleMetisContexts THEN return true`() {
         val notification = buildNotification(
-            type = StandalonePostCommunicationNotificationType.CONVERSATION_NEW_MESSAGE,
+            type = StandalonePostCommunicationNotificationType.NEW_POST_NOTIFICATION,
             target = buildTarget()
         )
         val visibleMetisContexts = listOf(VisiblePostList(metisContext = MetisContext.Conversation(courseId, conversationId)))
@@ -62,7 +66,7 @@ class PushNotificationVisibleContextTest {
     @Test
     fun `test GIVEN a visible chat context and unrelated notification target WHEN calling isNotificationContextInVisibleMetisContexts THEN return false`() {
         val notification = buildNotification(
-            type = StandalonePostCommunicationNotificationType.CONVERSATION_NEW_MESSAGE,
+            type = StandalonePostCommunicationNotificationType.NEW_POST_NOTIFICATION,
             target = buildTarget(conversationId = 4L)
         )
         val visibleMetisContexts = listOf(VisiblePostList(metisContext = MetisContext.Conversation(courseId, conversationId)))
@@ -78,7 +82,7 @@ class PushNotificationVisibleContextTest {
     @Test
     fun `test GIVEN a visible chat context but a thread notification target WHEN calling isNotificationContextInVisibleMetisContexts THEN return false`() {
         val notification = buildNotification(
-            type = ReplyPostCommunicationNotificationType.CONVERSATION_NEW_REPLY_MESSAGE,
+            type = ReplyPostCommunicationNotificationType.NEW_ANSWER_NOTIFICATION,
             target = buildTarget()
         )
         val visibleMetisContexts = listOf(VisiblePostList(metisContext = MetisContext.Conversation(courseId, conversationId)))
@@ -94,7 +98,7 @@ class PushNotificationVisibleContextTest {
     @Test
     fun `test GIVEN a visible thread context and a thread notification target WHEN calling isNotificationContextInVisibleMetisContexts THEN return true`() {
         val notification = buildNotification(
-            type = ReplyPostCommunicationNotificationType.CONVERSATION_NEW_REPLY_MESSAGE,
+            type = ReplyPostCommunicationNotificationType.NEW_ANSWER_NOTIFICATION,
             target = buildTarget()
         )
         val visibleMetisContexts = listOf(VisibleStandalonePostDetails(
@@ -116,9 +120,18 @@ class PushNotificationVisibleContextTest {
         target: CommunicationPostTarget,
     ): ArtemisNotification<CommunicationNotificationType> {
         return CommunicationArtemisNotification(
-            type = type,
-            notificationPlaceholders = emptyList(),
-            target = Json.encodeToString(target),
+            courseNotificationDTO = CourseNotificationDTO(
+                notificationType = type,
+                notificationId = 1L,
+                courseId = target.courseId,
+                creationDate = Clock.System.now(),
+                category = NotificationCategory.COMMUNICATION,
+                parameters = CourseNotificationParameters(
+                    postId = target.postId,
+                    courseTitle = "Test Course"
+                ),
+                status = NotificationStatus.UNSEEN
+            ),
             date = Clock.System.now(),
             version = 1
         )
