@@ -63,11 +63,11 @@ enum class GeneralNotificationType(@StringRes val title: Int, @StringRes val bod
     @SerialName("duplicateTestCaseNotification")
     DUPLICATE_TEST_CASE_NOTIFICATION(R.string.push_notification_title_duplicateTestCase, R.string.push_notification_text_duplicateTestCase),
     @SerialName("newCpcPlagiarismCaseNotification")
-    NEW_CPC_PLAGIARISM_CASE_NOTIFICATION(R.string.push_notification_title_newCpcPlagiarismCheck, R.string.push_notification_text_newCpcPlagiarismCheck),
+    NEW_CPC_PLAGIARISM_CASE_NOTIFICATION(R.string.push_notification_title_newCpcPlagiarismCheck, R.string.push_notification_title_newCpcPlagiarismCheck), // Not displayable
     @SerialName("newPlagiarismCaseNotification")
     NEW_PLAGIARISM_CASE_NOTIFICATION(R.string.push_notification_title_newPlagiarismCaseStudent, R.string.push_notification_text_newPlagiarismCaseStudent),
     @SerialName("programmingBuildRunUpdateNotification")
-    PROGRAMMING_BUILD_RUN_UPDATE_NOTIFICATION(R.string.push_notification_title_programmingBuildUpdate, R.string.push_notification_text_programmingBuildUpdate),
+    PROGRAMMING_BUILD_RUN_UPDATE_NOTIFICATION(R.string.push_notification_title_programmingBuildUpdate, R.string.push_notification_title_programmingBuildUpdate),// Not displayable
     @SerialName("programmingTestCasesChangedNotification")
     PROGRAMMING_TEST_CASES_CHANGED_NOTIFICATION(R.string.push_notification_title_programmingTestCasesChanged, R.string.push_notification_text_programmingTestCasesChanged),
     @SerialName("plagiarismCaseVerdictNotification")
@@ -101,7 +101,6 @@ fun GeneralNotificationType.isDisplayable(): Boolean {
 
         else -> false
     }
-    //TODO: fix missing text and compare with iOS
 }
 
 @Serializable
