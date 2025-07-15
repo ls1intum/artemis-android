@@ -126,7 +126,9 @@ class PushNotificationVisibleContextTest {
                 creationDate = Clock.System.now(),
                 category = NotificationCategory.COMMUNICATION,
                 parameters = CourseNotificationParameters(
-                    postId = target.postId,
+                    postId = if (type is ReplyPostCommunicationNotificationType) null else target.postId,
+                    replyId = if (type is ReplyPostCommunicationNotificationType) target.postId else null,
+                    channelId = target.conversationId,
                     courseTitle = "Test Course"
                 ),
                 status = NotificationStatus.UNSEEN
