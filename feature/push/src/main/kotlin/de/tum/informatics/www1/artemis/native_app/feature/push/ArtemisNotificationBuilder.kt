@@ -10,7 +10,10 @@ object ArtemisNotificationBuilder {
         notificationType: GeneralNotificationType,
         placeholderValues: List<String>
     ): NotificationContent {
-        return NotificationContent(context.getString(notificationType.title), context.getString(notificationType.body, *placeholderValues.toTypedArray()))
+        return NotificationContent(
+            context.getString(notificationType.title, *placeholderValues.toTypedArray()),
+            context.getString(notificationType.body, *placeholderValues.toTypedArray())
+        )
     }
 
     data class NotificationContent(val title: String, val body: String)
