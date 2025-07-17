@@ -15,9 +15,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.ReloadableViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.network.NotificationSettingsService
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.PushNotificationSetting
-import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.PushNotificationSettingUtil.filterByAuthorities
-import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.PushNotificationSettingUtil.filterEditable
-import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.group
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -104,24 +101,6 @@ class PushNotificationSettingsViewModel internal constructor(
                 settings.applyChanges(syncedSettings + updatedSettings)
             }
         }
-            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
-
-
-
-    internal val currentSettingsByGroup: StateFlow<DataState<List<NotificationCategory>>> =
-        currentSettings
-            .map { currentSettings ->
-                currentSettings.bind { settings ->
-                    val authorities = accountDataService.getCachedAccountData()?.authorities ?: emptyList()
-
-                    settings
-                        .filterEditable()
-                        .groupBy { it.group }
-                        .map { NotificationCategory(it.key, it.value) }
-                        .filterByAuthorities(authorities)
-                        .sortedBy { it.categoryId }
-                }
-            }
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
 
     /**

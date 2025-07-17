@@ -13,7 +13,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.Unsu
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.UploadPushNotificationDeviceConfigurationWorker
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.WorkManagerPushNotificationJobService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.CommunicationNotificationManagerImpl
-import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.MiscNotificationManager
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.GeneralNotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.NotificationManagerImpl
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.mark_as_read.MarkConversationAsReadWorker
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.mute.MuteConversationWorker
@@ -39,7 +39,7 @@ val pushModule = module {
     }
 
     single<NotificationManager> { NotificationManagerImpl(get(), get()) }
-    single { MiscNotificationManager(androidContext()) }
+    single { GeneralNotificationManager(androidContext()) }
     single<CommunicationNotificationManager> {
         CommunicationNotificationManagerImpl(
             androidContext(),
