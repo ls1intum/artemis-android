@@ -83,4 +83,16 @@ class PasskeysUseCase(
             }
         }
     }
+
+    fun deletePasskey(credentialId: String): Deferred<CreationResult> {
+        return coroutineScope.async {
+            val response = passkeySettingsService.deletePasskey(credentialId)
+            if (response is NetworkResponse.Failure) {
+                Log.e(TAG, "Failed to delete passkey: ${response.exception}")
+                return@async CreationResult.Failure(response.exception.localizedMessage ?: "Unknown error")
+            }
+            Log.d(TAG, "Successfully deleted passkey with credential ID: $credentialId")
+            CreationResult.Success
+        }
+    }
 }

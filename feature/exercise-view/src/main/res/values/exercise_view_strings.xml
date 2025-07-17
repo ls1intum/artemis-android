@@ -92,4 +92,6 @@
     <string name="exercise_list_exercises_no_search_results_body">\"%s\" did not match any exercises.</string>
     <string name="exercise_list_exercise_item_not_selected">Please select a exercise from the list.</string>
 
+    <string name="exercise_view_overview_section_communication">Communication</string>
+
 </resources>
