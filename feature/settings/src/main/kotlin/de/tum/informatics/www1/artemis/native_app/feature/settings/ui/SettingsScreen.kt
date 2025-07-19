@@ -15,6 +15,9 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -164,7 +167,7 @@ private fun UserInformationSection(
 ) {
     ArtemisSection(
         modifier = modifier,
-        title = stringResource(id = R.string.settings_account_information_section)
+        title = stringResource(id = R.string.settings_account_information_header)
     ) {
         AnimatedDataStateUi(
             dataState = accountDataState,
@@ -182,20 +185,23 @@ private fun UserInformationSection(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     ProfilePicture(
-                        modifier = Modifier.size(52.dp),
+                        modifier = Modifier.size(48.dp),
                         profilePictureData = ProfilePictureData.fromAccount(account)
                     )
 
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(16.dp))
 
-                    Column {
+                    Column(
+                        verticalArrangement = Arrangement.Center
+                    ) {
                         Text(
-                            text = account.name.orEmpty(),
+                            text = stringResource(id = R.string.settings_account_information_section),
                             style = MaterialTheme.typography.bodyLarge
                         )
                         Text(
-                            text = account.username.orEmpty(),
-                            style = MaterialTheme.typography.bodySmall
+                            text = stringResource(id = R.string.settings_account_information_section_subtext),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -208,13 +214,39 @@ private fun UserInformationSection(
 private fun NotificationSection(modifier: Modifier, onOpenNotificationSettings: () -> Unit) {
     ArtemisSection (
         modifier = modifier,
-        title = stringResource(id = R.string.settings_notification_section)
+        title = stringResource(id = R.string.settings_notification_header),
     ) {
         ButtonEntry(
             modifier = Modifier.fillMaxWidth(),
-            text = stringResource(id = R.string.settings_notification_settings),
             onClick = onOpenNotificationSettings
-        )
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Notifications,
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp).padding(8.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Column(
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.settings_notification_section),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Text(
+                        text = stringResource(id = R.string.settings_notification_settings),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
     }
 }
 
