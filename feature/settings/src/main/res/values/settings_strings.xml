@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="settings_screen_title">Settings</string>
+    <string name="settings_account_information_header">Account</string>
     <string name="settings_account_information_section">Account information</string>
+    <string name="settings_account_information_section_subtext">Profile, passkey</string>
     <string name="settings_account_information_full_name">Full name:</string>
     <string name="settings_account_information_login">Login:</string>
     <string name="settings_account_information_email">Email:</string>
     <string name="settings_account_logout">Logout</string>
 
+    <string name="settings_notification_header">Notification</string>
     <string name="settings_notification_section">Notifications</string>
-    <string name="settings_notification_settings">Open notification settings</string>
+    <string name="settings_notification_settings">Notification settings</string>
 
     <string name="settings_about_section">About</string>
     <string name="settings_server_specifics_information">Imprint and privacy policy depend on the server you have currently selected.</string>
