@@ -2,13 +2,18 @@ package de.tum.informatics.www1.artemis.native_app.feature.settings.ui.passkeys
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Key
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -27,6 +32,7 @@ fun PasskeysSection(
     modifier: Modifier = Modifier,
     passkeysDataState: DataState<List<PasskeyDTO>>,
     onCreatePasskey: () -> Unit,
+    onDeletePasskey: (PasskeyDTO) -> Unit,
 ) {
     ArtemisSection(
         modifier = modifier,
@@ -37,25 +43,41 @@ fun PasskeysSection(
             dataState = passkeysDataState,
         ) { passkeys ->
             for (passkey in passkeys) {
-                Column(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
-                        text = passkey.label,
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = passkey.label,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold
+                        )
 
-                    Text(
-                        text = stringResource(
-                            R.string.passkey_settings_created_at_label,
-                            passkey.created.format(DateFormats.OnlyDate.format)
-                        ),
-                        style = MaterialTheme.typography.labelMedium,
-                    )
+                        Text(
+                            text = stringResource(
+                                R.string.passkey_settings_created_at_label,
+                                passkey.created.format(DateFormats.OnlyDate.format)
+                            ),
+                            style = MaterialTheme.typography.labelMedium,
+                        )
+                    }
+                    
+                    IconButton(
+                        onClick = { onDeletePasskey(passkey) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = stringResource(R.string.passkey_settings_delete_key),
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
                 }
             }
 

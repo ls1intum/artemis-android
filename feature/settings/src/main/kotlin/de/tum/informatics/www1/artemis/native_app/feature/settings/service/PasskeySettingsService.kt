@@ -16,4 +16,6 @@ interface PasskeySettingsService: LoggedInBasedService {
 
     suspend fun registerPasskey(registerPasskeyJson: String): NetworkResponse<RegisterPasskeyResponseDTO>
 
+    suspend fun deletePasskey(credentialId: String): NetworkResponse<Unit>
+
 }

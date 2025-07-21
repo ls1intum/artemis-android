@@ -52,4 +52,12 @@ class PasskeySettingsServiceImpl(
             setBody(RegisterRequest(publicKey))
         }
     }
+
+    override suspend fun deletePasskey(credentialId: String): NetworkResponse<Unit> {
+        return deleteRequest {
+            url {
+                appendPathSegments("webauthn", "register", credentialId)
+            }
+        }
+    }
 }
