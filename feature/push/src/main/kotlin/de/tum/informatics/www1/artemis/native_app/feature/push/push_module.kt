@@ -62,5 +62,4 @@ val pushModule = module {
             get()
         )
     }
-    viewModel { PushNotificationSettingsViewModel(get(), get(), get(), get(), get(), get()) }
-}
+    viewModel { PushNotificationSettingsViewModel(get(), get(), get()) }}
