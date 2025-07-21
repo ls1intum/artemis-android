@@ -8,7 +8,9 @@ import androidx.room.Query
 import androidx.room.Transaction
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ArtemisNotification
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.NotificationTargetGenerator
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ReplyPostCommunicationNotificationType
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.getNotificationPlaceholders
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.parentId
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.util.NotificationTargetManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.util.NotificationTargetManager.toJsonString
@@ -46,22 +48,24 @@ interface PushCommunicationDao {
         isPostFromAppUser: suspend (CommunicationNotificationPlaceholderContent) -> Boolean
     ): Long {
         var parentId = artemisNotification.parentId
-        var targetString = artemisNotification.target
+        var targetString = NotificationTargetGenerator.generateTargetString(artemisNotification.courseNotificationDTO)
+
+        val placeholders = artemisNotification.getNotificationPlaceholders()
 
         val message: CommunicationMessageEntity = try {
             val content = CommunicationNotificationPlaceholderContent.fromNotificationsPlaceholders(
-                type = artemisNotification.type,
-                notificationPlaceholders = artemisNotification.notificationPlaceholders,
-                target = NotificationTargetManager.getCommunicationNotificationTarget(targetString)
+                type = artemisNotification.courseNotificationDTO.notificationType as CommunicationNotificationType,
+                notificationPlaceholders = placeholders,
+                target = NotificationTargetManager.getCommunicationNotificationTarget(artemisNotification.courseNotificationDTO),
             ) ?: return -1
 
-            if (artemisNotification.type is ReplyPostCommunicationNotificationType) {
+            if (artemisNotification.courseNotificationDTO.notificationType is ReplyPostCommunicationNotificationType) {
                 // For answer notifications, we set the parentId to the basePostId. This allows to group
                 // multiple answer notifications.
                 parentId = content.messageId.toLong()
 
                 // We also change the target postId to the basePostId. This allows to navigate to the thread of the post.
-                val target = NotificationTargetManager.getCommunicationNotificationTarget(artemisNotification.target)
+                val target = NotificationTargetManager.getCommunicationNotificationTarget(artemisNotification.courseNotificationDTO)
                 targetString = target.copy(postId = parentId).toJsonString()
             }
 
@@ -80,7 +84,7 @@ interface PushCommunicationDao {
                 val pushCommunicationEntity = PushCommunicationEntity(
                     parentId = parentId,
                     notificationId = generateNotificationId(),
-                    notificationTypeString = artemisNotification.type.toString(),
+                    notificationTypeString = artemisNotification.courseNotificationDTO.notificationType.toString(),
                     courseTitle = content.courseName,
                     containerTitle = content.channelName,
                     targetString = targetString,

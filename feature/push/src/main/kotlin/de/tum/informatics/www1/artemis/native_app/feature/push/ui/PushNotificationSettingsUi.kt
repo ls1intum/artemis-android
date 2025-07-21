@@ -33,7 +33,6 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.Scaling
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.InfoMessageCard
@@ -47,7 +46,6 @@ fun PushNotificationSettingsUi(
     modifier: Modifier,
     viewModel: PushNotificationSettingsViewModel = koinViewModel()
 ) {
-    val settingsByGroupDataStore: DataState<List<PushNotificationSettingsViewModel.NotificationCategory>> by viewModel.currentSettingsByGroup.collectAsState()
     val arePushNotificationEnabled by viewModel.arePushNotificationsEnabled.collectAsState()
 
     var updatePushNotificationEnabledJob: Job? by remember { mutableStateOf(null) }
@@ -77,24 +75,6 @@ fun PushNotificationSettingsUi(
             }
         )
 
-        // The following code is commented out because fine-graining the settings has to be adjusted
-        // to the the new endpoint with the new course-specific notification system
-
-        //AnimatedVisibility(visible = arePushNotificationEnabled) {
-        //    PushNotificationSettingCategoriesListUi(
-        //        modifier = Modifier.fillMaxWidth(),
-        //        settingsByGroupDataState = settingsByGroupDataStore,
-        //        onUpdate = { setting, webapp, email, push ->
-        //            viewModel.updateSettingsEntry(
-        //                setting.settingId,
-        //                email,
-        //                webapp,
-        //                push
-        //            )
-        //        },
-        //        onRequestReload = viewModel::onRequestReload
-        //    )
-        //}
     }
 
     if (updatePushNotificationEnabledJob != null) {

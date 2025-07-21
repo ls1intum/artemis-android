@@ -11,6 +11,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.notification_mode
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.NotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ReplyPostCommunicationNotificationType
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.getNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.NotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationHandler
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.util.NotificationTargetManager
@@ -42,11 +43,11 @@ class PushNotificationHandlerImpl(
             notification: ArtemisNotification<out NotificationType>,
             visibleMetisContexts: List<VisibleMetisContext>
         ): Boolean {
-            val notificationType = notification.type
+            val notificationType = notification.getNotificationType()
             if (notificationType !is CommunicationNotificationType) return false
 
             val metisTarget = NotificationTargetManager.getCommunicationNotificationTarget(
-                target = notification.target
+                courseNotificationDTO = notification.courseNotificationDTO
             )
 
             val visibleMetisContext = if (notificationType is ReplyPostCommunicationNotificationType) {

@@ -3,47 +3,9 @@ package de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.c
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.R
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ArtemisNotification
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.NotificationType
-import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-@Serializable
-data class CourseNotification(
-    val notificationType: CourseNotificationType,
-    val notificationId: Int,
-    val courseId: Int,
-    val creationDate: Instant,
-    val category: NotificationCategory,
-    val status: NotificationStatus,
-    val notification: ArtemisNotification<NotificationType>
-)
-
-@Serializable
-data class NotificationPage(
-    val pageNumber: Int,
-    val pageSize: Int,
-    val totalElements: Int,
-    val totalPages: Int,
-    val content: List<CourseNotification>?
-)
-enum class NotificationCategory {
-    COMMUNICATION,
-    GENERAL,
-    UNKNOWN
-}
-
-enum class NotificationFilter {
-    COMMUNICATION,
-    GENERAL
-}
-
-enum class NotificationStatus {
-    UNSEEN,
-    SEEN,
-    UNKNOWN
-}
 
 @Serializable
 enum class CourseNotificationType {
