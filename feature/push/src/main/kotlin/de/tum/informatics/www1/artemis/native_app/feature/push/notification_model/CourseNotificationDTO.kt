@@ -2,7 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.push.notification_mod
 
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.SerialName
 
 @Serializable
 data class CourseNotificationDTO(
