@@ -18,15 +18,12 @@ import kotlinx.serialization.json.jsonPrimitive
 
 @Serializable(with = ArtemisNotificationDeserializer::class)
 sealed interface ArtemisNotification<T : NotificationType>  {
-    val date: Instant
     val version: Int
     val courseNotificationDTO: CourseNotificationDTO
 }
 
 @Serializable
 data class GeneralArtemisNotification(
-    @Serializable(with = SafeInstantSerializer::class)
-    override val date: Instant,
     override val version: Int,
     @SerialName("courseNotificationDTO")
     override val courseNotificationDTO: CourseNotificationDTO
@@ -34,8 +31,6 @@ data class GeneralArtemisNotification(
 
 @Serializable
 data class CommunicationArtemisNotification(
-    @Serializable(with = SafeInstantSerializer::class)
-    override val date: Instant,
     override val version: Int,
     @SerialName("courseNotificationDTO")
     override val courseNotificationDTO: CourseNotificationDTO,
@@ -43,8 +38,6 @@ data class CommunicationArtemisNotification(
 
 @Serializable
 data class UnknownArtemisNotification(
-    @Serializable(with = SafeInstantSerializer::class)
-    override val date: Instant,
     override val version: Int,
     @SerialName("courseNotificationDTO")
     override val courseNotificationDTO: CourseNotificationDTO

@@ -133,7 +133,6 @@ class PushNotificationVisibleContextTest {
                 ),
                 status = NotificationStatus.UNSEEN
             ),
-            date = Clock.System.now(),
             version = 1
         )
     }

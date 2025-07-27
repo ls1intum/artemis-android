@@ -100,7 +100,7 @@ interface PushCommunicationDao {
                 authorId = content.authorId,
                 authorName = content.authorName,
                 authorImageUrl = content.authorImageUrl,
-                date = artemisNotification.date
+                date = artemisNotification.courseNotificationDTO.creationDate
             )
         } catch (e: Exception) {
             Log.e(TAG, "Error while parsing artemis communication notification", e)

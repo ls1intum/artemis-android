@@ -57,7 +57,6 @@ internal class PushNotificationReceiveTest {
                 ),
                 status = NotificationStatus.UNSEEN
             ),
-            date = Clock.System.now(),
             version = supportedVersion
         )
 
@@ -77,7 +76,6 @@ internal class PushNotificationReceiveTest {
                 parameters = CourseNotificationParameters(),
                 status = NotificationStatus.UNSEEN
             ),
-            date = Clock.System.now(),
             version = supportedVersion
         )
 
@@ -100,7 +98,6 @@ internal class PushNotificationReceiveTest {
                 parameters = CourseNotificationParameters(),
                 status = NotificationStatus.UNSEEN
             ),
-            date = Clock.System.now(),
             version = supportedVersion + 1
         )
 
