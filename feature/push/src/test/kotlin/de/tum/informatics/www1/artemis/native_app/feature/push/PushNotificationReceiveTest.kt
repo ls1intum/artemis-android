@@ -17,6 +17,7 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
 import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -79,8 +80,11 @@ internal class PushNotificationReceiveTest {
             version = supportedVersion
         )
 
-        val versionRegex = ",\\s*\"version\"\\s*:\\s*\\d*".toRegex()
-        val payload = Json.encodeToString(notification).replace(versionRegex, "")
+        // Remove the version field by parsing and reconstructing the JSON
+        val jsonElement = Json.parseToJsonElement(Json.encodeToString(notification))
+        val jsonObject = jsonElement.jsonObject.toMutableMap()
+        jsonObject.remove("version")
+        val payload = Json.encodeToString(jsonObject)
 
         pushNotificationHandler.handleServerPushNotification(payload)
         coVerify(exactly = 0) { notificationManagerMock.popNotification(any(), any()) }
