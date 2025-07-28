@@ -15,6 +15,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,9 +30,13 @@ import de.tum.informatics.www1.artemis.native_app.feature.forceupdate.R
 @Composable
 fun UpdateScreen(
     onDownloadClick: () -> Unit,
+    onSkipClick: () -> Unit,
     currentVersion: NormalizedAppVersion,
-    minVersion: NormalizedAppVersion
+    minVersion: NormalizedAppVersion,
+    recommendedVersion: NormalizedAppVersion
 ) {
+    val isRecommended = recommendedVersion > minVersion && currentVersion > minVersion
+
     Scaffold { paddingValues ->
         Column(
             modifier = Modifier
@@ -63,7 +68,11 @@ fun UpdateScreen(
                 )
 
                 Text(
-                    text = stringResource(R.string.update_screen_download_message),
+                    text = if (isRecommended) {
+                        stringResource(R.string.update_screen_recommended_download_message)
+                    } else {
+                        stringResource(R.string.update_screen_download_message)
+                    },
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center
                 )
@@ -71,22 +80,46 @@ fun UpdateScreen(
                 Spacer(modifier = Modifier.height(Spacings.UpdateScreen.medium))
 
                 Text(
-                    text = stringResource(
-                        R.string.update_screen_version_info,
-                        currentVersion,
-                        minVersion
-                    ),
+                    text = if (isRecommended) {
+                        stringResource(
+                            R.string.update_screen_recommended_version_info,
+                            currentVersion,
+                            recommendedVersion
+                        )
+                    } else {
+                        stringResource(
+                            R.string.update_screen_version_info,
+                            currentVersion,
+                            minVersion
+                        )
+                    },
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.secondary
                 )
 
             }
+
+            // Download button
             Button(
-                onClick = onDownloadClick,
+                onClick = {
+                    onDownloadClick()
+                },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(text = stringResource(R.string.update_screen_downlaod_button))
+            }
+
+            if (isRecommended) {
+                Spacer(modifier = Modifier.height(Spacings.UpdateScreen.medium))
+                TextButton(
+                    onClick = {
+                        onSkipClick()
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = "Skip")
+                }
             }
         }
     }

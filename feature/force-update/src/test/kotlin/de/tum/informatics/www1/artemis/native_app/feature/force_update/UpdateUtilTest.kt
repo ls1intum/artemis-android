@@ -25,7 +25,7 @@ class UpdateUtilTest {
     private val version1_3_0 = NormalizedAppVersion("1.3.0")
 
     @Test
-    fun `processUpdateResponse should detect update if server min version is higher`() {
+    fun `processUpdateResponse should detect force update if server min version is higher`() {
         val response = NetworkResponse.Response(
             UpdateServiceResult(
                 minVersion = version1_3_0,
@@ -40,6 +40,26 @@ class UpdateUtilTest {
         assertTrue(result.forceUpdate)
         assertEquals(version1_2_3, result.currentVersion)
         assertEquals(version1_3_0, result.minVersion)
+        assertEquals(version1_3_0, result.recommendedVersion)
+        assertTrue(result.showRecommended)
+    }
+
+    @Test
+    fun `processUpdateResponse should detect recommended update if current version is below recommended but above min`() {
+        val response = NetworkResponse.Response(
+            UpdateServiceResult(
+                minVersion = version1_1_9,
+                recommendedVersion = version1_3_0,
+                features = listOf("new-feature")
+            )
+        )
+        val result = UpdateUtil.processUpdateResponse(response, currentVersion = version1_2_3)
+        assertTrue(result.updateAvailable)
+        assertFalse(result.forceUpdate) // This is now false again due to UpdateUtil revert
+        assertEquals(version1_2_3, result.currentVersion)
+        assertEquals(version1_1_9, result.minVersion)
+        assertEquals(version1_3_0, result.recommendedVersion)
+        assertTrue(result.showRecommended)
     }
 
     @Test
@@ -57,6 +77,8 @@ class UpdateUtilTest {
         assertFalse(result.updateAvailable)
         assertFalse(result.forceUpdate)
         assertEquals(version1_2_3, result.minVersion)
+        assertEquals(version1_3_0, result.recommendedVersion)
+        assertFalse(result.showRecommended)
     }
 
     @Test
@@ -74,6 +96,8 @@ class UpdateUtilTest {
         assertFalse(result.updateAvailable)
         assertFalse(result.forceUpdate)
         assertEquals(version1_1_9, result.minVersion)
+        assertEquals(version1_2_3, result.recommendedVersion)
+        assertFalse(result.showRecommended)
     }
 
     @Test
@@ -86,6 +110,8 @@ class UpdateUtilTest {
         assertFalse(result.updateAvailable)
         assertFalse(result.forceUpdate)
         assertEquals(version1_2_3, result.minVersion)
+        assertEquals(version1_2_3, result.recommendedVersion)
+        assertFalse(result.showRecommended)
     }
 
     @Test

@@ -40,6 +40,8 @@ class UpdateRepository(
         val updateAvailable: Boolean,
         val forceUpdate: Boolean,
         val currentVersion: NormalizedAppVersion,
-        val minVersion: NormalizedAppVersion
+        val minVersion: NormalizedAppVersion,
+        val recommendedVersion: NormalizedAppVersion,
+        val showRecommended: Boolean
     )
 }

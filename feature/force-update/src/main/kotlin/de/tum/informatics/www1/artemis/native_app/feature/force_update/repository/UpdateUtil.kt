@@ -28,13 +28,21 @@ object UpdateUtil {
 
                 // 🔍 Version check
                 val serverMinVersion = data.minVersion
+                val serverRecommendedVersion = data.recommendedVersion
+                
+                // Check if update is required (current version below min version)
                 val updateRequired = serverMinVersion > currentVersion
+                
+                // Check if update is recommended (current version below recommended version but above min version)
+                val updateRecommended = !updateRequired && serverRecommendedVersion > currentVersion
 
                 UpdateRepository.UpdateResult(
-                    updateAvailable = updateRequired,
+                    updateAvailable = updateRequired || updateRecommended,
                     forceUpdate = updateRequired,
                     currentVersion = currentVersion,
-                    minVersion = serverMinVersion
+                    minVersion = serverMinVersion,
+                    recommendedVersion = serverRecommendedVersion,
+                    showRecommended = updateRecommended
                 )
             }
 
@@ -42,7 +50,9 @@ object UpdateUtil {
                 updateAvailable = false,
                 forceUpdate = false,
                 currentVersion = currentVersion,
-                minVersion = currentVersion
+                minVersion = currentVersion,
+                recommendedVersion = currentVersion,
+                showRecommended = false
             )
         }
     }

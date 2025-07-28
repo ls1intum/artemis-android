@@ -246,10 +246,11 @@ class MainActivity : AppCompatActivity(),
             }
 
             LaunchedEffect(updateResult?.minVersion) {
-                if (updateResult?.updateAvailable == true) {
+                if (updateResult?.showRecommended == true) {
                     navController.navigateToUpdateScreen(
                         updateResult!!.currentVersion,
-                        updateResult!!.minVersion
+                        updateResult!!.minVersion,
+                        updateResult!!.recommendedVersion
                     )
                 }
             }
@@ -262,7 +263,7 @@ class MainActivity : AppCompatActivity(),
                             Intent(this@MainActivity, OssLicensesMenuActivity::class.java)
                         startActivity(intent)
                     },
-                    onOpenPlayStore = ::openPlayStore
+                    onOpenPlayStore = ::openPlayStore,
                 )
             }
         }

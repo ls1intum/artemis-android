@@ -178,7 +178,10 @@ fun NavGraphBuilder.rootNavGraph(
     )
 
     updateNavGraph(
-        onOpenPlayStore = onOpenPlayStore
+        onOpenPlayStore = onOpenPlayStore,
+        onSkipUpdate = {
+            navController.navigateUp()
+        }
     )
 
     courseNotificationScreen(
