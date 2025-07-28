@@ -35,7 +35,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.settingsNa
 fun NavGraphBuilder.rootNavGraph(
     navController: NavController,
     onDisplayThirdPartyLicenses: () -> Unit,
-    onOpenPlayStore : () -> Unit
+    onOpenPlayStore: () -> Unit,
+    onSkipUpdate: () -> Unit
 ) {
     val onNavigateToTextExerciseParticipation =
         { exerciseId: Long, participationId: Long ->
@@ -179,9 +180,7 @@ fun NavGraphBuilder.rootNavGraph(
 
     updateNavGraph(
         onOpenPlayStore = onOpenPlayStore,
-        onSkipUpdate = {
-            navController.navigateUp()
-        }
+        onSkipUpdate = onSkipUpdate
     )
 
     courseNotificationScreen(

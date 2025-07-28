@@ -35,7 +35,7 @@ fun UpdateScreen(
     minVersion: NormalizedAppVersion,
     recommendedVersion: NormalizedAppVersion
 ) {
-    val isRecommended = recommendedVersion > minVersion && currentVersion > minVersion
+    val isRecommended = recommendedVersion > currentVersion && currentVersion > minVersion
 
     Scaffold { paddingValues ->
         Column(
@@ -111,7 +111,6 @@ fun UpdateScreen(
             }
 
             if (isRecommended) {
-                Spacer(modifier = Modifier.height(Spacings.UpdateScreen.medium))
                 TextButton(
                     onClick = {
                         onSkipClick()

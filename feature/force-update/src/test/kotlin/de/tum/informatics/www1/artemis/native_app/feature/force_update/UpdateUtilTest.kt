@@ -41,7 +41,6 @@ class UpdateUtilTest {
         assertEquals(version1_2_3, result.currentVersion)
         assertEquals(version1_3_0, result.minVersion)
         assertEquals(version1_3_0, result.recommendedVersion)
-        assertTrue(result.showRecommended)
     }
 
     @Test
@@ -59,7 +58,6 @@ class UpdateUtilTest {
         assertEquals(version1_2_3, result.currentVersion)
         assertEquals(version1_1_9, result.minVersion)
         assertEquals(version1_3_0, result.recommendedVersion)
-        assertTrue(result.showRecommended)
     }
 
     @Test
@@ -78,7 +76,6 @@ class UpdateUtilTest {
         assertFalse(result.forceUpdate)
         assertEquals(version1_2_3, result.minVersion)
         assertEquals(version1_3_0, result.recommendedVersion)
-        assertFalse(result.showRecommended)
     }
 
     @Test
@@ -97,7 +94,6 @@ class UpdateUtilTest {
         assertFalse(result.forceUpdate)
         assertEquals(version1_1_9, result.minVersion)
         assertEquals(version1_2_3, result.recommendedVersion)
-        assertFalse(result.showRecommended)
     }
 
     @Test
@@ -111,7 +107,6 @@ class UpdateUtilTest {
         assertFalse(result.forceUpdate)
         assertEquals(version1_2_3, result.minVersion)
         assertEquals(version1_2_3, result.recommendedVersion)
-        assertFalse(result.showRecommended)
     }
 
     @Test

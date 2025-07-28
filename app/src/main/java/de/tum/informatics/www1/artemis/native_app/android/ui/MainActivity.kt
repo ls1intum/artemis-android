@@ -246,7 +246,7 @@ class MainActivity : AppCompatActivity(),
             }
 
             LaunchedEffect(updateResult?.minVersion) {
-                if (updateResult?.showRecommended == true) {
+                if (updateResult?.updateAvailable == true) {
                     navController.navigateToUpdateScreen(
                         updateResult!!.currentVersion,
                         updateResult!!.minVersion,
@@ -264,6 +264,11 @@ class MainActivity : AppCompatActivity(),
                         startActivity(intent)
                     },
                     onOpenPlayStore = ::openPlayStore,
+                    onSkipUpdate = {
+                        // Mark this recommended update as dismissed
+                        updateRepository.dismissRecommendedUpdate()
+                        navController.navigateUp()
+                    }
                 )
             }
         }

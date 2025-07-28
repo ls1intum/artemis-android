@@ -41,8 +41,7 @@ object UpdateUtil {
                     forceUpdate = updateRequired,
                     currentVersion = currentVersion,
                     minVersion = serverMinVersion,
-                    recommendedVersion = serverRecommendedVersion,
-                    showRecommended = updateRecommended
+                    recommendedVersion = serverRecommendedVersion
                 )
             }
 
@@ -51,8 +50,7 @@ object UpdateUtil {
                 forceUpdate = false,
                 currentVersion = currentVersion,
                 minVersion = currentVersion,
-                recommendedVersion = currentVersion,
-                showRecommended = false
+                recommendedVersion = currentVersion
             )
         }
     }
