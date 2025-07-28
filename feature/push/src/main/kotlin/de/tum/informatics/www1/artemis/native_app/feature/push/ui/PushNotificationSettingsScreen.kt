@@ -8,6 +8,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -58,6 +62,28 @@ fun PushNotificationSettingsScreen(
                     }
                 }
             )
+        } ,
+        floatingActionButton = {
+            if (isInitialNotificationSettingsScreen) {
+                ExtendedFloatingActionButton(
+                    onClick = {
+                        onDone()
+                    },
+                    text = {
+                        Text(
+                            text = stringResource(
+                                id = R.string.initial_push_notification_settings_fab_text_without_save
+                            )
+                        )
+                    },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = null
+                        )
+                    }
+                )
+            }
         }
     ) { padding ->
         PushNotificationSettingsUi(
