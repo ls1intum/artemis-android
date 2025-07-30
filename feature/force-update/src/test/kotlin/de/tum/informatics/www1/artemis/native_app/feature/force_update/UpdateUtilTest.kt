@@ -61,7 +61,25 @@ class UpdateUtilTest {
     }
 
     @Test
-    fun `processUpdateResponse should not detect update if server min version is equal`() {
+    fun `processUpdateResponse should not detect update if server min version and recommended is equal`() {
+        val response = NetworkResponse.Response(
+            UpdateServiceResult(
+                minVersion = version1_2_3,
+                recommendedVersion = version1_2_3,
+                features = emptyList()
+            )
+        )
+
+        val result = UpdateUtil.processUpdateResponse(response, currentVersion = version1_2_3)
+
+        assertFalse(result.updateAvailable)
+        assertFalse(result.forceUpdate)
+        assertEquals(version1_2_3, result.minVersion)
+        assertEquals(version1_2_3, result.recommendedVersion)
+    }
+
+    @Test
+    fun `processUpdateResponse should detect update if recommended greater server min version is equal`() {
         val response = NetworkResponse.Response(
             UpdateServiceResult(
                 minVersion = version1_2_3,
@@ -72,14 +90,14 @@ class UpdateUtilTest {
 
         val result = UpdateUtil.processUpdateResponse(response, currentVersion = version1_2_3)
 
-        assertFalse(result.updateAvailable)
+        assertTrue(result.updateAvailable)
         assertFalse(result.forceUpdate)
         assertEquals(version1_2_3, result.minVersion)
         assertEquals(version1_3_0, result.recommendedVersion)
     }
 
     @Test
-    fun `processUpdateResponse should not detect update if server version is older`() {
+    fun `processUpdateResponse should not detect update if server version is older, recommended same`() {
         val response = NetworkResponse.Response(
             UpdateServiceResult(
                 minVersion = version1_1_9,
@@ -94,6 +112,24 @@ class UpdateUtilTest {
         assertFalse(result.forceUpdate)
         assertEquals(version1_1_9, result.minVersion)
         assertEquals(version1_2_3, result.recommendedVersion)
+    }
+
+    @Test
+    fun `processUpdateResponse should detect update if server version is older, recommended is greater`() {
+        val response = NetworkResponse.Response(
+            UpdateServiceResult(
+                minVersion = version1_1_9,
+                recommendedVersion = version1_3_0,
+                features = emptyList()
+            )
+        )
+
+        val result = UpdateUtil.processUpdateResponse(response, currentVersion = version1_2_3)
+
+        assertTrue(result.updateAvailable)
+        assertFalse(result.forceUpdate)
+        assertEquals(version1_1_9, result.minVersion)
+        assertEquals(version1_3_0, result.recommendedVersion)
     }
 
     @Test
