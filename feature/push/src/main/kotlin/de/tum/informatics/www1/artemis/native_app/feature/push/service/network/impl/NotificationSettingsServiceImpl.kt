@@ -8,12 +8,9 @@ import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.network.NotificationSettingsService
-import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.PushNotificationSetting
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
-import io.ktor.client.request.get
 import io.ktor.client.request.post
-import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -25,42 +22,6 @@ import javax.crypto.spec.SecretKeySpec
 
 internal class NotificationSettingsServiceImpl(private val ktorProvider: KtorProvider) :
     NotificationSettingsService {
-
-    override suspend fun getNotificationSettings(
-        serverUrl: String,
-        authToken: String
-    ): NetworkResponse<List<PushNotificationSetting>> {
-        return performNetworkCall {
-            ktorProvider.ktorClient.get(serverUrl) {
-                url {
-                    appendPathSegments(*Api.Communication.NotificationSettings.path)
-                }
-
-                contentType(ContentType.Application.Json)
-                cookieAuth(authToken)
-            }
-                .body()
-        }
-    }
-
-    override suspend fun updateNotificationSettings(
-        newSettings: List<PushNotificationSetting>,
-        serverUrl: String,
-        authToken: String
-    ): NetworkResponse<List<PushNotificationSetting>> {
-        return performNetworkCall {
-            ktorProvider.ktorClient.put(serverUrl) {
-                url {
-                    appendPathSegments(*Api.Communication.NotificationSettings.path)
-                }
-
-                contentType(ContentType.Application.Json)
-                cookieAuth(authToken)
-
-                setBody(newSettings)
-            }.body()
-        }
-    }
 
     override suspend fun uploadPushNotificationDeviceConfigurationsToServer(
         serverUrl: String,

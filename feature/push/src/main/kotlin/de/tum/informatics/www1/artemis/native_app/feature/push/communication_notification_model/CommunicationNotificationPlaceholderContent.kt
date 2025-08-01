@@ -38,7 +38,7 @@ data class CommunicationNotificationPlaceholderContent(
             Log.d(TAG, "Parsing notification placeholders ($type): $notificationPlaceholders")
 
             return when (type) {
-                StandalonePostCommunicationNotificationType.NEW_ANNOUNCEMENT_POST -> {
+                StandalonePostCommunicationNotificationType.NEW_ANNOUNCEMENT_NOTIFICATION -> {
                     // ["courseTitle", "postTitle", "postContent", "postCreationDate", "postAuthorName", "imageUrl", "authorId", "postId"]
                     if (notificationPlaceholders.size <= 7) return null
                     val profilePic = notificationPlaceholders[5].takeIf { it.isNotEmpty() }
@@ -56,7 +56,8 @@ data class CommunicationNotificationPlaceholderContent(
                     )
                 }
 
-                is StandalonePostCommunicationNotificationType -> {
+                // Regular conversation message
+                StandalonePostCommunicationNotificationType.NEW_POST_NOTIFICATION -> {
                     // ["courseTitle", "messageContent", "messageCreationDate", "conversationName", "authorName", "conversationType", "imageUrl", "userId", "postId"]
                     if (notificationPlaceholders.size <= 8) return null
                     val profilePic = notificationPlaceholders[6].takeIf { it.isNotEmpty() }
@@ -83,7 +84,7 @@ data class CommunicationNotificationPlaceholderContent(
                     // There is a bug for notifications for user mentions in conversations. The placeholders
                     // are filled like they would for a new reply, even when the notification is for a user mention
                     // in a base post. We treat this case here.
-                    if (type == ReplyPostCommunicationNotificationType.CONVERSATION_USER_MENTIONED &&
+                    if (type == ReplyPostCommunicationNotificationType.NEW_MENTION_NOTIFICATION &&
                         target?.message == CommunicationPostTarget.MESSAGE_NEW_MESSAGE) {
                         content = notificationPlaceholders[1]
                     }
@@ -98,6 +99,61 @@ data class CommunicationNotificationPlaceholderContent(
                         messageContent = content,
                         conversationType = null,
                         isReply = true
+                    )
+                }
+
+                // Channel management notification
+                StandalonePostCommunicationNotificationType.ADDED_TO_CHANNEL_NOTIFICATION -> {
+                    // ["courseTitle", "channelName", "channelModerator", "authorImageUrl", "authorId"]
+                    if (notificationPlaceholders.size < 5) return null
+                    val profilePic = notificationPlaceholders[3].takeIf { it.isNotEmpty() }
+
+                    CommunicationNotificationPlaceholderContent(
+                        authorName = notificationPlaceholders[2],
+                        channelName = notificationPlaceholders[1],
+                        courseName = notificationPlaceholders[0],
+                        authorId = notificationPlaceholders[4],
+                        messageId = "0",
+                        authorImageUrl = profilePic,
+                        messageContent = "You have been added to the channel",
+                        conversationType = null,
+                        isReply = false
+                    )
+                }
+
+                StandalonePostCommunicationNotificationType.REMOVED_FROM_CHANNEL_NOTIFICATION -> {
+                    // ["courseTitle", "channelName", "channelModerator", "authorImageUrl", "authorId"]
+                    if (notificationPlaceholders.size < 5) return null
+                    val profilePic = notificationPlaceholders[3].takeIf { it.isNotEmpty() }
+
+                    CommunicationNotificationPlaceholderContent(
+                        authorName = notificationPlaceholders[2],
+                        channelName = notificationPlaceholders[1],
+                        courseName = notificationPlaceholders[0],
+                        authorId = notificationPlaceholders[4],
+                        messageId = "0",
+                        authorImageUrl = profilePic,
+                        messageContent = "You have been removed from the channel",
+                        conversationType = null,
+                        isReply = false
+                    )
+                }
+
+                StandalonePostCommunicationNotificationType.CHANNEL_DELETED_NOTIFICATION -> {
+                    // ["courseTitle", "channelName", "deletingUser", "authorImageUrl", "authorId"]
+                    if (notificationPlaceholders.size < 5) return null
+                    val profilePic = notificationPlaceholders[3].takeIf { it.isNotEmpty() }
+
+                    CommunicationNotificationPlaceholderContent(
+                        authorName = notificationPlaceholders[2],
+                        channelName = notificationPlaceholders[1],
+                        courseName = notificationPlaceholders[0],
+                        authorId = notificationPlaceholders[4],
+                        messageId = "0",
+                        authorImageUrl = profilePic,
+                        messageContent = "The channel has been deleted",
+                        conversationType = null,
+                        isReply = false
                     )
                 }
             }

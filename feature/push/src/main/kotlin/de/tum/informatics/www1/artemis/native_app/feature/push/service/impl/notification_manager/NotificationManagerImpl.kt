@@ -8,16 +8,16 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.R
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ArtemisNotification
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationArtemisNotification
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.MiscArtemisNotification
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.GeneralArtemisNotification
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.UnknownArtemisNotification
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.NotificationManager
 
 /**
- * Notification manager that delegates handling the actual push notifications to [MiscNotificationManager] and [CommunicationNotificationManager]
+ * Notification manager that delegates handling the actual push notifications to [GeneralNotificationManager] and [CommunicationNotificationManager]
  */
 internal class NotificationManagerImpl(
-    private val miscNotificationManager: MiscNotificationManager,
+    private val generalNotificationManager: GeneralNotificationManager,
     private val communicationNotificationManager: CommunicationNotificationManager
 ) : NotificationManager, BaseNotificationManager {
 
@@ -27,8 +27,8 @@ internal class NotificationManagerImpl(
         artemisNotification: ArtemisNotification<*>
     ) {
         when (artemisNotification) {
-            is MiscArtemisNotification -> {
-                miscNotificationManager.popMiscNotification(
+            is GeneralArtemisNotification -> {
+                generalNotificationManager.popGeneralNotification(
                     artemisNotification = artemisNotification
                 )
             }
