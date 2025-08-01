@@ -42,6 +42,7 @@ import de.tum.informatics.www1.artemis.native_app.core.common.FeatureAvailabilit
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
+import de.tum.informatics.www1.artemis.native_app.core.ui.alert.MarkdownTextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisSection
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
@@ -81,6 +82,7 @@ fun AccountSettingsScreen(
         onDeleteProfilePicture = viewModel::onDeleteProfilePicture,
         onUploadProfilePicture = viewModel::onUploadProfilePicture,
         onCreatePasskey = passkeysUseCase::createPasskey,
+        onDeletePasskey = passkeysUseCase::deletePasskey,
         onLogout = viewModel::onRequestLogout,
         onRequestReload = viewModel::onRequestReload
     )
@@ -95,13 +97,20 @@ internal fun AccountSettingsScreen(
     onDeleteProfilePicture: () -> Unit,
     onUploadProfilePicture: (ImageBitmap) -> Deferred<ProfilePictureUploadResult>,
     onCreatePasskey: () -> Deferred<PasskeysUseCase.CreationResult>,
+    onDeletePasskey: (String) -> Deferred<PasskeysUseCase.CreationResult>,
     onLogout: () -> Unit,
     onRequestReload: () -> Unit
 ) {
     var showChangeActionsBottomSheet by remember { mutableStateOf(false) }
     var uploadJob: Deferred<ProfilePictureUploadResult>? by remember { mutableStateOf(null) }
     var createPasskeyJob: Deferred<PasskeysUseCase.CreationResult>? by remember { mutableStateOf(null) }
+    var deletePasskeyJob: Deferred<PasskeysUseCase.CreationResult>? by remember { mutableStateOf(null) }
+
     var createPasskeyResult by remember { mutableStateOf<PasskeysUseCase.CreationResult?>(null) }
+    var deletePasskeyResult by remember { mutableStateOf<PasskeysUseCase.CreationResult?>(null) }
+    
+    var showDeletePasskeyDialog by remember { mutableStateOf(false) }
+    var passkeyToDelete by remember { mutableStateOf<PasskeyDTO?>(null) }
 
     val imageCropper = rememberImageCropper()
     val croppingImagePicker = rememberCroppingImagePicker(
@@ -128,6 +137,14 @@ internal fun AccountSettingsScreen(
     AwaitDeferredCompletion(job = createPasskeyJob) { result ->
         createPasskeyJob = null
         createPasskeyResult = result
+        if (result is PasskeysUseCase.CreationResult.Success) {
+            onRequestReload()
+        }
+    }
+
+    AwaitDeferredCompletion(job = deletePasskeyJob) { result ->
+        deletePasskeyJob = null
+        deletePasskeyResult = result
         if (result is PasskeysUseCase.CreationResult.Success) {
             onRequestReload()
         }
@@ -169,6 +186,10 @@ internal fun AccountSettingsScreen(
                 onCreatePasskey = {
                     createPasskeyJob = onCreatePasskey()
                 },
+                onDeletePasskey = { passkey ->
+                    passkeyToDelete = passkey
+                    showDeletePasskeyDialog = true
+                },
                 onLogout = onLogout
             )
         }
@@ -195,6 +216,26 @@ internal fun AccountSettingsScreen(
                 createPasskeyResult = null
             }
         )
+
+        PasskeyDeleteResultHandler(
+            result = deletePasskeyResult,
+            onReset = {
+                deletePasskeyResult = null
+            }
+        )
+        
+        if (showDeletePasskeyDialog && passkeyToDelete != null) {
+            DeletePasskeyDialog(
+                passkeyName = passkeyToDelete!!.label,
+                onDeletePasskey = {
+                    deletePasskeyJob = onDeletePasskey(passkeyToDelete!!.credentialId)
+                },
+                onDismiss = { 
+                    showDeletePasskeyDialog = false
+                    passkeyToDelete = null
+                }
+            )
+        }
     }
 }
 
@@ -206,6 +247,7 @@ private fun AccountSettingsBody(
     passkeys: DataState<List<PasskeyDTO>>?,  // null means passkeys are disabled
     onChangeProfilePicture: () -> Unit,
     onCreatePasskey: () -> Unit,
+    onDeletePasskey:(PasskeyDTO) -> Unit,
     onLogout: () -> Unit,
 ) {
     Column(
@@ -228,7 +270,8 @@ private fun AccountSettingsBody(
             PasskeysSection(
                 modifier = Modifier.fillMaxWidth(),
                 passkeysDataState = it,
-                onCreatePasskey = onCreatePasskey
+                onCreatePasskey = onCreatePasskey,
+                onDeletePasskey = onDeletePasskey
             )
         }
 
@@ -394,4 +437,54 @@ private fun PasskeyCreationResultHandler(
 
         null -> {}
     }
+}
+
+@Composable
+private fun PasskeyDeleteResultHandler(
+    result: PasskeysUseCase.CreationResult?,
+    onReset: () -> Unit,
+) {
+    when (result) {
+        is PasskeysUseCase.CreationResult.Success -> {
+            Toast.makeText(
+                LocalContext.current,
+                R.string.passkey_settings_delete_success,
+                Toast.LENGTH_SHORT
+            ).show()
+            onReset()
+        }
+
+        null -> {}
+
+        else -> {
+            Toast.makeText(
+                LocalContext.current,
+                R.string.passkey_settings_delete_failed,
+                Toast.LENGTH_SHORT
+            ).show()
+            onReset()
+        }
+    }
+}
+
+@Composable
+fun DeletePasskeyDialog(
+    passkeyName: String,
+    onDeletePasskey: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    MarkdownTextAlertDialog(
+        title = stringResource(R.string.passkey_settings_section_delete_passkey_title),
+        text = stringResource(
+            R.string.passkey_settings_section_delete_passkey_message,
+            passkeyName
+        ),
+        confirmButtonText = stringResource(R.string.passkey_settings_delete_key),
+        dismissButtonText = stringResource(R.string.passkey_settings_section_delete_passkey_negative),
+        onPressPositiveButton = {
+            onDeletePasskey()
+            onDismiss()
+        },
+        onDismissRequest = onDismiss
+    )
 }

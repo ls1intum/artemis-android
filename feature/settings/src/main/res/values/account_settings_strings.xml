@@ -28,5 +28,11 @@
     <string name="passkey_settings_create_failure_dialog_desc">Consider retrying the creation.\nDetails:</string>
     <string name="passkey_settings_create_failure_dialog_ok">@android:string/ok</string>
 
+    <string name="passkey_settings_delete_key">Delete passkey</string>
+    <string name="passkey_settings_section_delete_passkey_title">Delete passkey?</string>
+    <string name="passkey_settings_section_delete_passkey_message">**Are you sure to delete the passkey %1$s?** This is a permanent action and cannot be undone.</string>
+    <string name="passkey_settings_section_delete_passkey_negative">@android:string/cancel</string>
+    <string name="passkey_settings_delete_success">Successfully deleted passkey</string>
+    <string name="passkey_settings_delete_failed">Failed to delete passkey</string>
 
 </resources>
