@@ -19,6 +19,7 @@ class UpdateRepository(
 
     private var lastCheckedTimestamp: Long = 0L
     private var lastResult: UpdateResult? = null
+    private var isCurrentRecommendedUpdateDismissed = false
 
     private val currentVersionNormalized = appVersionProvider.appVersion.normalized
 
@@ -31,15 +32,36 @@ class UpdateRepository(
             response = response,
             currentVersion = currentVersionNormalized
         )
+        
+        // Check if this recommended update should be shown
+        val shouldShowRecommended = if (result.updateAvailable && !result.forceUpdate) {
+            !isCurrentRecommendedUpdateDismissed
+        } else {
+            result.updateAvailable
+        }
+        
+        val finalResult = result.copy(updateAvailable = shouldShowRecommended)
+        
         lastCheckedTimestamp = now
-        lastResult = result
-        _updateResultFlow.value = result
+        lastResult = finalResult
+        _updateResultFlow.value = finalResult
+    }
+
+    fun dismissRecommendedUpdate() {
+        isCurrentRecommendedUpdateDismissed = true
+        // Update the current result to not show the update
+        lastResult?.let { result ->
+            if (!result.forceUpdate) {
+                _updateResultFlow.value = result.copy(updateAvailable = false)
+            }
+        }
     }
 
     data class UpdateResult(
         val updateAvailable: Boolean,
         val forceUpdate: Boolean,
         val currentVersion: NormalizedAppVersion,
-        val minVersion: NormalizedAppVersion
+        val minVersion: NormalizedAppVersion,
+        val recommendedVersion: NormalizedAppVersion
     )
 }

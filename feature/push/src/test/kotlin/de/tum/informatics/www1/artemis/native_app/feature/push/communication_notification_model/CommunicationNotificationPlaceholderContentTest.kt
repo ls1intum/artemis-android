@@ -27,7 +27,7 @@ class CommunicationNotificationPlaceholderContentTest {
     @Test
     fun `test GIVEN a standalone post notification WHEN parsing the notification placeholders THEN there are no errors`() {
         CommunicationNotificationPlaceholderContent.fromNotificationsPlaceholders(
-            type = StandalonePostCommunicationNotificationType.CONVERSATION_NEW_MESSAGE,
+            type = StandalonePostCommunicationNotificationType.NEW_POST_NOTIFICATION,
             notificationPlaceholders = realWorldNewMessageNotificationPlaceholders
         )
     }
@@ -35,7 +35,7 @@ class CommunicationNotificationPlaceholderContentTest {
     @Test
     fun `test GIVEN a reply post WHEN parsing the notification placeholders THEN there are no errors`() {
         CommunicationNotificationPlaceholderContent.fromNotificationsPlaceholders(
-            type = ReplyPostCommunicationNotificationType.CONVERSATION_NEW_REPLY_MESSAGE,
+            type = ReplyPostCommunicationNotificationType.NEW_ANSWER_NOTIFICATION,
             notificationPlaceholders = realWorldNewReplyNotificationPlaceholders
         )
     }
@@ -43,7 +43,7 @@ class CommunicationNotificationPlaceholderContentTest {
     @Test
     fun `test GIVEN an announcement WHEN parsing the notification placeholders THEN there are no errors`() {
         CommunicationNotificationPlaceholderContent.fromNotificationsPlaceholders(
-            type = StandalonePostCommunicationNotificationType.NEW_ANNOUNCEMENT_POST,
+            type = StandalonePostCommunicationNotificationType.NEW_ANNOUNCEMENT_NOTIFICATION,
             notificationPlaceholders = realWorldAnnouncementNotificationPlaceholders
         )
     }
