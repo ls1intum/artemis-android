@@ -249,7 +249,8 @@ class MainActivity : AppCompatActivity(),
                 if (updateResult?.updateAvailable == true) {
                     navController.navigateToUpdateScreen(
                         updateResult!!.currentVersion,
-                        updateResult!!.minVersion
+                        updateResult!!.minVersion,
+                        updateResult!!.recommendedVersion
                     )
                 }
             }
@@ -262,7 +263,12 @@ class MainActivity : AppCompatActivity(),
                             Intent(this@MainActivity, OssLicensesMenuActivity::class.java)
                         startActivity(intent)
                     },
-                    onOpenPlayStore = ::openPlayStore
+                    onOpenPlayStore = ::openPlayStore,
+                    onSkipUpdate = {
+                        // Mark this recommended update as dismissed
+                        updateRepository.dismissRecommendedUpdate()
+                        navController.navigateUp()
+                    }
                 )
             }
         }
