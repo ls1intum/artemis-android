@@ -1,12 +1,12 @@
 [versions]
-compileSdk = "35"
-targetSdk = "35"
+compileSdk = "36"
+targetSdk = "36"
 minSdk = "30"
 buildToolsVersion = "35.0.0"
 
 accompanist = "0.30.1"
 androidDesugarJdkLibs = "2.1.5"
-androidGradlePlugin = "8.7.1"
+androidGradlePlugin = "8.9.1"
 androidxActivity = "1.10.1"
 androidxAppCompat = "1.7.1"
 androidxComposeBom = "2025.06.01"
@@ -125,7 +125,7 @@ noties-markwon-image-coil = { group = "io.noties.markwon", name = "image-coil", 
 oss-licenses-plugin = { module = "com.google.android.gms:oss-licenses-plugin", version.ref = "ossLicensesPlugin" }
 placeholder-material = { group = "io.github.fornewid", name = "placeholder-material3", version.ref = "placeholderMaterial" }
 play-services-oss-licences = { group = "com.google.android.gms", name = "play-services-oss-licenses", version = "17.1.0" }
-robolectric = { group = "org.robolectric", name = "robolectric", version = "4.14.1" }
+robolectric = { group = "org.robolectric", name = "robolectric", version = "4.16.1" }
 sentry-android = { group = "io.sentry", name = "sentry-android", version.ref = "sentry-android" }
 sentry-compose-android = { group = "io.sentry", name = "sentry-compose-android", version.ref = "sentry-android" }
 toolbar-compose = { group = "me.onebone", name = "toolbar-compose", version = "2.3.5" }
