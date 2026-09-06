@@ -101,6 +101,35 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         partner: String,
         authToken: String,
         serverUrl: String
+    ): NetworkResponse<OneToOneChat> = createOneToOneConversation(
+        courseId = courseId,
+        chatPartner = OneToOneChatPartner(login = partner),
+        authToken = authToken,
+        serverUrl = serverUrl
+    )
+
+    override suspend fun createOneToOneConversation(
+        courseId: Long,
+        partnerId: Long,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<OneToOneChat> = createOneToOneConversation(
+        courseId = courseId,
+        chatPartner = OneToOneChatPartner(userId = partnerId),
+        authToken = authToken,
+        serverUrl = serverUrl
+    )
+
+    /**
+     * Creates the one-to-one chat with the given partner. The partner is identified in the request
+     * body; the deprecated variant that appends the partner id as a path segment stops being served
+     * on 30 September 2026.
+     */
+    private suspend fun createOneToOneConversation(
+        courseId: Long,
+        chatPartner: OneToOneChatPartner,
+        authToken: String,
+        serverUrl: String
     ): NetworkResponse<OneToOneChat> {
         return performNetworkCall {
             ktorProvider.ktorClient.post(serverUrl) {
@@ -108,7 +137,7 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
                     appendPathSegments(*Api.Communication.Courses.path, courseId.toString(), "one-to-one-chats")
                 }
 
-                setBody(listOf(partner))
+                setBody(chatPartner)
                 contentType(ContentType.Application.Json)
 
                 accept(ContentType.Application.Json)
@@ -117,23 +146,15 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         }
     }
 
-    override suspend fun createOneToOneConversation(
-        courseId: Long,
-        partnerId: Long,
-        authToken: String,
-        serverUrl: String
-    ): NetworkResponse<OneToOneChat> {
-        return performNetworkCall {
-            ktorProvider.ktorClient.post(serverUrl) {
-                url {
-                    appendPathSegments(*Api.Communication.Courses.path, courseId.toString(), "one-to-one-chats", partnerId.toString())
-                }
-
-                accept(ContentType.Application.Json)
-                cookieAuth(authToken)
-            }.body()
-        }
-    }
+    /**
+     * The single other participant of a one-to-one chat, identified by exactly one of [userId] or
+     * [login]. The unset one is left out of the request body.
+     */
+    @Serializable
+    private data class OneToOneChatPartner(
+        val userId: Long? = null,
+        val login: String? = null
+    )
 
     override suspend fun createChannel(
         courseId: Long,

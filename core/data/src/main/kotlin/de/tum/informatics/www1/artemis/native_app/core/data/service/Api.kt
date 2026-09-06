@@ -12,9 +12,11 @@ private const val api = "api"
  * (See the git history of this file for the previous version.)
  *
  * Artemis 9.3 moved several resources out of the "core" and "communication" modules into modules of
- * their own: courses answer under "course", the account and passkey endpoints under "account", and
- * everything notification-related under "notification". The server still serves the old spellings as
- * deprecated aliases, but stops doing so on 30 September 2026.
+ * their own: courses answer under "course", the account and passkey endpoints under "account",
+ * everything notification-related under "notification", the admin endpoints under "admin" (user
+ * administration under "account/admin"), and starting a quiz batch under "quiz/quiz-batches". The
+ * server still serves the old spellings as deprecated aliases, but stops doing so on
+ * 30 September 2026.
  */
 sealed class Api(
     vararg val path: String
@@ -25,8 +27,11 @@ sealed class Api(
     // With 8.0.0 API changes:
 
     data object Account: Api(api, "account") {
+        data object Admin : Api(*Account.path, "admin")
         data object Passkeys : Api(*Account.path, "passkeys")
     }
+
+    data object Admin: Api(api, "admin")
 
     data object Core: Api(api, "core") {
         data object Public : Api(*Core.path, "public")
@@ -74,6 +79,7 @@ sealed class Api(
     }
 
     data object Quiz: Api(api, "quiz") {
+        data object QuizBatches : Api(*Quiz.path, "quiz-batches")
         data object QuizExercises : Api(*Quiz.path, "quiz-exercises")
     }
 }
