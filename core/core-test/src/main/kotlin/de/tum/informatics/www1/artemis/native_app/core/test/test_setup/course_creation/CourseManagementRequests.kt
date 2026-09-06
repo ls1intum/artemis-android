@@ -90,7 +90,7 @@ suspend fun KoinComponent.createCourse(
     ) {
         url(serverConfigurationService.serverUrl.first())
         url {
-            appendPathSegments(*Api.Core.path, "admin", "courses")
+            appendPathSegments(*Api.Admin.path, "courses")
         }
 
         cookieAuth(accessToken)
@@ -277,12 +277,13 @@ suspend fun KoinComponent.addQuizExerciseBatch(
 
 suspend fun KoinComponent.startQuizExerciseBatch(
     accessToken: String,
-    exerciseId: Long,
     batch: QuizExercise.QuizBatch
 ) {
+    val batchId = requireNotNull(batch.id) { "Cannot start a quiz batch without an id" }
+
     return ktorProvider.ktorClient.put(serverConfigurationService.serverUrl.first()) {
         url {
-            appendPathSegments(*Api.Quiz.QuizExercises.path, exerciseId.toString(), "start-batch")
+            appendPathSegments(*Api.Quiz.QuizBatches.path, batchId.toString(), "start-batch")
         }
 
         setBody(batch)

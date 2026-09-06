@@ -150,7 +150,7 @@ internal class QuizWaitingScreenE2eTest : QuizBaseE2eTest(QuizType.Live) {
 
         // Start the batch to generate a participation
         runBlockingWithTestTimeout {
-            startQuizExerciseBatch(getAdminAccessToken(), quiz.id, batch)
+            startQuizExerciseBatch(getAdminAccessToken(), batch)
         }
 
         val participation = runBlockingWithTestTimeout {
