@@ -32,7 +32,7 @@ internal class NotificationSettingsServiceImpl(private val ktorProvider: KtorPro
         return performNetworkCall {
             val response: RegisterResponseBody = ktorProvider.ktorClient.post(serverUrl) {
                 url {
-                    appendPathSegments(*Api.Communication.PushNotification.path, "register")
+                    appendPathSegments(*Api.Notification.PushNotification.path, "register")
                 }
 
                 cookieAuth(authToken)
@@ -61,7 +61,7 @@ internal class NotificationSettingsServiceImpl(private val ktorProvider: KtorPro
         return performNetworkCall {
             ktorProvider.ktorClient.delete(serverUrl) {
                 url {
-                    appendPathSegments(*Api.Communication.PushNotification.path, "unregister")
+                    appendPathSegments(*Api.Notification.PushNotification.path, "unregister")
                 }
 
                 cookieAuth(authToken)

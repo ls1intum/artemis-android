@@ -125,7 +125,7 @@ class RegisterEndToEndTest : BaseComposeTest() {
     private suspend fun getUsers(loginName: String): List<User> {
         return ktorProvider.ktorClient.get(testServerUrl) {
             url {
-                appendPathSegments(*Api.Core.path, "admin", "users")
+                appendPathSegments(*Api.Account.Admin.path, "users")
 
                 parameter("page", 0)
                 parameter("pageSize", 10)
