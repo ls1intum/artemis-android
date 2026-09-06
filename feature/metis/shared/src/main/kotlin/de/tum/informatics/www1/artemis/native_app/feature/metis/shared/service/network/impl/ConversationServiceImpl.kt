@@ -64,7 +64,7 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         return performNetworkCall {
             ktorProvider.ktorClient.get(serverUrl) {
                 url {
-                    appendPathSegments(*Api.Core.Courses.path, courseId.toString(), "users", "search")
+                    appendPathSegments(*Api.Course.Courses.path, courseId.toString(), "users", "search")
 
                     parameter("loginOrName", query)
                     parameter("roles", roles.joinToString(","))

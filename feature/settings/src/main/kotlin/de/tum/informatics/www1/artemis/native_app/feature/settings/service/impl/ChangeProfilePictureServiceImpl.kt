@@ -32,8 +32,7 @@ class ChangeProfilePictureServiceImpl(
         return putRequest {
             url {
                 appendPathSegments(
-                    *Api.Core.path,
-                    "account",
+                    *Api.Account.path,
                     "profile-picture",
                 )
             }
@@ -55,8 +54,7 @@ class ChangeProfilePictureServiceImpl(
         return deleteRequest {
             url {
                 appendPathSegments(
-                    *Api.Core.path,
-                    "account",
+                    *Api.Account.path,
                     "profile-picture",
                 )
             }
