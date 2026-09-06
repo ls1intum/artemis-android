@@ -25,7 +25,7 @@ class CourseNotificationSettingsServiceImpl(
     override suspend fun getNotificationSettingsInfo(): NetworkResponse<NotificationSettingsInfo> {
         return getRequest {
             url {
-                appendPathSegments(*Api.Communication.CourseNotifications.path, "info")
+                appendPathSegments(*Api.Notification.Courses.path, "info")
             }
             Log.d(TAG, "Fetching notification settings info from $url")
         }
@@ -37,7 +37,7 @@ class CourseNotificationSettingsServiceImpl(
         return getRequest {
             url {
                 appendPathSegments(
-                    *Api.Communication.CourseNotifications.path,
+                    *Api.Notification.Courses.path,
                     courseId.toString(),
                     "settings"
                 )
@@ -54,7 +54,7 @@ class CourseNotificationSettingsServiceImpl(
         return putRequest {
             url {
                 appendPathSegments(
-                    *Api.Communication.CourseNotifications.path,
+                    *Api.Notification.Courses.path,
                     courseId.toString(),
                     "setting-specification"
                 )
@@ -76,7 +76,7 @@ class CourseNotificationSettingsServiceImpl(
         return putRequest {
             url {
                 appendPathSegments(
-                    *Api.Communication.CourseNotifications.path,
+                    *Api.Notification.Courses.path,
                     courseId.toString(),
                     "setting-preset"
                 )

@@ -12,8 +12,8 @@ private const val api = "api"
  * (See the git history of this file for the previous version.)
  *
  * Artemis 9.3 moved several resources out of the "core" and "communication" modules into modules of
- * their own: courses answer under "course", the account endpoints under "account", and the push
- * notification endpoints under "notification". The server still serves the old spellings as
+ * their own: courses answer under "course", the account and passkey endpoints under "account", and
+ * everything notification-related under "notification". The server still serves the old spellings as
  * deprecated aliases, but stops doing so on 30 September 2026.
  */
 sealed class Api(
@@ -24,12 +24,13 @@ sealed class Api(
 
     // With 8.0.0 API changes:
 
-    data object Account: Api(api, "account")
+    data object Account: Api(api, "account") {
+        data object Passkeys : Api(*Account.path, "passkeys")
+    }
 
     data object Core: Api(api, "core") {
         data object Public : Api(*Core.path, "public")
         data object Files : Api(*Core.path, "files")
-        data object Passkey : Api(*Core.path, "passkey")
     }
 
     data object Course: Api(api, "course") {
@@ -38,9 +39,7 @@ sealed class Api(
 
     data object Communication: Api(api, "communication") {
         data object Courses : Api(*Communication.path, "courses")
-        data object NotificationSettings : Api(*Communication.path, "notification-settings")
         data object SavedPosts : Api(*Communication.path, "saved-posts")
-        data object CourseNotifications : Api(*Communication.path, "notification")
 
         /** To be used as a appended path segment after Communication.Courses */
         const val standalonePostSegment = "messages"
@@ -49,6 +48,7 @@ sealed class Api(
     }
 
     data object Notification: Api(api, "notification") {
+        data object Courses : Api(*Notification.path, "courses")
         data object PushNotification : Api(*Notification.path, "push_notification")
     }
 
