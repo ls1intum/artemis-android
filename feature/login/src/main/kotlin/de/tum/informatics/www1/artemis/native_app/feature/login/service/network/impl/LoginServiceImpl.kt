@@ -5,7 +5,11 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
+import de.tum.informatics.www1.artemis.native_app.feature.login.service.LoginOptionsDto
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.network.LoginService
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
@@ -63,6 +67,33 @@ internal class LoginServiceImpl(
                 contentType(ContentType.Application.Json)
             }
         }
+    }
+
+    override suspend fun fetchLoginOptions(
+        usernameOrEmail: String,
+        serverUrl: String
+    ): NetworkResponse<LoginOptionsDto> {
+        return performNetworkCall {
+            val response = ktorProvider.ktorClient.get(serverUrl) {
+                url {
+                    appendPathSegments(*Api.Core.Public.path, "login-options")
+                    parameter("usernameOrEmail", usernameOrEmail)
+                }
+            }
+            if (response.status.isSuccess()) {
+                response.body<LoginOptionsDto>()
+            } else {
+                throw RuntimeException("Failed to fetch login options: ${response.status}")
+            }
+        }
+    }
+
+    override suspend fun loginOIDC(
+        rememberMe: Boolean,
+        serverUrl: String
+    ): NetworkResponse<HttpResponse> {
+        TODO("Not yet implemented")
+        println("Okay, let's start OIDC with"+ rememberMe)
     }
 
     @Serializable

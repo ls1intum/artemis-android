@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.login.service.network
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.feature.login.service.LoginOptionsDto
 import io.ktor.client.statement.HttpResponse
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -14,6 +15,9 @@ interface LoginService {
 
     suspend fun loginSaml2(rememberMe: Boolean, serverUrl: String): NetworkResponse<HttpResponse>
 
+    suspend fun loginOIDC(rememberMe: Boolean, serverUrl: String): NetworkResponse<HttpResponse>
+
+    suspend fun fetchLoginOptions(usernameOrEmail: String, serverUrl: String): NetworkResponse<LoginOptionsDto>
     @Serializable
     data class LoginResponse(
         @SerialName("id_token") val idToken: String

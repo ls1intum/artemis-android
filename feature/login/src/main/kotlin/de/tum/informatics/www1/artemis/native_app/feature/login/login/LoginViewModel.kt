@@ -12,15 +12,20 @@ import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvi
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.feature.login.BaseAccountViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.AndroidCredentialService
+import de.tum.informatics.www1.artemis.native_app.feature.login.service.LoginMethod
+import de.tum.informatics.www1.artemis.native_app.feature.login.service.LoginOptionsDto
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.network.LoginService
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.network.PasskeyLoginService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -46,6 +51,7 @@ class LoginViewModel(
         private const val PASSWORD_KEY = "password"
         private const val REMEMBER_ME_KEY = "rememberMe"
         private const val USER_ACCEPTED_TERMS_KEY = "rememberMe"
+        private const val AUTH_PHASE = "authPhase"
     }
 
     val username: StateFlow<String> = savedStateHandle.getStateFlow(USERNAME_KEY, "")
@@ -54,8 +60,17 @@ class LoginViewModel(
 
     val rememberMe: StateFlow<Boolean> = savedStateHandle.getStateFlow(REMEMBER_ME_KEY, true)
 
+    val authPhase: StateFlow<AuthPhase> = savedStateHandle.getStateFlow(AUTH_PHASE, AuthPhase.USERNAME)
+
     val hasUserAcceptedTerms: StateFlow<Boolean> =
         savedStateHandle.getStateFlow(USER_ACCEPTED_TERMS_KEY, false)
+
+    private val _loginOptions = MutableStateFlow<LoginOptionsDto?>(null)
+    val loginOptions: StateFlow<LoginOptionsDto?> = _loginOptions.asStateFlow()
+
+    val continueButtonEnabled: StateFlow<Boolean> = username
+        .map { it.isNotBlank() }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     val loginButtonEnabled: StateFlow<Boolean> =
         combine(
@@ -86,8 +101,55 @@ class LoginViewModel(
         savedStateHandle[REMEMBER_ME_KEY] = newRememberMe
     }
 
+    fun updateAuthPhase(newAuthPhase: AuthPhase){
+        savedStateHandle[AUTH_PHASE] = newAuthPhase
+    }
+
     fun updateUserAcceptedTerms(newUserAcceptedTerms: Boolean) {
         savedStateHandle[USER_ACCEPTED_TERMS_KEY] = newUserAcceptedTerms
+    }
+
+    fun fetchLoginOptions(): Deferred<Boolean> {
+        return viewModelScope.async(coroutineContext) {
+            val serverUrlVal = serverUrl.value
+            val usernameVal = username.first().trim()
+            if (usernameVal.isBlank()) return@async false
+            when (val response = loginService.fetchLoginOptions(usernameVal, serverUrlVal)) {
+                is NetworkResponse.Response -> {
+                    android.util.Log.d("LoginViewModel", "Fetched login options: ${response.data}")
+                    _loginOptions.value = response.data
+                    updateAuthPhase(AuthPhase.CREDENTIALS)
+                    return@async true
+                }
+
+                is NetworkResponse.Failure -> {
+                    android.util.Log.w(
+                        "LoginViewModel",
+                        "fetchLoginOptions failed, applying fallback",
+                        response.exception
+                    )
+                    // fallback for instances that do not have /login-options integrated yet (404)
+                    val profile = serverProfileInfo.value
+                    val isPasswordDisabled =
+                        profile is DataState.Success && profile.data.isPasswordLoginDisabled
+                    // default fallback is a password option, but if this is disabled -> show saml2 for compatibility
+                    val fallbackMethod =
+                        if (isPasswordDisabled) LoginMethod.SAML2 else LoginMethod.PASSWORD
+                    val idpLabel =
+                        (profile as? DataState.Success)?.data?.saml2?.identityProviderName
+
+                    _loginOptions.value = LoginOptionsDto(fallbackMethod, idpLabel)
+                    updateAuthPhase(AuthPhase.CREDENTIALS)
+                    return@async true
+                }
+            }
+        }
+    }
+
+    fun resetToUsernamePhase() {
+        updateAuthPhase(AuthPhase.USERNAME)
+        _loginOptions.value = null
+        updatePassword("")
     }
 
     fun login(): Deferred<Boolean> {

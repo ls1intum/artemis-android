@@ -384,16 +384,11 @@ private fun RegisterLoginAccount(
 
                     if (LocalInspectionMode.current) {
                         //Just for the preview.
-                        LoginUi(
+                        Text(
                             modifier = loginUiModifier,
-                            accountName = "TUM",
-                            needsToAcceptTerms = true,
-                            hasUserAcceptedTerms = true,
-                            saml2Config = null,
-                            isPasswordLoginDisabled = false,
-                            updateUserAcceptedTerms = {},
-                            passwordBasedLoginContent = {},
-                            saml2BasedLoginContent = { _, _ -> }
+                            text = stringResource(id = R.string.login_title),
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Center
                         )
                     } else {
                         LoginUi(
