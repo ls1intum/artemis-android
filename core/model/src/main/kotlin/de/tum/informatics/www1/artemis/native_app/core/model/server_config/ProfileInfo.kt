@@ -29,7 +29,11 @@ data class ProfileInfo(
     /**
      * Set if the server allows a saml2 based login. If not set, it is also not supported.
      */
-    val saml2: Saml2Config? = null
+    val saml2: Saml2Config? = null,
+    /**
+     * Set if the server allows an OIDC based login. If not set, it is also not supported.
+     */
+    val oidc: OidcConfig? = null
 ) {
     /**
      * If a login using a username-password combination is not possible.

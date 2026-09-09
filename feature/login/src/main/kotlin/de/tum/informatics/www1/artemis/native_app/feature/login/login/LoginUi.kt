@@ -82,6 +82,7 @@ internal fun LoginUi(
     val rememberMe by viewModel.rememberMe.collectAsState()
     val authPhase by viewModel.authPhase.collectAsState()
     val loginOptions by viewModel.loginOptions.collectAsState()
+    val singleSSOOption by viewModel.singleSSOOption.collectAsState()
     val isLoginButtonEnabled by viewModel.loginButtonEnabled.collectAsState()
     val isContinueButtonEnabled by viewModel.continueButtonEnabled.collectAsState()
     val serverUrl: String by viewModel.serverUrl.collectAsState()
@@ -142,19 +143,19 @@ internal fun LoginUi(
             modifier = formModifier,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Поле логина: доступно для ввода в фазе USERNAME, заблокировано в CREDENTIALS
-            TextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = username,
-                onValueChange = viewModel::updateUsername,
-                enabled = authPhase == AuthPhase.USERNAME,
-                label = { Text(text = stringResource(id = R.string.login_username_label)) },
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = if (authPhase == AuthPhase.USERNAME) ImeAction.Next else ImeAction.None
+            if (singleSSOOption == null) {
+                TextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = username,
+                    onValueChange = viewModel::updateUsername,
+                    enabled = authPhase == AuthPhase.USERNAME,
+                    label = { Text(text = stringResource(id = R.string.login_username_label)) },
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        imeAction = if (authPhase == AuthPhase.USERNAME) ImeAction.Next else ImeAction.None
+                    )
                 )
-            )
+            }
 
-            // ФАЗА 1: Только ввод логина
             if (authPhase == AuthPhase.USERNAME) {
                 ButtonWithLoadingAnimation(
                     modifier = Modifier.fillMaxWidth(),
@@ -176,7 +177,6 @@ internal fun LoginUi(
                 }
             }
 
-            // ФАЗА 2: Ввод данных для выбранного метода авторизации
             if (authPhase == AuthPhase.CREDENTIALS) {
                 when (loginOptions?.loginMethod) {
                     LoginMethod.PASSWORD -> {
@@ -246,12 +246,13 @@ internal fun LoginUi(
                     null -> {}
                 }
 
-                // Кнопка возврата к смене логина — в самом низу формы
-                TextButton(
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                    onClick = viewModel::resetToUsernamePhase
-                ) {
-                    Text(text = "← Back")
+                if (singleSSOOption == null) {
+                    TextButton(
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        onClick = viewModel::resetToUsernamePhase
+                    ) {
+                        Text(text = "← Back")
+                    }
                 }
             }
         }

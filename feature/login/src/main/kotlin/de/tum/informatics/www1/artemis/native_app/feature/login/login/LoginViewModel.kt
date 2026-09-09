@@ -9,6 +9,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerProfileInfoService
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.core.model.server_config.ProfileInfo
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.feature.login.BaseAccountViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.AndroidCredentialService
@@ -24,9 +25,12 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -38,7 +42,7 @@ class LoginViewModel(
     private val accountService: AccountService,
     private val loginService: LoginService,
     private val pushNotificationConfigurationService: PushNotificationConfigurationService,
-    serverConfigurationService: ServerConfigurationService,
+    private val serverConfigurationService: ServerConfigurationService,
     serverProfileInfoService: ServerProfileInfoService,
     networkStatusProvider: NetworkStatusProvider,
     private val passkeyLoginService: PasskeyLoginService,
@@ -68,6 +72,9 @@ class LoginViewModel(
     private val _loginOptions = MutableStateFlow<LoginOptionsDto?>(null)
     val loginOptions: StateFlow<LoginOptionsDto?> = _loginOptions.asStateFlow()
 
+    private val _singleSSOOption = MutableStateFlow<LoginOptionsDto?>(null)
+    val singleSSOOption: StateFlow<LoginOptionsDto?> = _singleSSOOption.asStateFlow()
+
     val continueButtonEnabled: StateFlow<Boolean> = username
         .map { it.isNotBlank() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
@@ -88,6 +95,50 @@ class LoginViewModel(
             .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     val serverUrl: StateFlow<String> = serverUrlStateFlow(serverConfigurationService)
+
+    init {
+        // reset the authentication phase if instance is changed
+        viewModelScope.launch(coroutineContext) {
+            serverConfigurationService.serverUrl
+                .distinctUntilChanged()
+                .drop(1)
+                .collect {
+                    resetToUsernamePhase()
+                }
+        }
+        // if only one authentication options is enabled on instance -> skip USERNAME authentication phase
+        viewModelScope.launch(coroutineContext) {
+            serverProfileInfo.collect { dataState ->
+                if (dataState is DataState.Success) {
+                    val singleSso = determineSingleSSOOption(dataState.data)
+                    _singleSSOOption.value = singleSso
+                    if (singleSso != null) {
+                        _loginOptions.value = singleSso
+                        updateAuthPhase(AuthPhase.CREDENTIALS)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun determineSingleSSOOption(profile: ProfileInfo): LoginOptionsDto? {
+        if (!profile.isPasswordLoginDisabled) return null
+
+        val hasSaml2 = profile.saml2 != null || profile.activeProfiles.contains("saml2")
+        val hasOidc = profile.oidc != null || profile.activeProfiles.contains("oidc")
+
+        return when {
+            hasSaml2 && !hasOidc -> {
+                val label = profile.saml2?.buttonLabel ?: profile.saml2?.identityProviderName
+                LoginOptionsDto(LoginMethod.SAML2, label)
+            }
+            hasOidc && !hasSaml2 -> {
+                val label = profile.oidc?.buttonLabel ?: profile.oidc?.clientName
+                LoginOptionsDto(LoginMethod.OIDC, label)
+            }
+            else -> null
+        }
+    }
 
     fun updateUsername(newUsername: String) {
         savedStateHandle[USERNAME_KEY] = newUsername
