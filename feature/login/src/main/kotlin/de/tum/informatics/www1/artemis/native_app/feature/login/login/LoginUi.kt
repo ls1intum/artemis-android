@@ -95,6 +95,7 @@ internal fun LoginUi(
     var fetchOptionsJob: Deferred<Boolean>? by remember { mutableStateOf(null) }
     var loginJob: Deferred<Boolean>? by remember { mutableStateOf(null) }
     var loginWithPasskeyJob: Deferred<Boolean>? by remember { mutableStateOf(null) }
+    val oidcLoginJob by viewModel.oidcLoginJob.collectAsState()
 
     AwaitDeferredCompletion(job = fetchOptionsJob) { wasSuccessful ->
         fetchOptionsJob = null
@@ -114,6 +115,15 @@ internal fun LoginUi(
 
     AwaitDeferredCompletion(job = loginWithPasskeyJob) { wasSuccessful ->
         loginWithPasskeyJob = null
+        if (wasSuccessful) {
+            onLoggedIn()
+        } else {
+            displayLoginFailedDialog = true
+        }
+    }
+
+    AwaitDeferredCompletion(job = oidcLoginJob) { wasSuccessful ->
+        viewModel.clearOidcLoginJob()
         if (wasSuccessful) {
             onLoggedIn()
         } else {
@@ -237,9 +247,7 @@ internal fun LoginUi(
                             idpName = loginOptions?.idpName,
                             rememberMe = rememberMe,
                             updateRememberMe = viewModel::updateRememberMe,
-                            onLoginButtonClicked = {
-                                println("Clicked OIDC login!")
-                            }
+                            onLoginButtonClicked = viewModel::loginWithOidc
                         )
                     }
 

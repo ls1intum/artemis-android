@@ -15,6 +15,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.BaseAccountViewM
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.AndroidCredentialService
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.LoginMethod
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.LoginOptionsDto
+import de.tum.informatics.www1.artemis.native_app.feature.login.service.oidc.OidcAuthService
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.network.LoginService
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.network.PasskeyLoginService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
@@ -46,6 +47,7 @@ class LoginViewModel(
     serverProfileInfoService: ServerProfileInfoService,
     networkStatusProvider: NetworkStatusProvider,
     private val passkeyLoginService: PasskeyLoginService,
+    private val oidcAuthService: OidcAuthService,
     private val androidCredentialService: AndroidCredentialService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : BaseAccountViewModel(serverConfigurationService, networkStatusProvider, serverProfileInfoService) {
@@ -74,6 +76,9 @@ class LoginViewModel(
 
     private val _singleSSOOption = MutableStateFlow<LoginOptionsDto?>(null)
     val singleSSOOption: StateFlow<LoginOptionsDto?> = _singleSSOOption.asStateFlow()
+
+    private val _oidcLoginJob = MutableStateFlow<Deferred<Boolean>?>(null)
+    val oidcLoginJob: StateFlow<Deferred<Boolean>?> = _oidcLoginJob.asStateFlow()
 
     val continueButtonEnabled: StateFlow<Boolean> = username
         .map { it.isNotBlank() }
@@ -117,6 +122,12 @@ class LoginViewModel(
                         updateAuthPhase(AuthPhase.CREDENTIALS)
                     }
                 }
+            }
+        }
+        // listen for OIDC code to be extracted and start code exchange routine
+        viewModelScope.launch(coroutineContext) {
+            oidcAuthService.authCodeFlow.collect { code ->
+                _oidcLoginJob.value = handleOidcCallback(code)
             }
         }
     }
@@ -290,5 +301,48 @@ class LoginViewModel(
 
 //            serverResponse.bind { it.authenticated }.or(false)
         }
+    }
+    // Start the oidc authentication flow
+    fun loginWithOidc() {
+        oidcAuthService.launchOidcFlow(
+            serverUrl = serverUrl.value,
+            rememberMe = rememberMe.value
+        )
+    }
+
+    // extract code after successful oidc authentication by IdP
+    fun handleOidcCallback(code: String): Deferred<Boolean> {
+        return viewModelScope.async(coroutineContext) {
+            val serverUrlVal = serverUrl.value
+            val rememberMeVal = rememberMe.first()
+            val verifier = oidcAuthService.getAndClearCodeVerifier() ?: return@async false
+
+            val hasToRegisterForPushNotifications =
+                pushNotificationConfigurationService.getArePushNotificationsEnabledFlow(serverUrlVal)
+                    .first()
+
+            loginService.exchangeCodeForJwtToken(code, verifier, serverUrlVal)
+                .then {
+                    if (hasToRegisterForPushNotifications) {
+                        val wasSuccess =
+                            pushNotificationConfigurationService.updateArePushNotificationEnabled(
+                                true,
+                                serverUrlVal,
+                                it.idToken
+                            )
+                        if (wasSuccess) NetworkResponse.Response(it)
+                        else NetworkResponse.Failure(RuntimeException("Could not register for push notifications"))
+                    } else NetworkResponse.Response(it)
+                }
+                .onSuccess {
+                    accountService.storeAccessToken(it.idToken, rememberMeVal)
+                }
+                .bind { true }
+                .or(false)
+        }
+    }
+
+    fun clearOidcLoginJob() {
+        _oidcLoginJob.value = null
     }
 }

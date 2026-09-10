@@ -15,9 +15,9 @@ interface LoginService {
 
     suspend fun loginSaml2(rememberMe: Boolean, serverUrl: String): NetworkResponse<HttpResponse>
 
-    suspend fun loginOIDC(rememberMe: Boolean, serverUrl: String): NetworkResponse<HttpResponse>
-
     suspend fun fetchLoginOptions(usernameOrEmail: String, serverUrl: String): NetworkResponse<LoginOptionsDto>
+
+    suspend fun exchangeCodeForJwtToken(code: String, codeVerifier: String, serverUrl: String): NetworkResponse<LoginResponse>
     @Serializable
     data class LoginResponse(
         @SerialName("id_token") val idToken: String
