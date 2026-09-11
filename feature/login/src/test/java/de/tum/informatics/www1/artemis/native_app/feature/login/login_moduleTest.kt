@@ -37,6 +37,7 @@ internal class login_moduleTest {
                 ServerProfileInfoService::class,
                 AccountService::class,
                 CoroutineContext::class,
+                android.content.Context::class
             )
         )
     }

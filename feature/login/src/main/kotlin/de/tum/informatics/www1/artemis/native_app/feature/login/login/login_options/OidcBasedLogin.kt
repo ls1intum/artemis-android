@@ -7,7 +7,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import de.tum.informatics.www1.artemis.native_app.core.model.server_config.Saml2Config
 import de.tum.informatics.www1.artemis.native_app.feature.login.R
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.RememberLoginCheckBox
 
