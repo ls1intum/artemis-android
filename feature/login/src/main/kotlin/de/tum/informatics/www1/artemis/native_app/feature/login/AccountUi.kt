@@ -187,7 +187,8 @@ internal fun LoginUiScreen(
                         .fillMaxSize()
                         .imePadding()
                 ) {
-                    nestedNavController.navigate(NestedDestination.Home)
+                    // pop back the stack so that there is always only one ViewModel
+                    nestedNavController.popBackStack(NestedDestination.Home, inclusive = false)
                 }
             }
 
