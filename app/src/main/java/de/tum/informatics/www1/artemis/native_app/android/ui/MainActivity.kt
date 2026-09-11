@@ -51,6 +51,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.force_update.repositor
 import de.tum.informatics.www1.artemis.native_app.feature.force_update.ui.navigateToUpdateScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.LoginScreenRoute
 import de.tum.informatics.www1.artemis.native_app.feature.login.navigateToLogin
+import de.tum.informatics.www1.artemis.native_app.feature.login.service.oidc.OidcAuthService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.LocalVisibleMetisContextManager
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContextManager
@@ -77,6 +78,7 @@ class MainActivity : AppCompatActivity(),
 
     private val serverConfigurationService: ServerConfigurationService = get()
     private val accountService: AccountService = get()
+    private val oidcAuthService: OidcAuthService = get()
     private val communicationNotificationManager: CommunicationNotificationManager = get()
 
     override val visibleMetisContexts: MutableStateFlow<List<VisibleMetisContext>> =
@@ -125,6 +127,9 @@ class MainActivity : AppCompatActivity(),
         }
 
         val data = intent?.data
+        if (oidcAuthService.handleRedirectUri(data)) {
+            intent?.data = null
+        }
         val newHost = if (data != null && data.scheme == "https") data.host else null
 
         val hasServerMismatch = newHost != null && newHost != currentHost
@@ -189,6 +194,14 @@ class MainActivity : AppCompatActivity(),
                     }
                 }
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        if (oidcAuthService.handleRedirectUri(intent.data)) {
+            intent.data = null
         }
     }
 

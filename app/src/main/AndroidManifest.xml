@@ -17,6 +17,7 @@
             android:name=".ui.MainActivity"
             android:configChanges="smallestScreenSize|screenSize|screenLayout|orientation"
             android:exported="true"
+            android:launchMode="singleTask"
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -36,6 +37,17 @@
                 <data android:host="lectures" />
                 <data android:host="metis_standalone_post" />
                 <data android:host="quiz_participation" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="de.tum.cit.ase.artemis"
+                    android:host="oauth2callback" />
             </intent-filter>
         </activity>
 
