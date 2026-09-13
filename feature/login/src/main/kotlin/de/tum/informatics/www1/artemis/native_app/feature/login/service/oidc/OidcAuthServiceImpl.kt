@@ -24,6 +24,8 @@ class OidcAuthServiceImpl (
         this.codeVerifier = verifier
         val authUrl = URLBuilder(serverUrl).apply {
             appendPathSegments("oauth2", "authorization", "oidc")
+            // Note: The Artemis server side expects "redirect=ios" for all mobile apps to trigger the
+            // custom scheme redirect (de.tum.cit.ase.artemis://oauth2callback). Do not change to "android".
             parameters.append("redirect", "ios")
             parameters.append("code_challenge", codeChallenge)
             parameters.append("rememberMe", rememberMe.toString())
