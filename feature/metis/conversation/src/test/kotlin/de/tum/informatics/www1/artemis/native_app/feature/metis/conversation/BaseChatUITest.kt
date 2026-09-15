@@ -49,6 +49,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.ReactionPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.LocalVisibleMetisContextManager
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisiblePostList
 import de.tum.informatics.www1.artemis.native_app.feature.metistest.VisibleMetisContextManagerMock
@@ -97,14 +98,14 @@ abstract class BaseChatUITest : BaseComposeTest() {
     )
 
     val reactions = listOf(
-        PostPojo.Reaction(
+        ReactionPojo(
             emojiId = "rocket",
             authorId = currentUser.id,
             username = currentUser.username ?: "author name",
             id = 1,
             creationDate = Clock.System.now()
         ),
-        PostPojo.Reaction(
+        ReactionPojo(
             emojiId = "tada",
             authorId = otherUser.id,
             username = otherUser.username ?: "other author name",
