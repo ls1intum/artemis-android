@@ -8,11 +8,13 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonPro
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.UnknownExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateId
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateShortName
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
 import io.ktor.client.request.forms.formData
@@ -40,7 +42,7 @@ val KoinComponent.serverConfigurationService: ServerConfigurationService get() =
 suspend fun KoinComponent.createCourse(
     accessToken: String,
     courseName: String = "Course ${generateId()}",
-    courseShortName: String = "ae2e${generateId()}",
+    courseShortName: String = generateShortName(),
     forceSelfRegistration: Boolean = false
 ): Course {
     Log.i(TAG, "Creating new course with name $courseName and shortName $courseShortName")
@@ -51,18 +53,10 @@ suspend fun KoinComponent.createCourse(
             shortName = courseShortName
         )
     } else {
-        val course = Course(
-            id = null,
-            title = courseName,
-            shortName = courseShortName,
-            testCourse = true,
-            courseInformationSharingConfiguration = Course.CourseInformationSharingConfiguration.COMMUNICATION_AND_MESSAGING,
-            courseInformationSharingMessagingCodeOfConduct = "Code of conduct…"
-        )
-        jsonProvider.applicationJsonConfiguration.encodeToString(course)
+        createCourseTemplate(title = courseName, shortName = courseShortName)
     }
 
-    return ktorProvider.ktorClient.submitFormWithBinaryData(
+    val course: Course = ktorProvider.ktorClient.submitFormWithBinaryData(
         formData {
             append(
                 "course",
@@ -85,6 +79,15 @@ suspend fun KoinComponent.createCourse(
         accept(ContentType.Application.Json)
     }
         .body()
+
+    // Every field of the course model has a default and unknown keys are ignored, so an error body
+    // decodes into a course rather than failing: without this check a rejected creation surfaces
+    // much later as a course with no id.
+    check(course.id != null && course.id != 0L) {
+        "Creating the course did not answer with one: $course"
+    }
+
+    return course
 }
 
 suspend fun KoinComponent.createExercise(
@@ -106,7 +109,19 @@ suspend fun KoinComponent.createExercise(
         contentType(ContentType.Application.Json)
         accept(ContentType.Application.Json)
     }
-        .body()
+        .body<Exercise>()
+        .also(::checkCreated)
+}
+
+/**
+ * An error body decodes into an [UnknownExercise] rather than failing, because the exercise
+ * hierarchy falls back to it for a type it does not recognise. Without this a rejected creation
+ * surfaces later as a cast failure in whichever screen the test opens.
+ */
+private fun checkCreated(exercise: Exercise) {
+    check(exercise !is UnknownExercise && exercise.id != null) {
+        "Creating the exercise did not answer with one: $exercise"
+    }
 }
 
 suspend fun KoinComponent.createExerciseFormBodyWithPng(
@@ -147,7 +162,7 @@ suspend fun KoinComponent.createExerciseFormBodyWithPng(
 
         contentType(ContentType.MultiPart.FormData)
         accept(ContentType.Application.Json)
-    }.body()
+    }.body<Exercise>().also(::checkCreated)
 }
 
 suspend fun KoinComponent.createLecture(
