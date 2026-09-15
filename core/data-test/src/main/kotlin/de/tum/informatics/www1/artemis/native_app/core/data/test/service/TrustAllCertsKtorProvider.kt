@@ -25,6 +25,11 @@ class TrustAllCertsKtorProvider(jsonProvider: JsonProvider, timeoutMillis: Long 
     }
 
     private val httpClient = HttpClient(CIO) {
+        // Same as the production client: without it a 4xx is handed to .body() like any
+        // other response, and since every model field has a default it decodes into an
+        // empty domain object. The E2E suite then sees a successful call that did nothing.
+        expectSuccess = true
+
         install(ContentNegotiation) {
             json(jsonProvider.applicationJsonConfiguration)
         }
