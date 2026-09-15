@@ -6,6 +6,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.LoggedInBasedServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
+import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.service.dto.TextEditorParticipationDto
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.service.TextEditorService
 import io.ktor.http.appendPathSegments
 
@@ -15,10 +16,10 @@ class TextEditorServiceImpl(
 ) : LoggedInBasedServiceImpl(ktorProvider, artemisContextProvider), TextEditorService {
 
     override suspend fun getParticipation(participationId: Long): NetworkResponse<Participation> {
-        return getRequest {
+        return getRequest<TextEditorParticipationDto> {
             url {
                 appendPathSegments(*Api.Text.Participations.path, participationId.toString(), "text-editor")
             }
-        }
+        }.bind { it.toParticipation() }
     }
 }

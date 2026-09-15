@@ -162,21 +162,10 @@ internal class MetisModificationServiceImpl(
         serverUrl: String,
         authToken: String
     ): NetworkResponse<Reaction> {
-        val reaction = when (post) {
-            is MetisModificationService.AffectedPost.Answer -> {
-                Reaction(
-                    emojiId = emojiId,
-                    answerPost = AnswerPost(id = post.postId)
-                )
-            }
-
-            is MetisModificationService.AffectedPost.Standalone -> {
-                Reaction(
-                    emojiId = emojiId,
-                    standalonePost = StandalonePost(id = post.postId)
-                )
-            }
-        }
+        // The server identifies the posting by its id alone, whether it is a message or a reply,
+        // and rejects the request when it is missing. Sending the posting nested, the way it comes
+        // back, leaves that id unset.
+        val reaction = CreateReactionDto(emojiId = emojiId, relatedPostId = post.postId)
 
         return performNetworkCall {
             ktorProvider.ktorClient.post(serverUrl) {

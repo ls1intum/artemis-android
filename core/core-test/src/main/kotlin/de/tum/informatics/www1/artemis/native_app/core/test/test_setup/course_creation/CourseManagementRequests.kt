@@ -8,11 +8,13 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonPro
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.UnknownExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateId
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateShortName
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
 import io.ktor.client.request.forms.formData
@@ -25,6 +27,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.appendPathSegments
+import io.ktor.http.HttpMethod
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.flow.first
@@ -40,7 +43,7 @@ val KoinComponent.serverConfigurationService: ServerConfigurationService get() =
 suspend fun KoinComponent.createCourse(
     accessToken: String,
     courseName: String = "Course ${generateId()}",
-    courseShortName: String = "ae2e${generateId()}",
+    courseShortName: String = generateShortName(),
     forceSelfRegistration: Boolean = false
 ): Course {
     Log.i(TAG, "Creating new course with name $courseName and shortName $courseShortName")
@@ -51,18 +54,10 @@ suspend fun KoinComponent.createCourse(
             shortName = courseShortName
         )
     } else {
-        val course = Course(
-            id = null,
-            title = courseName,
-            shortName = courseShortName,
-            testCourse = true,
-            courseInformationSharingConfiguration = Course.CourseInformationSharingConfiguration.COMMUNICATION_AND_MESSAGING,
-            courseInformationSharingMessagingCodeOfConduct = "Code of conduct…"
-        )
-        jsonProvider.applicationJsonConfiguration.encodeToString(course)
+        createCourseTemplate(title = courseName, shortName = courseShortName)
     }
 
-    return ktorProvider.ktorClient.submitFormWithBinaryData(
+    val course: Course = ktorProvider.ktorClient.submitFormWithBinaryData(
         formData {
             append(
                 "course",
@@ -85,6 +80,15 @@ suspend fun KoinComponent.createCourse(
         accept(ContentType.Application.Json)
     }
         .body()
+
+    // Every field of the course model has a default and unknown keys are ignored, so an error body
+    // decodes into a course rather than failing: without this check a rejected creation surfaces
+    // much later as a course with no id.
+    check(course.id != null && course.id != 0L) {
+        "Creating the course did not answer with one: $course"
+    }
+
+    return course
 }
 
 suspend fun KoinComponent.createExercise(
@@ -106,7 +110,19 @@ suspend fun KoinComponent.createExercise(
         contentType(ContentType.Application.Json)
         accept(ContentType.Application.Json)
     }
-        .body()
+        .body<Exercise>()
+        .also(::checkCreated)
+}
+
+/**
+ * An error body decodes into an [UnknownExercise] rather than failing, because the exercise
+ * hierarchy falls back to it for a type it does not recognise. Without this a rejected creation
+ * surfaces later as a cast failure in whichever screen the test opens.
+ */
+private fun checkCreated(exercise: Exercise) {
+    check(exercise !is UnknownExercise && exercise.id != null) {
+        "Creating the exercise did not answer with one: $exercise"
+    }
 }
 
 suspend fun KoinComponent.createExerciseFormBodyWithPng(
@@ -147,7 +163,7 @@ suspend fun KoinComponent.createExerciseFormBodyWithPng(
 
         contentType(ContentType.MultiPart.FormData)
         accept(ContentType.Application.Json)
-    }.body()
+    }.body<Exercise>().also(::checkCreated)
 }
 
 suspend fun KoinComponent.createLecture(
@@ -290,14 +306,72 @@ suspend fun KoinComponent.addStudentToCourse(
     accessToken: String,
     courseId: Long,
     studentLogin: String
+) = addUserToCourse(accessToken, courseId, studentLogin, "students")
+
+/**
+ * Sets the code of conduct of an existing course.
+ *
+ * The creation endpoint does not accept one: the field is absent from its payload and silently
+ * dropped, and a course without a code of conduct reports it as already accepted, so the tests that
+ * exercise accepting it have nothing to accept.
+ */
+suspend fun KoinComponent.setCodeOfConduct(
+    accessToken: String,
+    course: Course,
+    codeOfConduct: String
+) {
+    val response = ktorProvider.ktorClient.submitFormWithBinaryData(
+        formData {
+            append(
+                "course",
+                updateCourseCodeOfConductTemplate(course, codeOfConduct),
+                Headers.build {
+                    set("Content-Type", "application/json")
+                    set("name", "course")
+                    set("filename", "blob")
+                })
+        }
+    ) {
+        url(serverConfigurationService.serverUrl.first())
+        url {
+            appendPathSegments(*Api.Course.Courses.path, course.id.toString())
+        }
+        method = HttpMethod.Put
+
+        cookieAuth(accessToken)
+
+        contentType(ContentType.MultiPart.FormData)
+        accept(ContentType.Application.Json)
+    }
+
+    check(response.status.isSuccess()) {
+        "Could not set the code of conduct of course ${course.id}: ${response.status}"
+    }
+}
+
+/**
+ * Adds the given user to the course as an instructor, which is what the server means by a user
+ * responsible for the code of conduct.
+ */
+suspend fun KoinComponent.addInstructorToCourse(
+    accessToken: String,
+    courseId: Long,
+    instructorLogin: String
+) = addUserToCourse(accessToken, courseId, instructorLogin, "instructors")
+
+private suspend fun KoinComponent.addUserToCourse(
+    accessToken: String,
+    courseId: Long,
+    userLogin: String,
+    roleSegment: String
 ) {
     val response = ktorProvider.ktorClient.post(serverConfigurationService.serverUrl.first()) {
         url {
             appendPathSegments(
                 *Api.Course.Courses.path,
                 courseId.toString(),
-                "students",
-                studentLogin
+                roleSegment,
+                userLogin
             )
         }
 
@@ -307,6 +381,6 @@ suspend fun KoinComponent.addStudentToCourse(
     }
 
     check(response.status.isSuccess()) {
-        "Could not add $studentLogin to course $courseId: ${response.status}"
+        "Could not add $userLogin to course $courseId as $roleSegment: ${response.status}"
     }
 }
