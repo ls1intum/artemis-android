@@ -6,12 +6,10 @@ import androidx.room.Relation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IReaction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.AnswerPostingEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.BasePostingEntity
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.MetisUserEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.PostReactionEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.StandalonePostTagEntity
 import kotlinx.datetime.Instant
@@ -66,7 +64,7 @@ data class PostPojo(
         parentColumn = "client_post_id",
         projection = ["author_id", "emoji", "id"]
     )
-    override val reactions: List<Reaction>
+    override val reactions: List<ReactionPojo>
 ) : IStandalonePost {
 
     @Ignore
@@ -77,25 +75,4 @@ data class PostPojo(
 
     @Ignore
     override val standalonePostId: StandalonePostId = StandalonePostId.ClientSideId(clientPostId)
-
-    data class Reaction(
-        @ColumnInfo(name = "emoji")
-        override val emojiId: String,
-        @ColumnInfo(name = "author_id")
-        val authorId: Long,
-        @Relation(
-            entity = MetisUserEntity::class,
-            parentColumn = "author_id",
-            entityColumn = "id",
-            projection = ["name"]
-        )
-        val username: String,
-        @ColumnInfo(name = "id")
-        override val id: Long,
-        @ColumnInfo(name = "creation_date")
-        override val creationDate: Instant?
-    ) : IReaction {
-        @Ignore
-        override val creatorId: Long = authorId
-    }
 }
