@@ -1,5 +1,8 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct
 
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.setCodeOfConduct
+import org.junit.Before
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -32,6 +35,17 @@ class CodeOfConductE2eTest : ConversationBaseTest() {
 
     private companion object {
         private const val ERROR_MESSAGE_COC = "Could not load code of conduct from server"
+    }
+
+    @Before
+    override fun setup() {
+        super.setup()
+
+        // A course without a code of conduct reports it as already accepted, and the creation
+        // endpoint does not take one.
+        runBlockingWithTestTimeout {
+            setCodeOfConduct(getAdminAccessToken(), course, "Be excellent to each other")
+        }
     }
 
     @Test(timeout = DefaultTestTimeoutMillis)

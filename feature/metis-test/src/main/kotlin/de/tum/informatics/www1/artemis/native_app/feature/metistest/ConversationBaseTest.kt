@@ -6,7 +6,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExerci
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
 import de.tum.informatics.www1.artemis.native_app.core.test.testWebsocketModule
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.addStudentToCourse
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.addInstructorToCourse
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createCourse
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
@@ -14,6 +14,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAcc
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.performTestLogin
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.testLoginModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Username
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.user3Username
 import de.tum.informatics.www1.artemis.native_app.feature.metis.communicationModule
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.MetisDatabaseProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
@@ -57,7 +58,17 @@ abstract class ConversationBaseTest : BaseComposeTest() {
             accessToken = performTestLogin()
 
             course = createCourse(getAdminAccessToken())
-            addStudentToCourse(getAdminAccessToken(), course.id!!, user1Username)
+            // All three, not just the one that logs in: the conversation tests search for members,
+            // start chats with them and list them.
+            //
+            // As instructors, because that is what these tests used to get. The course carried one
+            // group name for every role and the users were all in it, so each of them was an
+            // instructor of every test course. Artemis 10 decides membership from per-course roles,
+            // where the equivalent has to be asked for: as plain students they cannot create a
+            // channel, moderate one, or manage its members.
+            listOf(user1Username, user2Username, user3Username).forEach { login ->
+                addInstructorToCourse(getAdminAccessToken(), course.id!!, login)
+            }
         }
     }
 

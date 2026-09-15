@@ -51,15 +51,17 @@ open class Account(
     private fun hasAnyAuthorityDirect(authorities: List<AccountAuthority>): Boolean {
         return this.authorities.any { it in authorities }
     }
-
-    private companion object {
-        /**
-         * Both count as an administrator on the server, and the internal admin holds
-         * ROLE_SUPER_ADMIN rather than ROLE_ADMIN.
-         */
-        val ADMIN_AUTHORITIES = listOf(
-            AccountAuthority.ROLE_ADMIN,
-            AccountAuthority.ROLE_SUPER_ADMIN
-        )
-    }
 }
+
+/**
+ * Both count as an administrator on the server, and the internal admin holds ROLE_SUPER_ADMIN
+ * rather than ROLE_ADMIN.
+ *
+ * Kept out of a companion object: kotlinx serialization looks the generated serializer up through
+ * the companion reflectively, and a private one makes that lookup fail with an IllegalAccessException
+ * wherever the serializer is not resolved at compile time.
+ */
+private val ADMIN_AUTHORITIES = listOf(
+    AccountAuthority.ROLE_ADMIN,
+    AccountAuthority.ROLE_SUPER_ADMIN
+)

@@ -27,6 +27,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.appendPathSegments
+import io.ktor.http.HttpMethod
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.flow.first
@@ -305,14 +306,72 @@ suspend fun KoinComponent.addStudentToCourse(
     accessToken: String,
     courseId: Long,
     studentLogin: String
+) = addUserToCourse(accessToken, courseId, studentLogin, "students")
+
+/**
+ * Sets the code of conduct of an existing course.
+ *
+ * The creation endpoint does not accept one: the field is absent from its payload and silently
+ * dropped, and a course without a code of conduct reports it as already accepted, so the tests that
+ * exercise accepting it have nothing to accept.
+ */
+suspend fun KoinComponent.setCodeOfConduct(
+    accessToken: String,
+    course: Course,
+    codeOfConduct: String
+) {
+    val response = ktorProvider.ktorClient.submitFormWithBinaryData(
+        formData {
+            append(
+                "course",
+                updateCourseCodeOfConductTemplate(course, codeOfConduct),
+                Headers.build {
+                    set("Content-Type", "application/json")
+                    set("name", "course")
+                    set("filename", "blob")
+                })
+        }
+    ) {
+        url(serverConfigurationService.serverUrl.first())
+        url {
+            appendPathSegments(*Api.Course.Courses.path, course.id.toString())
+        }
+        method = HttpMethod.Put
+
+        cookieAuth(accessToken)
+
+        contentType(ContentType.MultiPart.FormData)
+        accept(ContentType.Application.Json)
+    }
+
+    check(response.status.isSuccess()) {
+        "Could not set the code of conduct of course ${course.id}: ${response.status}"
+    }
+}
+
+/**
+ * Adds the given user to the course as an instructor, which is what the server means by a user
+ * responsible for the code of conduct.
+ */
+suspend fun KoinComponent.addInstructorToCourse(
+    accessToken: String,
+    courseId: Long,
+    instructorLogin: String
+) = addUserToCourse(accessToken, courseId, instructorLogin, "instructors")
+
+private suspend fun KoinComponent.addUserToCourse(
+    accessToken: String,
+    courseId: Long,
+    userLogin: String,
+    roleSegment: String
 ) {
     val response = ktorProvider.ktorClient.post(serverConfigurationService.serverUrl.first()) {
         url {
             appendPathSegments(
                 *Api.Course.Courses.path,
                 courseId.toString(),
-                "students",
-                studentLogin
+                roleSegment,
+                userLogin
             )
         }
 
@@ -322,6 +381,6 @@ suspend fun KoinComponent.addStudentToCourse(
     }
 
     check(response.status.isSuccess()) {
-        "Could not add $studentLogin to course $courseId: ${response.status}"
+        "Could not add $userLogin to course $courseId as $roleSegment: ${response.status}"
     }
 }

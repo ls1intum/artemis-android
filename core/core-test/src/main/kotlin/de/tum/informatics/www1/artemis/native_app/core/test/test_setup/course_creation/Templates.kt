@@ -89,6 +89,28 @@ fun createCourseTemplate(
 }
 """.trimIndent()
 
+fun updateCourseCodeOfConductTemplate(
+    course: de.tum.informatics.www1.artemis.native_app.core.model.Course,
+    codeOfConduct: String
+): String = """
+{
+  "id": ${course.id},
+  "title": "${course.title}",
+  "shortName": "${course.shortName}",
+  "testCourse": true,
+  "onlineCourse": false,
+  "accuracyOfScores": 1,
+  "maxComplaints": 0,
+  "maxTeamComplaints": 0,
+  "maxComplaintTimeDays": 0,
+  "maxComplaintTextLimit": 0,
+  "maxComplaintResponseTextLimit": 0,
+  "maxRequestMoreFeedbackTimeDays": 0,
+  "courseInformationSharingConfiguration": "COMMUNICATION_AND_MESSAGING",
+  "courseInformationSharingMessagingCodeOfConduct": "$codeOfConduct"
+}
+""".trimIndent()
+
 fun createTextExercise(title: String, courseId: Long): String = """
     {
         "mode": "INDIVIDUAL",
