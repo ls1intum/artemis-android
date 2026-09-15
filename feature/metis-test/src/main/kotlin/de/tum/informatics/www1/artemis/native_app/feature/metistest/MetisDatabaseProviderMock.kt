@@ -17,7 +17,10 @@ class MetisDatabaseProviderMock(context: Context) :
             MetisTestDatabase::class.java,
             "metis_db"
         )
-        .fallbackToDestructiveMigration()
+        .fallbackToDestructiveMigration(dropAllTables = true)
+        // Room 2.8 asserts the calling thread on the raw query path too, and the tests read back
+        // through it directly from the test thread.
+        .allowMainThreadQueries()
         .build()
 
     override val metisDao: MetisDao get() = database.metisDao()

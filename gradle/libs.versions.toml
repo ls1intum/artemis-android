@@ -4,37 +4,37 @@ targetSdk = "36"
 minSdk = "30"
 buildToolsVersion = "35.0.0"
 
-accompanist = "0.30.1"
+accompanist = "0.36.0"
 androidDesugarJdkLibs = "2.1.5"
-androidGradlePlugin = "8.9.1"
-androidxActivity = "1.10.1"
-androidxAppCompat = "1.7.1"
-androidxComposeBom = "2025.06.01"
-androidxCredentials = "1.5.0"
-androidxDataStore = "1.1.4"
-androidxLifecycle = "2.9.1"
-androidxNavigation = "2.8.9"
-androidxPaging = "3.3.6"
-androidxPagingCompose = "3.3.6"
+androidGradlePlugin = "8.13.2"
+androidxActivity = "1.13.0"
+androidxAppCompat = "1.8.0"
+androidxComposeBom = "2026.06.01"
+androidxCredentials = "1.6.0"
+androidxDataStore = "1.2.1"
+androidxLifecycle = "2.10.0"
+androidxNavigation = "2.9.8"
+androidxPaging = "3.5.1"
+androidxPagingCompose = "3.5.1"
 coil = "3.2.0"
 coil2 = "2.7.0"     # The markwon library still depends on coil2: https://github.com/ls1intum/artemis-android/issues/171
 kotlin = "2.2.0"
 kotlinxCoroutines = "1.10.2"
 kotlinxDatetime = "0.6.2"
-kotlinxSerializationJson = "1.8.1"
+kotlinxSerializationJson = "1.9.0"
 koin = "4.1.0"
-koinAndroidxCompose = "4.0.0"
+koinAndroidxCompose = "4.0.0"     # Held back: 4.1.0 resolves koinViewModel against a closed root scope, see ConversationProfilePictureUiTest
 kover = "0.9.1"
 krop = "0.2.0"
 krossbow = "9.3.0"
 ktor = "3.2.0"
 markwon = "4.6.2"
-mockk = "1.14.2"
-ossLicensesPlugin = "0.10.6"
+mockk = "1.14.3"
+ossLicensesPlugin = "0.13.0"
 placeholderMaterial = "2.0.0"
-room = "2.6.1"
-sentry-android = "8.14.0"
-work = "2.10.2"
+room = "2.8.5"
+sentry-android = "8.16.0"
+work = "2.11.2"
 browser = "1.10.0"
 
 [libraries]
@@ -47,7 +47,7 @@ accompanist-permissions = { group = "com.google.accompanist", name = "accompanis
 android-desugarJdkLibs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "androidDesugarJdkLibs" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidxActivity" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidxAppCompat" }
-androidx-browser = { group = "androidx.browser", name = "browser", version = "1.8.0" }
+androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "androidxComposeBom" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout" }
@@ -74,7 +74,7 @@ androidx-room-runtime = { group = "androidx.room", name = "room-runtime", versio
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 androidx-room-paging = { group = "androidx.room", name = "room-paging", version.ref = "room" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
-androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version = "1.1.0-beta01" }
+androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version = "1.1.0" }
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work" }
 auth0-java-jwt = { group = "com.auth0.android", name = "jwtdecode", version = "2.0.2" }
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
@@ -82,8 +82,8 @@ coil-compose-core = { group = "io.coil-kt.coil3", name = "coil-compose-core", ve
 coil-test = { group = "io.coil-kt.coil3", name = "coil-test", version.ref = "coil" }
 coil-network = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 coil2-base = { group = "io.coil-kt", name = "coil-base", version.ref = "coil2" }
-edge2edge-preview = { group = "de.drick.compose", name = "edge-to-edge-preview", version = "0.6.0" }
-google-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version = "33.15.0" }
+edge2edge-preview = { group = "de.drick.compose", name = "edge-to-edge-preview", version = "0.7.1" }
+google-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version = "34.19.0" }
 google-firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
@@ -125,7 +125,7 @@ noties-markwon-simple-ext = { group = "io.noties.markwon", name = "simple-ext", 
 noties-markwon-image-coil = { group = "io.noties.markwon", name = "image-coil", version.ref = "markwon" }
 oss-licenses-plugin = { module = "com.google.android.gms:oss-licenses-plugin", version.ref = "ossLicensesPlugin" }
 placeholder-material = { group = "io.github.fornewid", name = "placeholder-material3", version.ref = "placeholderMaterial" }
-play-services-oss-licences = { group = "com.google.android.gms", name = "play-services-oss-licenses", version = "17.1.0" }
+play-services-oss-licences = { group = "com.google.android.gms", name = "play-services-oss-licenses", version = "17.5.2" }
 robolectric = { group = "org.robolectric", name = "robolectric", version = "4.16.1" }
 sentry-android = { group = "io.sentry", name = "sentry-android", version.ref = "sentry-android" }
 sentry-compose-android = { group = "io.sentry", name = "sentry-compose-android", version.ref = "sentry-android" }
@@ -140,9 +140,9 @@ browser = { group = "androidx.browser", name = "browser", version.ref = "browser
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
 android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "5.1.1" }
+google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "5.3.0" }
 google-ksp = { id = "com.google.devtools.ksp", version = "2.2.0-2.0.2" }
-google-services = { id = "com.google.gms.google-services", version = "4.4.2" }
+google-services = { id = "com.google.gms.google-services", version = "4.5.0" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
