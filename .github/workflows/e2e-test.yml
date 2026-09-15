@@ -56,7 +56,9 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
-          java-version: 17
+          # build-logic targets JVM 21, so Gradle refuses to configure the build on 17. The other
+          # three workflows already use 21.
+          java-version: 21
 
       - name: Run tests
         run: ./gradlew test --max-workers=4 -Dskip.unit-tests=true -Dskip.e2e=false -Dskip.debugVariants=true -Dskip.flavor.unrestricted=true -Dskip.flavor.beta=true
