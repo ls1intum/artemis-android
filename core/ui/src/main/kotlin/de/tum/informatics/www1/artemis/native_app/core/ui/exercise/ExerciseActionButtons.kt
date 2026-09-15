@@ -54,10 +54,12 @@ fun ExerciseActionButtons(
     }
 
     if (templateStatus != null) {
-        if (templateStatus is ResultTemplateStatus.WithResult) {
+        // TODO: Quiz results not working, thus disabled
+        if (templateStatus is ResultTemplateStatus.WithResult && exercise !is QuizExercise) {
             ArtemisButton(
                 modifier = modifier,
-                onClick = if (exercise is QuizExercise) actions.onClickViewQuizResults else actions.onClickViewResult,
+                // onClick = if (exercise is QuizExercise) actions.onClickViewQuizResults else actions.onClickViewResult,
+                onClick = actions.onClickViewResult,
                 text = stringResource(id = R.string.exercise_actions_view_result_button)
             )
         }

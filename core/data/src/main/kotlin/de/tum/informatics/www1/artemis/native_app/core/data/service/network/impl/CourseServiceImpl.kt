@@ -19,7 +19,7 @@ internal class CourseServiceImpl(
     ): NetworkResponse<CourseWithScore> {
         return getRequest {
             url {
-                appendPathSegments(*Api.Core.Courses.path, courseId.toString(), "for-dashboard")
+                appendPathSegments(*Api.Course.Courses.path, courseId.toString(), "for-dashboard")
             }
         }
     }
