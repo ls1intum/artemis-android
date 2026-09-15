@@ -194,6 +194,16 @@ Found while comparing the models against the server, and not fixed here.
 - **`CourseWithScore` is only meaningful on the dashboard.** The scores come from
   `courses/for-dashboard`. The single-course endpoints no longer carry them, and no screen outside
   the dashboard read them.
+- **`SavedPost.authorRole` is always null.** `saved-posts` answers with a `PostingDTO`, which spells
+  that field `role`; every other posting endpoint spells it `authorRole`. The inconsistency is on
+  the server and predates Artemis 10, so it is recorded rather than worked around with a
+  `@SerialName` that would break once the server is made consistent.
+- **`SavedPost.hasForwardedMessages` is always null**, for the same reason: `PostingDTO` does not
+  carry it, so the saved-posts list cannot show the forwarded-message indicator.
+
+The models were compared field by field against the server DTOs for the course, account, exercise,
+lecture, participation, submission, result, attachment, conversation, post, reaction, forwarded
+message, saved post and passkey types. Everything not listed above matched.
 
 ## Endpoints that are no longer legacy aliases
 
