@@ -9,7 +9,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entiti
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.MetisPostContextEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.MetisUserEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.PostReactionEntity
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 data class AnswerPostPojo(
     @ColumnInfo(name = "parent_post_id")

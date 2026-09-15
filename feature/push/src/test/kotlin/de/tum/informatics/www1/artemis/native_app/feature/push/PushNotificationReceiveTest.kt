@@ -15,7 +15,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.noti
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import org.junit.Before

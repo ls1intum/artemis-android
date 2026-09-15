@@ -1,6 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation
 
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.coroutines.delay
 import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest

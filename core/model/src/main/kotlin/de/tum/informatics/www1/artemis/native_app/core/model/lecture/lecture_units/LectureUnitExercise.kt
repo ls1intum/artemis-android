@@ -1,7 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units
 
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

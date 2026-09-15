@@ -1,27 +1,27 @@
 [versions]
-compileSdk = "36"
-targetSdk = "36"
+compileSdk = "37"
+targetSdk = "37"
 minSdk = "30"
-buildToolsVersion = "35.0.0"
+buildToolsVersion = "37.0.0"
 
 accompanist = "0.36.0"                # the last release of the deprecated artifacts below
 accompanistPermissions = "0.37.3"     # the only one still released
 androidDesugarJdkLibs = "2.1.5"
-androidGradlePlugin = "8.13.2"
+androidGradlePlugin = "9.4.0"
 androidxActivity = "1.13.0"
 androidxAppCompat = "1.8.0"
-androidxComposeBom = "2026.06.01"
+androidxComposeBom = "2026.09.00"
 androidxCredentials = "1.6.0"
 androidxDataStore = "1.2.1"
-androidxLifecycle = "2.10.0"
-androidxNavigation = "2.9.8"
+androidxLifecycle = "2.11.0"
+androidxNavigation = "2.10.1"
 androidxPaging = "3.5.1"
 androidxPagingCompose = "3.5.1"
-coil = "3.5.0"                        # 3.6.x pulls Compose 1.12, whose AAR metadata requires AGP 9.1+
+coil = "3.6.2"
 coil2 = "2.7.0"     # The markwon library still depends on coil2: https://github.com/ls1intum/artemis-android/issues/171
-kotlin = "2.3.21"
+kotlin = "2.4.20"
 kotlinxCoroutines = "1.11.0"
-kotlinxDatetime = "0.6.2"
+kotlinxDatetime = "0.8.0"
 kotlinxSerializationJson = "1.11.0"
 koin = "4.2.2"
 kover = "0.9.9"
@@ -78,6 +78,7 @@ androidx-security-crypto = { group = "androidx.security", name = "security-crypt
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work" }
 auth0-java-jwt = { group = "com.auth0.android", name = "jwtdecode", version = "2.1.0" }
 bouncycastle-bcprov = { group = "org.bouncycastle", name = "bcprov-jdk18on", version = "1.86" }
+androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version = "3.7.0" }
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 coil-compose-core = { group = "io.coil-kt.coil3", name = "coil-compose-core", version.ref = "coil" }
 coil-test = { group = "io.coil-kt.coil3", name = "coil-test", version.ref = "coil" }
@@ -127,7 +128,7 @@ noties-markwon-image-coil = { group = "io.noties.markwon", name = "image-coil", 
 oss-licenses-plugin = { module = "com.google.android.gms:oss-licenses-plugin", version.ref = "ossLicensesPlugin" }
 placeholder-material = { group = "io.github.fornewid", name = "placeholder-material3", version.ref = "placeholderMaterial" }
 play-services-oss-licences = { group = "com.google.android.gms", name = "play-services-oss-licenses", version = "17.5.2" }
-robolectric = { group = "org.robolectric", name = "robolectric", version = "4.16.1" }  # 4.17 fails every Robolectric test on JDK 21 with "Failed to interact with raw FileDescriptor internals"
+robolectric = { group = "org.robolectric", name = "robolectric", version = "4.17" }
 sentry-android = { group = "io.sentry", name = "sentry-android", version.ref = "sentry-android" }
 sentry-compose-android = { group = "io.sentry", name = "sentry-compose-android", version.ref = "sentry-android" }
 toolbar-compose = { group = "me.onebone", name = "toolbar-compose", version = "2.3.5" }

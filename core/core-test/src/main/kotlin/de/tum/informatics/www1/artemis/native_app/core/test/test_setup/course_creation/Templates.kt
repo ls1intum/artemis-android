@@ -2,8 +2,8 @@ package de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_c
 
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateId
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlin.time.Duration.Companion.days
 
 fun createCourseWithSelfRegistration(

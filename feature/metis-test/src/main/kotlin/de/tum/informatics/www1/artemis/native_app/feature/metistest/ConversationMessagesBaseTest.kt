@@ -8,7 +8,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.sha
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import org.junit.Before
 import org.koin.test.get
 

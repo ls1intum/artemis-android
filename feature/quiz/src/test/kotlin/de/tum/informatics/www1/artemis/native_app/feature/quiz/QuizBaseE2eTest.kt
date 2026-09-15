@@ -85,7 +85,11 @@ internal abstract class QuizBaseE2eTest(protected val quizType: QuizType.Workabl
 
     protected fun getBackgroundImageFilePath() = "/api/files/drag-and-drop/backgrounds/${generateId()}/dndbackground.png"
 
-    protected fun getBackgroundImageBytes(): ByteArray = context.resources.openRawResource(R.raw.dndbackground).use { inputStream ->
-        inputStream.readBytes()
-    }
+    // Read from the test classpath rather than as an Android raw resource: the resource route
+    // needed src/test/res grafted onto the main source set, which AGP 9 no longer allows and which
+    // shipped a test fixture in the release APK.
+    protected fun getBackgroundImageBytes(): ByteArray =
+        checkNotNull(javaClass.getResourceAsStream("/dndbackground.png")) {
+            "dndbackground.png is missing from the test resources"
+        }.use { inputStream -> inputStream.readBytes() }
 }
