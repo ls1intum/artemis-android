@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.participate.text_exercise
 
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
 import androidx.test.platform.app.InstrumentationRegistry
 import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
@@ -7,6 +8,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExerci
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
 import de.tum.informatics.www1.artemis.native_app.core.test.testWebsocketModule
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.addStudentToCourse
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createCourse
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createTextExercise
@@ -45,6 +47,7 @@ abstract class BaseExerciseTest : BaseComposeTest() {
             accessToken = performTestLogin()
 
             course = createCourse(getAdminAccessToken())
+            addStudentToCourse(getAdminAccessToken(), course.id!!, user1Username)
             exercise = createExercise(
                 getAdminAccessToken(),
                 course.id!!,

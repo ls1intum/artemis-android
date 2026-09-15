@@ -6,10 +6,12 @@ import com.android.build.api.variant.AndroidComponentsExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
-import org.gradle.api.plugins.ExtensionAware
+import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByType
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompilerOptions
 import util.libs
 import java.lang.Boolean
 import kotlin.String
@@ -71,16 +73,6 @@ internal fun Project.configureKotlinAndroid(
             isCoreLibraryDesugaringEnabled = true
         }
 
-        kotlinOptions {
-            freeCompilerArgs = freeCompilerArgs + listOf(
-                "-opt-in=kotlin.RequiresOptIn",
-                // Enable experimental coroutines APIs, including Flow
-                "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-                "-opt-in=kotlinx.coroutines.FlowPreview"
-            )
-
-            jvmTarget = JavaVersion.VERSION_17.toString()
-        }
 
         testOptions {
             unitTests {
@@ -101,6 +93,17 @@ internal fun Project.configureKotlinAndroid(
                 }
             }
         }
+    }
+
+    kotlinCompilerOptions {
+        freeCompilerArgs.addAll(
+            "-opt-in=kotlin.RequiresOptIn",
+            // Enable experimental coroutines APIs, including Flow
+            "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+            "-opt-in=kotlinx.coroutines.FlowPreview"
+        )
+
+        jvmTarget.set(JvmTarget.JVM_17)
     }
 
     dependencies {
@@ -192,6 +195,14 @@ private fun NamedDomainObjectContainer<out ProductFlavor>.createFlavor(
     }
 }
 
-fun CommonExtension<*, *, *, *, *, *>.kotlinOptions(block: KotlinJvmOptions.() -> Unit) {
-    (this as ExtensionAware).extensions.configure("kotlinOptions", block)
+/**
+ * Configures the Kotlin compiler of this project.
+ *
+ * Kotlin 2.2 turned the "kotlinOptions" block on the Android extension into an error, so the options
+ * are set on the Kotlin extension itself instead.
+ */
+fun Project.kotlinCompilerOptions(block: KotlinJvmCompilerOptions.() -> Unit) {
+    extensions.configure<KotlinAndroidProjectExtension> {
+        compilerOptions(block)
+    }
 }
