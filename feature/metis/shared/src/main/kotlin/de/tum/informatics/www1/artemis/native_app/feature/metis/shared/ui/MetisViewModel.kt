@@ -42,7 +42,9 @@ abstract class MetisViewModel(
         networkStatusProvider = networkStatusProvider,
         manualReloadFlow = requestReload
     ) {
-        getCourse(courseId).bind { it.course }
+        // The content is needed, not just the metadata: the message composer completes exercise,
+        // lecture and FAQ references from it.
+        getCourseWithContent(courseId)
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 

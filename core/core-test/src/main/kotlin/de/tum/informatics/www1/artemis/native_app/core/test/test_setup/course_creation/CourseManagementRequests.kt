@@ -30,12 +30,6 @@ import kotlinx.coroutines.flow.first
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 
-private const val DEFAULT = "default"
-private val studentGroupName: String get() = System.getenv("studentGroupName") ?: DEFAULT
-private val teachingAssistantGroupName: String get() = System.getenv("tutorGroupName") ?: DEFAULT
-private val editorGroupName: String get() = System.getenv("editorGroupName") ?: DEFAULT
-private val instructorGroupName: String get() = System.getenv("instructorGroupName") ?: DEFAULT
-
 private const val TAG = "CourseCreationService"
 
 val KoinComponent.jsonProvider: JsonProvider get() = get()
@@ -48,12 +42,7 @@ suspend fun KoinComponent.createCourse(
     courseShortName: String = "ae2e${generateId()}",
     forceSelfRegistration: Boolean = false
 ): Course {
-    Log.i(
-        TAG, """
-        Creating new course with name $courseName and shortName $courseShortName
-        Using studentGroupName=$studentGroupName, teachingAssistantGroupName=$teachingAssistantGroupName, editorGroupName=$editorGroupName, instructorGroupName=$instructorGroupName
-        """.trimIndent()
-    )
+    Log.i(TAG, "Creating new course with name $courseName and shortName $courseShortName")
 
     val courseJsonString = if (forceSelfRegistration) {
         createCourseWithSelfRegistration(
@@ -67,10 +56,6 @@ suspend fun KoinComponent.createCourse(
             shortName = courseShortName,
             testCourse = true,
             courseInformationSharingConfiguration = Course.CourseInformationSharingConfiguration.COMMUNICATION_AND_MESSAGING,
-            studentGroupName = studentGroupName,
-            teachingAssistantGroupName = teachingAssistantGroupName,
-            editorGroupName = editorGroupName,
-            instructorGroupName = instructorGroupName,
             courseInformationSharingMessagingCodeOfConduct = "Code of conduct…"
         )
         jsonProvider.applicationJsonConfiguration.encodeToString(course)

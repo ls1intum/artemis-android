@@ -18,21 +18,28 @@ open class Account(
     override val langKey: String = "en",
     override val imageUrl: String? = null,
     override val id: Long = 0L,
-    val groups: List<String> = emptyList()
+    /**
+     * The roles this account holds per course. Artemis 10 replaced the course group names the client
+     * used to match against the account's groups with this list.
+     */
+    val courseRoles: List<CourseAccessRights> = emptyList()
 ) : BaseAccount {
 
     val hasCustomProfilePicture: Boolean
         get() = imageUrl != null
 
-    fun isAtLeastTutorInCourse(course: Course): Boolean {
-        return hasGroup(course.instructorGroupName) ||
-                hasGroup(course.editorGroupName) ||
-                hasGroup(course.teachingAssistantGroupName) ||
-                hasAnyAuthorityDirect(listOf(AccountAuthority.ROLE_INSTRUCTOR))
-    }
+    fun isAtLeastTutorInCourse(course: Course): Boolean =
+        hasCourseRoleAtLeast(course.id, CourseRole.TEACHING_ASSISTANT)
 
-    private fun hasGroup(groupName: String): Boolean {
-        return groupName in groups
+    private fun hasCourseRoleAtLeast(courseId: Long?, minimum: CourseRole): Boolean {
+        if (hasAnyAuthorityDirect(listOf(AccountAuthority.ROLE_ADMIN))) return true
+        if (courseId == null) return false
+
+        return courseRoles
+            .firstOrNull { it.courseId == courseId }
+            ?.roles
+            .orEmpty()
+            .any { it.isAtLeast(minimum) }
     }
 
     private fun hasAnyAuthorityDirect(authorities: List<AccountAuthority>): Boolean {

@@ -16,7 +16,12 @@ private const val api = "api"
  * everything notification-related under "notification", the admin endpoints under "admin" (user
  * administration under "account/admin"), and starting a quiz batch under "quiz/quiz-batches". The
  * server still serves the old spellings as deprecated aliases, but stops doing so on
- * 30 September 2026.
+ * 30 September 2026. This app calls none of them.
+ *
+ * Artemis 10 then removed several endpoints outright. The app therefore requires a server of that
+ * version or newer; against an older one, the course view, the quiz view and the server clock
+ * synchronisation fail. "developerDocs/ArtemisApiUsage.md" lists every endpoint the app calls and
+ * describes how to compare that list against a server release.
  */
 sealed class Api(
     vararg val path: String
@@ -37,6 +42,13 @@ sealed class Api(
         data object Public : Api(*Core.path, "public")
         data object Files : Api(*Core.path, "files")
     }
+
+    /**
+     * Endpoints served outside any module, directly by the servlet container. Artemis 8.8.2 moved the
+     * server time here from "api/core/public/time" so it bypasses the Spring filter chain; it answers
+     * text/plain rather than JSON.
+     */
+    data object Public: Api(api, "public")
 
     data object Course: Api(api, "course") {
         data object Courses : Api(*Course.path, "courses")

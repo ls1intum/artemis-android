@@ -84,7 +84,7 @@ internal class CodeOfConductViewModel(
                  */
                 courseService
                     .getCourse(courseId)
-                    .bind { it.course.courseInformationSharingMessagingCodeOfConduct }
+                    .bind { it.courseInformationSharingMessagingCodeOfConduct }
                     .then { courseCoc ->
                         if (courseCoc.isBlank()) {
                             codeOfConductService.getCodeOfConductTemplate(

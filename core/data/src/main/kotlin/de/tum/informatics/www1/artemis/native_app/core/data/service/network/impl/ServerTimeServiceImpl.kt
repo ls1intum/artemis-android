@@ -4,11 +4,13 @@ import de.tum.informatics.www1.artemis.native_app.core.common.ClockWithOffset
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.common.offsetBy
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.retryNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.LoggedInBasedServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ServerTimeService
+import io.ktor.http.ContentType
 import io.ktor.http.appendPathSegments
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -99,13 +101,21 @@ internal class ServerTimeServiceImpl(
     private suspend fun requestServerTime(clock: Clock): NetworkResponse<ServerTimeRequestResponse> {
         return retryNetworkCall(maxRetries = 3, delayBetweenRetries = 1.seconds) {
             val sentTime = clock.now().toEpochMilliseconds()
-            getRequest<Instant> {
+            // The endpoint is served by a servlet container valve, not by Spring, and writes the
+            // instant as text/plain. Reading it as a String and parsing it keeps the JSON content
+            // negotiation of the other calls out of the way.
+            getRequest<String>(contentType = ContentType.Text.Plain) {
                 url {
-                    appendPathSegments(*Api.Core.Public.path, "time")
+                    appendPathSegments(*Api.Public.path, "time")
                 }
             }
-                .bind { serverTime ->
-                    ServerTimeRequestResponse(sentTime, serverTime.toEpochMilliseconds())
+                .then { serverTime ->
+                    performNetworkCall {
+                        ServerTimeRequestResponse(
+                            sentTime,
+                            Instant.parse(serverTime.trim()).toEpochMilliseconds()
+                        )
+                    }
                 }
         }
     }
