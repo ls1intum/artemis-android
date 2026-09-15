@@ -209,6 +209,14 @@ internal abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest()
                 R.string.conversation_settings_section_channel_toggle_privacy_public_button
         )
 
+        // Once the channel has changed, the action on offer is the opposite one.
+        val toggledButtonText = context.getString(
+            if (isPublic)
+                R.string.conversation_settings_section_channel_toggle_privacy_public
+            else
+                R.string.conversation_settings_section_channel_toggle_privacy_private
+        )
+
         composeTestRule.waitUntilAtLeastOneExists(
             hasText(toggleButtonText),
             DefaultTimeoutMillis
@@ -235,7 +243,7 @@ internal abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest()
 
         composeTestRule
             .waitUntilExactlyOneExists(
-                hasText(toggleButtonText),
+                hasText(toggledButtonText),
                 DefaultTimeoutMillis
             )
     }

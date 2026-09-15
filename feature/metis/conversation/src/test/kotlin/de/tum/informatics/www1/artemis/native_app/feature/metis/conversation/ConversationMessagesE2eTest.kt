@@ -1,5 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation
 
+import kotlinx.datetime.Clock
+import kotlinx.coroutines.delay
 import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
@@ -119,9 +121,9 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
                 accessToken
             ).orThrow("Could not create reaction")
 
-            val updatedPost = metisService
-                .getPost(metisContext, post.id!!, testServerUrl, accessToken)
-                .orThrow("Could not get updated post")
+            val updatedPost = awaitPost(post.id!!, "a reaction with emojiId=$emojiId") { fetched ->
+                fetched.reactions.orEmpty().any { it.emojiId == emojiId }
+            }
 
             assertTrue(
                 updatedPost.reactions.orEmpty().any { it.emojiId == emojiId },
@@ -148,9 +150,9 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
                 ).orThrow("Could not create reaction")
             }
 
-            val newPost =
-                metisService.getPost(metisContext, post.id!!, testServerUrl, accessToken)
-                    .orThrow("Could not load new post")
+            val newPost = awaitPost(post.id!!, "a reaction with emojiId=$emojiId") { fetched ->
+                fetched.reactions.orEmpty().any { it.emojiId == emojiId }
+            }
 
             val reaction = newPost.reactions.orEmpty().first { it.emojiId == emojiId }
 
@@ -164,9 +166,9 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
                 "Could not delete reaction"
             )
 
-            val finalPost =
-                metisService.getPost(metisContext, post.id!!, testServerUrl, accessToken)
-                    .orThrow("Could not load final post")
+            val finalPost = awaitPost(post.id!!, "no reaction with emojiId=$emojiId") { fetched ->
+                fetched.reactions.orEmpty().none { it.emojiId == emojiId }
+            }
 
             assertNull(
                 finalPost.reactions.orEmpty().firstOrNull { it.emojiId == emojiId },
@@ -247,4 +249,32 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
             assertEquals(DisplayPriority.PINNED, editedPost.displayPriority, "Edited post does not have the updated display priority")
         }
     }
+
+    /**
+     * Reads the post back until it satisfies [condition].
+     *
+     * A reaction is visible to the app over the websocket as soon as it is made, so the message read
+     * is allowed to catch up a moment behind the write. Asserting on a single immediate read makes
+     * the test fail under load for a difference nobody would see.
+     */
+    private suspend fun awaitPost(
+        postId: Long,
+        expectation: String,
+        condition: (StandalonePost) -> Boolean
+    ): StandalonePost {
+        val deadline = Clock.System.now() + DefaultTimeoutMillis.milliseconds
+
+        var latest = metisService.getPost(metisContext, postId, testServerUrl, accessToken)
+            .orThrow("Could not load post $postId")
+
+        while (!condition(latest) && Clock.System.now() < deadline) {
+            delay(250.milliseconds)
+            latest = metisService.getPost(metisContext, postId, testServerUrl, accessToken)
+                .orThrow("Could not load post $postId")
+        }
+
+        assertTrue(condition(latest), "Post $postId never showed $expectation: $latest")
+        return latest
+    }
+
 }
