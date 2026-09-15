@@ -17,6 +17,17 @@ permissions:
   contents: read
   checks: write
 
+concurrency:
+  # One E2E run at a time, repository wide. The stack uses fixed container names and a fixed volume,
+  # and the job starts by stopping and removing exactly those, so two runs sharing a machine tear
+  # each other down; a full Artemis and MySQL per run is more than the runners carry in parallel in
+  # any case. A run that overlapped another has already failed here with "container artemis-app is
+  # unhealthy" after waiting out the ten minute health check.
+  #
+  # Queued rather than cancelled: every one of these runs is a result somebody is waiting on.
+  group: e2e-tests
+  cancel-in-progress: false
+
 jobs:
   end-to-end-tests:
     name: E2E Tests
