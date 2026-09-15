@@ -1,10 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metistest
 
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
 import de.tum.informatics.www1.artemis.native_app.core.test.testWebsocketModule
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.addStudentToCourse
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createCourse
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
@@ -55,6 +57,7 @@ abstract class ConversationBaseTest : BaseComposeTest() {
             accessToken = performTestLogin()
 
             course = createCourse(getAdminAccessToken())
+            addStudentToCourse(getAdminAccessToken(), course.id!!, user1Username)
         }
     }
 

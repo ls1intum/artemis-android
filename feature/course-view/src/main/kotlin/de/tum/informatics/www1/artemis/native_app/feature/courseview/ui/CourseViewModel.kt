@@ -46,8 +46,7 @@ class CourseViewModel(
             networkStatusProvider = networkStatusProvider,
             manualReloadFlow = requestReload
         ) {
-            getCourse(courseId)
-                .bind { it.course }
+            getCourseWithContent(courseId)
         }
         .flowOn(coroutineContext)
         .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())

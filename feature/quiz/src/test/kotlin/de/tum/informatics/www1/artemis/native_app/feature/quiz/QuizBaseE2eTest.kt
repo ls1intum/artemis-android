@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.quiz
 
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.SavedStateHandle
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ParticipationService
@@ -7,6 +8,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
 import de.tum.informatics.www1.artemis.native_app.core.test.testWebsocketModule
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.addStudentToCourse
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createCourse
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateId
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
@@ -47,6 +49,7 @@ internal abstract class QuizBaseE2eTest(protected val quizType: QuizType.Workabl
 
         runBlockingWithTestTimeout(timeoutMultiplier = 2) {
             course = createCourse(getAdminAccessToken())
+            addStudentToCourse(getAdminAccessToken(), course.id!!, user1Username)
             courseId = course.id!!
 
             accessToken = performTestLogin()
