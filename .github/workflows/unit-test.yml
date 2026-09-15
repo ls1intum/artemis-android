@@ -40,6 +40,10 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          # The action installs "tools platform-tools" by default, and Google has withdrawn the
+          # obsolete "tools" package, so the default makes sdkmanager exit 1 before anything builds.
+          packages: 'platform-tools'
 
       - name: Run tests
         run: ./gradlew test -Dskip.unit-tests=false -Dskip.e2e=true -Dskip.debugVariants=true -Dskip.flavor.unrestricted=true -Dskip.flavor.beta=true
