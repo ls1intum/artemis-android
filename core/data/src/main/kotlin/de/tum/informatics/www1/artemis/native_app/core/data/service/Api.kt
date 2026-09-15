@@ -18,10 +18,9 @@ private const val api = "api"
  * server still serves the old spellings as deprecated aliases, but stops doing so on
  * 30 September 2026. This app calls none of them.
  *
- * Artemis 10 then removed several endpoints outright. The app therefore requires a server of that
- * version or newer; against an older one, the course view, the quiz view and the server clock
- * synchronisation fail. "developerDocs/ArtemisApiUsage.md" lists every endpoint the app calls and
- * describes how to compare that list against a server release.
+ * The minimum server version is 9.9, set by the course overview endpoints this app now composes the
+ * course from. "developerDocs/ArtemisApiUsage.md" lists every endpoint the app calls and describes
+ * how to compare that list against a server release.
  */
 sealed class Api(
     vararg val path: String

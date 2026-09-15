@@ -2,10 +2,16 @@
 
 Every Artemis REST endpoint this app calls, and how it was checked against the server.
 
-The app has no server-version negotiation: each endpoint is a single hardcoded path. It therefore
-requires an Artemis server of **version 10 or newer**, and a path that the server stops serving turns
-into a silent feature failure rather than a build error. This page exists so that the next person
-comparing the app against a new Artemis release does not have to rediscover the endpoint list.
+The app has no server-version negotiation: each endpoint is a single hardcoded path. A path the
+server stops serving therefore turns into a silent feature failure rather than a build error. This
+page exists so that the next person comparing the app against a new Artemis release does not have to
+rediscover the endpoint list.
+
+**Minimum server version: Artemis 9.9.** That is set by the newest thing the app depends on, the
+course overview endpoints (`for-overview`, `available-tabs`, `exercises-for-overview`,
+`lectures-for-overview`), all of which shipped in 9.9. The per-course roles on the account arrived in
+the same release; `faqEnabled` left the course in 9.4 and the enrollment confirmation message was
+renamed in 9.3.
 
 ## How to re-run the comparison
 
