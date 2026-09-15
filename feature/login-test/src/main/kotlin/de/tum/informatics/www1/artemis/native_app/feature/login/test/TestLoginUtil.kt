@@ -20,6 +20,9 @@ val user2DisplayName: String get() = System.getenv("USER_2_DISPLAY_NAME") ?: "Te
 val user3Username: String get() = System.getenv("USER_3_USERNAME") ?: "aa03aaa"
 val user3DisplayName: String get() = System.getenv("USER_3_DISPLAY_NAME") ?: "Test User3"
 
+val adminUsername: String get() = System.getenv("ADMIN_USERNAME") ?: "artemis_admin"
+val adminPassword: String get() = System.getenv("ADMIN_PASSWORD") ?: "artemis_admin"
+
 suspend fun KoinTest.performTestLogin(): String {
     val loginService: LoginService = get()
     val accountService: AccountService = get()

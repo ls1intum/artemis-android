@@ -45,6 +45,10 @@ class ForwardedMessagesHandler(
      * @param postingType The type of the destination posts for which the forwarded messages should be loaded.
      */
     suspend fun loadForwardedMessages(postingType: PostingType) {
+        if (forwardedPostIds.isEmpty()) {
+            // Do not make a server request if there are no forwarded messages to fetch
+            return
+        }
         metisService.getForwardedMessagesByIds(
             metisContext = metisContext,
             postIds = forwardedPostIds,
