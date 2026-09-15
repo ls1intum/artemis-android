@@ -18,7 +18,7 @@ fun createCourseWithSelfRegistration(
   "shortName": "$shortName",
   "startDate": "$startDate",
   "endDate": "$endDate",
-  "semester": null,
+  "semester": "WS26/27",
   "testCourse": null,
   "onlineCourse": false,
   "complaintsEnabled": false,
@@ -65,7 +65,7 @@ fun createCourseTemplate(
   "shortName": "$shortName",
   "startDate": "$startDate",
   "endDate": "$endDate",
-  "semester": null,
+  "semester": "WS26/27",
   "testCourse": true,
   "onlineCourse": false,
   "complaintsEnabled": false,
@@ -91,12 +91,17 @@ fun createCourseTemplate(
 
 fun updateCourseCodeOfConductTemplate(
     course: de.tum.informatics.www1.artemis.native_app.core.model.Course,
-    codeOfConduct: String
+    codeOfConduct: String,
+    startDate: Instant = Clock.System.now(),
+    endDate: Instant = startDate + 3.days
 ): String = """
 {
   "id": ${course.id},
   "title": "${course.title}",
   "shortName": "${course.shortName}",
+  "semester": "WS26/27",
+  "startDate": "$startDate",
+  "endDate": "$endDate",
   "testCourse": true,
   "onlineCourse": false,
   "accuracyOfScores": 1,
