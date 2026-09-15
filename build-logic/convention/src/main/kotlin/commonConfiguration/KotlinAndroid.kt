@@ -63,25 +63,23 @@ internal fun Project.configureKotlinAndroid(
         compileSdk = libs.findVersion("compileSdk").get().toString().toInt()
         buildToolsVersion = libs.findVersion("buildToolsVersion").get().toString()
 
-        defaultConfig {
-            minSdk = libs.findVersion("minSdk").get().toString().toInt()
-        }
+        defaultConfig.minSdk = libs.findVersion("minSdk").get().toString().toInt()
 
-        compileOptions {
+        compileOptions.apply {
             sourceCompatibility = JavaVersion.VERSION_17
             targetCompatibility = JavaVersion.VERSION_17
             isCoreLibraryDesugaringEnabled = true
         }
 
+        testOptions.unitTests.isIncludeAndroidResources = true
 
-        testOptions {
-            unitTests {
-                isIncludeAndroidResources = true
-            }
-        }
+        // The product flavors below declare BuildConfig fields, so the feature has to be on. It used
+        // to be switched on by "android.defaults.buildfeatures.buildconfig" in gradle.properties,
+        // which is deprecated and gone in AGP 9.
+        buildFeatures.buildConfig = true
 
         // As of now, we can skip the linter on release builds.
-        lint {
+        lint.apply {
             checkReleaseBuilds = false
             checkTestSources = false
         }
@@ -119,7 +117,7 @@ internal fun Project.configureReleaseTypeFlavors(
     commonExtension.apply {
         flavorDimensions += ProductFlavors.Dimensions.ReleaseType.Key
 
-        productFlavors {
+        productFlavors.apply {
             createFlavor(
                 ProductFlavors.Dimensions.ReleaseType.Key,
                 ProductFlavors.Dimensions.ReleaseType.Flavors.Beta
@@ -145,7 +143,7 @@ internal fun Project.configureInstanceSelectionFlavors(
     commonExtension.apply {
         flavorDimensions += ProductFlavors.Dimensions.InstanceSelection.Key
 
-        productFlavors {
+        productFlavors.apply {
             createFlavor(
                 ProductFlavors.Dimensions.InstanceSelection.Key,
                 ProductFlavors.Dimensions.InstanceSelection.Flavors.FreeInstanceSelection
