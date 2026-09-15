@@ -14,7 +14,7 @@ plugins {
     id("com.google.gms.google-services")
     id("com.google.firebase.appdistribution")
     id("com.google.android.gms.oss-licenses-plugin")
-    id("io.sentry.android.gradle") version "5.7.0"
+    id("io.sentry.android.gradle") version "5.8.0"
     id("artemis.android.room")
 }
 
@@ -24,7 +24,8 @@ android {
     val versionName = "2.1.5"
     val versionCode = 624
 
-    setProperty("archivesBaseName", "artemis-android-$versionName-$versionCode")
+    // Gradle 9 removed the "archivesBaseName" project property in favour of the base extension.
+    base.archivesName.set("artemis-android-$versionName-$versionCode")
 
     signingConfigs {
         if (keystoreProperties != null) {
