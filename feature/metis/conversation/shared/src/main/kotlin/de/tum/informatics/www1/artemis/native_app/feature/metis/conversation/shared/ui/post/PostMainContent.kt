@@ -57,8 +57,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profil
 import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
 import java.time.Duration
 
 private const val PLACEHOLDER_POST_CONTENT = "WWWWWWW"

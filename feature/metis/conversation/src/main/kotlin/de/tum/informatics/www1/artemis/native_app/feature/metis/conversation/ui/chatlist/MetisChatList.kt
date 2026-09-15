@@ -66,7 +66,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
-import kotlinx.datetime.toJavaInstant
+import kotlin.time.toJavaInstant
 import org.koin.compose.koinInject
 import java.text.SimpleDateFormat
 import java.util.Date

@@ -5,7 +5,7 @@ import androidx.room.Ignore
 import androidx.room.Relation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IReaction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.MetisUserEntity
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 /**
  * Kept at the top level rather than nested in [PostPojo]: Room's KSP 2 processor resolves a nested

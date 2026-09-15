@@ -1,7 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.core.model
 
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.experimental.categories.Category

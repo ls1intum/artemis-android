@@ -1,7 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission
 
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonClassDiscriminator
