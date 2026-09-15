@@ -53,6 +53,16 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 add("testImplementation", libs.findLibrary("koin.test.junit4").get())
                 add("testImplementation", libs.findLibrary("koin.android.test").get())
                 add("testImplementation", libs.findLibrary("robolectric").get())
+
+                // Robolectric drags in Bouncy Castle, and the version it asks for is old enough to
+                // carry a long list of advisories (issue #688). None of it is shipped -- the release
+                // runtime classpath contains neither Robolectric nor Bouncy Castle -- but the
+                // scanner reads every configuration, so pin the test classpath to a supported
+                // release rather than leave a critical finding standing.
+                constraints {
+                    add("implementation", libs.findLibrary("bouncycastle.bcprov").get())
+                    add("testImplementation", libs.findLibrary("bouncycastle.bcprov").get())
+                }
             }
 
             afterEvaluate {
