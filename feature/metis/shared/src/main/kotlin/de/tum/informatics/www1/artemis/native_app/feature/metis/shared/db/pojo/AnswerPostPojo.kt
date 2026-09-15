@@ -31,7 +31,7 @@ data class AnswerPostPojo(
         parentColumn = "post_id",
         projection = ["author_id", "emoji", "id"]
     )
-    override val reactions: List<PostPojo.Reaction>,
+    override val reactions: List<ReactionPojo>,
     @Relation(
         entity = MetisPostContextEntity::class,
         entityColumn = "client_post_id",

@@ -350,10 +350,9 @@ internal class QuizParticipationViewModel(
 
                 val receipt = try {
                     websocketProvider.convertAndSend(
-                        headers = StompSendHeaders(
-                            destination = submissionChannel,
+                        headers = StompSendHeaders(destination = submissionChannel) {
                             receipt = UUID.randomUUID().toString()
-                        ),
+                        },
                         body = submission,
                         serializer = Submission.serializer()
                     )
