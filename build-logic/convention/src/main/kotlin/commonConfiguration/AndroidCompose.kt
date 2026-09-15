@@ -5,7 +5,7 @@ import util.libs
 
 //Adapted from: https://github.com/android/nowinandroid/blob/bbc5460b624d67b64b5b5118f8a0e1763427e7e4/build-logic/convention/src/main/kotlin/com/google/samples/apps/nowinandroid/AndroidCompose.kt
 
-internal fun Project.configureCompose(commonExtension: CommonExtension<*, *, *, *, *, *>) {
+internal fun Project.configureCompose(commonExtension: CommonExtension) {
     kotlinCompilerOptions {
         freeCompilerArgs.addAll(
             "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
@@ -21,7 +21,10 @@ internal fun Project.configureCompose(commonExtension: CommonExtension<*, *, *, 
     commonExtension.apply {
         dependencies {
             val bom = libs.findLibrary("androidx-compose-bom").get()
-            add("implementation", platform(bom))
+            // On "api", not "implementation": modules such as core:ui re-export Compose artifacts
+            // without a version, so the platform that supplies those versions has to reach their
+            // consumers too.
+            add("api", platform(bom))
             add("testImplementation", platform(bom))
             add("implementation", libs.findLibrary("koin.core").get())
             add("implementation", libs.findLibrary("koin.android").get())

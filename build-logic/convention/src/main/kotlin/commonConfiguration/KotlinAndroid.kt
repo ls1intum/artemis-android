@@ -57,7 +57,7 @@ object ProductFlavors {
  * Configure base Kotlin with Android options
  */
 internal fun Project.configureKotlinAndroid(
-    commonExtension: CommonExtension<*, *, *, *, *, *>,
+    commonExtension: CommonExtension,
 ) {
     commonExtension.apply {
         compileSdk = libs.findVersion("compileSdk").get().toString().toInt()
@@ -84,11 +84,15 @@ internal fun Project.configureKotlinAndroid(
             checkTestSources = false
         }
 
-        extensions.getByType(AndroidComponentsExtension::class).apply {
-            if (Boolean.getBoolean("skip.debugVariants")) {
-                beforeVariants(selector().withBuildType("debug")) { variantBuilder ->
-                    variantBuilder.enable = false
-                }
+    }
+
+    // Qualified against the project: AGP 9 makes CommonExtension itself ExtensionAware, so an
+    // unqualified "extensions" inside the block above now resolves to the Android extension's own
+    // (empty) container rather than the project's.
+    this.extensions.getByType(AndroidComponentsExtension::class).apply {
+        if (Boolean.getBoolean("skip.debugVariants")) {
+            beforeVariants(selector().withBuildType("debug")) { variantBuilder ->
+                variantBuilder.enable = false
             }
         }
     }
@@ -112,7 +116,7 @@ internal fun Project.configureKotlinAndroid(
 }
 
 internal fun Project.configureReleaseTypeFlavors(
-    commonExtension: CommonExtension<*, *, *, *, *, *>,
+    commonExtension: CommonExtension,
 ) {
     commonExtension.apply {
         flavorDimensions += ProductFlavors.Dimensions.ReleaseType.Key
@@ -138,7 +142,7 @@ internal fun Project.configureReleaseTypeFlavors(
 private const val TUM_ARTEMIS_SERVER_URL = "https://artemis.tum.de/"        // The "/" at the end is important, as it is used in the URL building process
 
 internal fun Project.configureInstanceSelectionFlavors(
-    commonExtension: CommonExtension<*, *, *, *, *, *>,
+    commonExtension: CommonExtension,
 ) {
     commonExtension.apply {
         flavorDimensions += ProductFlavors.Dimensions.InstanceSelection.Key

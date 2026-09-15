@@ -1,7 +1,7 @@
 @file:Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
 
 import com.android.build.api.variant.LibraryAndroidComponentsExtension
-import com.android.build.gradle.LibraryExtension
+import com.android.build.api.dsl.LibraryExtension
 import commonConfiguration.configureJacoco
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -25,14 +25,15 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
         with(target) {
             with(pluginManager) {
                 apply("com.android.library")
-                apply("org.jetbrains.kotlin.android")
                 apply("org.gradle.jacoco")
                 apply("org.jetbrains.kotlinx.kover")
             }
 
             extensions.configure<LibraryExtension> {
                 configureKotlinAndroid(this)
-                defaultConfig.targetSdk = libs.findVersion("targetSdk").get().toString().toInt()
+                // AGP 9 removed targetSdk from a library's defaultConfig -- it only ever applied to
+                // the module's own tests, which is where it now lives.
+                testOptions.targetSdk = libs.findVersion("targetSdk").get().toString().toInt()
             }
 
             configurations.configureEach {
@@ -62,11 +63,28 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 constraints {
                     add("implementation", libs.findLibrary("bouncycastle.bcprov").get())
                     add("testImplementation", libs.findLibrary("bouncycastle.bcprov").get())
+
+                    // Compose's ui-test still pulls Espresso 3.5.0, which predates Android 17 and
+                    // dies in Robolectric with NoSuchMethodException on InputManager.getInstance().
+                    add("testImplementation", libs.findLibrary("androidx.test.espresso.core").get())
                 }
             }
 
             afterEvaluate {
                 tasks.withType(Test::class) {
+                    // Robolectric reaches into JDK internals and fails with "Failed to
+                    // interact with raw FileDescriptor internals" without these.
+                    jvmArgs(
+                        "--add-opens=java.base/java.io=ALL-UNNAMED",
+                        "--add-opens=java.base/java.lang=ALL-UNNAMED",
+                        "--add-opens=java.base/java.util=ALL-UNNAMED",
+                        "--add-opens=java.base/java.net=ALL-UNNAMED",
+                        "--add-opens=java.base/java.security=ALL-UNNAMED",
+                        "--add-opens=java.base/java.nio=ALL-UNNAMED",
+                        "--add-opens=java.base/sun.nio.fs=ALL-UNNAMED",
+                        "--add-opens=java.base/jdk.internal.access=ALL-UNNAMED"
+                    )
+
                     testLogging.setEvents(listOf(TestLogEvent.FAILED))
 
                     testLogging.exceptionFormat = TestExceptionFormat.FULL
