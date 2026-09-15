@@ -63,6 +63,12 @@ jobs:
       - name: Run tests
         run: ./gradlew test --max-workers=4 -Dskip.unit-tests=true -Dskip.e2e=false -Dskip.debugVariants=true -Dskip.flavor.unrestricted=true -Dskip.flavor.beta=true
         continue-on-error: true
+        env:
+          # The tests wait this long for the server. The default of 10s is measured against a
+          # developer machine talking to a warm server; here the runner is shared and the server
+          # has just started, and the first test to reach it has timed out on that alone. Still
+          # short enough that something genuinely stuck fails rather than hangs.
+          DEFAULT_TIMEOUT: 30000
 
       - name: Test Report
         uses: dorny/test-reporter@v1
