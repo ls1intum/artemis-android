@@ -127,7 +127,7 @@ noties-markwon-image-coil = { group = "io.noties.markwon", name = "image-coil", 
 oss-licenses-plugin = { module = "com.google.android.gms:oss-licenses-plugin", version.ref = "ossLicensesPlugin" }
 placeholder-material = { group = "io.github.fornewid", name = "placeholder-material3", version.ref = "placeholderMaterial" }
 play-services-oss-licences = { group = "com.google.android.gms", name = "play-services-oss-licenses", version = "17.5.2" }
-robolectric = { group = "org.robolectric", name = "robolectric", version = "4.16.1" }  # 4.17 fails every Robolectric test on JDK 21 with "Failed to interact with raw FileDescriptor internals"
+robolectric = { group = "org.robolectric", name = "robolectric", version = "4.17" }  # 4.17 fails every Robolectric test on JDK 21 with "Failed to interact with raw FileDescriptor internals"
 sentry-android = { group = "io.sentry", name = "sentry-android", version.ref = "sentry-android" }
 sentry-compose-android = { group = "io.sentry", name = "sentry-compose-android", version.ref = "sentry-android" }
 toolbar-compose = { group = "me.onebone", name = "toolbar-compose", version = "2.3.5" }
