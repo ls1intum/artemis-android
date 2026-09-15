@@ -7,7 +7,7 @@
 # ------------------------------ LICENSE AGREEMENT NOTICE ------------------------------
 
 
-FROM thyrlian/android-sdk:9.1 as builder
+FROM thyrlian/android-sdk:9.3 as builder
 
 RUN sdkmanager "build-tools;33.0.1" "build-tools;30.0.3" "platforms;android-34" "platform-tools" "emulator"
 
