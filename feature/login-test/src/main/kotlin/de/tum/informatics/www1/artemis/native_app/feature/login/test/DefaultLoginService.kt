@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.login.test
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.feature.login.service.LoginOptionsDto
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.network.LoginService
 import io.ktor.client.statement.HttpResponse
 
@@ -19,4 +20,19 @@ class DefaultLoginService() : LoginService {
         rememberMe: Boolean,
         serverUrl: String
     ): NetworkResponse<HttpResponse> = throw NotImplementedError()
+
+    override suspend fun fetchLoginOptions(
+        usernameOrEmail: String,
+        serverUrl: String
+    ): NetworkResponse<LoginOptionsDto> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun exchangeCodeForJwtToken(
+        code: String,
+        codeVerifier: String,
+        serverUrl: String
+    ): NetworkResponse<LoginService.LoginResponse> {
+        TODO("Not yet implemented")
+    }
 }

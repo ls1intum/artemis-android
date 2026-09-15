@@ -5,6 +5,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.login.LoginViewM
 import de.tum.informatics.www1.artemis.native_app.feature.login.register.RegisterViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.login.saml2_login.Saml2LoginViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.AndroidCredentialService
+import de.tum.informatics.www1.artemis.native_app.feature.login.service.oidc.OidcAuthService
+import de.tum.informatics.www1.artemis.native_app.feature.login.service.oidc.OidcAuthServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.ServerNotificationStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.impl.AndroidCredentialServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.impl.PersistentServerNotificationStorageService
@@ -32,6 +34,7 @@ val loginModule = module {
             networkStatusProvider = get(),
             passkeyLoginService = get(),
             androidCredentialService = get(),
+            oidcAuthService = get()
         )
     }
     viewModel {
@@ -64,5 +67,8 @@ val loginModule = module {
             get(),
             get()
         )
+    }
+    single<OidcAuthService> {
+        OidcAuthServiceImpl(androidContext())
     }
 }
