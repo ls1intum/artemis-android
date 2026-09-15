@@ -34,27 +34,24 @@ internal class CourseServiceImpl(
             val exercises = async { getExercises(courseId) }
 
             course.await().then { loadedCourse ->
-                availableTabs.await().then { tabs ->
-                    exercises.await().then { exercisesForOverview ->
-                        // The lectures endpoint requires membership in this course specifically,
-                        // unlike the three above, and answers an error object rather than a list
-                        // when the course has no lecture tab. Asking the tabs first keeps a course
-                        // without lectures from failing the whole screen on a response the list
-                        // cannot be parsed from.
-                        val lectures =
-                            if (tabs.lectures) getLectures(courseId) else NetworkResponse.Response(
-                                emptyList()
-                            )
+                // Only the course itself decides whether this screen can be shown. The rest is
+                // content: a course that answers but whose exercises momentarily do not is still
+                // worth rendering, and failing the whole screen would also take down everything
+                // else derived from it.
+                val tabs = availableTabs.await().or(CourseAvailableTabs())
 
-                        lectures.bind { loadedLectures ->
-                            loadedCourse.copy(
-                                exercises = exercisesForOverview.exercises,
-                                lectures = loadedLectures,
-                                faqEnabled = tabs.faq,
-                            )
-                        }
-                    }
-                }
+                // The lectures endpoint requires membership in this course specifically, unlike the
+                // other three, so it is only asked when the tabs say there are lectures to show.
+                val lectures =
+                    if (tabs.lectures) getLectures(courseId).or(emptyList()) else emptyList()
+
+                NetworkResponse.Response(
+                    loadedCourse.copy(
+                        exercises = exercises.await().or(CourseExercisesForOverview()).exercises,
+                        lectures = lectures,
+                        faqEnabled = tabs.faq,
+                    )
+                )
             }
         }
 

@@ -28,11 +28,17 @@ open class Account(
     val hasCustomProfilePicture: Boolean
         get() = imageUrl != null
 
-    fun isAtLeastTutorInCourse(course: Course): Boolean =
-        hasCourseRoleAtLeast(course.id, CourseRole.TEACHING_ASSISTANT)
+    fun isAtLeastTutorInCourse(course: Course): Boolean = isAtLeastTutorInCourse(course.id)
+
+    /**
+     * The id is enough to answer this, so a caller that already knows which course it is looking at
+     * does not have to load the course first.
+     */
+    fun isAtLeastTutorInCourse(courseId: Long?): Boolean =
+        hasCourseRoleAtLeast(courseId, CourseRole.TEACHING_ASSISTANT)
 
     private fun hasCourseRoleAtLeast(courseId: Long?, minimum: CourseRole): Boolean {
-        if (hasAnyAuthorityDirect(listOf(AccountAuthority.ROLE_ADMIN))) return true
+        if (hasAnyAuthorityDirect(ADMIN_AUTHORITIES)) return true
         if (courseId == null) return false
 
         return courseRoles
@@ -44,5 +50,16 @@ open class Account(
 
     private fun hasAnyAuthorityDirect(authorities: List<AccountAuthority>): Boolean {
         return this.authorities.any { it in authorities }
+    }
+
+    private companion object {
+        /**
+         * Both count as an administrator on the server, and the internal admin holds
+         * ROLE_SUPER_ADMIN rather than ROLE_ADMIN.
+         */
+        val ADMIN_AUTHORITIES = listOf(
+            AccountAuthority.ROLE_ADMIN,
+            AccountAuthority.ROLE_SUPER_ADMIN
+        )
     }
 }

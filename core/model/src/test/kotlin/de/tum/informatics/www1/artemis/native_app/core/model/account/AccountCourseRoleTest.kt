@@ -64,6 +64,37 @@ class AccountCourseRoleTest {
     }
 
     @Test
+    fun `a super admin is a tutor everywhere`() {
+        val superAdmin = Account(
+            authorities = listOf(AccountAuthority.ROLE_SUPER_ADMIN),
+            courseRoles = emptyList()
+        )
+        assertTrue(superAdmin.isAtLeastTutorInCourse(course))
+    }
+
+    @Test
+    fun `the super admin authority decodes rather than failing the whole account`() {
+        // The internal administrator holds ROLE_SUPER_ADMIN. An unknown name inside a list of enums
+        // throws instead of being coerced, so a missing constant would break the account entirely.
+        val json = """
+            {"id":1,"login":"artemis_admin","activated":true,
+             "authorities":["ROLE_USER","ROLE_SUPER_ADMIN"]}
+        """.trimIndent()
+
+        val account = Json { ignoreUnknownKeys = true }.decodeFromString<Account>(json)
+
+        assertTrue(account.authorities.contains(AccountAuthority.ROLE_SUPER_ADMIN))
+        assertTrue(account.isAtLeastTutorInCourse(course))
+    }
+
+    @Test
+    fun `the course id alone answers the check`() {
+        assertTrue(account(setOf(CourseRole.EDITOR)).isAtLeastTutorInCourse(42L))
+        assertFalse(account(setOf(CourseRole.EDITOR)).isAtLeastTutorInCourse(43L))
+        assertFalse(account(setOf(CourseRole.EDITOR)).isAtLeastTutorInCourse(null))
+    }
+
+    @Test
     fun `a global instructor authority alone grants nothing in a course`() {
         val instructor = Account(
             authorities = listOf(AccountAuthority.ROLE_INSTRUCTOR),

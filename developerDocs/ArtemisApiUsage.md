@@ -9,9 +9,10 @@ rediscover the endpoint list.
 
 **Minimum server version: Artemis 9.9.** That is set by the newest thing the app depends on, the
 course overview endpoints (`for-overview`, `available-tabs`, `exercises-for-overview`,
-`lectures-for-overview`), all of which shipped in 9.9. The per-course roles on the account arrived in
-the same release; `faqEnabled` left the course in 9.4 and the enrollment confirmation message was
-renamed in 9.3.
+`lectures-for-overview`) and the per-course roles on the account, which all reach the 9.9 tag. Check
+a claim like this against the tag's own tree rather than against a release date, with
+`git show 9.9:<path> | grep`: a commit's merge date and the release that first contains it are not
+the same thing.
 
 ## How to re-run the comparison
 
@@ -55,9 +56,12 @@ Paths are relative to the server URL. `{…}` marks a path variable.
 | POST | `webauthn/register/options` | `PasskeySettingsServiceImpl` |
 | POST | `webauthn/register` | `PasskeySettingsServiceImpl` |
 | DELETE | `webauthn/register/{credentialId}` | `PasskeySettingsServiceImpl` |
+| GET | `oauth2/authorization/oidc` | `OidcAuthServiceImpl` |
 
-The `webauthn` and `login/webauthn` paths are served by Spring Security's filter chain, not by a
-controller, so they do not appear in the controller route table.
+The `webauthn`, `login/webauthn` and `oauth2` paths are served by Spring Security's filter chain
+rather than by a controller, and `management/info` by the actuator, so none of them appear in the
+controller route table. They still break silently if the server moves them, which is why they are
+listed here.
 
 ### Server metadata
 

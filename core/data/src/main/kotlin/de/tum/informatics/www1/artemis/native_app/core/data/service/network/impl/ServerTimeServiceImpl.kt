@@ -10,7 +10,6 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.artemis_context.LoggedInBasedServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ServerTimeService
-import io.ktor.http.ContentType
 import io.ktor.http.appendPathSegments
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -102,9 +101,9 @@ internal class ServerTimeServiceImpl(
         return retryNetworkCall(maxRetries = 3, delayBetweenRetries = 1.seconds) {
             val sentTime = clock.now().toEpochMilliseconds()
             // The endpoint is served by a servlet container valve, not by Spring, and writes the
-            // instant as text/plain. Reading it as a String and parsing it keeps the JSON content
-            // negotiation of the other calls out of the way.
-            getRequest<String>(contentType = ContentType.Text.Plain) {
+            // instant as text/plain. String is one of the types Ktor's content negotiation ignores,
+            // so the JSON converter never sees the body and it arrives to be parsed here.
+            getRequest<String> {
                 url {
                     appendPathSegments(*Api.Public.path, "time")
                 }

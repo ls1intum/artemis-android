@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class CourseAccessRights(
-    val courseId: Long,
+    val courseId: Long = 0L,
     val roles: Set<CourseRole> = emptySet(),
 )
 

@@ -56,15 +56,14 @@ abstract class MetisViewModel(
             getAccountData()
         }
 
-    val isAtLeastTutorInCourse: StateFlow<Boolean> = combine(
-        accountDataStateFlow,
-        course,
-    ) { accountDataState, courseDataState ->
-        accountDataState.join(courseDataState).bind { (account, course) ->
-            account.isAtLeastTutorInCourse(course = course)
+    // Deliberately derived from the account alone: the roles are answered per course id, which this
+    // view model already has. Joining the loaded course would let an unrelated failure of any of the
+    // requests behind it revoke the moderation actions with no error shown.
+    val isAtLeastTutorInCourse: StateFlow<Boolean> = accountDataStateFlow
+        .map { accountDataState ->
+            accountDataState.bind { account -> account.isAtLeastTutorInCourse(courseId) }
+                .orElse(false)
         }
-            .orElse(false)
-    }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
     // Emits when a reload is manually requested or when we have a websocket reconnect
