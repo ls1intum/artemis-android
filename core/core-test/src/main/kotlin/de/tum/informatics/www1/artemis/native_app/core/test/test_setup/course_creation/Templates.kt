@@ -16,11 +16,6 @@ fun createCourseWithSelfRegistration(
   "id": null,
   "title": "$title",
   "shortName": "$shortName",
-  "customizeGroupNames": true,
-  "studentGroupName": "artemis-$shortName-student",
-  "teachingAssistantGroupName": "artemis-$shortName-tutors",
-  "editorGroupName": "artemis-$shortName-editors",
-  "instructorGroupName": "artemis-$shortName-instructors",
   "startDate": "$startDate",
   "endDate": "$endDate",
   "semester": null,
@@ -46,6 +41,50 @@ fun createCourseWithSelfRegistration(
   "courseInformationSharingConfiguration": "DISABLED",
   "enrollmentEnabled": true,
   "enrollmentConfirmationMessage": "course enrollment message",
+  "courseInformationSharingMessagingCodeOfConduct": "Code of conduct…"
+}
+""".trimIndent()
+
+/**
+ * The payload for an ordinary test course.
+ *
+ * Written out rather than serialised from the [de.tum.informatics.www1.artemis.native_app.core.model.Course]
+ * model: that model describes what the server sends, and the creation endpoint needs fields it does
+ * not carry. Leaving the complaint configuration out makes the server answer 400, and since every
+ * field of the model has a default, that error body used to parse into a course with no id.
+ */
+fun createCourseTemplate(
+    title: String,
+    shortName: String,
+    startDate: Instant = Clock.System.now(),
+    endDate: Instant = startDate + 3.days
+): String = """
+{
+  "id": null,
+  "title": "$title",
+  "shortName": "$shortName",
+  "startDate": "$startDate",
+  "endDate": "$endDate",
+  "semester": null,
+  "testCourse": true,
+  "onlineCourse": false,
+  "complaintsEnabled": false,
+  "requestMoreFeedbackEnabled": false,
+  "maxPoints": null,
+  "accuracyOfScores": 1,
+  "defaultProgrammingLanguage": null,
+  "maxComplaints": 0,
+  "maxTeamComplaints": 0,
+  "maxComplaintTimeDays": 0,
+  "maxComplaintTextLimit": 0,
+  "maxComplaintResponseTextLimit": 0,
+  "maxRequestMoreFeedbackTimeDays": 0,
+  "unenrollmentEnabled": null,
+  "color": null,
+  "courseIcon": null,
+  "timeZone": null,
+  "courseInformationSharingConfiguration": "COMMUNICATION_AND_MESSAGING",
+  "enrollmentEnabled": false,
   "courseInformationSharingMessagingCodeOfConduct": "Code of conduct…"
 }
 """.trimIndent()
@@ -80,7 +119,7 @@ fun createTextExercise(title: String, courseId: Long): String = """
         "exampleSolution": "Android Example Solution",
         "gradingInstructions": "Android Assessment Instructions",
         "channelName": "${(title + "_c").take(30)}",
-        "course": { "id": $courseId }
+        "courseId": $courseId
     }
 """.trimIndent()
 
@@ -117,7 +156,7 @@ fun createModelingExercise(title: String, courseId: Long): String = """
         "problemStatement": "Problem Statement",
         "gradingInstructions": "Grading Instruction ",
         "exampleSolutionExplanation": "Example Solution Explanation",
-        "course": { "id": $courseId },
+        "courseId": $courseId,
         "channelName": "${(title + "_c").take(30)}",
         "exampleSolutionModel": "{\"version\":\"2.0.0\",\"type\":\"ClassDiagram\",\"size\":{\"width\":640,\"height\":600},\"interactive\":{\"elements\":[],\"relationships\":[]},\"elements\":[{\"id\":\"6e1f57c6-cbc7-4b97-9df9-c5741dc905fa\",\"name\":\"Package\",\"type\":\"Package\",\"owner\":null,\"bounds\":{\"x\":230,\"y\":0,\"width\":200,\"height\":100}},{\"id\":\"ff7e3be0-9765-4301-baf5-cf9cf2f17c3c\",\"name\":\"Class\",\"type\":\"Class\",\"owner\":null,\"bounds\":{\"x\":0,\"y\":220,\"width\":200,\"height\":100},\"attributes\":[\"de2d464b-f969-4cf3-ac0d-2f300b3a6497\"],\"methods\":[\"084a59b9-3009-4ebd-885c-159b436581d9\"]},{\"id\":\"de2d464b-f969-4cf3-ac0d-2f300b3a6497\",\"name\":\"+ attribute: Type\",\"type\":\"ClassAttribute\",\"owner\":\"ff7e3be0-9765-4301-baf5-cf9cf2f17c3c\",\"bounds\":{\"x\":0,\"y\":260,\"width\":200,\"height\":30}},{\"id\":\"084a59b9-3009-4ebd-885c-159b436581d9\",\"name\":\"+ method()\",\"type\":\"ClassMethod\",\"owner\":\"ff7e3be0-9765-4301-baf5-cf9cf2f17c3c\",\"bounds\":{\"x\":0,\"y\":290,\"width\":200,\"height\":30}},{\"id\":\"1ad94aff-ee37-494f-8b99-9d861dc58e4a\",\"name\":\"Abstract\",\"type\":\"AbstractClass\",\"owner\":null,\"bounds\":{\"x\":380,\"y\":220,\"width\":200,\"height\":110},\"attributes\":[\"4d58287c-d4c0-42d1-9d02-ad239b701de6\"],\"methods\":[\"2de2a7c3-19c9-4534-8a71-f6607e93556c\"]},{\"id\":\"4d58287c-d4c0-42d1-9d02-ad239b701de6\",\"name\":\"+ attribute: Type\",\"type\":\"ClassAttribute\",\"owner\":\"1ad94aff-ee37-494f-8b99-9d861dc58e4a\",\"bounds\":{\"x\":380,\"y\":270,\"width\":200,\"height\":30}},{\"id\":\"2de2a7c3-19c9-4534-8a71-f6607e93556c\",\"name\":\"+ method()\",\"type\":\"ClassMethod\",\"owner\":\"1ad94aff-ee37-494f-8b99-9d861dc58e4a\",\"bounds\":{\"x\":380,\"y\":300,\"width\":200,\"height\":30}}],\"relationships\":[],\"assessments\":[]}"
     }
