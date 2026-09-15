@@ -66,8 +66,8 @@ internal fun Project.configureKotlinAndroid(
         defaultConfig.minSdk = libs.findVersion("minSdk").get().toString().toInt()
 
         compileOptions.apply {
-            sourceCompatibility = JavaVersion.VERSION_17
-            targetCompatibility = JavaVersion.VERSION_17
+            sourceCompatibility = JavaVersion.VERSION_25
+            targetCompatibility = JavaVersion.VERSION_25
             isCoreLibraryDesugaringEnabled = true
         }
 
@@ -105,7 +105,7 @@ internal fun Project.configureKotlinAndroid(
             "-opt-in=kotlinx.coroutines.FlowPreview"
         )
 
-        jvmTarget.set(JvmTarget.JVM_17)
+        jvmTarget.set(JvmTarget.JVM_25)
     }
 
     dependencies {

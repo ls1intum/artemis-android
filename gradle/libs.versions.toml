@@ -2,7 +2,7 @@
 compileSdk = "37"
 targetSdk = "37"
 minSdk = "30"
-buildToolsVersion = "35.0.0"
+buildToolsVersion = "37.0.0"
 
 accompanist = "0.36.0"                # the last release of the deprecated artifacts below
 accompanistPermissions = "0.37.3"     # the only one still released
@@ -19,9 +19,9 @@ androidxPaging = "3.5.1"
 androidxPagingCompose = "3.5.1"
 coil = "3.6.2"
 coil2 = "2.7.0"     # The markwon library still depends on coil2: https://github.com/ls1intum/artemis-android/issues/171
-kotlin = "2.3.21"
+kotlin = "2.4.20"
 kotlinxCoroutines = "1.11.0"
-kotlinxDatetime = "0.6.2"
+kotlinxDatetime = "0.8.0"
 kotlinxSerializationJson = "1.11.0"
 koin = "4.2.2"
 kover = "0.9.9"

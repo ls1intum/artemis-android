@@ -1,6 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 interface IReaction {
     val id: Long?

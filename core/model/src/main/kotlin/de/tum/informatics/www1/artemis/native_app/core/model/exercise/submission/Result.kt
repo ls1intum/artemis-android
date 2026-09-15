@@ -5,8 +5,8 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.ProgrammingExerciseStudentParticipation
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlinx.serialization.Serializable
 
 @Serializable

@@ -37,7 +37,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.noti
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 private const val TAG = "CommunicationNotificationManagerImpl"
 

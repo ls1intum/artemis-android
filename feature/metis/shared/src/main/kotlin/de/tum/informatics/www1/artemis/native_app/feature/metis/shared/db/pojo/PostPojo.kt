@@ -12,7 +12,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entiti
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.BasePostingEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.PostReactionEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.StandalonePostTagEntity
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 data class PostPojo(
     @ColumnInfo(name = "client_post_id")
