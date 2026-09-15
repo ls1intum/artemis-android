@@ -3,8 +3,14 @@ package de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.c
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.R
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 
 
 @Serializable
@@ -77,6 +83,9 @@ enum class CourseNotificationType {
     @SerialName("registeredToTutorialGroupNotification")
     REGISTERED_TO_TUTORIAL_GROUP_NOTIFICATION,
 
+    @SerialName("irisResponseNeedsReviewNotification")
+    IRIS_RESPONSE_NEEDS_REVIEW_NOTIFICATION,
+
     @SerialName("tutorialGroupAssignedNotification")
     TUTORIAL_GROUP_ASSIGNED_NOTIFICATION,
 
@@ -86,6 +95,11 @@ enum class CourseNotificationType {
     @SerialName("tutorialGroupUnassignedNotification")
     TUTORIAL_GROUP_UNASSIGNED_NOTIFICATION,
 
+    /**
+     * Anything the server sends that this version does not know. Notification types are added to the
+     * server regularly, and they arrive as the values of a map, where an unrecognised name would
+     * otherwise abort the whole response rather than just that entry.
+     */
     UNKNOWN;
 
     companion object {
@@ -93,6 +107,32 @@ enum class CourseNotificationType {
             entries.firstOrNull { it.name.equals(value, ignoreCase = true) }
                 ?: UNKNOWN
     }
+}
+
+/**
+ * Reads an unrecognised notification type as [CourseNotificationType.UNKNOWN].
+ *
+ * The generated enum serializer throws on a name it does not know, so a single type added to the
+ * server takes down every screen that reads the notification settings. Encoding is unchanged.
+ */
+object CourseNotificationTypeSerializer : KSerializer<CourseNotificationType> {
+
+    private val generated = CourseNotificationType.entries
+        .associateBy { type ->
+            CourseNotificationType.serializer().descriptor.getElementName(type.ordinal)
+        }
+
+    override val descriptor: SerialDescriptor =
+        PrimitiveSerialDescriptor("CourseNotificationType", PrimitiveKind.STRING)
+
+    override fun serialize(encoder: Encoder, value: CourseNotificationType) {
+        encoder.encodeString(
+            CourseNotificationType.serializer().descriptor.getElementName(value.ordinal)
+        )
+    }
+
+    override fun deserialize(decoder: Decoder): CourseNotificationType =
+        generated[decoder.decodeString()] ?: CourseNotificationType.UNKNOWN
 }
 
 @Composable
@@ -122,6 +162,7 @@ fun CourseNotificationType.settingsTitle(): String = when (this) {
     CourseNotificationType.TUTORIAL_GROUP_ASSIGNED_NOTIFICATION -> stringResource(R.string.tutorial_assigned_settings_name)
     CourseNotificationType.TUTORIAL_GROUP_DELETED_NOTIFICATION -> stringResource(R.string.tutorial_deleted_settings_name)
     CourseNotificationType.TUTORIAL_GROUP_UNASSIGNED_NOTIFICATION -> stringResource(R.string.tutorial_unassigned_settings_name)
+    CourseNotificationType.IRIS_RESPONSE_NEEDS_REVIEW_NOTIFICATION -> stringResource(R.string.iris_response_needs_review_settings_name)
     CourseNotificationType.UNKNOWN -> ""
 }
 

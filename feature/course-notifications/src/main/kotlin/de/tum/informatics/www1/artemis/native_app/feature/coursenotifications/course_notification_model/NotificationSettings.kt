@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class NotificationSettingsInfo(
-    val notificationTypes: Map<String, CourseNotificationType>,
+    val notificationTypes: Map<String, @Serializable(with = CourseNotificationTypeSerializer::class) CourseNotificationType>,
     val channels: List<NotificationChannel>,
     val presets: List<NotificationSettingsPreset>
 )
@@ -24,7 +24,7 @@ data class NotificationSettings(
 data class NotificationSettingsPreset(
     val identifier: NotificationSettingsPresetIdentifier,
     val typeId: Int,
-    val presetMap: Map<CourseNotificationType, Map<NotificationChannel, Boolean>>
+    val presetMap: Map<@Serializable(with = CourseNotificationTypeSerializer::class) CourseNotificationType, Map<NotificationChannel, Boolean>>
 )
 
 @Serializable
