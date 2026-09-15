@@ -17,7 +17,7 @@ class TextEditorServiceImpl(
     override suspend fun getParticipation(participationId: Long): NetworkResponse<Participation> {
         return getRequest {
             url {
-                appendPathSegments(*Api.Text.path, "text-editor", participationId.toString())
+                appendPathSegments(*Api.Text.Participations.path, participationId.toString(), "text-editor")
             }
         }
     }
