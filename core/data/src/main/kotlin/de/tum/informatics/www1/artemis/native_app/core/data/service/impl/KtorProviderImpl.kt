@@ -11,6 +11,7 @@ import kotlin.time.Duration.Companion.seconds
 internal class KtorProviderImpl(jsonProvider: JsonProvider) : KtorProvider {
 
     override val ktorClient = HttpClient {
+        expectSuccess = true
         install(ContentNegotiation) {
             json(jsonProvider.applicationJsonConfiguration)
         }
