@@ -24,6 +24,7 @@ import org.robolectric.util.Logger
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNull
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -113,13 +114,18 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
         runTest(timeout = DefaultTimeoutMillis.milliseconds * 4) {
             val post = postDefaultMessage()
 
-            metisModificationService.createReaction(
+            val createdReaction = metisModificationService.createReaction(
                 metisContext,
                 MetisModificationService.AffectedPost.Standalone(post.id!!),
                 emojiId,
                 testServerUrl,
                 accessToken
             ).orThrow("Could not create reaction")
+
+            // Belt and braces alongside expectSuccess: every field of Reaction has a default, so
+            // any 2xx body that is not a reaction still decodes. Without this the test only
+            // notices 30 seconds later, and reports it as "the reaction never appeared".
+            assertNotNull(createdReaction.id, "Server did not create the reaction: $createdReaction")
 
             val updatedPost = awaitPost(post.id!!, "a reaction with emojiId=$emojiId") { fetched ->
                 fetched.reactions.orEmpty().any { it.emojiId == emojiId }
