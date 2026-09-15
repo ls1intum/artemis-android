@@ -32,12 +32,21 @@ internal class CourseServiceImpl(
             val course = async { getCourse(courseId) }
             val availableTabs = async { getAvailableTabs(courseId) }
             val exercises = async { getExercises(courseId) }
-            val lectures = async { getLectures(courseId) }
 
             course.await().then { loadedCourse ->
                 availableTabs.await().then { tabs ->
                     exercises.await().then { exercisesForOverview ->
-                        lectures.await().bind { loadedLectures ->
+                        // The lectures endpoint requires membership in this course specifically,
+                        // unlike the three above, and answers an error object rather than a list
+                        // when the course has no lecture tab. Asking the tabs first keeps a course
+                        // without lectures from failing the whole screen on a response the list
+                        // cannot be parsed from.
+                        val lectures =
+                            if (tabs.lectures) getLectures(courseId) else NetworkResponse.Response(
+                                emptyList()
+                            )
+
+                        lectures.bind { loadedLectures ->
                             loadedCourse.copy(
                                 exercises = exercisesForOverview.exercises,
                                 lectures = loadedLectures,

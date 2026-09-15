@@ -26,6 +26,7 @@ import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.appendPathSegments
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import kotlinx.coroutines.flow.first
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
@@ -277,4 +278,35 @@ suspend fun KoinComponent.startQuizExerciseBatch(
 
         contentType(ContentType.Application.Json)
     }.body()
+}
+/**
+ * Adds the given user to the course as a student.
+ *
+ * Artemis 10 decides course membership from per-course roles rather than from the group names a
+ * course used to carry, so creating a course and a user no longer relates the two: without this the
+ * user is not a member and every endpoint that requires membership in this course answers 403.
+ */
+suspend fun KoinComponent.addStudentToCourse(
+    accessToken: String,
+    courseId: Long,
+    studentLogin: String
+) {
+    val response = ktorProvider.ktorClient.post(serverConfigurationService.serverUrl.first()) {
+        url {
+            appendPathSegments(
+                *Api.Course.Courses.path,
+                courseId.toString(),
+                "students",
+                studentLogin
+            )
+        }
+
+        cookieAuth(accessToken)
+
+        contentType(ContentType.Application.Json)
+    }
+
+    check(response.status.isSuccess()) {
+        "Could not add $studentLogin to course $courseId: ${response.status}"
+    }
 }
