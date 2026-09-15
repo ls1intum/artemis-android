@@ -35,7 +35,7 @@ jobs:
     timeout-minutes: 60
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set Android Sdk Env
         run: export ANDROID_HOME=/usr/lib/android-sdk
@@ -44,7 +44,7 @@ jobs:
         run: echo "sdk.dir=/usr/lib/android-sdk" > local.properties
 
       - name: Gradle Wrapper Verification
-        uses: gradle/actions/wrapper-validation@v3
+        uses: gradle/actions/wrapper-validation@v5
 
         # Sanity cleanup
       - name: Stop all running docker containers
@@ -64,12 +64,12 @@ jobs:
         if: success() || failure()
 
       - name: JDK setup
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
           # build-logic targets JVM 21, so Gradle refuses to configure the build on 17. The other
           # three workflows already use 21.
-          java-version: 21
+          java-version: 25
 
       - name: Run tests
         run: ./gradlew test --max-workers=4 -Dskip.unit-tests=true -Dskip.e2e=false -Dskip.debugVariants=true -Dskip.flavor.unrestricted=true -Dskip.flavor.beta=true
@@ -82,7 +82,7 @@ jobs:
           DEFAULT_TIMEOUT: 30000
 
       - name: Test Report
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v3
         if: success() || failure()    # run this step even if previous step failed
         with:
           name: E2E Test Results

@@ -12,7 +12,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metistest.MetisDatabas
 import de.tum.informatics.www1.artemis.native_app.feature.metistest.MetisTestDatabase
 import de.tum.informatics.www1.artemis.native_app.feature.metistest.loadAsList
 import kotlinx.coroutines.runBlocking
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before

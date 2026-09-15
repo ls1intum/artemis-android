@@ -15,7 +15,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metistest.MetisDatabaseProviderMock
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 abstract class MetisStorageBaseTest {
 

@@ -12,7 +12,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExercisePoint
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ProvideDefaultExerciseTemplateStatus
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ExerciseColors
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.R
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 
 object ExerciseOverviewChipUtil {

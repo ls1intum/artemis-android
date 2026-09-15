@@ -2,7 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.core.ui.exercise.util
 
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 object ExerciseParticipationLastRatedUtil {
     fun findLatestRatedResult(participation: Participation?): Result? {

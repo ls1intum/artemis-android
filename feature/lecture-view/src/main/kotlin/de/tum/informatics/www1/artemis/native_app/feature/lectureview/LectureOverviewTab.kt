@@ -64,7 +64,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.common
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import io.noties.markwon.LinkResolver
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 internal const val TEST_TAG_OVERVIEW_LIST = "overview_list"
 
