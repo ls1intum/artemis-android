@@ -173,8 +173,11 @@ class LectureE2eTest : BaseComposeTest() {
         // trigger mark as successful
         composeTestRule.onNode(checkboxMatcher).performClick()
 
-        // Wait until complete
-        composeTestRule.waitUntilAtLeastOneExists(checkboxMatcher, DefaultTimeoutMillis)
+        // The checkbox exists before the click as well, so waiting for it to exist returns straight
+        // away and the assertion below races the request. Wait for the state it asserts instead.
+        composeTestRule.waitUntil(DefaultTimeoutMillis) {
+            viewModel.lectureUnits.value.first { it.id == lectureUnit.id }.completed
+        }
 
         // Check now actually completed.
         assertTrue(
