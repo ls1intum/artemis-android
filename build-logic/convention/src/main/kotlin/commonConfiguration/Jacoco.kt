@@ -33,7 +33,10 @@ internal fun Project.configureJacoco(
     androidComponentsExtension: AndroidComponentsExtension<*, *, *>,
 ) {
     configure<JacocoPluginExtension> {
-        toolVersion = "0.8.10"
+        // 0.8.10 cannot read the class files Kotlin 2.4 emits for Java 25 and logs
+        // "IllegalClassFormatException: Error while instrumenting ..." for each one, which drops
+        // them from coverage.
+        toolVersion = "0.8.15"
     }
 
     val jacocoTestReport = tasks.create("jacocoTestReport")
