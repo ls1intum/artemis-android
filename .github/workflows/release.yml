@@ -13,7 +13,7 @@ jobs:
     name: Job 1 - Build Signed AAB
     runs-on: [self-hosted, ase-large-android-sdk-35]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Set Android Sdk Env
         run: export ANDROID_HOME=/usr/lib/android-sdk
