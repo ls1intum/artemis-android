@@ -22,7 +22,7 @@ jobs:
         run: echo "sdk.dir=/usr/lib/android-sdk" > local.properties
 
       - name: Gradle Wrapper Verification
-        uses: gradle/actions/wrapper-validation@v5
+        uses: gradle/actions/wrapper-validation@v6
 
       - name: JDK setup
         uses: actions/setup-java@v5
@@ -34,7 +34,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Setup Gradle Cache
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
         with:
           gradle-home-cache-cleanup: true
 
