@@ -35,7 +35,7 @@ jobs:
     timeout-minutes: 60
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Set Android Sdk Env
         run: export ANDROID_HOME=/usr/lib/android-sdk
