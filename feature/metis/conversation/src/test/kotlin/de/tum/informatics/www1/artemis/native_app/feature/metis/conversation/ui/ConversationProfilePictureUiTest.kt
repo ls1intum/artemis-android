@@ -1,10 +1,13 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.data.test.AccountDataServiceStub
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.impl.ArtemisImageProviderStub
@@ -30,6 +33,7 @@ import org.robolectric.shadows.ShadowLog
 
 @Category(UnitTest::class)
 @RunWith(RobolectricTestRunner::class)
+@OptIn(ExperimentalTestApi::class)
 class ConversationProfilePictureUiTest : BaseChatUITest() {
 
     private val allTestTags = listOf(
@@ -120,8 +124,13 @@ class ConversationProfilePictureUiTest : BaseChatUITest() {
         composeTestRule.onNodeWithTag(TEST_TAG_PROFILE_PICTURE_INITIALS)
             .performClick()
 
-        composeTestRule.onNodeWithTag(TEST_TAG_USER_PROFILE_DIALOG)
-            .assertExists()
+        // The dialog is composed in response to the click, so assertExists can run before it is
+        // there. Waiting also makes the assertion below meaningful: without it, "the button is
+        // absent" would hold simply because the dialog had not appeared yet.
+        composeTestRule.waitUntilExactlyOneExists(
+            hasTestTag(TEST_TAG_USER_PROFILE_DIALOG),
+            DefaultTimeoutMillis
+        )
 
         composeTestRule.onNodeWithTag(TEST_TAG_USER_PROFILE_DIALOG_SEND_MESSAGE)
             .assertExists()
@@ -135,8 +144,10 @@ class ConversationProfilePictureUiTest : BaseChatUITest() {
         composeTestRule.onNodeWithTag(TEST_TAG_PROFILE_PICTURE_INITIALS)
             .performClick()
 
-        composeTestRule.onNodeWithTag(TEST_TAG_USER_PROFILE_DIALOG)
-            .assertExists()
+        composeTestRule.waitUntilExactlyOneExists(
+            hasTestTag(TEST_TAG_USER_PROFILE_DIALOG),
+            DefaultTimeoutMillis
+        )
 
         composeTestRule.onNodeWithTag(TEST_TAG_USER_PROFILE_DIALOG_SEND_MESSAGE)
             .assertDoesNotExist()

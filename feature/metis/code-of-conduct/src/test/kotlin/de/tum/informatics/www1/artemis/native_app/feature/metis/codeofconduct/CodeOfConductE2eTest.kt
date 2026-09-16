@@ -132,7 +132,9 @@ class CodeOfConductE2eTest : ConversationBaseTest() {
             .performScrollTo()
             .performClick()
 
-        composeTestRule.waitForIdle()
+        // waitForIdle returns once Compose has nothing left to recompose, which says nothing about
+        // the request the click started. Wait for the callback the assertion is about.
+        composeTestRule.waitUntil(DefaultTimeoutMillis) { accepted }
 
         assertTrue(accepted, "Code of conduct was not accepted.")
     }
