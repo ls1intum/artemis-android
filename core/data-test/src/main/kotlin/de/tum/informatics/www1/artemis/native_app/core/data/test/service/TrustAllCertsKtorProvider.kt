@@ -11,7 +11,15 @@ import io.ktor.serialization.kotlinx.json.json
 import java.security.cert.X509Certificate
 import javax.net.ssl.X509TrustManager
 
-class TrustAllCertsKtorProvider(jsonProvider: JsonProvider, timeoutMillis: Long = 10000) : KtorProvider {
+class TrustAllCertsKtorProvider(
+    jsonProvider: JsonProvider,
+    // Mirrors DefaultTimeoutMillis, which lives in core:core-test and is not visible from here. CI
+    // raises DEFAULT_TIMEOUT because the runner is shared and slower than a developer machine, but
+    // that only ever reached the test timeouts: the HTTP client stayed at ten seconds, and fixture
+    // requests have run past it -- creating a course timed out on develop with
+    // "Request timeout has expired [url=.../api/admin/courses, request_timeout=10000 ms]".
+    timeoutMillis: Long = System.getenv("DEFAULT_TIMEOUT")?.toLongOrNull() ?: 10_000L
+) : KtorProvider {
 
     private val trustAll = @SuppressLint("CustomX509TrustManager")
     object : X509TrustManager {

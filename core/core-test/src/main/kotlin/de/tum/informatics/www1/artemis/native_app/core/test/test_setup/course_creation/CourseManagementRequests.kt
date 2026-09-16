@@ -15,7 +15,9 @@ import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateId
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateShortName
+import kotlinx.coroutines.delay
 import io.ktor.client.call.body
+import io.ktor.client.plugins.ServerResponseException
 import io.ktor.client.request.accept
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
@@ -359,28 +361,68 @@ suspend fun KoinComponent.addInstructorToCourse(
     instructorLogin: String
 ) = addUserToCourse(accessToken, courseId, instructorLogin, "instructors")
 
+/**
+ * Number of attempts for [addUserToCourse]. Two is enough, because the collision can only happen
+ * while the authority row is still missing: once any attempt has written it, no further attempt
+ * inserts anything.
+ */
+private const val ADD_USER_ATTEMPTS = 2
+
+private const val ADD_USER_RETRY_DELAY = 500L
+
+/**
+ * Grants [userLogin] a role in a course, retrying once if the server answers 5xx.
+ *
+ * The suite runs its modules in parallel and each of them grants the same few test users a staff
+ * role in its own freshly created course. The server stores the course role first and then rebuilds
+ * that user's *global* authorities, and Hibernate inserts only the authority rows the user does not
+ * have yet -- so two grants collide only while `ROLE_INSTRUCTOR` is still missing for that user,
+ * which on a wiped database is the first grant of a run. Both insert `(user, ROLE_INSTRUCTOR)`, one
+ * wins, and the loser answers 500 although the course role it was asked for is already stored.
+ *
+ * Retrying therefore settles it rather than papering over anything: the second attempt finds the
+ * role in place and returns early, and the authority was written by whichever attempt won. Verified
+ * against a local server -- eight simultaneous first grants for one user answer 1x200 and 7x500
+ * without this, and 8x200 with it, with the role stored in all eight courses either way.
+ *
+ * Only a test suite provokes this. Granting the same person their first staff role in several
+ * courses within the same instant is not something the web client does.
+ */
 private suspend fun KoinComponent.addUserToCourse(
     accessToken: String,
     courseId: Long,
     userLogin: String,
     roleSegment: String
 ) {
-    val response = ktorProvider.ktorClient.post(serverConfigurationService.serverUrl.first()) {
-        url {
-            appendPathSegments(
-                *Api.Course.Courses.path,
-                courseId.toString(),
-                roleSegment,
-                userLogin
-            )
+    repeat(ADD_USER_ATTEMPTS) { attempt ->
+        val failure = try {
+            val response = ktorProvider.ktorClient.post(serverConfigurationService.serverUrl.first()) {
+                url {
+                    appendPathSegments(
+                        *Api.Course.Courses.path,
+                        courseId.toString(),
+                        roleSegment,
+                        userLogin
+                    )
+                }
+
+                cookieAuth(accessToken)
+
+                contentType(ContentType.Application.Json)
+            }
+
+            check(response.status.isSuccess()) {
+                "Could not add $userLogin to course $courseId as $roleSegment: ${response.status}"
+            }
+            return
+        } catch (e: ServerResponseException) {
+            e
         }
 
-        cookieAuth(accessToken)
-
-        contentType(ContentType.Application.Json)
-    }
-
-    check(response.status.isSuccess()) {
-        "Could not add $userLogin to course $courseId as $roleSegment: ${response.status}"
+        if (attempt == ADD_USER_ATTEMPTS - 1) {
+            throw failure
+        }
+        Log.w("CourseManagementRequests", "Retrying to add $userLogin to course $courseId as $roleSegment", failure)
+        delay(ADD_USER_RETRY_DELAY)
     }
 }
