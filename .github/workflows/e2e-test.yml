@@ -64,7 +64,7 @@ jobs:
         if: success() || failure()
 
       - name: JDK setup
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         with:
           distribution: 'zulu'
           # build-logic targets JVM 21, so Gradle refuses to configure the build on 17. The other
