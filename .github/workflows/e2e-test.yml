@@ -44,7 +44,7 @@ jobs:
         run: echo "sdk.dir=/usr/lib/android-sdk" > local.properties
 
       - name: Gradle Wrapper Verification
-        uses: gradle/actions/wrapper-validation@v5
+        uses: gradle/actions/wrapper-validation@v6
 
         # Sanity cleanup
       - name: Stop all running docker containers
