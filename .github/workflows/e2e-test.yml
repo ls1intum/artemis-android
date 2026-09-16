@@ -46,32 +46,39 @@ jobs:
       - name: Gradle Wrapper Verification
         uses: gradle/actions/wrapper-validation@v6
 
-        # Sanity cleanup
-      - name: Stop all running docker containers
-        run: docker stop artemis-app artemis-mysql docker-artemis-app-setup
-        continue-on-error: true
+      - name: Remove the stack left behind by the previous run
+        # Runs are serialised repository wide, so the previous job on this runner can finish seconds
+        # before this one starts. Its containers are then still terminating, the MySQL volume is
+        # still attached, and "docker volume rm" fails -- which used to be swallowed by "|| exit 0",
+        # leaving the next Artemis to start against the previous run's database. That shows up later
+        # as "container artemis-app is unhealthy", or as tests failing on data they did not create.
+        run: |
+          docker compose -f docker/e2e-tests.yml down --volumes --remove-orphans --timeout 30 || true
+          docker rm --force artemis-app artemis-mysql docker-artemis-app-setup 2>/dev/null || true
 
-      - name: Remove all docker containers
-        run: docker rm artemis-app artemis-mysql docker-artemis-app-setup
-        if: success() || failure()
-        continue-on-error: true
+          for _ in $(seq 1 60); do
+            docker volume ls --quiet | grep -qx artemis-mysql-data-android || break
+            docker volume rm artemis-mysql-data-android >/dev/null 2>&1 || sleep 1
+          done
 
-      - name: Remove mysql volume
-        run: docker volume rm artemis-mysql-data-android || exit 0
+          if docker volume ls --quiet | grep -qx artemis-mysql-data-android; then
+            echo "::error::The MySQL volume from a previous run is still present, so the database would not be empty."
+            exit 1
+          fi
 
       - name: Launch docker containers
         run: docker compose -f docker/e2e-tests.yml up -d artemis-app-setup
-        if: success() || failure()
 
       - name: JDK setup
         uses: actions/setup-java@v6
         with:
           distribution: 'zulu'
-          # build-logic targets JVM 21, so Gradle refuses to configure the build on 17. The other
-          # three workflows already use 21.
+          # build-logic and the Android modules target JVM 25; Gradle refuses to configure the
+          # build on an older JDK.
           java-version: 25
 
       - name: Run tests
+        id: run-tests
         run: ./gradlew test --max-workers=4 -Dskip.unit-tests=true -Dskip.e2e=false -Dskip.debugVariants=true -Dskip.flavor.unrestricted=true -Dskip.flavor.beta=true
         continue-on-error: true
         env:
@@ -80,6 +87,13 @@ jobs:
           # has just started, and the first test to reach it has timed out on that alone. Still
           # short enough that something genuinely stuck fails rather than hangs.
           DEFAULT_TIMEOUT: 30000
+
+      - name: Artemis server log
+        # Only useful when something went wrong, and then it is the difference between "a test
+        # failed" and knowing which request the server rejected and why.
+        if: steps.run-tests.outcome == 'failure'
+        continue-on-error: true
+        run: docker logs artemis-app --tail 400
 
       - name: Test Report
         uses: dorny/test-reporter@v3
@@ -90,12 +104,9 @@ jobs:
           reporter: java-junit
           fail-on-empty: 'false'
 
-      - name: Cleanup -> Stop all running docker containers
+      - name: Cleanup
         if: always()
-        run: docker stop artemis-app artemis-mysql docker-artemis-app-setup
-        continue-on-error: true
-
-      - name: Cleanup -> Remove all docker containers
-        if: always()
-        run: docker rm artemis-app artemis-mysql docker-artemis-app-setup
+        # With --volumes, so the next run starts from an empty database even if it begins before
+        # this teardown has fully settled.
+        run: docker compose -f docker/e2e-tests.yml down --volumes --remove-orphans --timeout 30
         continue-on-error: true
