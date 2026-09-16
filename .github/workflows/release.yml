@@ -66,7 +66,7 @@ jobs:
           keyPassword: '${{ secrets.SIGNING_KEY_PASSWORD }}'
 
       - name: Upload app bundle as artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: app-bundle
           path: '${{ env.SIGNED_RELEASE_FILE }}'
@@ -79,7 +79,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download app bundle from artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           name: app-bundle
 
