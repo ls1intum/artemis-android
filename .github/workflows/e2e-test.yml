@@ -90,10 +90,18 @@ jobs:
 
       - name: Artemis server log
         # Only useful when something went wrong, and then it is the difference between "a test
-        # failed" and knowing which request the server rejected and why.
+        # failed" and knowing which request the server rejected and why. Artemis logs at DEBUG, so
+        # a plain tail covers the last few seconds and misses the failure entirely; select the
+        # errors out of the whole log instead, and keep a tail as well for the shape of the end.
         if: steps.run-tests.outcome == 'failure'
         continue-on-error: true
-        run: docker logs artemis-app --tail 400
+        run: |
+          echo "::group::Errors and exceptions"
+          docker logs artemis-app 2>&1 | grep -aE "ERROR|Exception|Caused by:" | tail -200 || echo "none found"
+          echo "::endgroup::"
+          echo "::group::Last 200 lines"
+          docker logs artemis-app --tail 200 2>&1 || true
+          echo "::endgroup::"
 
       - name: Test Report
         uses: dorny/test-reporter@v3
