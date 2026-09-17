@@ -21,7 +21,7 @@ plugins {
 android {
     namespace = "de.tum.informatics.www1.artemis.native_app.android"
 
-    val versionName = "2.1.5"
+    val versionName = "3.0.0"
     val versionCode = 624
 
     // Gradle 9 removed the "archivesBaseName" project property in favour of the base extension.
