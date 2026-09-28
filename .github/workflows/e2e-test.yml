@@ -46,6 +46,14 @@ jobs:
       - name: Gradle Wrapper Verification
         uses: gradle/actions/wrapper-validation@v6
 
+      - name: Fetch the database version Artemis uses
+        # Every docker compose call below reads it from docker/.env, including the cleanup of the previous run.
+        # The stack includes the PostgreSQL service from the Artemis repository, which needs a Compose version
+        # with remote includes, so the step also records the version the runner has.
+        run: |
+          docker compose version
+          bash docker/fetch-artemis-versions.sh
+
       - name: Remove the stack left behind by the previous run
         # Runs are serialised repository wide, so the previous job on this runner can finish seconds
         # before this one starts. Its containers are then still terminating, the database volume is
