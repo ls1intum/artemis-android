@@ -17,6 +17,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.test.performTest
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.testLoginModule
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizParticipationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.service.QuizExerciseService
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.service.QuizParticipationService
 import org.junit.Before
 import org.junit.Rule
 import org.koin.android.ext.koin.androidContext
@@ -42,6 +43,8 @@ internal abstract class QuizBaseE2eTest(protected val quizType: QuizType.Workabl
     protected val participationService: ParticipationService get() = get()
 
     protected val quizExerciseService: QuizExerciseService get() = get()
+
+    protected val quizParticipationService: QuizParticipationService get() = get()
 
     @Before
     fun setup() {
