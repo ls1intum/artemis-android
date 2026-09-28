@@ -14,6 +14,19 @@ interface QuizParticipationService {
         authToken: String
     ): NetworkResponse<Result>
 
+    /**
+     * Saves the answers of a live quiz without submitting them, so they can still be changed.
+     */
+    suspend fun saveForLiveMode(
+        submission: QuizSubmission,
+        exerciseId: Long,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<Submission>
+
+    /**
+     * Submits the answers of a live quiz. They cannot be changed afterwards.
+     */
     suspend fun submitForLiveMode(
         submission: QuizSubmission,
         exerciseId: Long,
