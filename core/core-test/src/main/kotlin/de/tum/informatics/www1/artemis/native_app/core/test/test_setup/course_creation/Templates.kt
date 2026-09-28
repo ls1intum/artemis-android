@@ -240,252 +240,97 @@ fun createProgramingExercise(title: String, courseId: Long): String = """
 
 """.trimIndent()
 
+/**
+ * The payload for a quiz with one question of each type, for `POST courses/{courseId}/quiz-exercises`.
+ *
+ * Artemis 10 reads it into a creation DTO rather than into the quiz entity: the course comes from the
+ * path, and the items of a question refer to each other through their tempID instead of through copies
+ * of each other.
+ */
 fun createQuizExercise(
     title: String,
-    courseId: Long,
     backgroundFilePath: String,
     mode: QuizExercise.QuizMode = QuizExercise.QuizMode.INDIVIDUAL
 ): String = """
 {
   "title": "$title",
-  "bonusPoints": 0,
-  "allowComplaintsForAutomaticAssessments": false,
-  "allowManualFeedbackRequests": false,
   "mode": "INDIVIDUAL",
   "includedInOverallScore": "NOT_INCLUDED",
-  "type": "quiz",
-  "course": {
-    "id": $courseId
-  },
-  "numberOfAssessmentsOfCorrectionRounds": [
-    {
-      "inTime": 0,
-      "late": 0
-    }
-  ],
-  "studentAssignedTeamIdComputed": false,
-  "secondCorrectionEnabled": false,
-  "isAtLeastTutor": false,
-  "isAtLeastEditor": false,
-  "isAtLeastInstructor": false,
-  "teamMode": false,
-  "assessmentDueDateError": false,
-  "exampleSolutionPublicationDateError": false,
-  "exampleSolutionPublicationDateWarning": false,
-  "presentationScoreEnabled": false,
-  "allowedNumberOfAttempts": 1,
+  "channelName": "${(title + "_c").take(30)}",
   "randomizeQuestionOrder": true,
-  "isOpenForPractice": false,
+  "quizMode": "${mode.name}",
   "duration": 600,
   "quizQuestions": [
     {
+      "type": "multiple-choice",
       "title": "MC1",
       "text": "Enter your long question if needed",
       "hint": "Add a hint here (visible during the quiz via ?-Button)",
       "points": 1,
       "scoringType": "ALL_OR_NOTHING",
       "randomizeOrder": true,
-      "invalid": false,
-      "exportQuiz": false,
-      "type": "multiple-choice",
+      "singleChoice": false,
       "answerOptions": [
         {
           "text": "Enter a correct answer option here",
           "hint": "Add a hint here (visible during the quiz via ?-Button)",
           "explanation": "Add an explanation here (only visible in feedback after quiz has ended)",
-          "isCorrect": true,
-          "invalid": false
+          "isCorrect": true
         },
         {
           "text": "Enter a wrong answer option here",
-          "isCorrect": false,
-          "invalid": false
+          "isCorrect": false
         }
       ]
     },
     {
+      "type": "short-answer",
       "title": "ShortAnswer",
       "text": "Enter your long question if needed\n\nSelect a part of the text and click on Add Spot to automatically create an input field and the corresponding mapping\n\nYou can define a input field like this: This [-spot 1] an [-spot 2] field.\n\nTo define the solution for the input fields you need to create a mapping (multiple mapping also possible):",
       "points": 1,
       "scoringType": "PROPORTIONAL_WITHOUT_PENALTY",
       "randomizeOrder": true,
-      "invalid": false,
-      "exportQuiz": false,
-      "type": "short-answer",
       "spots": [
-        {
-          "tempID": 8712716567622115,
-          "width": 15,
-          "spotNr": 1,
-          "invalid": false
-        },
-        {
-          "tempID": 1322472840644149,
-          "width": 15,
-          "spotNr": 2,
-          "invalid": false
-        }
+        { "tempID": 8712716567622115, "spotNr": 1, "width": 15 },
+        { "tempID": 1322472840644149, "spotNr": 2, "width": 15 }
       ],
       "solutions": [
-        {
-          "tempID": 2161480876583171,
-          "text": "is",
-          "invalid": false
-        },
-        {
-          "tempID": 2629748690868899,
-          "text": "input",
-          "invalid": false
-        },
-        {
-          "tempID": 3255797993079859,
-          "text": "correctInBothFields",
-          "invalid": false
-        }
+        { "tempID": 2161480876583171, "text": "is" },
+        { "tempID": 2629748690868899, "text": "input" },
+        { "tempID": 3255797993079859, "text": "correctInBothFields" }
       ],
       "correctMappings": [
-        {
-          "invalid": false,
-          "solution": {
-            "tempID": 2161480876583171,
-            "text": "is",
-            "invalid": false
-          },
-          "spot": {
-            "tempID": 8712716567622115,
-            "width": 15,
-            "spotNr": 1,
-            "invalid": false
-          }
-        },
-        {
-          "invalid": false,
-          "solution": {
-            "tempID": 2629748690868899,
-            "text": "input",
-            "invalid": false
-          },
-          "spot": {
-            "tempID": 1322472840644149,
-            "width": 15,
-            "spotNr": 2,
-            "invalid": false
-          }
-        },
-        {
-          "invalid": false,
-          "solution": {
-            "tempID": 3255797993079859,
-            "text": "correctInBothFields",
-            "invalid": false
-          },
-          "spot": {
-            "tempID": 8712716567622115,
-            "width": 15,
-            "spotNr": 1,
-            "invalid": false
-          }
-        },
-        {
-          "invalid": false,
-          "solution": {
-            "tempID": 3255797993079859,
-            "text": "correctInBothFields",
-            "invalid": false
-          },
-          "spot": {
-            "tempID": 1322472840644149,
-            "width": 15,
-            "spotNr": 2,
-            "invalid": false
-          }
-        }
+        { "solutionTempId": 2161480876583171, "spotTempId": 8712716567622115 },
+        { "solutionTempId": 2629748690868899, "spotTempId": 1322472840644149 },
+        { "solutionTempId": 3255797993079859, "spotTempId": 8712716567622115 },
+        { "solutionTempId": 3255797993079859, "spotTempId": 1322472840644149 }
       ],
-      "matchLetterCase": false,
-      "similarityValue": 85
+      "similarityValue": 85,
+      "matchLetterCase": false
     },
     {
+      "type": "drag-and-drop",
       "title": "Dnd Question",
       "text": "Enter your long question if needed",
       "hint": "Add a hint here (visible during the quiz via ?-Button)",
       "points": 1,
       "scoringType": "PROPORTIONAL_WITH_PENALTY",
       "randomizeOrder": true,
-      "invalid": false,
-      "exportQuiz": false,
-      "type": "drag-and-drop",
       "backgroundFilePath": "$backgroundFilePath",
       "dropLocations": [
-        {
-          "tempID": 7167046265873659,
-          "posX": 22,
-          "posY": 57,
-          "width": 23,
-          "height": 23,
-          "invalid": false
-        },
-        {
-          "tempID": 7845820172921351,
-          "posX": 94,
-          "posY": 55,
-          "width": 26,
-          "height": 20,
-          "invalid": false
-        }
+        { "tempID": 7167046265873659, "posX": 22, "posY": 57, "width": 23, "height": 23 },
+        { "tempID": 7845820172921351, "posX": 94, "posY": 55, "width": 26, "height": 20 }
       ],
       "dragItems": [
-        {
-          "tempID": 1600501544974459,
-          "text": "item1",
-          "invalid": false
-        },
-        {
-          "tempID": 3318321452932735,
-          "text": "item2",
-          "invalid": false
-        }
+        { "tempID": 1600501544974459, "text": "item1" },
+        { "tempID": 3318321452932735, "text": "item2" }
       ],
       "correctMappings": [
-        {
-          "invalid": false,
-          "dragItem": {
-            "tempID": 1600501544974459,
-            "text": "item1",
-            "invalid": false
-          },
-          "dropLocation": {
-            "tempID": 7167046265873659,
-            "posX": 22,
-            "posY": 57,
-            "width": 23,
-            "height": 23,
-            "invalid": false
-          }
-        },
-        {
-          "invalid": false,
-          "dragItem": {
-            "tempID": 3318321452932735,
-            "text": "item2",
-            "invalid": false
-          },
-          "dropLocation": {
-            "tempID": 7845820172921351,
-            "posX": 94,
-            "posY": 55,
-            "width": 26,
-            "height": 20,
-            "invalid": false
-          }
-        }
+        { "dragItemTempId": 1600501544974459, "dropLocationTempId": 7167046265873659 },
+        { "dragItemTempId": 3318321452932735, "dropLocationTempId": 7845820172921351 }
       ]
     }
-  ],
-  "quizMode": "${mode.name}",
-  "isActiveQuiz": false,
-  "isPracticeModeAvailable": true,
-  "isEditable": true,
-  "channelName": "${(title + "_c").take(30)}"
+  ]
 }
 """.trimIndent()
 

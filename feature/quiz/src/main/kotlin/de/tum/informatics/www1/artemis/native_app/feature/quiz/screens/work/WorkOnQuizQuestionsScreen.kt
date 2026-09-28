@@ -31,7 +31,7 @@ internal fun WorkOnQuizQuestionsScreen(
     lastSubmissionTime: Instant?,
     endDate: Instant?,
     isConnected: Boolean,
-    overallPoints: Int,
+    overallPoints: Double,
     latestSavedSubmission: Result<QuizSubmission>?,
     clock: Clock,
     onRequestRetrySave: () -> Unit

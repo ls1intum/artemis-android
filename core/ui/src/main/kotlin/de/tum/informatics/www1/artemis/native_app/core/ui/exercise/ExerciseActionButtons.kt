@@ -54,12 +54,10 @@ fun ExerciseActionButtons(
     }
 
     if (templateStatus != null) {
-        // TODO: Quiz results not working, thus disabled
-        if (templateStatus is ResultTemplateStatus.WithResult && exercise !is QuizExercise) {
+        if (templateStatus is ResultTemplateStatus.WithResult) {
             ArtemisButton(
                 modifier = modifier,
-                // onClick = if (exercise is QuizExercise) actions.onClickViewQuizResults else actions.onClickViewResult,
-                onClick = actions.onClickViewResult,
+                onClick = if (exercise is QuizExercise) actions.onClickViewQuizResults else actions.onClickViewResult,
                 text = stringResource(id = R.string.exercise_actions_view_result_button)
             )
         }
@@ -141,21 +139,14 @@ private fun QuizExerciseButtons(
     val startQuizAvailable = exercise.isUninitializedC
 
     if (openQuizAvailable || startQuizAvailable) {
-        // TODO: Quiz participation temporarily disabled. See https://github.com/ls1intum/artemis-android/issues/107
-//            Button(
-//                modifier = modifier,
-//                onClick = {
-//                    if (openQuizAvailable) actions.onClickOpenQuiz()
-//                    else actions.onClickStartQuiz()
-//                }
-//            ) {
-//                Text(
-//                    text = stringResource(
-//                        id = if (openQuizAvailable) R.string.exercise_actions_open_quiz_button
-//                        else R.string.exercise_actions_start_quiz_button
-//                    )
-//                )
-//            }
+        ArtemisButton(
+            modifier = modifier,
+            onClick = if (openQuizAvailable) actions.onClickOpenQuiz else actions.onClickStartQuiz,
+            text = stringResource(
+                id = if (openQuizAvailable) R.string.exercise_actions_open_quiz_button
+                else R.string.exercise_actions_start_quiz_button
+            )
+        )
     }
 }
 

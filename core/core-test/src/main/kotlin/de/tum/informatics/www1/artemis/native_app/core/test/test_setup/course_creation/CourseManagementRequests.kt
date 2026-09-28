@@ -266,6 +266,31 @@ suspend fun KoinComponent.createAttachment(
         .body()
 }
 
+/**
+ * The path segments to create a quiz of the given course at, with [createQuizExercise] as the payload.
+ */
+fun courseQuizExercisesPath(courseId: Long): Array<String> =
+    arrayOf(*Api.Quiz.path, "courses", courseId.toString(), "quiz-exercises")
+
+/**
+ * Ends a quiz that is not synchronized. The server scores the submissions right away.
+ */
+suspend fun KoinComponent.endQuizExerciseNow(
+    accessToken: String,
+    exerciseId: Long
+) {
+    val response = ktorProvider.ktorClient.put(serverConfigurationService.serverUrl.first()) {
+        url {
+            appendPathSegments(*Api.Quiz.QuizExercises.path, exerciseId.toString(), "end-now")
+        }
+
+        cookieAuth(accessToken)
+        contentType(ContentType.Application.Json)
+    }
+
+    check(response.status.isSuccess()) { "Could not end quiz $exerciseId: ${response.status}" }
+}
+
 suspend fun KoinComponent.addQuizExerciseBatch(
     accessToken: String,
     exerciseId: Long

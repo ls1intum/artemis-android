@@ -11,11 +11,11 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
-import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.addQuizExerciseBatch
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.courseQuizExercisesPath
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createExerciseFormBodyWithPng
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createQuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.startQuizExerciseBatch
@@ -23,7 +23,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAcc
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizParticipationUi
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.TEST_TAG_TEXT_FIELD_BATCH_PASSWORD
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.TEST_TAG_WAIT_FOR_QUIZ_START_SCREEN
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
@@ -37,7 +36,6 @@ import kotlin.test.assertNotNull
 internal class QuizWaitingScreenE2eTest : QuizBaseE2eTest(QuizType.Live) {
 
     @Test(timeout = DefaultTestTimeoutMillis)
-    @Ignore("Quiz participation currently fails to load. See https://github.com/ls1intum/artemis-android/issues/107")
     fun `can start individual quiz`() {
         val quiz: QuizExercise = runBlockingWithTestTimeout {
             val path = getBackgroundImageFilePath()
@@ -45,11 +43,11 @@ internal class QuizWaitingScreenE2eTest : QuizBaseE2eTest(QuizType.Live) {
                 createExerciseFormBodyWithPng(
                     getAdminAccessToken(),
                     courseId,
-                    pathSegments = Api.Quiz.QuizExercises.path,
+                    pathSegments = courseQuizExercisesPath(courseId),
                     pngFilePath = path,
                     pngByteArray = getBackgroundImageBytes(),
-                    creator = { name, courseId ->
-                        createQuizExercise(name, courseId, path, QuizExercise.QuizMode.INDIVIDUAL)
+                    creator = { name, _ ->
+                        createQuizExercise(name, path, QuizExercise.QuizMode.INDIVIDUAL)
                     }
                 )
             )
@@ -94,7 +92,6 @@ internal class QuizWaitingScreenE2eTest : QuizBaseE2eTest(QuizType.Live) {
     }
 
     @Test(timeout = DefaultTestTimeoutMillis)
-    @Ignore("Quiz participation currently fails to load. See https://github.com/ls1intum/artemis-android/issues/107")
     fun `can start batched quiz`() {
         val (quiz, batch) = runBlockingWithTestTimeout {
             val path = getBackgroundImageFilePath()
@@ -103,11 +100,11 @@ internal class QuizWaitingScreenE2eTest : QuizBaseE2eTest(QuizType.Live) {
                 createExerciseFormBodyWithPng(
                     getAdminAccessToken(),
                     courseId,
-                    pathSegments = Api.Quiz.QuizExercises.path,
+                    pathSegments = courseQuizExercisesPath(courseId),
                     pngByteArray = getBackgroundImageBytes(),
                     pngFilePath = path,
-                    creator = { name, courseId ->
-                        createQuizExercise(name, courseId, path, QuizExercise.QuizMode.BATCHED)
+                    creator = { name, _ ->
+                        createQuizExercise(name, path, QuizExercise.QuizMode.BATCHED)
                     }
                 )
             )

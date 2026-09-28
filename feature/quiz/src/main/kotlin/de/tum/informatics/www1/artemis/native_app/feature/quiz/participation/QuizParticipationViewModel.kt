@@ -36,6 +36,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.DropLocationId
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.MultipleChoiceStorageData
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.ShortAnswerStorageData
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.quizResult
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.quizSubmission
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.service.QuizExerciseService
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.service.QuizParticipationService
 import kotlinx.coroutines.Deferred
@@ -167,12 +169,7 @@ internal class QuizParticipationViewModel(
         .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 
     private val initialSubmission: Flow<QuizSubmission> = latestParticipation
-        .map { latestParticipation ->
-            latestParticipation
-                .results
-                .orEmpty()
-                .firstOrNull()?.submission as? QuizSubmission ?: QuizSubmission()
-        }
+        .map { latestParticipation -> latestParticipation.quizSubmission ?: QuizSubmission() }
 
     /**
      * Map the question id to the data
@@ -250,8 +247,8 @@ internal class QuizParticipationViewModel(
     )
         .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 
-    val overallPoints: Flow<Int> = quizExercise.map { exercise ->
-        exercise.quizQuestions.sumOf { it.points ?: 0 }
+    val overallPoints: Flow<Double> = quizExercise.map { exercise ->
+        exercise.quizQuestions.sumOf { it.points ?: 0.0 }
     }
         .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 
@@ -411,7 +408,7 @@ internal class QuizParticipationViewModel(
     private val resultFromSubmission = MutableSharedFlow<SubmissionResult>()
     val result: StateFlow<SubmissionResult?> =
         merge(
-            latestParticipation.map { it.results.orEmpty().firstOrNull() },
+            latestParticipation.map { it.quizResult },
             resultFromSubmission
         )
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, null)
