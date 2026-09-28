@@ -56,6 +56,7 @@ This project is configured to support multiple [flavor dimensions](https://devel
 We use both unit tests and end-to-end integration tests. Before running the end-to-end tests, consider the licenses section in this readme.
 - To run the unit tests, execute `./gradlew test -Dskip.unit-tests=false -Dskip.e2e=true -Dskip.debugVariants=true -Dskip.flavor.unrestricted=true -Dskip.flavor.beta=true`
 - To run the end-to-end tests, first start artemis locally in docker: 
+  - `bash docker/fetch-artemis-versions.sh` (writes the PostgreSQL version Artemis uses to `docker/.env`)
   - `docker compose -f docker/e2e-tests.yml up artemis-app-setup`
   - `./gradlew test -Dskip.unit-tests=true -Dskip.e2e=false -Dskip.debugVariants=true -Dskip.flavor.unrestricted=true -Dskip.flavor.beta=true`
   - **Note**: With the end-to-end tests, we create many new courses that might pile up and slow down the performance of the tests. 
