@@ -146,8 +146,8 @@ internal fun QuizParticipationUi(
             val lastSubmission by viewModel.latestSubmission.collectAsState()
             val endDate by viewModel.endDate.collectAsState(initial = null)
             val overallPoints by viewModel.overallPoints.collectAsState(initial = 0)
-            val latestWebsocketSubmission by viewModel
-                .latestWebsocketSubmission.collectAsState(initial = null)
+            val latestSavedSubmission by viewModel
+                .latestSavedSubmission.collectAsState(initial = null)
 
             EmptyDataStateUi(
                 dataState = questionWithDataDataState
@@ -160,9 +160,9 @@ internal fun QuizParticipationUi(
                     endDate = endDate,
                     isConnected = isConnected,
                     overallPoints = overallPoints,
-                    latestWebsocketSubmission = latestWebsocketSubmission,
+                    latestSavedSubmission = latestSavedSubmission,
                     clock = serverClock,
-                    onRequestRetrySave = viewModel::requestSaveSubmissionThroughWebsocket
+                    onRequestRetrySave = viewModel::requestSaveSubmission
                 )
             }
         }
