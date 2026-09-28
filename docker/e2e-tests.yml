@@ -1,15 +1,15 @@
 services:
-  mysql:
+  postgres:
     extends:
-      file: ./mysql.yml
-      service: mysql
+      file: ./postgres.yml
+      service: postgres
 
   artemis-app:
     extends:
       file: ./artemis.yml
       service: artemis-app
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
     env_file:
       - artemis_e2e_config.env
@@ -39,7 +39,7 @@ networks:
     name: artemis
 
 volumes:
-  artemis-mysql-data-android:
-    name: artemis-mysql-data-android
+  artemis-postgres-data-android:
+    name: artemis-postgres-data-android
   artemis-data:
     name: artemis-data
