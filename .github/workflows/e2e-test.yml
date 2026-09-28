@@ -20,7 +20,7 @@ permissions:
 concurrency:
   # One E2E run at a time, repository wide. The stack uses fixed container names and a fixed volume,
   # and the job starts by stopping and removing exactly those, so two runs sharing a machine tear
-  # each other down; a full Artemis and MySQL per run is more than the runners carry in parallel in
+  # each other down; a full Artemis and PostgreSQL per run is more than the runners carry in parallel in
   # any case. A run that overlapped another has already failed here with "container artemis-app is
   # unhealthy" after waiting out the ten minute health check.
   #
@@ -48,21 +48,21 @@ jobs:
 
       - name: Remove the stack left behind by the previous run
         # Runs are serialised repository wide, so the previous job on this runner can finish seconds
-        # before this one starts. Its containers are then still terminating, the MySQL volume is
+        # before this one starts. Its containers are then still terminating, the database volume is
         # still attached, and "docker volume rm" fails -- which used to be swallowed by "|| exit 0",
         # leaving the next Artemis to start against the previous run's database. That shows up later
         # as "container artemis-app is unhealthy", or as tests failing on data they did not create.
         run: |
           docker compose -f docker/e2e-tests.yml down --volumes --remove-orphans --timeout 30 || true
-          docker rm --force artemis-app artemis-mysql docker-artemis-app-setup 2>/dev/null || true
+          docker rm --force artemis-app artemis-postgres-android docker-artemis-app-setup 2>/dev/null || true
 
           for _ in $(seq 1 60); do
-            docker volume ls --quiet | grep -qx artemis-mysql-data-android || break
-            docker volume rm artemis-mysql-data-android >/dev/null 2>&1 || sleep 1
+            docker volume ls --quiet | grep -qx artemis-postgres-data-android || break
+            docker volume rm artemis-postgres-data-android >/dev/null 2>&1 || sleep 1
           done
 
-          if docker volume ls --quiet | grep -qx artemis-mysql-data-android; then
-            echo "::error::The MySQL volume from a previous run is still present, so the database would not be empty."
+          if docker volume ls --quiet | grep -qx artemis-postgres-data-android; then
+            echo "::error::The database volume from a previous run is still present, so the database would not be empty."
             exit 1
           fi
 
