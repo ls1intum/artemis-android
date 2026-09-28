@@ -10,6 +10,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Submission
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.service.QuizParticipationService
 import io.ktor.client.call.body
+import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -26,7 +27,16 @@ class QuizParticipationServiceImpl(
         serverUrl: String,
         authToken: String
     ): NetworkResponse<Result> {
-        return submitImpl(serverUrl, exerciseId, authToken, submission, "practice")
+        return submitImpl(serverUrl, exerciseId, authToken, submission, "practice", submit = null)
+    }
+
+    override suspend fun saveForLiveMode(
+        submission: QuizSubmission,
+        exerciseId: Long,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<Submission> {
+        return submitImpl(serverUrl, exerciseId, authToken, submission, "live", submit = false)
     }
 
     override suspend fun submitForLiveMode(
@@ -35,15 +45,19 @@ class QuizParticipationServiceImpl(
         serverUrl: String,
         authToken: String
     ): NetworkResponse<Submission> {
-        return submitImpl(serverUrl, exerciseId, authToken, submission, "live")
+        return submitImpl(serverUrl, exerciseId, authToken, submission, "live", submit = true)
     }
 
+    /**
+     * @param submit for live quizzes, whether the answers are submitted or only saved. The server only saves them if this is not set.
+     */
     private suspend inline fun <reified T> submitImpl(
         serverUrl: String,
         exerciseId: Long,
         authToken: String,
         submission: QuizSubmission,
-        endPoint: String
+        endPoint: String,
+        submit: Boolean?
     ): NetworkResponse<T> {
         return performNetworkCall {
             ktorProvider.ktorClient.post(serverUrl) {
@@ -55,6 +69,9 @@ class QuizParticipationServiceImpl(
                         "submissions",
                         endPoint
                     )
+                }
+                if (submit != null) {
+                    parameter("submit", submit)
                 }
 
                 contentType(ContentType.Application.Json)
