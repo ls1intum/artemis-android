@@ -181,10 +181,9 @@ val Exercise.notEndedSubmittedOrFinished: Flow<Boolean>
                 )
     }
 
-// TODO: Include QuizExercises here once this issue has been resolved: See https://github.com/ls1intum/artemis-android/issues/107
 val Exercise.isParticipationAvailable: Flow<Boolean>
     get() {
-        return if (this is TextExercise) flowOf(true)
+        return if (this is TextExercise || this is QuizExercise) flowOf(true)
         else flowOf(false)
     }
 
