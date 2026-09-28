@@ -13,7 +13,10 @@ sealed class QuizQuestion {
     abstract val text: String?
     abstract val hint: String?
     abstract val explanation: String?
-    abstract val points: Int?
+    /**
+     * Decimal since Artemis 8.0 (ls1intum/Artemis#10232), so whole points arrive as e.g. 1.0
+     */
+    abstract val points: Double?
     abstract val scoringType: ScoringType?
     abstract val randomizeOrder: Boolean
     abstract val invalid: Boolean
