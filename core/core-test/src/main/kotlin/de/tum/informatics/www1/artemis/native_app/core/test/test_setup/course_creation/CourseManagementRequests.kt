@@ -90,7 +90,9 @@ suspend fun KoinComponent.createCourse(
         "Creating the course did not answer with one: $course"
     }
 
-    return course
+    // Artemis 10 answers with the id of the new course only, so the title and short name the tests
+    // look for and send back when updating the course are taken from the payload.
+    return course.copy(title = courseName, shortName = courseShortName)
 }
 
 suspend fun KoinComponent.createExercise(

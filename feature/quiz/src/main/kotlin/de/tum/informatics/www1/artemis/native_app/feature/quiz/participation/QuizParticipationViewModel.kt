@@ -23,7 +23,6 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.QuizQ
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.ShortAnswerQuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quizEnded
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.QuizSubmission
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Submission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.DragAndDropSubmittedAnswer
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.MultipleChoiceSubmittedAnswer
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.ShortAnswerSubmittedAnswer
@@ -49,7 +48,9 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
@@ -72,8 +73,6 @@ import kotlinx.coroutines.plus
 import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlinx.parcelize.Parcelize
-import org.hildan.krossbow.stomp.headers.StompSendHeaders
-import java.util.UUID
 import kotlin.Result
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -113,9 +112,18 @@ internal class QuizParticipationViewModel(
         private const val TAG_SHORT_ANSWER_DATA = "short_answer_data"
         private const val TAG_DRAG_AND_DROP_DATA = "drag_and_drop_data"
         private const val TAG_MULTIPLE_CHOICE_DATA = "multiple_choice_data"
+
+        /**
+         * How often the answers of a live quiz are saved at most while they change, the same interval as in the web app and the iOS app
+         */
+        private val AUTOSAVE_INTERVAL = 30.seconds
+
+        /**
+         * How long before the end of a live quiz every change is saved right away
+         */
+        private val SAVE_IMMEDIATELY_BEFORE_END = 10.seconds
     }
 
-    private val submissionChannel = "/topic/quizExercise/$exerciseId/submission"
     private val quizExerciseChannel = "/topic/courses/$courseId/quizExercises"
 
 
@@ -307,74 +315,58 @@ internal class QuizParticipationViewModel(
     private val hasStoredInitialSubmission = MutableStateFlow(false)
 
     /**
-     * Emitted to when buildAndUploadSubmission successfully uploaded a submission through the websocket
-     */
-    private val onRequestUploadSubmissionToWebsocket =
-        MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-
-    val latestWebsocketSubmission: Flow<Result<QuizSubmission>> = flow {
-        // Wait for the initial storage to avoid uploading an empty submission
-        hasStoredInitialSubmission.filter { it }.first()
-
-        var emittedFirst = false
-        val submissionFlow = combine(
-            dragAndDropData,
-            multipleChoiceData,
-            shortAnswerData,
-            onRequestUploadSubmissionToWebsocket.onStart { emit(Unit) }
-        ) { dragAndDropData, multipleChoiceData, shortAnswerData, _ ->
-            Triple(dragAndDropData, multipleChoiceData, shortAnswerData)
-        }
-            .transform {
-                if (emittedFirst) {
-                    emit(it)
-                } else emittedFirst = true
-            }
-            .transformLatest {
-                // If the end date is very close do not wait but send immediately to avoid data loss.
-                if (endDate.first() - serverClock.first().now() >= 10.seconds) {
-                    // Wait for 1 seconds to avoid sending a submission on every keystroke.
-                    delay(1.seconds)
-                }
-                emit(it)
-            }
-            .map { (dragAndDropData, multipleChoiceData, shortAnswerData) ->
-                val submission = buildAndUploadSubmission(
-                    questions = quizQuestionsRandomOrder.first(),
-                    isFinalSubmission = false,
-                    dragAndDropData = dragAndDropData,
-                    multipleChoiceData = multipleChoiceData,
-                    shortAnswerData = shortAnswerData,
-                    serverClock = serverClock.first()
-                )
-
-                val receipt = try {
-                    websocketProvider.convertAndSend(
-                        headers = StompSendHeaders(destination = submissionChannel) {
-                            receipt = UUID.randomUUID().toString()
-                        },
-                        body = submission,
-                        serializer = Submission.serializer()
-                    )
-                } catch (e: Exception) {
-                    null
-                }
-
-                if (receipt != null) {
-                    Result.success(submission)
-                } else {
-                    Result.failure(RuntimeException("Could not send through websocket"))
-                }
-            }
-
-        emitAll(submissionFlow)
-    }
-        .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
-
-    /**
      * Set when the user has uploaded a submission using the submit button
      */
     private val uploadedSubmission: MutableStateFlow<QuizSubmission?> = MutableStateFlow(null)
+
+    /**
+     * Emitted to when the user asks to save the current answers again, e.g. after saving them failed
+     */
+    private val onRequestSaveSubmission = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+
+    /**
+     * The outcome of the latest save of the answers of a live quiz. Like the web app and the iOS app, the answers are saved through the REST API, at most every
+     * [AUTOSAVE_INTERVAL] while they change, and right away shortly before the quiz ends.
+     */
+    val latestSavedSubmission: Flow<Result<QuizSubmission>> = flow {
+        // The answers of a practice quiz are only sent when the practice is submitted
+        if (quizType !is QuizType.Live) return@flow
+
+        // Wait for the initial storage to avoid uploading an empty submission
+        hasStoredInitialSubmission.filter { it }.first()
+
+        val changedAnswers = combine(
+            dragAndDropData,
+            multipleChoiceData,
+            shortAnswerData
+        ) { dragAndDropData, multipleChoiceData, shortAnswerData ->
+            Triple(dragAndDropData, multipleChoiceData, shortAnswerData)
+        }
+            // The first value holds the answers that were just loaded from the server
+            .drop(1)
+            .conflate()
+            .transform { answers ->
+                emit(answers)
+                // Changes made in the meantime are saved together when the interval has passed. Shortly before the end, nothing is held back.
+                val timeUntilEnd = endDate.first() - serverClock.first().now()
+                delay(minOf(AUTOSAVE_INTERVAL, timeUntilEnd - SAVE_IMMEDIATELY_BEFORE_END))
+            }
+
+        // A save the user asks for does not wait for the interval
+        val requestedAnswers = onRequestSaveSubmission.map {
+            Triple(dragAndDropData.first(), multipleChoiceData.first(), shortAnswerData.first())
+        }
+
+        emitAll(
+            merge(changedAnswers, requestedAnswers)
+                // Submitted answers cannot be changed anymore
+                .filter { uploadedSubmission.value == null }
+                .map { (dragAndDropData, multipleChoiceData, shortAnswerData) ->
+                    saveSubmission(dragAndDropData, multipleChoiceData, shortAnswerData)
+                }
+        )
+    }
+        .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 
     val latestSubmission: StateFlow<QuizSubmission> = flow {
         when (quizType) {
@@ -383,7 +375,7 @@ internal class QuizParticipationViewModel(
                 emitAll(
                     merge(
                         initialSubmission,
-                        latestWebsocketSubmission.mapNotNull { it.getOrNull() },
+                        latestSavedSubmission.mapNotNull { it.getOrNull() },
                         uploadedSubmission.filterNotNull()
                     )
                 )
@@ -501,7 +493,7 @@ internal class QuizParticipationViewModel(
 
     fun submit(): Deferred<Boolean> {
         return viewModelScope.async(coroutineContext) {
-            val submission = buildAndUploadSubmission(
+            val submission = buildSubmission(
                 questions = quizQuestionsRandomOrder.first(),
                 isFinalSubmission = true,
                 shortAnswerData = shortAnswerData.first(),
@@ -539,13 +531,34 @@ internal class QuizParticipationViewModel(
     }
 
     /**
-     * Request to upload a submission of the current state through the websocket
+     * Request to save the current answers right away
      */
-    fun requestSaveSubmissionThroughWebsocket() {
-        viewModelScope.launch {
-            websocketProvider.requestTryReconnect()
-            onRequestUploadSubmissionToWebsocket.tryEmit(Unit)
-        }
+    fun requestSaveSubmission() {
+        onRequestSaveSubmission.tryEmit(Unit)
+    }
+
+    private suspend fun saveSubmission(
+        dragAndDropData: Map<Long, DragAndDropStorageData>,
+        multipleChoiceData: Map<Long, MultipleChoiceStorageData>,
+        shortAnswerData: Map<Long, ShortAnswerStorageData>
+    ): Result<QuizSubmission> {
+        val submission = buildSubmission(
+            questions = quizQuestionsRandomOrder.first(),
+            isFinalSubmission = false,
+            dragAndDropData = dragAndDropData,
+            multipleChoiceData = multipleChoiceData,
+            shortAnswerData = shortAnswerData,
+            serverClock = serverClock.first()
+        )
+
+        return quizParticipationService.saveForLiveMode(
+            submission,
+            exerciseId,
+            serverConfigurationService.serverUrl.first(),
+            accountService.authToken.first()
+        )
+            .bind { Result.success(submission) }
+            .or(Result.failure(RuntimeException("Could not save the answers")))
     }
 
     /**
@@ -603,13 +616,9 @@ internal class QuizParticipationViewModel(
     }
 
     /**
-     * Constructs a submission from the stored data in the savedStateHandle and uploads it to the server.
-     * If isFinalSubmission is set to true, a http request is sent, otherwise the submission is sent
-     * through the websocket.
-     *
-     * @return true if uploading the submission was successful.
+     * Constructs a submission from the stored data in the savedStateHandle.
      */
-    private fun buildAndUploadSubmission(
+    private fun buildSubmission(
         questions: List<QuizQuestion>,
         isFinalSubmission: Boolean,
         shortAnswerData: Map<Long, ShortAnswerStorageData>,
