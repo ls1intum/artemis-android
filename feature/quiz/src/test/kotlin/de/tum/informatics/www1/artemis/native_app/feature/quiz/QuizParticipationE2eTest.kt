@@ -7,15 +7,21 @@ import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragAndDropQuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.MultipleChoiceQuizQuestion
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.ShortAnswerQuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.QuizSubmission
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.DragAndDropSubmittedAnswer
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.MultipleChoiceSubmittedAnswer
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.ShortAnswerSubmittedAnswer
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.endQuizExerciseNow
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizParticipationScreen
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizParticipationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizQuestionData
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.QuizResultViewModel
+import kotlin.test.assertNotNull
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
@@ -66,20 +72,45 @@ internal class QuizParticipationE2eTest : QuizParticipationBaseE2eTest(QuizType.
     }
 
     @Test(timeout = DefaultTestTimeoutMillis)
-    fun `shows the saved answers when a live quiz is opened again`() {
-        val (question, savedOption) = runBlockingWithTestTimeout {
-            val (question, option) = loadFirstMultipleChoiceOption()
+    fun `shows the saved answers to every kind of question when a live quiz is opened again`() {
+        val started = runBlockingWithTestTimeout {
+            assertIs<QuizExercise>(participationService.findParticipation(quiz.id).orThrow("Could not load the quiz").exercise)
+        }
+        val multipleChoice = started.quizQuestions.filterIsInstance<MultipleChoiceQuizQuestion>().single()
+        val shortAnswer = started.quizQuestions.filterIsInstance<ShortAnswerQuizQuestion>().single()
+        val dragAndDrop = started.quizQuestions.filterIsInstance<DragAndDropQuizQuestion>().single()
 
+        val chosenOption = multipleChoice.answerOptions.first { it.text == "Enter a correct answer option here" }
+        val otherOption = multipleChoice.answerOptions.first { it != chosenOption }
+        val spot = shortAnswer.spots.first { it.spotNr == 1 }
+        val otherSpot = shortAnswer.spots.first { it.spotNr == 2 }
+        val placedItem = dragAndDrop.dragItems.first { it.text == "item1" }
+        val otherItem = dragAndDrop.dragItems.first { it.text == "item2" }
+        val dropLocation = dragAndDrop.dropLocations.first()
+
+        runBlockingWithTestTimeout {
             quizParticipationService
                 .saveForLiveMode(
-                    submissionSelecting(question, option, submitted = false),
+                    QuizSubmission(
+                        submitted = false,
+                        submissionDate = Clock.System.now(),
+                        submittedAnswers = listOf(
+                            MultipleChoiceSubmittedAnswer(quizQuestion = multipleChoice, selectedOptions = listOf(chosenOption)),
+                            ShortAnswerSubmittedAnswer(
+                                quizQuestion = shortAnswer,
+                                submittedTexts = listOf(ShortAnswerSubmittedAnswer.ShortAnswerSubmittedText(text = "is", spot = spot))
+                            ),
+                            DragAndDropSubmittedAnswer(
+                                quizQuestion = dragAndDrop,
+                                mappings = listOf(DragAndDropSubmittedAnswer.DragAndDropMapping(dragItem = placedItem, dropLocation = dropLocation))
+                            )
+                        )
+                    ),
                     quiz.id,
                     testServerUrl,
                     accessToken
                 )
                 .orThrow("Could not save the answers")
-
-            question to option
         }
 
         val viewModel = setupUi(quiz.id) { viewModel ->
@@ -91,13 +122,37 @@ internal class QuizParticipationE2eTest : QuizParticipationBaseE2eTest(QuizType.
             )
         }
 
-        waitUntilViewModelsSettle {
-            val questions = (viewModel.quizQuestionsWithData.value as? DataState.Success)?.data.orEmpty()
+        waitUntilViewModelsSettle { restoredAnswers(viewModel) != null }
 
-            questions
-                .filterIsInstance<QuizQuestionData.MultipleChoiceData.Editable>()
-                .any { it.question.id == question.id && it.optionSelectionMapping[savedOption.id] == true }
-        }
+        val restored = assertNotNull(restoredAnswers(viewModel))
+        assertEquals(mapOf(chosenOption.id to true), restored.multipleChoice.optionSelectionMapping.filterValues { it })
+        assertEquals(false, restored.multipleChoice.optionSelectionMapping[otherOption.id] ?: false, "The other option must stay unselected")
+
+        assertEquals("is", restored.shortAnswer.solutionTexts[spot.spotNr])
+        assertEquals("", restored.shortAnswer.solutionTexts[otherSpot.spotNr].orEmpty(), "The other spot must stay empty")
+
+        assertEquals(mapOf(dropLocation.id to placedItem.id), restored.dragAndDrop.dropLocationMapping.map { (location, item) -> location.id to item.id }.toMap())
+        assertEquals(listOf(otherItem.id), restored.dragAndDrop.availableDragItems.map { it.id }, "Only the item that was not placed is still to be dragged")
+    }
+
+    private class RestoredAnswers(
+        val multipleChoice: QuizQuestionData.MultipleChoiceData.Editable,
+        val shortAnswer: QuizQuestionData.ShortAnswerData.Editable,
+        val dragAndDrop: QuizQuestionData.DragAndDropData.Editable
+    )
+
+    /**
+     * What the questions of the screen hold, once the saved answers have been put into them
+     */
+    private fun restoredAnswers(viewModel: QuizParticipationViewModel): RestoredAnswers? {
+        val questions = (viewModel.quizQuestionsWithData.value as? DataState.Success)?.data.orEmpty()
+        val multipleChoice = questions.filterIsInstance<QuizQuestionData.MultipleChoiceData.Editable>().singleOrNull()
+        val shortAnswer = questions.filterIsInstance<QuizQuestionData.ShortAnswerData.Editable>().singleOrNull()
+        val dragAndDrop = questions.filterIsInstance<QuizQuestionData.DragAndDropData.Editable>().singleOrNull()
+
+        return if (multipleChoice != null && shortAnswer != null && dragAndDrop != null &&
+            multipleChoice.optionSelectionMapping.isNotEmpty() && shortAnswer.solutionTexts.isNotEmpty() && dragAndDrop.dropLocationMapping.isNotEmpty()
+        ) RestoredAnswers(multipleChoice, shortAnswer, dragAndDrop) else null
     }
 
     @Test(timeout = DefaultTestTimeoutMillis)

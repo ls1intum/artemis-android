@@ -51,6 +51,10 @@ class QuizExerciseActionButtonsTest : BaseComposeTest() {
     fun `offers to open a quiz the student has not joined yet`() {
         setupUi(QuizExercise(id = 1))
 
+        composeTestRule.onNodeWithText(startQuizText).assertDoesNotExist()
+        composeTestRule.onNodeWithText(practiceText).assertDoesNotExist()
+        composeTestRule.onNodeWithText(viewResultText).assertDoesNotExist()
+
         composeTestRule.onNodeWithText(openQuizText).performClick()
 
         assertEquals(listOf("open quiz"), clickedActions)
@@ -65,6 +69,9 @@ class QuizExerciseActionButtonsTest : BaseComposeTest() {
             )
         )
 
+        composeTestRule.onNodeWithText(openQuizText).assertDoesNotExist()
+        composeTestRule.onNodeWithText(practiceText).assertDoesNotExist()
+
         composeTestRule.onNodeWithText(startQuizText).performClick()
 
         assertEquals(listOf("start quiz"), clickedActions)
@@ -78,6 +85,10 @@ class QuizExerciseActionButtonsTest : BaseComposeTest() {
                 studentParticipations = listOf(participation(Participation.InitializationState.INITIALIZED))
             )
         )
+
+        composeTestRule.onNodeWithText(startQuizText).assertDoesNotExist()
+        composeTestRule.onNodeWithText(practiceText).assertDoesNotExist()
+        composeTestRule.onNodeWithText(viewResultText).assertDoesNotExist()
 
         composeTestRule.onNodeWithText(openQuizText).performClick()
 
@@ -116,6 +127,8 @@ class QuizExerciseActionButtonsTest : BaseComposeTest() {
             )
         )
 
+        composeTestRule.onNodeWithText(openQuizText).assertDoesNotExist()
+
         composeTestRule.onNodeWithText(viewResultText).performClick()
 
         assertEquals(listOf("view quiz results"), clickedActions)
@@ -131,6 +144,9 @@ class QuizExerciseActionButtonsTest : BaseComposeTest() {
                 studentParticipations = listOf(participation(Participation.InitializationState.FINISHED))
             )
         )
+
+        composeTestRule.onNodeWithText(openQuizText).assertDoesNotExist()
+        composeTestRule.onNodeWithText(startQuizText).assertDoesNotExist()
 
         composeTestRule.onNodeWithText(practiceText).performClick()
 
