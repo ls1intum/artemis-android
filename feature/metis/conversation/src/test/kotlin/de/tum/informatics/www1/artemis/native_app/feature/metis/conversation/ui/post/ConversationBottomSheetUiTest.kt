@@ -14,11 +14,11 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.getTestTagForEmojiId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.getTestTagForReactionAuthor
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 @Category(UnitTest::class)
 @RunWith(RobolectricTestRunner::class)
@@ -203,7 +203,8 @@ class ConversationBottomSheetUiTest : BaseChatUITest() {
         composeTestRule.assertPostActionVisibility(R.string.post_forward, isVisible = true)
     }
 
-    @Ignore("This test is flaky and does not work")
+    // The sheet does not scroll, and the default test screen is too small for all actions of this post
+    @Config(qualifiers = "w411dp-h1200dp")
     @Test
     fun `test GIVEN a post that has no content but forwarded messages WHEN long pressing the post THEN forward option is shown`() {
         val post = posts[1].copy(content = "")
