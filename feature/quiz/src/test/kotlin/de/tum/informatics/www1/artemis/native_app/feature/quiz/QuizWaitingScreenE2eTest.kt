@@ -15,9 +15,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExerci
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.addQuizExerciseBatch
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.courseQuizExercisesPath
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createExerciseFormBodyWithPng
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createQuizExercise
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createQuiz
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.startQuizExerciseBatch
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizParticipationUi
@@ -38,19 +36,7 @@ internal class QuizWaitingScreenE2eTest : QuizBaseE2eTest(QuizType.Live) {
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can start individual quiz`() {
         val quiz: QuizExercise = runBlockingWithTestTimeout {
-            val path = getBackgroundImageFilePath()
-            assertIs(
-                createExerciseFormBodyWithPng(
-                    getAdminAccessToken(),
-                    courseId,
-                    pathSegments = courseQuizExercisesPath(courseId),
-                    pngFilePath = path,
-                    pngByteArray = getBackgroundImageBytes(),
-                    creator = { name, _ ->
-                        createQuizExercise(name, path, QuizExercise.QuizMode.INDIVIDUAL)
-                    }
-                )
-            )
+            createQuiz(getAdminAccessToken(), courseId, QuizExercise.QuizMode.INDIVIDUAL)
         }
 
         setupUi(quiz.id) { viewModel ->
@@ -94,20 +80,7 @@ internal class QuizWaitingScreenE2eTest : QuizBaseE2eTest(QuizType.Live) {
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can start batched quiz`() {
         val (quiz, batch) = runBlockingWithTestTimeout {
-            val path = getBackgroundImageFilePath()
-
-            val quiz: QuizExercise = assertIs(
-                createExerciseFormBodyWithPng(
-                    getAdminAccessToken(),
-                    courseId,
-                    pathSegments = courseQuizExercisesPath(courseId),
-                    pngByteArray = getBackgroundImageBytes(),
-                    pngFilePath = path,
-                    creator = { name, _ ->
-                        createQuizExercise(name, path, QuizExercise.QuizMode.BATCHED)
-                    }
-                )
-            )
+            val quiz = createQuiz(getAdminAccessToken(), courseId, QuizExercise.QuizMode.BATCHED)
 
             val batch = addQuizExerciseBatch(getAdminAccessToken(), quiz.id)
 

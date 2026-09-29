@@ -10,7 +10,6 @@ import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
 import de.tum.informatics.www1.artemis.native_app.core.test.testWebsocketModule
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.addStudentToCourse
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createCourse
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateId
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.performTestLogin
@@ -85,14 +84,4 @@ internal abstract class QuizBaseE2eTest(protected val quizType: QuizType.Workabl
 
         return viewModel
     }
-
-    protected fun getBackgroundImageFilePath() = "/api/files/drag-and-drop/backgrounds/${generateId()}/dndbackground.png"
-
-    // Read from the test classpath rather than as an Android raw resource: the resource route
-    // needed src/test/res grafted onto the main source set, which AGP 9 no longer allows and which
-    // shipped a test fixture in the release APK.
-    protected fun getBackgroundImageBytes(): ByteArray =
-        checkNotNull(javaClass.getResourceAsStream("/dndbackground.png")) {
-            "dndbackground.png is missing from the test resources"
-        }.use { inputStream -> inputStream.readBytes() }
 }

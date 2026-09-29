@@ -18,6 +18,7 @@ import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTi
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createModelingExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createProgramingExercise
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createQuiz
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createTextExercise
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.TEST_TAG_EXERCISE_LIST_LAZY_COLUMN
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
@@ -69,19 +70,12 @@ class ExerciseListOverviewE2eTest : BaseCourseTest() {
         }
     }
 
-    @Ignore("TODO: quiz creation is currently undergoing changes. Fix once those are complete.")
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `display quiz exercise`() {
-//        displayExerciseTypeTestImpl {
-//            createExerciseFormBody(
-//                getAdminAccessToken(),
-//                course.id!!,
-//                endpoint = "quiz-exercises",
-//                creator = { ::createQuizExercise }
-//            )
-//        }
+        displayExerciseTypeTestImpl {
+            createQuiz(getAdminAccessToken(), course.id!!)
+        }
     }
-
 
     private fun displayExerciseTypeTestImpl(createExercise: suspend () -> Exercise) {
         val exercise = runBlockingWithTestTimeout {
