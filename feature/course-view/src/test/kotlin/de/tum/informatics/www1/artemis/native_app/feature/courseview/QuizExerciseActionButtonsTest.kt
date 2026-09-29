@@ -45,6 +45,7 @@ class QuizExerciseActionButtonsTest : BaseComposeTest() {
     private val openQuizText get() = context.getString(R.string.exercise_actions_open_quiz_button)
     private val startQuizText get() = context.getString(R.string.exercise_actions_start_quiz_button)
     private val viewResultText get() = context.getString(R.string.exercise_actions_view_result_button)
+    private val practiceText get() = context.getString(R.string.exercise_actions_practice_quiz_button)
 
     @Test
     fun `offers to open a quiz the student has not joined yet`() {
@@ -118,6 +119,22 @@ class QuizExerciseActionButtonsTest : BaseComposeTest() {
         composeTestRule.onNodeWithText(viewResultText).performClick()
 
         assertEquals(listOf("view quiz results"), clickedActions)
+    }
+
+    @Test
+    fun `offers to practise a quiz that has ended`() {
+        // Artemis opens every course quiz for practice once it has ended, and no longer sends a flag for it
+        setupUi(
+            QuizExercise(
+                id = 1,
+                dueDate = Instant.parse("2026-09-28T20:29:41Z"),
+                studentParticipations = listOf(participation(Participation.InitializationState.FINISHED))
+            )
+        )
+
+        composeTestRule.onNodeWithText(practiceText).performClick()
+
+        assertEquals(listOf("practice quiz"), clickedActions)
     }
 
     private fun participation(state: Participation.InitializationState) =

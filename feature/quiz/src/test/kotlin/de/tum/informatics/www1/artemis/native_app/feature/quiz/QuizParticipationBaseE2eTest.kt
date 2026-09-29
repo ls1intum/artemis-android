@@ -16,10 +16,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.MultipleChoiceSubmittedAnswer
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.ShortAnswerSubmittedAnswer
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.courseQuizExercisesPath
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createExerciseFormBodyWithPng
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createQuizExercise
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateId
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createQuiz
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.TEST_TAG_BUTTON_WITH_LOADING_ANIMATION_LOADING
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizParticipationScreen
@@ -42,20 +39,7 @@ internal abstract class QuizParticipationBaseE2eTest(quizType: QuizType.Workable
     override suspend fun setupHook() {
         super.setupHook()
 
-        val filePath = "/api/files/drag-and-drop/backgrounds/$courseId/${generateId()}/dndbackground.png"
-
-        quiz = assertIs(
-            createExerciseFormBodyWithPng(
-                accessToken = getAdminAccessToken(),
-                courseId = courseId,
-                pathSegments = courseQuizExercisesPath(courseId),
-                pngByteArray = getBackgroundImageBytes(),
-                pngFilePath = filePath,
-                creator = { name, _ ->
-                    createQuizExercise(name, filePath)
-                }
-            )
-        )
+        quiz = createQuiz(getAdminAccessToken(), courseId)
     }
 
     protected fun testSubmitDragAndDropImpl() {
@@ -242,7 +226,14 @@ internal abstract class QuizParticipationBaseE2eTest(quizType: QuizType.Workable
                         }
 
                         QuizType.Practice -> {
-                            val result = assertNotNull(viewModel.result.first(), "Result is null")
+                            // The result is null until the submission has come back, and the view model
+                            // only carries on while the compose rule runs the main looper
+                            composeTestRule.waitUntil(DefaultTimeoutMillis) {
+                                composeTestRule.waitForIdle()
+                                viewModel.result.value != null
+                            }
+
+                            val result = assertNotNull(viewModel.result.value, "Result is null")
 
                             assertIs(
                                 result.submission,

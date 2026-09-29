@@ -10,7 +10,6 @@ import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.UnknownExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateId
@@ -217,60 +216,38 @@ suspend fun KoinComponent.createLectureUnit(
     }.body()
 }
 
-suspend fun KoinComponent.createAttachment(
+/**
+ * Creates a visible quiz of the given course with one question of each type, see [createQuizExercise],
+ * and uploads the background of its drag and drop question with it.
+ */
+suspend fun KoinComponent.createQuiz(
     accessToken: String,
-    lectureId: Long,
-    attachmentName: String = "Attachment${generateId()}"
-): Attachment {
-    return ktorProvider.ktorClient.submitFormWithBinaryData(
-        formData {
-            append(
-                "file",
-                "file content".encodeToByteArray(),
-                Headers.build {
-                    append(HttpHeaders.ContentDisposition, "filename=file.txt")
-                }
-            )
+    courseId: Long,
+    mode: QuizExercise.QuizMode = QuizExercise.QuizMode.INDIVIDUAL
+): QuizExercise {
+    val backgroundFilePath = "/api/files/drag-and-drop/backgrounds/$courseId/${generateId()}/dndbackground.png"
 
-            append(
-                "attachment",
-                """
-                    {
-                      "name": "$attachmentName",
-                      "link": "$attachmentName.txt",
-                      "version": 1,
-                      "attachmentType": "FILE",
-                      "lecture": {
-                        "id": $lectureId
-                      }
-                    }
-                """.trimIndent(),
-                Headers.build {
-                    set("Content-Type", "application/json")
-                    set("filename", "blob")
-                }
-            )
-        }
-    ) {
-        url(serverConfigurationService.serverUrl.first())
+    val quiz = createExerciseFormBodyWithPng(
+        accessToken = accessToken,
+        courseId = courseId,
+        pathSegments = arrayOf(*Api.Quiz.path, "courses", courseId.toString(), "quiz-exercises"),
+        pngByteArray = quizBackgroundImageBytes(),
+        pngFilePath = backgroundFilePath,
+        creator = { name, _ -> createQuizExercise(name, backgroundFilePath, mode) }
+    )
 
-        url {
-            appendPathSegments(*Api.Lecture.path, "attachments")
-        }
-
-        cookieAuth(accessToken)
-
-        contentType(ContentType.MultiPart.FormData)
-        accept(ContentType.Application.Json)
-    }
-        .body()
+    return quiz as? QuizExercise ?: error("Creating the quiz did not answer with a quiz: $quiz")
 }
 
-/**
- * The path segments to create a quiz of the given course at, with [createQuizExercise] as the payload.
- */
-fun courseQuizExercisesPath(courseId: Long): Array<String> =
-    arrayOf(*Api.Quiz.path, "courses", courseId.toString(), "quiz-exercises")
+private object QuizBackgroundImage
+
+// Read from the classpath rather than as an Android raw resource: the resource route needed
+// src/test/res grafted onto the main source set, which AGP 9 no longer allows and which shipped a
+// test fixture in the release APK.
+private fun quizBackgroundImageBytes(): ByteArray =
+    checkNotNull(QuizBackgroundImage::class.java.getResourceAsStream("/dndbackground.png")) {
+        "dndbackground.png is missing from the resources of core-test"
+    }.use { inputStream -> inputStream.readBytes() }
 
 /**
  * Ends a quiz that is not synchronized. The server scores the submissions right away.

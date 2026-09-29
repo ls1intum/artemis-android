@@ -16,7 +16,6 @@ import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTi
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
-import de.tum.informatics.www1.artemis.native_app.core.data.test.awaitFirstSuccess
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
@@ -25,7 +24,6 @@ import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
 import de.tum.informatics.www1.artemis.native_app.core.test.testWebsocketModule
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createAttachment
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.addStudentToCourse
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createCourse
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createExercise
@@ -48,7 +46,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.test.testLoginMo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.communicationModule
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -57,7 +54,6 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.test.KoinTestRule
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -131,29 +127,6 @@ class LectureE2eTest : BaseComposeTest() {
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `shows online lecture unit`() {
         verifyLectureUnit(createLectureUnit("online-units", ::createOnlineLectureUnit))
-    }
-
-    @Test(timeout = DefaultTestTimeoutMillis)
-    @Ignore("Lecture attachment creation has been deprecated in https://github.com/ls1intum/Artemis/pull/10708")
-    fun `shows attachments`() {
-        val attachments = runBlocking {
-            (0 until 3).map {
-                createAttachment(getAdminAccessToken(), lecture.id!!)
-            }
-        }
-
-        assert(attachments.size == 3) { "Expected 3 lecture units" }
-
-        val viewModel = setupViewModelAndUi()
-        val loadedAttachments = runBlockingWithTestTimeout {
-            viewModel.lectureDataState.awaitFirstSuccess("Lecture Data State").attachments
-        }
-
-        assertEquals(loadedAttachments.size, 3, "Expected 3 attachments")
-
-        attachments.forEach { attachment ->
-            composeTestRule.onNodeWithText(attachment.name!!).assertExists()
-        }
     }
 
     @OptIn(ExperimentalTestApi::class)
