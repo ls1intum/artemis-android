@@ -200,16 +200,18 @@ fun createModelingExercise(title: String, courseId: Long): String = """
 fun createQuizExercise(
     title: String,
     backgroundFilePath: String,
-    mode: QuizExercise.QuizMode = QuizExercise.QuizMode.INDIVIDUAL
+    mode: QuizExercise.QuizMode = QuizExercise.QuizMode.INDIVIDUAL,
+    randomizeQuestionOrder: Boolean = true,
+    durationInSeconds: Int = 600
 ): String = """
 {
   "title": "$title",
   "mode": "INDIVIDUAL",
   "includedInOverallScore": "NOT_INCLUDED",
   "channelName": "${(title + "_c").take(30)}",
-  "randomizeQuestionOrder": true,
+  "randomizeQuestionOrder": $randomizeQuestionOrder,
   "quizMode": "${mode.name}",
-  "duration": 600,
+  "duration": $durationInSeconds,
   "quizQuestions": [
     {
       "type": "multiple-choice",
