@@ -127,3 +127,10 @@ jobs:
         # this teardown has fully settled.
         run: docker compose -f docker/e2e-tests.yml down --volumes --remove-orphans --timeout 30
         continue-on-error: true
+
+      - name: Fail when the tests did not pass
+        # The tests continue on error so that the server log, the report and the cleanup above still
+        # run. The report fails the job for failed tests only: a build that fails before any test has
+        # run, e.g. because a dependency could not be downloaded, reports nothing and left the job green.
+        if: steps.run-tests.outcome == 'failure'
+        run: exit 1
