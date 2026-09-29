@@ -10,7 +10,6 @@ import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.UnknownExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateId
@@ -215,55 +214,6 @@ suspend fun KoinComponent.createLectureUnit(
         contentType(ContentType.Application.Json)
         accept(ContentType.Application.Json)
     }.body()
-}
-
-suspend fun KoinComponent.createAttachment(
-    accessToken: String,
-    lectureId: Long,
-    attachmentName: String = "Attachment${generateId()}"
-): Attachment {
-    return ktorProvider.ktorClient.submitFormWithBinaryData(
-        formData {
-            append(
-                "file",
-                "file content".encodeToByteArray(),
-                Headers.build {
-                    append(HttpHeaders.ContentDisposition, "filename=file.txt")
-                }
-            )
-
-            append(
-                "attachment",
-                """
-                    {
-                      "name": "$attachmentName",
-                      "link": "$attachmentName.txt",
-                      "version": 1,
-                      "attachmentType": "FILE",
-                      "lecture": {
-                        "id": $lectureId
-                      }
-                    }
-                """.trimIndent(),
-                Headers.build {
-                    set("Content-Type", "application/json")
-                    set("filename", "blob")
-                }
-            )
-        }
-    ) {
-        url(serverConfigurationService.serverUrl.first())
-
-        url {
-            appendPathSegments(*Api.Lecture.path, "attachments")
-        }
-
-        cookieAuth(accessToken)
-
-        contentType(ContentType.MultiPart.FormData)
-        accept(ContentType.Application.Json)
-    }
-        .body()
 }
 
 /**

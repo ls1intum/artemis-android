@@ -17,12 +17,10 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createModelingExercise
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createProgramingExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createQuiz
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createTextExercise
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.TEST_TAG_EXERCISE_LIST_LAZY_COLUMN
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
@@ -58,24 +56,12 @@ class ExerciseListOverviewE2eTest : BaseCourseTest() {
     }
 
     @Test(timeout = DefaultTestTimeoutMillis)
-    @Ignore
-    fun `display programing exercise`() {
-        displayExerciseTypeTestImpl {
-            createExercise(
-                getAdminAccessToken(),
-                course.id!!,
-                pathSegments = Api.Programming.ProgrammingExercises.path,
-                creator = ::createProgramingExercise
-            )
-        }
-    }
-
-    @Test(timeout = DefaultTestTimeoutMillis)
     fun `display quiz exercise`() {
         displayExerciseTypeTestImpl {
             createQuiz(getAdminAccessToken(), course.id!!)
         }
     }
+
 
     private fun displayExerciseTypeTestImpl(createExercise: suspend () -> Exercise) {
         val exercise = runBlockingWithTestTimeout {
