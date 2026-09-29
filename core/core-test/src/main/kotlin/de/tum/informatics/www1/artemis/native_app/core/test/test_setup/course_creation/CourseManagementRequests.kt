@@ -10,10 +10,13 @@ import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.UnknownExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.QuizSubmission
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Submission
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateId
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateShortName
+import io.ktor.client.request.parameter
 import kotlinx.coroutines.delay
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ServerResponseException
@@ -223,7 +226,9 @@ suspend fun KoinComponent.createLectureUnit(
 suspend fun KoinComponent.createQuiz(
     accessToken: String,
     courseId: Long,
-    mode: QuizExercise.QuizMode = QuizExercise.QuizMode.INDIVIDUAL
+    mode: QuizExercise.QuizMode = QuizExercise.QuizMode.INDIVIDUAL,
+    randomizeQuestionOrder: Boolean = true,
+    durationInSeconds: Int = 600
 ): QuizExercise {
     val backgroundFilePath = "/api/files/drag-and-drop/backgrounds/$courseId/${generateId()}/dndbackground.png"
 
@@ -233,7 +238,7 @@ suspend fun KoinComponent.createQuiz(
         pathSegments = arrayOf(*Api.Quiz.path, "courses", courseId.toString(), "quiz-exercises"),
         pngByteArray = quizBackgroundImageBytes(),
         pngFilePath = backgroundFilePath,
-        creator = { name, _ -> createQuizExercise(name, backgroundFilePath, mode) }
+        creator = { name, _ -> createQuizExercise(name, backgroundFilePath, mode, randomizeQuestionOrder, durationInSeconds) }
     )
 
     return quiz as? QuizExercise ?: error("Creating the quiz did not answer with a quiz: $quiz")
@@ -250,22 +255,72 @@ private fun quizBackgroundImageBytes(): ByteArray =
     }.use { inputStream -> inputStream.readBytes() }
 
 /**
+ * Lets the user of the given access token join the batch of a quiz, after they have started their participation.
+ * A quiz in individual mode creates the batch for them.
+ */
+suspend fun KoinComponent.joinQuiz(accessToken: String, exerciseId: Long, password: String = "") {
+    val response = ktorProvider.ktorClient.post(serverConfigurationService.serverUrl.first()) {
+        url {
+            appendPathSegments(*Api.Quiz.QuizExercises.path, exerciseId.toString(), "join")
+        }
+
+        cookieAuth(accessToken)
+        contentType(ContentType.Application.Json)
+        setBody("{\"password\":\"$password\"}")
+    }
+
+    check(response.status.isSuccess()) { "Could not join quiz $exerciseId: ${response.status}" }
+}
+
+/**
+ * Submits the answers of the user of the given access token to a live quiz they have started.
+ */
+suspend fun KoinComponent.submitLiveQuiz(
+    accessToken: String,
+    exerciseId: Long,
+    submission: QuizSubmission = QuizSubmission(submitted = true)
+) {
+    val response = ktorProvider.ktorClient.post(serverConfigurationService.serverUrl.first()) {
+        url {
+            appendPathSegments(*Api.Quiz.path, "exercises", exerciseId.toString(), "submissions", "live")
+        }
+        parameter("submit", true)
+
+        cookieAuth(accessToken)
+        contentType(ContentType.Application.Json)
+        setBody<Submission>(submission)
+    }
+
+    check(response.status.isSuccess()) { "Could not submit quiz $exerciseId: ${response.status}" }
+}
+
+/**
  * Ends a quiz that is not synchronized. The server scores the submissions right away.
  */
 suspend fun KoinComponent.endQuizExerciseNow(
     accessToken: String,
     exerciseId: Long
-) {
+) = performQuizAction(accessToken, exerciseId, "end-now")
+
+/**
+ * Starts a synchronized quiz for everyone who waits for it.
+ */
+suspend fun KoinComponent.startQuizExerciseNow(
+    accessToken: String,
+    exerciseId: Long
+) = performQuizAction(accessToken, exerciseId, "start-now")
+
+private suspend fun KoinComponent.performQuizAction(accessToken: String, exerciseId: Long, action: String) {
     val response = ktorProvider.ktorClient.put(serverConfigurationService.serverUrl.first()) {
         url {
-            appendPathSegments(*Api.Quiz.QuizExercises.path, exerciseId.toString(), "end-now")
+            appendPathSegments(*Api.Quiz.QuizExercises.path, exerciseId.toString(), action)
         }
 
         cookieAuth(accessToken)
         contentType(ContentType.Application.Json)
     }
 
-    check(response.status.isSuccess()) { "Could not end quiz $exerciseId: ${response.status}" }
+    check(response.status.isSuccess()) { "Could not $action quiz $exerciseId: ${response.status}" }
 }
 
 suspend fun KoinComponent.addQuizExerciseBatch(

@@ -17,6 +17,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.times
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.toSize
@@ -39,6 +40,8 @@ internal sealed interface DragAndDropAreaType {
     ) : DragAndDropAreaType
 }
 
+internal fun getTestTagForDropLocation(dropLocationId: Long) = "DROP_LOCATION_$dropLocationId"
+
 /**
  * Load and display the background image. Renders the drop locations onto the image and reports
  * drag events about drag items already placed in the drop locations.
@@ -55,8 +58,6 @@ internal fun DragAndDropWorkArea(
         imagePath = imageUrl
     )
     val asyncImagePainterState by asyncImagePainter.state.collectAsState()
-    asyncImagePainter.restart()
-
 
     BasicDataStateUi(
         modifier = modifier,
@@ -144,7 +145,8 @@ internal fun DragAndDropWorkArea(
                             .size(
                                 width = width.toDp(),
                                 height = height.toDp()
-                            ),
+                            )
+                            .testTag(getTestTagForDropLocation(dropLocation.id)),
                         dragItem = dragItem,
                         type = when (type) {
                             is DragAndDropAreaType.Editable -> {
