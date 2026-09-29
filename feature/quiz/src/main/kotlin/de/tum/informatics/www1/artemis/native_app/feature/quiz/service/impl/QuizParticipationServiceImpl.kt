@@ -27,7 +27,7 @@ class QuizParticipationServiceImpl(
         serverUrl: String,
         authToken: String
     ): NetworkResponse<Result> {
-        return submitImpl(serverUrl, exerciseId, authToken, submission, "practice", submit = null)
+        return submitImpl(serverUrl, exerciseId, authToken, QuizSubmissionFromStudentDTO.of(submission), "practice", submit = null)
     }
 
     override suspend fun saveForLiveMode(
@@ -36,7 +36,7 @@ class QuizParticipationServiceImpl(
         serverUrl: String,
         authToken: String
     ): NetworkResponse<Submission> {
-        return submitImpl(serverUrl, exerciseId, authToken, submission, "live", submit = false)
+        return submitImpl<Submission, Submission>(serverUrl, exerciseId, authToken, submission, "live", submit = false)
     }
 
     override suspend fun submitForLiveMode(
@@ -45,17 +45,18 @@ class QuizParticipationServiceImpl(
         serverUrl: String,
         authToken: String
     ): NetworkResponse<Submission> {
-        return submitImpl(serverUrl, exerciseId, authToken, submission, "live", submit = true)
+        return submitImpl<Submission, Submission>(serverUrl, exerciseId, authToken, submission, "live", submit = true)
     }
 
     /**
+     * @param body the answers in the shape the endpoint reads
      * @param submit for live quizzes, whether the answers are submitted or only saved. The server only saves them if this is not set.
      */
-    private suspend inline fun <reified T> submitImpl(
+    private suspend inline fun <reified B, reified T> submitImpl(
         serverUrl: String,
         exerciseId: Long,
         authToken: String,
-        submission: QuizSubmission,
+        body: B,
         endPoint: String,
         submit: Boolean?
     ): NetworkResponse<T> {
@@ -76,7 +77,7 @@ class QuizParticipationServiceImpl(
 
                 contentType(ContentType.Application.Json)
                 cookieAuth(authToken)
-                setBody<Submission>(submission)
+                setBody<B>(body)
             }.body()
         }
     }

@@ -152,15 +152,13 @@ private fun QuizExerciseButtons(
 
 /**
  * The start practice button should be available for programming and quiz exercises
- * - For quizzes when they are open for practice and the regular work periode is over
+ * - For quizzes once they have ended: Artemis opens every course quiz for practice then
  * - For programming exercises when it's after the due date
  */
 @Composable
 private fun isStartPracticeAvailable(exercise: Exercise): Boolean {
     return when (exercise) {
-        is QuizExercise -> {
-            exercise.isOpenForPractice == true && hasQuizEnded(exercise)
-        }
+        is QuizExercise -> hasQuizEnded(exercise)
 
         is ProgrammingExercise -> {
             val dueDate = exercise.dueDate
