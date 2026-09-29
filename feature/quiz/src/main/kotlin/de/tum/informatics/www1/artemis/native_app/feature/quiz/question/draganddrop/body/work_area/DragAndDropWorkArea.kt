@@ -67,8 +67,6 @@ internal fun DragAndDropWorkArea(
         retryButtonText = stringResource(id = R.string.quiz_participation_load_dnd_image_retry),
         onClickRetry = { asyncImagePainter.restart() }
     ) { painter ->
-        // TODO: verify that the image is loaded properly after re-enabling quizes: https://github.com/ls1intum/artemis-android/issues/107
-
         val localDensity = LocalDensity.current
 
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
