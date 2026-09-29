@@ -46,5 +46,5 @@ jobs:
 
       - name: Compile debug sources
         # The screenshots of the Play Store are previews of the debug variant, which nothing else builds. The
-        # quiz screenshot was commented out for two years because it no longer compiled.
+        # quiz screenshot was commented out for almost two years because it no longer compiled.
         run: ./gradlew compileProductionUnrestrictedDebugUnitTestSources

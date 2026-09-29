@@ -21,6 +21,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.service.QuizParti
 import org.junit.Before
 import org.junit.Rule
 import org.koin.android.ext.koin.androidContext
+import org.koin.core.module.Module
 import org.koin.test.KoinTestRule
 import org.koin.test.get
 import org.robolectric.shadows.ShadowLog
@@ -34,6 +35,11 @@ internal abstract class QuizBaseE2eTest(
     useRealWebsocket: Boolean = false
 ) : BaseComposeTest() {
 
+    /**
+     * Modules that replace what the tests share, e.g. to reach the server by another way
+     */
+    protected open fun overrideModules(): List<Module> = emptyList()
+
     protected var courseId: Long = 0L
     protected lateinit var course: Course
 
@@ -45,6 +51,7 @@ internal abstract class QuizBaseE2eTest(
 
         modules(coreTestModules)
         modules(loginModule, testLoginModule, if (useRealWebsocket) websocketModule else testWebsocketModule, quizParticipationModule)
+        modules(overrideModules())
     }
 
     protected val participationService: ParticipationService get() = get()
