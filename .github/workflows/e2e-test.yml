@@ -86,6 +86,12 @@ jobs:
           # in this repository compiles and runs on the same JDK; Renovate bumps it.
           java-version: 25.0.4+101.0.LTS
 
+      - name: Restore the Gradle dependencies
+        # Without it every run downloads all dependencies from Maven Central, which answers the shared address of the
+        # runners with 429 Too Many Requests once their Gradle home is empty. develop writes the cache, pull
+        # requests read it.
+        uses: gradle/actions/setup-gradle@v6
+
       - name: Run tests
         id: run-tests
         run: ./gradlew test --max-workers=4 -Dskip.unit-tests=true -Dskip.e2e=false -Dskip.debugVariants=true -Dskip.flavor.unrestricted=true -Dskip.flavor.beta=true
