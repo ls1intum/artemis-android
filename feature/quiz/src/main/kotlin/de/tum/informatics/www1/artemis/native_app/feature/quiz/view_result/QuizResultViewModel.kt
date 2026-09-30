@@ -27,6 +27,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.MultipleChoiceSto
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.ShortAnswerStorageData
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizQuestionData
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.quizResult
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.quizSubmission
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.service.QuizExerciseService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -68,11 +70,7 @@ internal class QuizResultViewModel(
         QuizType.ViewResults -> initialParticipationDataState
             .mapNotNull { initialParticipationDataState ->
                 initialParticipationDataState.transform { initialParticipation ->
-                    val submission = initialParticipation
-                        .results
-                        .orEmpty()
-                        .firstOrNull()
-                        ?.submission as? QuizSubmission
+                    val submission = initialParticipation.quizSubmission
 
                     if (submission == null) {
                         DataState.Failure(RuntimeException("No submission loaded"))
@@ -86,10 +84,7 @@ internal class QuizResultViewModel(
         is QuizType.PracticeResults -> flowOf(DataState.Success(quizType.result))
         QuizType.ViewResults -> initialParticipationDataState.map { participationDataState ->
             participationDataState.transform { participation ->
-                val result = participation
-                    .results
-                    .orEmpty()
-                    .firstOrNull()
+                val result = participation.quizResult
 
                 if (result == null) {
                     DataState.Failure(RuntimeException("No result loaded"))

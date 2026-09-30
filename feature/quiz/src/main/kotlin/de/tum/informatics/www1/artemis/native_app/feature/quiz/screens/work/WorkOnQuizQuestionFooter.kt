@@ -45,7 +45,7 @@ internal fun WorkOnQuizQuestionFooter(
     lastSubmissionTime: Instant?,
     endDate: Instant?,
     isConnected: Boolean,
-    latestWebsocketSubmission: Result<QuizSubmission>?,
+    latestSavedSubmission: Result<QuizSubmission>?,
     clock: Clock,
     canNavigateToPreviousQuestion: Boolean,
     canNavigateToNextQuestion: Boolean,
@@ -73,7 +73,7 @@ internal fun WorkOnQuizQuestionFooter(
         }
     }
 
-    if (latestWebsocketSubmission != null && latestWebsocketSubmission.isFailure) {
+    if (latestSavedSubmission != null && latestSavedSubmission.isFailure) {
         // Display ui that the latest submission could not be uploaded
         Box(
             modifier = Modifier

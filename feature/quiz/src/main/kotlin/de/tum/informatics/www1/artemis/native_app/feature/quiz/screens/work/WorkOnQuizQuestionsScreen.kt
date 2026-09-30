@@ -31,8 +31,8 @@ internal fun WorkOnQuizQuestionsScreen(
     lastSubmissionTime: Instant?,
     endDate: Instant?,
     isConnected: Boolean,
-    overallPoints: Int,
-    latestWebsocketSubmission: Result<QuizSubmission>?,
+    overallPoints: Double,
+    latestSavedSubmission: Result<QuizSubmission>?,
     clock: Clock,
     onRequestRetrySave: () -> Unit
 ) {
@@ -69,7 +69,7 @@ internal fun WorkOnQuizQuestionsScreen(
                 .padding(bottom = 8.dp),
             quizType = quizType,
             lastSubmissionTime = lastSubmissionTime,
-            latestWebsocketSubmission = latestWebsocketSubmission,
+            latestSavedSubmission = latestSavedSubmission,
             isConnected = isConnected,
             endDate = endDate,
             clock = clock,

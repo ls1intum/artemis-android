@@ -1,15 +1,17 @@
-services:
-  mysql:
-    extends:
-      file: ./mysql.yml
-      service: mysql
+# The PostgreSQL service comes from the Artemis repository, so the stack runs the database that Artemis develop runs
+# with, next to the develop image of Artemis. Its version is read from docker/.env, written by fetch-artemis-versions.sh.
+include:
+  - path:
+      - https://github.com/ls1intum/Artemis.git#develop:docker/postgres.yml
+      - ./postgres.override.yml
 
+services:
   artemis-app:
     extends:
       file: ./artemis.yml
       service: artemis-app
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
     env_file:
       - artemis_e2e_config.env
@@ -39,7 +41,5 @@ networks:
     name: artemis
 
 volumes:
-  artemis-mysql-data-android:
-    name: artemis-mysql-data-android
   artemis-data:
     name: artemis-data
