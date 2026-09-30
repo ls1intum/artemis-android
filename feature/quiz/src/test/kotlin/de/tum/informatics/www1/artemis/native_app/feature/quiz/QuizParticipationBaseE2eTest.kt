@@ -10,16 +10,13 @@ import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
-import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.QuizSubmission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.DragAndDropSubmittedAnswer
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.MultipleChoiceSubmittedAnswer
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.ShortAnswerSubmittedAnswer
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createExerciseFormBodyWithPng
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createQuizExercise
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateId
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createQuiz
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.TEST_TAG_BUTTON_WITH_LOADING_ANIMATION_LOADING
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizParticipationScreen
@@ -42,20 +39,7 @@ internal abstract class QuizParticipationBaseE2eTest(quizType: QuizType.Workable
     override suspend fun setupHook() {
         super.setupHook()
 
-        val filePath = "/api/files/drag-and-drop/backgrounds/$courseId/${generateId()}/dndbackground.png"
-
-        quiz = assertIs(
-            createExerciseFormBodyWithPng(
-                accessToken = getAdminAccessToken(),
-                courseId = courseId,
-                pathSegments = Api.Quiz.QuizExercises.path,
-                pngByteArray = getBackgroundImageBytes(),
-                pngFilePath = filePath,
-                creator = { name, courseId ->
-                    createQuizExercise(name, courseId, filePath)
-                }
-            )
-        )
+        quiz = createQuiz(getAdminAccessToken(), courseId)
     }
 
     protected fun testSubmitDragAndDropImpl() {
@@ -187,6 +171,13 @@ internal abstract class QuizParticipationBaseE2eTest(quizType: QuizType.Workable
             )
         }
 
+        // runBlocking holds the main looper, and with it the view model, so the questions have to have
+        // loaded before: otherwise waiting for them below only ends with the timeout
+        composeTestRule.waitUntilExactlyOneExists(
+            hasTestTag(TEST_TAG_WORK_ON_QUIZ_QUESTIONS_SCREEN),
+            DefaultTimeoutMillis
+        )
+
         runBlockingWithTestTimeout(
             timeoutMultiplier = 2
         ) {
@@ -213,38 +204,44 @@ internal abstract class QuizParticipationBaseE2eTest(quizType: QuizType.Workable
                         DefaultTimeoutMillis
                     )
 
-                val result = runBlockingWithTestTimeout(timeoutMultiplier = 2) {
+                val submission: QuizSubmission = runBlockingWithTestTimeout(timeoutMultiplier = 2) {
                     when (quizType) {
                         QuizType.Live -> {
+                            // The quiz is still running, so there is no result yet: the participation
+                            // carries the submission itself, which submitting has to have marked as such
                             val participation = participationService
                                 .findParticipation(quiz.id)
                                 .orThrow("Could not load submitted participation")
 
-                            val results =
-                                assertNotNull(
-                                    participation.results,
-                                    "Results is null on participation"
-                                )
-                            assertTrue(
-                                results.isNotEmpty(),
-                                "Results does not contain any element"
+                            val submission = assertIs<QuizSubmission>(
+                                participation.submissions.orEmpty().firstOrNull(),
+                                "The participation holds no quiz submission"
                             )
-                            results.first()
+                            assertEquals(
+                                true,
+                                submission.submitted,
+                                "The answers were saved, but not submitted"
+                            )
+                            submission
                         }
 
                         QuizType.Practice -> {
-                            viewModel.result.first()
+                            // The result is null until the submission has come back, and the view model
+                            // only carries on while the compose rule runs the main looper
+                            composeTestRule.waitUntil(DefaultTimeoutMillis) {
+                                composeTestRule.waitForIdle()
+                                viewModel.result.value != null
+                            }
+
+                            val result = assertNotNull(viewModel.result.value, "Result is null")
+
+                            assertIs(
+                                result.submission,
+                                "Submission in result is not a QuizSubmission"
+                            )
                         }
                     }
                 }
-
-                assertNotNull(result, "Result is null")
-
-                val submission: QuizSubmission =
-                    assertIs(
-                        result.submission,
-                        "Submission in result is not a QuizSubmission"
-                    )
 
                 Logger.info("Loaded submitted submission: $submission")
 

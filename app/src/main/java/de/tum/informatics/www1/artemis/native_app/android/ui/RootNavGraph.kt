@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.android.ui
 
 import android.net.Uri
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.navOptions
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.ui.courseNotificationScreen
@@ -163,7 +164,7 @@ fun NavGraphBuilder.rootNavGraph(
     quizParticipation(
         onLeaveQuiz = {
             val previousBackStackEntry = navController.previousBackStackEntry
-            if (previousBackStackEntry?.destination?.route == ExerciseScreenRoute::class.qualifiedName.orEmpty()) {
+            if (previousBackStackEntry?.destination?.hasRoute<ExerciseScreenRoute>() == true) {
                 previousBackStackEntry.savedStateHandle[ExerciseViewDestination.REQUIRE_RELOAD_KEY] =
                     true
             }

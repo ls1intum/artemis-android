@@ -1,0 +1,14 @@
+# ----------------------------------------------------------------------------------------------------------------------
+# Android overrides for the PostgreSQL service of Artemis (docker/postgres.yml in ls1intum/Artemis, see e2e-tests.yml)
+# ----------------------------------------------------------------------------------------------------------------------
+
+services:
+  postgres:
+    # The self-hosted runners also run other Artemis setups, so the container and its volume get names of their own,
+    # and the database port is not published on the host
+    container_name: artemis-postgres-android
+    ports: !reset []
+
+volumes:
+  artemis-postgres-data:
+    name: artemis-postgres-data-android

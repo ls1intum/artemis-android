@@ -60,7 +60,7 @@ internal fun QuizQuestionHeader(
         modifier = modifier,
         questionIndex = questionIndex,
         title = question.title.orEmpty(),
-        points = question.points ?: 1,
+        points = question.points ?: 1.0,
         type = type,
     )
 }
@@ -70,7 +70,7 @@ internal fun QuizQuestionHeader(
     modifier: Modifier,
     questionIndex: Int,
     title: String,
-    points: Int = 1,
+    points: Double = 1.0,
     type: QuizQuestionHeaderType
 ) {
     Column(modifier = modifier) {
@@ -115,14 +115,14 @@ internal fun QuizQuestionHeader(
 @Composable
 private fun ScoreInfo(
     modifier: Modifier,
-    points: Int,
+    points: Double,
     type: QuizQuestionHeaderType
 ) {
     val (scoreText, scoreTextColor) = when (type) {
         is QuizQuestionHeaderType.NoResult -> {
             stringResource(
                 id = R.string.quiz_participation_question_header_points,
-                points
+                QuizQuestionPointsDecimalFormat.format(points)
             ) to LocalTextStyle.current.color
         }
         is QuizQuestionHeaderType.Result -> {
@@ -134,7 +134,7 @@ private fun ScoreInfo(
                 QuizQuestionPointsDecimalFormat.format(type.achievedPoints)
             }
 
-            val isCorrect = type.achievedPoints == points.toDouble()
+            val isCorrect = type.achievedPoints == points
 
             stringResource(
                 id = R.string.quiz_result_question_header_points,
@@ -183,7 +183,7 @@ private fun QuizQuestionHeaderPreview() {
             modifier = Modifier.fillMaxWidth(),
             questionIndex = 0,
             title = "My multiple choice question",
-            points = 1,
+            points = 1.0,
             type = QuizQuestionHeaderType.NoResult(
                 canDisplayQuestionHint = true,
                 onRequestDisplayHint = {}
@@ -200,7 +200,7 @@ private fun QuizQuestionHeaderPreviewMultiline() {
             modifier = Modifier.fillMaxWidth(),
             questionIndex = 0,
             title = "My multiple choice question with a very long title that will stretch over multiple lines",
-            points = 1,
+            points = 1.0,
             type = QuizQuestionHeaderType.NoResult(
                 canDisplayQuestionHint = true,
                 onRequestDisplayHint = {}

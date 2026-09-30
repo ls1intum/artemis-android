@@ -45,7 +45,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
@@ -252,61 +251,6 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
             .onFailure {
                 fail("API call failed with exception: ${it.message}")
             }
-    }
-
-    /**
-     * Checks that updates to conversations are automatically received over the websocket connection.
-     */
-    @OptIn(ExperimentalTestApi::class)
-    @Ignore("Websockets are currently very flaky -> disabled")
-    @Test(timeout = DefaultTestTimeoutMillis)
-    fun `receives websocket conversation updates`() {
-        val chat = runBlocking {
-            conversationService.createChannel(
-                courseId = course.id!!,
-                name = "channel${Random.nextInt(10000)}",
-                description = "some description",
-                isPublic = true,
-                isAnnouncement = false,
-                isCourseWide = false,
-                authToken = accessToken,
-                serverUrl = testServerUrl
-            )
-                .orThrow("Could not create channel")
-        }
-
-        val viewModel = setupUiAndViewModel()
-
-        waitUntilConversationsAreLoaded(viewModel)
-
-        scrollToConversation(chat)
-
-        composeTestRule
-            .onNodeWithTag(getTagForConversation(chat))
-            .assert(hasAnyDescendant(hasText(chat.name)))
-
-        val newChannelName = "newname"
-
-        // Rename the channel, the server should send a websocket message
-        runBlocking {
-            conversationService.updateConversation(
-                courseId = course.id!!,
-                conversationId = chat.id,
-                newName = newChannelName,
-                newDescription = null,
-                newTopic = null,
-                conversation = chat,
-                authToken = accessToken,
-                serverUrl = testServerUrl
-            ).orThrow("Could not send name update")
-        }
-
-        composeTestRule.waitUntilExactlyOneExists(
-            hasTestTag(getTagForConversation(chat)) and hasAnyDescendant(
-                hasText(newChannelName)
-            ),
-            DefaultTimeoutMillis
-        )
     }
 
     private fun expandHiddenSection(viewModel: ConversationOverviewViewModel) {

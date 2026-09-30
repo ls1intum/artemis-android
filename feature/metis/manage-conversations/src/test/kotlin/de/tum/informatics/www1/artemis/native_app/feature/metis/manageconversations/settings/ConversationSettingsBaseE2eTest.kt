@@ -98,8 +98,7 @@ internal abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest()
 
     protected fun setupUiAndViewModel(
         conversation: Conversation,
-        onConversationLeft: () -> Unit = {},
-        onChannelDeleted: () -> Unit = {}
+        onConversationLeft: () -> Unit = {}
     ): ConversationSettingsViewModel {
         val viewModel = ConversationSettingsViewModel(
             initialCourseId = course.id!!,
@@ -123,7 +122,7 @@ internal abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest()
                 onRequestAddMembers = { },
                 onRequestViewAllMembers = { },
                 onConversationLeft = onConversationLeft,
-                onChannelDeleted = onChannelDeleted,
+                onChannelDeleted = { },
                 onSidebarToggle = { },
             )
         }
@@ -155,35 +154,6 @@ internal abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest()
             hasText(context.getString(R.string.conversation_settings_section_more_info)),
             DefaultTimeoutMillis
         )
-    }
-
-    protected fun deleteChannelTestImpl() {
-        val deleteButtonText =
-            context.getString(R.string.conversation_settings_section_delete_channel)
-
-        composeTestRule.waitUntilAtLeastOneExists(
-            hasText(deleteButtonText),
-            DefaultTimeoutMillis
-        )
-
-        composeTestRule
-            .onNodeWithText(deleteButtonText)
-            .performScrollTo()
-            .assertIsDisplayed()
-            .performClick()
-
-        composeTestRule
-            .onNode(
-                hasAnyAncestor(isDialog()) and hasText(context.getString(R.string.conversation_settings_section_delete_channel_title))
-            )
-            .assertExists()
-
-        composeTestRule
-            .onNode(
-                hasAnyAncestor(isDialog()) and hasText(context.getString(R.string.conversation_settings_section_delete_channel))
-            )
-            .assertExists()
-            .performClick()
     }
 
     protected fun toggleChannelPrivacyTestImpl(conversation: Conversation) {

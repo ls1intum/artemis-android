@@ -10,11 +10,13 @@ import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.UnknownExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.QuizSubmission
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Submission
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateId
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateShortName
+import io.ktor.client.request.parameter
 import kotlinx.coroutines.delay
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ServerResponseException
@@ -90,7 +92,9 @@ suspend fun KoinComponent.createCourse(
         "Creating the course did not answer with one: $course"
     }
 
-    return course
+    // Artemis 10 answers with the id of the new course only, so the title and short name the tests
+    // look for and send back when updating the course are taken from the payload.
+    return course.copy(title = courseName, shortName = courseShortName)
 }
 
 suspend fun KoinComponent.createExercise(
@@ -215,53 +219,108 @@ suspend fun KoinComponent.createLectureUnit(
     }.body()
 }
 
-suspend fun KoinComponent.createAttachment(
+/**
+ * Creates a visible quiz of the given course with one question of each type, see [createQuizExercise],
+ * and uploads the background of its drag and drop question with it.
+ */
+suspend fun KoinComponent.createQuiz(
     accessToken: String,
-    lectureId: Long,
-    attachmentName: String = "Attachment${generateId()}"
-): Attachment {
-    return ktorProvider.ktorClient.submitFormWithBinaryData(
-        formData {
-            append(
-                "file",
-                "file content".encodeToByteArray(),
-                Headers.build {
-                    append(HttpHeaders.ContentDisposition, "filename=file.txt")
-                }
-            )
+    courseId: Long,
+    mode: QuizExercise.QuizMode = QuizExercise.QuizMode.INDIVIDUAL,
+    randomizeQuestionOrder: Boolean = true,
+    durationInSeconds: Int = 600
+): QuizExercise {
+    val backgroundFilePath = "/api/files/drag-and-drop/backgrounds/$courseId/${generateId()}/dndbackground.png"
 
-            append(
-                "attachment",
-                """
-                    {
-                      "name": "$attachmentName",
-                      "link": "$attachmentName.txt",
-                      "version": 1,
-                      "attachmentType": "FILE",
-                      "lecture": {
-                        "id": $lectureId
-                      }
-                    }
-                """.trimIndent(),
-                Headers.build {
-                    set("Content-Type", "application/json")
-                    set("filename", "blob")
-                }
-            )
-        }
-    ) {
-        url(serverConfigurationService.serverUrl.first())
+    val quiz = createExerciseFormBodyWithPng(
+        accessToken = accessToken,
+        courseId = courseId,
+        pathSegments = arrayOf(*Api.Quiz.path, "courses", courseId.toString(), "quiz-exercises"),
+        pngByteArray = quizBackgroundImageBytes(),
+        pngFilePath = backgroundFilePath,
+        creator = { name, _ -> createQuizExercise(name, backgroundFilePath, mode, randomizeQuestionOrder, durationInSeconds) }
+    )
 
+    return quiz as? QuizExercise ?: error("Creating the quiz did not answer with a quiz: $quiz")
+}
+
+private object QuizBackgroundImage
+
+// Read from the classpath rather than as an Android raw resource: the resource route needed
+// src/test/res grafted onto the main source set, which AGP 9 no longer allows and which shipped a
+// test fixture in the release APK.
+private fun quizBackgroundImageBytes(): ByteArray =
+    checkNotNull(QuizBackgroundImage::class.java.getResourceAsStream("/dndbackground.png")) {
+        "dndbackground.png is missing from the resources of core-test"
+    }.use { inputStream -> inputStream.readBytes() }
+
+/**
+ * Lets the user of the given access token join the batch of a quiz, after they have started their participation.
+ * A quiz in individual mode creates the batch for them.
+ */
+suspend fun KoinComponent.joinQuiz(accessToken: String, exerciseId: Long, password: String = "") {
+    val response = ktorProvider.ktorClient.post(serverConfigurationService.serverUrl.first()) {
         url {
-            appendPathSegments(*Api.Lecture.path, "attachments")
+            appendPathSegments(*Api.Quiz.QuizExercises.path, exerciseId.toString(), "join")
         }
 
         cookieAuth(accessToken)
-
-        contentType(ContentType.MultiPart.FormData)
-        accept(ContentType.Application.Json)
+        contentType(ContentType.Application.Json)
+        setBody("{\"password\":\"$password\"}")
     }
-        .body()
+
+    check(response.status.isSuccess()) { "Could not join quiz $exerciseId: ${response.status}" }
+}
+
+/**
+ * Submits the answers of the user of the given access token to a live quiz they have started.
+ */
+suspend fun KoinComponent.submitLiveQuiz(
+    accessToken: String,
+    exerciseId: Long,
+    submission: QuizSubmission = QuizSubmission(submitted = true)
+) {
+    val response = ktorProvider.ktorClient.post(serverConfigurationService.serverUrl.first()) {
+        url {
+            appendPathSegments(*Api.Quiz.path, "exercises", exerciseId.toString(), "submissions", "live")
+        }
+        parameter("submit", true)
+
+        cookieAuth(accessToken)
+        contentType(ContentType.Application.Json)
+        setBody<Submission>(submission)
+    }
+
+    check(response.status.isSuccess()) { "Could not submit quiz $exerciseId: ${response.status}" }
+}
+
+/**
+ * Ends a quiz that is not synchronized. The server scores the submissions right away.
+ */
+suspend fun KoinComponent.endQuizExerciseNow(
+    accessToken: String,
+    exerciseId: Long
+) = performQuizAction(accessToken, exerciseId, "end-now")
+
+/**
+ * Starts a synchronized quiz for everyone who waits for it.
+ */
+suspend fun KoinComponent.startQuizExerciseNow(
+    accessToken: String,
+    exerciseId: Long
+) = performQuizAction(accessToken, exerciseId, "start-now")
+
+private suspend fun KoinComponent.performQuizAction(accessToken: String, exerciseId: Long, action: String) {
+    val response = ktorProvider.ktorClient.put(serverConfigurationService.serverUrl.first()) {
+        url {
+            appendPathSegments(*Api.Quiz.QuizExercises.path, exerciseId.toString(), action)
+        }
+
+        cookieAuth(accessToken)
+        contentType(ContentType.Application.Json)
+    }
+
+    check(response.status.isSuccess()) { "Could not $action quiz $exerciseId: ${response.status}" }
 }
 
 suspend fun KoinComponent.addQuizExerciseBatch(

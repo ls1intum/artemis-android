@@ -190,302 +190,99 @@ fun createModelingExercise(title: String, courseId: Long): String = """
 
 """.trimIndent()
 
-fun createProgramingExercise(title: String, courseId: Long): String = """
-    {
-        "mode": "INDIVIDUAL",
-        "includedInOverallScore": "INCLUDED_COMPLETELY",
-        "numberOfAssessmentsOfCorrectionRounds": [
-            {
-                "inTime": 0,
-                "late": 0
-            }
-        ],
-        "studentAssignedTeamIdComputed": false,
-        "secondCorrectionEnabled": false,
-        "type": "programming",
-        "bonusPoints": 0,
-        "isAtLeastTutor": false,
-        "isAtLeastEditor": false,
-        "isAtLeastInstructor": false,
-        "teamMode": false,
-        "assessmentDueDateError": false,
-        "dueDateError": false,
-        "exampleSolutionPublicationDateError": false,
-        "exampleSolutionPublicationDateWarning": false,
-        "presentationScoreEnabled": false,
-        "templateParticipation": {
-            "type": "template"
-        },
-        "solutionParticipation": {
-            "type": "solution"
-        },
-        "publishBuildPlanUrl": false,
-        "allowOnlineEditor": true,
-        "staticCodeAnalysisEnabled": false,
-        "allowOfflineIde": true,
-        "programmingLanguage": "JAVA",
-        "noVersionControlAndContinuousIntegrationAvailable": false,
-        "checkoutSolutionRepository": false,
-        "projectType": "PLAIN_MAVEN",
-        "showTestNamesToStudents": false,
-        "assessmentType": "AUTOMATIC",
-        "problemStatement": "# Sorting with the Strategy Pattern\n\nIn this exercise, we want to implement sorting algorithms and choose them based on runtime specific variables.\n\n### Part 1: Sorting\n\nFirst, we need to implement two sorting algorithms, in this case `MergeSort` and `BubbleSort`.\n\n**You have the following tasks:**\n\n1. [task][Implement Bubble Sort](testBubbleSort)\nImplement the method `performSort(List<Date>)` in the class `BubbleSort`. Make sure to follow the Bubble Sort algorithm exactly.\n\n2. [task][Implement Merge Sort](testMergeSort)\nImplement the method `performSort(List<Date>)` in the class `MergeSort`. Make sure to follow the Merge Sort algorithm exactly.\n\n### Part 2: Strategy Pattern\n\nWe want the application to apply different algorithms for sorting a `List` of `Date` objects.\nUse the strategy pattern to select the right sorting algorithm at runtime.\n\n**You have the following tasks:**\n\n1. [task][SortStrategy Interface](testClass[SortStrategy],testMethods[SortStrategy])\nCreate a `SortStrategy` interface and adjust the sorting algorithms so that they implement this interface.\n\n2. [task][Context Class](testAttributes[Context],testMethods[Context])\nCreate and implement a `Context` class following the below class diagram\n\n3. [task][Context Policy](testConstructors[Policy],testAttributes[Policy],testMethods[Policy])\nCreate and implement a `Policy` class following the below class diagram with a simple configuration mechanism:\n\n    1. [task][Select MergeSort](testClass[MergeSort],testUseMergeSortForBigList)\n    Select `MergeSort` when the List has more than 10 dates.\n\n    2. [task][Select BubbleSort](testClass[BubbleSort],testUseBubbleSortForSmallList)\n    Select `BubbleSort` when the List has less or equal 10 dates.\n\n4. Complete the `Client` class which demonstrates switching between two strategies at runtime.\n\n@startuml\n\nclass Client {\n}\n\nclass Policy {\n  <color:testsColor(testMethods[Policy])>+configure()</color>\n}\n\nclass Context {\n  <color:testsColor(testAttributes[Context])>-dates: List<Date></color>\n  <color:testsColor(testMethods[Context])>+sort()</color>\n}\n\ninterface SortStrategy {\n  <color:testsColor(testMethods[SortStrategy])>+performSort(List<Date>)</color>\n}\n\nclass BubbleSort {\n  <color:testsColor(testBubbleSort)>+performSort(List<Date>)</color>\n}\n\nclass MergeSort {\n  <color:testsColor(testMergeSort)>+performSort(List<Date>)</color>\n}\n\nMergeSort -up-|> SortStrategy #testsColor(testClass[MergeSort])\nBubbleSort -up-|> SortStrategy #testsColor(testClass[BubbleSort])\nPolicy -right-> Context #testsColor(testAttributes[Policy]): context\nContext -right-> SortStrategy #testsColor(testAttributes[Context]): sortAlgorithm\nClient .down.> Policy\nClient .down.> Context\n\nhide empty fields\nhide empty methods\n\n@enduml\n\n\n### Part 3: Optional Challenges\n\n(These are not tested)\n\n1. Create a new class `QuickSort` that implements `SortStrategy` and implement the Quick Sort algorithm.\n\n2. Make the method `performSort(List<Dates>)` generic, so that other objects can also be sorted by the same method.\n**Hint:** Have a look at Java Generics and the interface `Comparable`.\n\n3. Think about a useful decision in `Policy` when to use the new `QuickSort` algorithm.\n",
-        "title": "$title",
-        "shortName": "<Insert programming exercise short name here>",
-        "maxPoints": 10,
-        "packageName": "<Insert package name here>",
-        "channelName": "${(title + "_c").take(30)}",
-        "course": { "id": $courseId }
-    }
-
-""".trimIndent()
-
+/**
+ * The payload for a quiz with one question of each type, for `POST courses/{courseId}/quiz-exercises`.
+ *
+ * Artemis 10 reads it into a creation DTO rather than into the quiz entity: the course comes from the
+ * path, and the items of a question refer to each other through their tempID instead of through copies
+ * of each other.
+ */
 fun createQuizExercise(
     title: String,
-    courseId: Long,
     backgroundFilePath: String,
-    mode: QuizExercise.QuizMode = QuizExercise.QuizMode.INDIVIDUAL
+    mode: QuizExercise.QuizMode = QuizExercise.QuizMode.INDIVIDUAL,
+    randomizeQuestionOrder: Boolean = true,
+    durationInSeconds: Int = 600
 ): String = """
 {
   "title": "$title",
-  "bonusPoints": 0,
-  "allowComplaintsForAutomaticAssessments": false,
-  "allowManualFeedbackRequests": false,
   "mode": "INDIVIDUAL",
   "includedInOverallScore": "NOT_INCLUDED",
-  "type": "quiz",
-  "course": {
-    "id": $courseId
-  },
-  "numberOfAssessmentsOfCorrectionRounds": [
-    {
-      "inTime": 0,
-      "late": 0
-    }
-  ],
-  "studentAssignedTeamIdComputed": false,
-  "secondCorrectionEnabled": false,
-  "isAtLeastTutor": false,
-  "isAtLeastEditor": false,
-  "isAtLeastInstructor": false,
-  "teamMode": false,
-  "assessmentDueDateError": false,
-  "exampleSolutionPublicationDateError": false,
-  "exampleSolutionPublicationDateWarning": false,
-  "presentationScoreEnabled": false,
-  "allowedNumberOfAttempts": 1,
-  "randomizeQuestionOrder": true,
-  "isOpenForPractice": false,
-  "duration": 600,
+  "channelName": "${(title + "_c").take(30)}",
+  "randomizeQuestionOrder": $randomizeQuestionOrder,
+  "quizMode": "${mode.name}",
+  "duration": $durationInSeconds,
   "quizQuestions": [
     {
+      "type": "multiple-choice",
       "title": "MC1",
       "text": "Enter your long question if needed",
       "hint": "Add a hint here (visible during the quiz via ?-Button)",
       "points": 1,
       "scoringType": "ALL_OR_NOTHING",
       "randomizeOrder": true,
-      "invalid": false,
-      "exportQuiz": false,
-      "type": "multiple-choice",
+      "singleChoice": false,
       "answerOptions": [
         {
           "text": "Enter a correct answer option here",
           "hint": "Add a hint here (visible during the quiz via ?-Button)",
           "explanation": "Add an explanation here (only visible in feedback after quiz has ended)",
-          "isCorrect": true,
-          "invalid": false
+          "isCorrect": true
         },
         {
           "text": "Enter a wrong answer option here",
-          "isCorrect": false,
-          "invalid": false
+          "isCorrect": false
         }
       ]
     },
     {
+      "type": "short-answer",
       "title": "ShortAnswer",
       "text": "Enter your long question if needed\n\nSelect a part of the text and click on Add Spot to automatically create an input field and the corresponding mapping\n\nYou can define a input field like this: This [-spot 1] an [-spot 2] field.\n\nTo define the solution for the input fields you need to create a mapping (multiple mapping also possible):",
       "points": 1,
       "scoringType": "PROPORTIONAL_WITHOUT_PENALTY",
       "randomizeOrder": true,
-      "invalid": false,
-      "exportQuiz": false,
-      "type": "short-answer",
       "spots": [
-        {
-          "tempID": 8712716567622115,
-          "width": 15,
-          "spotNr": 1,
-          "invalid": false
-        },
-        {
-          "tempID": 1322472840644149,
-          "width": 15,
-          "spotNr": 2,
-          "invalid": false
-        }
+        { "tempID": 8712716567622115, "spotNr": 1, "width": 15 },
+        { "tempID": 1322472840644149, "spotNr": 2, "width": 15 }
       ],
       "solutions": [
-        {
-          "tempID": 2161480876583171,
-          "text": "is",
-          "invalid": false
-        },
-        {
-          "tempID": 2629748690868899,
-          "text": "input",
-          "invalid": false
-        },
-        {
-          "tempID": 3255797993079859,
-          "text": "correctInBothFields",
-          "invalid": false
-        }
+        { "tempID": 2161480876583171, "text": "is" },
+        { "tempID": 2629748690868899, "text": "input" },
+        { "tempID": 3255797993079859, "text": "correctInBothFields" }
       ],
       "correctMappings": [
-        {
-          "invalid": false,
-          "solution": {
-            "tempID": 2161480876583171,
-            "text": "is",
-            "invalid": false
-          },
-          "spot": {
-            "tempID": 8712716567622115,
-            "width": 15,
-            "spotNr": 1,
-            "invalid": false
-          }
-        },
-        {
-          "invalid": false,
-          "solution": {
-            "tempID": 2629748690868899,
-            "text": "input",
-            "invalid": false
-          },
-          "spot": {
-            "tempID": 1322472840644149,
-            "width": 15,
-            "spotNr": 2,
-            "invalid": false
-          }
-        },
-        {
-          "invalid": false,
-          "solution": {
-            "tempID": 3255797993079859,
-            "text": "correctInBothFields",
-            "invalid": false
-          },
-          "spot": {
-            "tempID": 8712716567622115,
-            "width": 15,
-            "spotNr": 1,
-            "invalid": false
-          }
-        },
-        {
-          "invalid": false,
-          "solution": {
-            "tempID": 3255797993079859,
-            "text": "correctInBothFields",
-            "invalid": false
-          },
-          "spot": {
-            "tempID": 1322472840644149,
-            "width": 15,
-            "spotNr": 2,
-            "invalid": false
-          }
-        }
+        { "solutionTempId": 2161480876583171, "spotTempId": 8712716567622115 },
+        { "solutionTempId": 2629748690868899, "spotTempId": 1322472840644149 },
+        { "solutionTempId": 3255797993079859, "spotTempId": 8712716567622115 },
+        { "solutionTempId": 3255797993079859, "spotTempId": 1322472840644149 }
       ],
-      "matchLetterCase": false,
-      "similarityValue": 85
+      "similarityValue": 85,
+      "matchLetterCase": false
     },
     {
+      "type": "drag-and-drop",
       "title": "Dnd Question",
       "text": "Enter your long question if needed",
       "hint": "Add a hint here (visible during the quiz via ?-Button)",
       "points": 1,
       "scoringType": "PROPORTIONAL_WITH_PENALTY",
       "randomizeOrder": true,
-      "invalid": false,
-      "exportQuiz": false,
-      "type": "drag-and-drop",
       "backgroundFilePath": "$backgroundFilePath",
       "dropLocations": [
-        {
-          "tempID": 7167046265873659,
-          "posX": 22,
-          "posY": 57,
-          "width": 23,
-          "height": 23,
-          "invalid": false
-        },
-        {
-          "tempID": 7845820172921351,
-          "posX": 94,
-          "posY": 55,
-          "width": 26,
-          "height": 20,
-          "invalid": false
-        }
+        { "tempID": 7167046265873659, "posX": 22, "posY": 57, "width": 23, "height": 23 },
+        { "tempID": 7845820172921351, "posX": 94, "posY": 55, "width": 26, "height": 20 }
       ],
       "dragItems": [
-        {
-          "tempID": 1600501544974459,
-          "text": "item1",
-          "invalid": false
-        },
-        {
-          "tempID": 3318321452932735,
-          "text": "item2",
-          "invalid": false
-        }
+        { "tempID": 1600501544974459, "text": "item1" },
+        { "tempID": 3318321452932735, "text": "item2" }
       ],
       "correctMappings": [
-        {
-          "invalid": false,
-          "dragItem": {
-            "tempID": 1600501544974459,
-            "text": "item1",
-            "invalid": false
-          },
-          "dropLocation": {
-            "tempID": 7167046265873659,
-            "posX": 22,
-            "posY": 57,
-            "width": 23,
-            "height": 23,
-            "invalid": false
-          }
-        },
-        {
-          "invalid": false,
-          "dragItem": {
-            "tempID": 3318321452932735,
-            "text": "item2",
-            "invalid": false
-          },
-          "dropLocation": {
-            "tempID": 7845820172921351,
-            "posX": 94,
-            "posY": 55,
-            "width": 26,
-            "height": 20,
-            "invalid": false
-          }
-        }
+        { "dragItemTempId": 1600501544974459, "dropLocationTempId": 7167046265873659 },
+        { "dragItemTempId": 3318321452932735, "dropLocationTempId": 7845820172921351 }
       ]
     }
-  ],
-  "quizMode": "${mode.name}",
-  "isActiveQuiz": false,
-  "isPracticeModeAvailable": true,
-  "isEditable": true,
-  "channelName": "${(title + "_c").take(30)}"
+  ]
 }
 """.trimIndent()
 

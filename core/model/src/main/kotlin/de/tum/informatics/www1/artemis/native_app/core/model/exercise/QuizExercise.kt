@@ -45,7 +45,6 @@ data class QuizExercise(
     val allowedNumberOfAttempts: Int? = null,
     val remainingNumberOfAttempts: Int? = null,
     val randomizeQuestionOrder: Boolean? = null,
-    val isOpenForPractice: Boolean? = null,
     val duration: Int? = null,
     val quizQuestions: List<QuizQuestion> = emptyList(),
     val quizMode: QuizMode = QuizMode.INDIVIDUAL,
@@ -75,7 +74,6 @@ data class QuizExercise(
 //    }
 
     enum class QuizStatus {
-        CLOSED,
         OPEN_FOR_PRACTICE,
         ACTIVE,
         VISIBLE,
@@ -119,9 +117,8 @@ val QuizExercise.quizStarted: Flow<Boolean>
 val QuizExercise.quizStatus: Flow<QuizExercise.QuizStatus>
     get() = combine(quizStarted, quizEnded) { quizStarted, quizEnded ->
         if (!quizStarted) return@combine QuizExercise.QuizStatus.INVISIBLE
-        if (quizEnded) return@combine if (isOpenForPractice == true)
-            QuizExercise.QuizStatus.OPEN_FOR_PRACTICE
-        else QuizExercise.QuizStatus.CLOSED
+        // Artemis opens every course quiz for practice once it has ended
+        if (quizEnded) return@combine QuizExercise.QuizStatus.OPEN_FOR_PRACTICE
 
         if (quizBatches.orEmpty()
                 .any { it.started == true }
