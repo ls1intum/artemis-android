@@ -30,6 +30,8 @@ android {
 
 repositories {
     google()
+    // Maven Central as mirrored by TUM AET, see settings.gradle.kts
+    maven("https://reposilite.aet.cit.tum.de/releases")
     mavenCentral()
     maven("https://jitpack.io")
 }
