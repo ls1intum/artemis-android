@@ -253,9 +253,20 @@ internal class QuizParticipationUiE2eTest : QuizBaseE2eTest(QuizType.Live, useRe
         }
         dragOnto("item1", getTestTagForDropLocation(dropLocation.id))
 
-        composeTestRule.onNodeWithText(submitText).performClick()
+        // The drop is counted as an answer a moment after the gesture. Until it is, the dialog still warns
+        val warning = hasAnyAncestor(isDialog()) and hasText("not answered all questions", substring = true)
+        composeTestRule.waitUntil(DefaultTimeoutMillis) {
+            composeTestRule.onNodeWithText(submitText).performClick()
+            composeTestRule.waitForIdle()
+            val warns = composeTestRule.onAllNodes(warning).fetchSemanticsNodes().isNotEmpty()
+            if (warns) {
+                composeTestRule.onNode(hasAnyAncestor(isDialog()) and hasText(context.getString(R.string.quiz_participation_submit_dialog_negative))).performClick()
+                composeTestRule.waitForIdle()
+            }
+            !warns
+        }
 
-        composeTestRule.onNode(hasAnyAncestor(isDialog()) and hasText("not answered all questions", substring = true)).assertDoesNotExist()
+        composeTestRule.onNode(warning).assertDoesNotExist()
         composeTestRule.onNode(hasAnyAncestor(isDialog()) and hasText("Are you sure you want to submit", substring = true)).assertExists()
     }
 
