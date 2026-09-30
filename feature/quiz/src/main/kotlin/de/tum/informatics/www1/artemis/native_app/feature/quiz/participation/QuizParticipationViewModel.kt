@@ -74,6 +74,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlin.time.Clock
 import kotlin.time.Instant
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.parcelize.Parcelize
 import kotlin.Result
 import kotlin.coroutines.CoroutineContext
@@ -317,6 +319,13 @@ internal class QuizParticipationViewModel(
     private val uploadedSubmission: MutableStateFlow<QuizSubmission?> = MutableStateFlow(null)
 
     /**
+     * The uploads of the answers of a live quiz go out one after the other. Artemis creates the answers twice when
+     * a save and the submit reach it at the same time, and then scores whichever it finds: with the old answer of an
+     * autosave that is still on its way when the student submits, a student lost the points of their last answer.
+     */
+    private val uploadMutex = Mutex()
+
+    /**
      * Emitted to when the user asks to save the current answers again, e.g. after saving them failed
      */
     private val onRequestSaveSubmission = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
@@ -358,7 +367,7 @@ internal class QuizParticipationViewModel(
             merge(changedAnswers, requestedAnswers)
                 // Submitted answers cannot be changed anymore
                 .filter { uploadedSubmission.value == null }
-                .map { (dragAndDropData, multipleChoiceData, shortAnswerData) ->
+                .mapNotNull { (dragAndDropData, multipleChoiceData, shortAnswerData) ->
                     saveSubmission(dragAndDropData, multipleChoiceData, shortAnswerData)
                 }
         )
@@ -489,42 +498,45 @@ internal class QuizParticipationViewModel(
     }
 
     fun submit(): Deferred<Boolean> {
-        return viewModelScope.async(coroutineContext) {
-            val submission = buildSubmission(
-                questions = quizQuestionsRandomOrder.first(),
-                isFinalSubmission = true,
-                shortAnswerData = shortAnswerData.first(),
-                dragAndDropData = dragAndDropData.first(),
-                multipleChoiceData = multipleChoiceData.first(),
-                serverClock = serverClock.first()
+        // Waits for a save that is on its way, and builds the submission after it, from the answers as they are then
+        return viewModelScope.async(coroutineContext) { uploadMutex.withLock { submitImpl() } }
+    }
+
+    private suspend fun submitImpl(): Boolean {
+        val submission = buildSubmission(
+            questions = quizQuestionsRandomOrder.first(),
+            isFinalSubmission = true,
+            shortAnswerData = shortAnswerData.first(),
+            dragAndDropData = dragAndDropData.first(),
+            multipleChoiceData = multipleChoiceData.first(),
+            serverClock = serverClock.first()
+        )
+
+        val serverUrl = serverConfigurationService.serverUrl.first()
+        val authToken = accountService.authToken.first()
+
+        return when (quizType) {
+            QuizType.Live -> quizParticipationService.submitForLiveMode(
+                submission, exerciseId, serverUrl, authToken
             )
 
-            val serverUrl = serverConfigurationService.serverUrl.first()
-            val authToken = accountService.authToken.first()
-
-            when (quizType) {
-                QuizType.Live -> quizParticipationService.submitForLiveMode(
+            QuizType.Practice -> {
+                val resultResponse = quizParticipationService.submitForPractice(
                     submission, exerciseId, serverUrl, authToken
                 )
 
-                QuizType.Practice -> {
-                    val resultResponse = quizParticipationService.submitForPractice(
-                        submission, exerciseId, serverUrl, authToken
-                    )
-
-                    if (resultResponse is NetworkResponse.Response) {
-                        resultFromSubmission.emit(resultResponse.data)
-                    }
-
-                    resultResponse
+                if (resultResponse is NetworkResponse.Response) {
+                    resultFromSubmission.emit(resultResponse.data)
                 }
+
+                resultResponse
             }
-                .onSuccess {
-                    uploadedSubmission.value = submission
-                }
-                .bind { true }
-                .or(false)
         }
+            .onSuccess {
+                uploadedSubmission.value = submission
+            }
+            .bind { true }
+            .or(false)
     }
 
     /**
@@ -534,11 +546,17 @@ internal class QuizParticipationViewModel(
         onRequestSaveSubmission.tryEmit(Unit)
     }
 
+    /**
+     * @return the outcome of the save, or null if there was nothing left to save: the quiz was submitted while
+     * this save was waiting for the upload of the submit to be done
+     */
     private suspend fun saveSubmission(
         dragAndDropData: Map<Long, DragAndDropStorageData>,
         multipleChoiceData: Map<Long, MultipleChoiceStorageData>,
         shortAnswerData: Map<Long, ShortAnswerStorageData>
-    ): Result<QuizSubmission> {
+    ): Result<QuizSubmission>? = uploadMutex.withLock {
+        if (uploadedSubmission.value != null) return@withLock null
+
         val submission = buildSubmission(
             questions = quizQuestionsRandomOrder.first(),
             isFinalSubmission = false,
@@ -548,7 +566,7 @@ internal class QuizParticipationViewModel(
             serverClock = serverClock.first()
         )
 
-        return quizParticipationService.saveForLiveMode(
+        quizParticipationService.saveForLiveMode(
             submission,
             exerciseId,
             serverConfigurationService.serverUrl.first(),

@@ -15,8 +15,8 @@ dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
-        // Not through the Maven Central mirror of TUM AET used for the plugins above: it does not serve
-        // .aar files, so the Android libraries among the dependencies could not be downloaded.
+        // Maven Central as mirrored by TUM AET, see pluginManagement
+        maven("https://reposilite.aet.cit.tum.de/releases")
         mavenCentral()
         maven("https://jitpack.io")
     }
