@@ -34,6 +34,12 @@ jobs:
     runs-on: [self-hosted, ase-large-android-sdk-35]
     timeout-minutes: 60
 
+    env:
+      # setup-gradle restores the cache only into a Gradle home that does not exist yet ("Gradle User Home already
+      # exists: will not restore from cache"), and ~/.gradle of the runner does, so the cache was saved and never
+      # restored. The workspace is empty at the start of every run.
+      GRADLE_USER_HOME: ${{ github.workspace }}/.gradle-home
+
     steps:
       - uses: actions/checkout@v7
 
@@ -85,6 +91,12 @@ jobs:
           # build on an older JDK. Pinned to an exact build, like the other workflows, so every job
           # in this repository compiles and runs on the same JDK; Renovate bumps it.
           java-version: 25.0.4+101.0.LTS
+
+      - name: Restore the Gradle dependencies
+        # Without it every run downloads all dependencies from Maven Central, which answers the shared address of the
+        # runners with 429 Too Many Requests once their Gradle home is empty. develop writes the cache, pull
+        # requests read it.
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Run tests
         id: run-tests

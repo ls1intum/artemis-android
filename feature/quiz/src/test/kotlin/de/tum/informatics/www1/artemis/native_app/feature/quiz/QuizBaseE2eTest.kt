@@ -8,6 +8,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
 import de.tum.informatics.www1.artemis.native_app.core.test.testWebsocketModule
+import de.tum.informatics.www1.artemis.native_app.core.websocket.websocketModule
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.addStudentToCourse
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createCourse
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
@@ -20,11 +21,24 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.service.QuizParti
 import org.junit.Before
 import org.junit.Rule
 import org.koin.android.ext.koin.androidContext
+import org.koin.core.module.Module
 import org.koin.test.KoinTestRule
 import org.koin.test.get
 import org.robolectric.shadows.ShadowLog
 
-internal abstract class QuizBaseE2eTest(protected val quizType: QuizType.WorkableQuizType) : BaseComposeTest() {
+/**
+ * @param useRealWebsocket the tests run with a websocket that is connected and never receives anything, unless
+ * they depend on what Artemis pushes: a quiz that starts while the student waits, or a result
+ */
+internal abstract class QuizBaseE2eTest(
+    protected val quizType: QuizType.WorkableQuizType,
+    useRealWebsocket: Boolean = false
+) : BaseComposeTest() {
+
+    /**
+     * Modules that replace what the tests share, e.g. to reach the server by another way
+     */
+    protected open fun overrideModules(): List<Module> = emptyList()
 
     protected var courseId: Long = 0L
     protected lateinit var course: Course
@@ -36,7 +50,8 @@ internal abstract class QuizBaseE2eTest(protected val quizType: QuizType.Workabl
         androidContext(context)
 
         modules(coreTestModules)
-        modules(loginModule, testLoginModule, testWebsocketModule, quizParticipationModule)
+        modules(loginModule, testLoginModule, if (useRealWebsocket) websocketModule else testWebsocketModule, quizParticipationModule)
+        modules(overrideModules())
     }
 
     protected val participationService: ParticipationService get() = get()
