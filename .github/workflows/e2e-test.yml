@@ -34,6 +34,12 @@ jobs:
     runs-on: [self-hosted, ase-large-android-sdk-35]
     timeout-minutes: 60
 
+    env:
+      # setup-gradle restores the cache only into a Gradle home that does not exist yet ("Gradle User Home already
+      # exists: will not restore from cache"), and ~/.gradle of the runner does, so the cache was saved and never
+      # restored. The workspace is empty at the start of every run.
+      GRADLE_USER_HOME: ${{ github.workspace }}/.gradle-home
+
     steps:
       - uses: actions/checkout@v7
 
