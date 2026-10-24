@@ -6,7 +6,7 @@ object WebsocketTopic {
      * Returns the topic for conversation updates for a course-wide conversation.
      */
     fun getCourseWideConversationUpdateTopic(courseId: Long): String {
-        return "/topic/metis/courses/$courseId"
+        return "/topic/communication/courses/$courseId"
     }
 
     /**
@@ -21,6 +21,6 @@ object WebsocketTopic {
      * and updates (like changing the channel name).
      */
     fun getConversationMetaUpdateTopic(courseId: Long, userId: Long): String {
-        return "/user/topic/metis/courses/$courseId/conversations/user/$userId"
+        return "/user/topic/communication/courses/$courseId/conversations/user/$userId"
     }
 }
