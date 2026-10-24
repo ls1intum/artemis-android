@@ -129,8 +129,8 @@ internal fun MetisChatList(
             conversationName = conversationName,
             generateLinkPreviews = viewModel::generateLinkPreviews,
             onRemoveLinkPreview = viewModel::removeLinkPreview,
-            onFileSelected = { uri ->
-                viewModel.onFileSelected(uri, context)
+            onFileSelected = { uri, onAppendMarkdown ->
+                viewModel.onFileSelected(uri, context, onAppendMarkdown)
             }
         )
     }
@@ -158,7 +158,7 @@ fun MetisChatList(
     onRemoveLinkPreview: (LinkPreview, IBasePost, IStandalonePost?) -> Unit,
     onRequestRetrySend: (StandalonePostId) -> Unit,
     conversationName: String,
-    onFileSelected: (Uri) -> Unit
+    onFileSelected: (Uri, (String) -> Unit) -> Unit
 ) {
     MetisReplyHandler(
         initialReplyTextProvider = initialReplyTextProvider,

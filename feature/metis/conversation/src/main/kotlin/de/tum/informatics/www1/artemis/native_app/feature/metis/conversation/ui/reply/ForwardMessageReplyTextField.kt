@@ -18,10 +18,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.util.MarkdownEditEngine
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.MetisModificationTask
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.util.MarkdownListContinuationUtil.continueListIfApplicable
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.util.MarkdownStyleUtil
 
 /**
  * An alternative version of the ReplyTextField that is used when forwarding a message.
@@ -31,19 +31,18 @@ fun ForwardMessageReplyTextField(
     modifier: Modifier,
     initialReplyTextProvider: InitialReplyTextProvider,
     hintText: String,
-    onFileSelected: (Uri) -> Unit,
+    onFileSelected: (Uri, (String) -> Unit) -> Unit,
     isEmojiPickerEnabled: Boolean = false,
-    textOptionsColor: Color = MaterialTheme.colorScheme.surfaceContainer,
     backgroundColor: Color = BottomSheetDefaults.ContainerColor,
     sendButton: @Composable RowScope.() -> Unit = {},
     textOptionsTopContent: @Composable ColumnScope.() -> Unit,
     onCreateForwardedMessage: () -> MetisModificationTask,
 ) {
-    val prevReplyContent by remember { mutableStateOf("") }
-    val focusRequester = FocusRequester()
+    val focusRequester = remember { FocusRequester() }
     val context = LocalContext.current
     val newMessageText =
         initialReplyTextProvider.newMessageText.collectAsState(initial = TextFieldValue())
+    val editorSessionKey by initialReplyTextProvider.editorSessionKey.collectAsState(initial = initialReplyTextProvider)
 
     val replyMode = ReplyMode.NewMessage(
         currentText = newMessageText,
@@ -52,7 +51,18 @@ fun ForwardMessageReplyTextField(
     )
 
     val currentTextFieldValue by replyMode.currentText
-    val filePickerLauncher = rememberFilePickerLauncher(context, onFileSelected)
+    var pendingAttachmentTarget by remember { mutableStateOf<((String) -> Unit)?>(null) }
+    val captureTarget = {
+        initialReplyTextProvider.captureAttachmentTarget()
+            ?: { markup: String ->
+                replyMode.onUpdate(MarkdownEditEngine.insertMarkup(replyMode.currentText.value, markup))
+            }
+    }
+    val filePickerLauncher = rememberFilePickerLauncher(context) { uri ->
+        val captured = pendingAttachmentTarget ?: captureTarget()
+        pendingAttachmentTarget = null
+        onFileSelected(uri, captured)
+    }
     var requestedAutoCompleteType by remember { mutableStateOf<AutoCompleteType?>(null) }
 
     AutoCompletionDialog(
@@ -64,45 +74,23 @@ fun ForwardMessageReplyTextField(
     MarkdownTextField(
         modifier = modifier.fillMaxSize(),
         textFieldValue = currentTextFieldValue,
+        editorSession = editorSessionKey,
         hintText = AnnotatedString(hintText),
         filePickerLauncher = filePickerLauncher,
+        onPrepareAttachment = { pendingAttachmentTarget = captureTarget() },
         backgroundColor = backgroundColor,
-        textOptionsColor = textOptionsColor,
         onTextChanged = { newValue ->
-            val finalValue = continueListIfApplicable(prevReplyContent, newValue)
+            val finalValue = continueListIfApplicable(currentTextFieldValue.text, newValue)
             replyMode.onUpdate(finalValue)
         },
-        isTextOptionsInitiallyVisible = false,
         focusRequester = focusRequester,
         isEmojiPickerEnabled = isEmojiPickerEnabled,
         alignOptionsAtBottom = true,
         showAutoCompletePopup = {
             requestedAutoCompleteType = it
-            val newTextFieldValue = MarkdownStyleUtil.apply(
-                style = when (it) {
-                    AutoCompleteType.USERS -> MarkdownStyle.UserMention
-                    AutoCompleteType.CHANNELS -> MarkdownStyle.ChannelMention
-                    AutoCompleteType.LECTURES -> MarkdownStyle.LectureMention
-                    AutoCompleteType.EXERCISES -> MarkdownStyle.ExerciseMention
-                    AutoCompleteType.FAQS -> MarkdownStyle.FaqMention
-                },
-                currentTextFieldValue = currentTextFieldValue,
-            )
-            replyMode.onUpdate(newTextFieldValue)
         },
         textFieldTrailingContent = sendButton,
         textOptionsTopContent = textOptionsTopContent,
-        formattingOptionButtons = {
-            FormattingOptions(
-                textOptionsColor,
-                applyMarkdownStyle = {
-                    val newTextFieldValue = MarkdownStyleUtil.apply(
-                        style = it,
-                        currentTextFieldValue = currentTextFieldValue,
-                    )
-                    replyMode.onUpdate(newTextFieldValue)
-                }
-            )
-        }
+
     )
 }

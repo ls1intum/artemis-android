@@ -16,6 +16,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.holdLatestLoaded
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
+import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseService
@@ -35,6 +36,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.ReplyTextStorageService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.StoredReplyDraft
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.asMetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.service.model.Link
@@ -47,6 +49,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompletionUseCase
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.util.MarkdownEditEngine
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.ConversationThreadUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisCrudAction
@@ -73,16 +76,20 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.n
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.subscribeToConversationUpdates
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.MetisViewModel
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -94,7 +101,10 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.util.UUID
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -209,7 +219,7 @@ internal open class ConversationViewModel(
         networkStatusProvider = networkStatusProvider,
         savedStateHandle = SavedStateHandle(),
         coroutineContext = coroutineContext,
-        onFileSelected = ::onFileSelected
+        onUploadFile = ::onFileSelected
     )
 
     /**
@@ -289,18 +299,31 @@ internal open class ConversationViewModel(
     override val newMessageText: MutableStateFlow<TextFieldValue> =
         MutableStateFlow(TextFieldValue(""))
 
+    private data class ReplyDraftKey(val serverHost: String, val postId: StandalonePostId?)
+    private data class SentReplyDraft(
+        val key: ReplyDraftKey?,
+        val postId: StandalonePostId?,
+        val draft: StoredReplyDraft,
+        val pendingWrite: Job?
+    )
+
+    override val handlesAcceptedSend: Boolean = true
+
+    private val replyDraftKeys = combine(serverConfigurationService.host, postId) { host, post ->
+        ReplyDraftKey(host, post)
+    }.distinctUntilChanged()
+    override val editorSessionKey: Flow<Any?> = replyDraftKeys
+
+    private var activeDraftKey: ReplyDraftKey? = null
+    private val draftTextByKey = mutableMapOf<ReplyDraftKey, TextFieldValue>()
+    private val draftRevisionByKey = mutableMapOf<ReplyDraftKey, String?>()
+    private val dirtyDraftRevisions = mutableMapOf<ReplyDraftKey, String>()
+    private val pendingDraftWrites = mutableMapOf<ReplyDraftKey, Job>()
+    private val replyDraftStorageMutex = Mutex()
+
     val serverUrl = serverUrlStateFlow(serverConfigurationService)
 
     init {
-        viewModelScope.launch(coroutineContext) {
-            // Store the text that was written every 500 millis
-            newMessageText
-                .debounce(500L)
-                .collect { textToStore ->
-                    storeNewMessageText(textToStore.text)
-                }
-        }
-
         // Receive websocket updates and store them in the db.
         viewModelScope.launch(coroutineContext) {
             combine(
@@ -502,6 +525,7 @@ internal open class ConversationViewModel(
 
     fun editPost(post: IStandalonePost, newText: String): MetisModificationTask {
         return viewModelScope.async(coroutineContext) {
+            val serverHost = serverConfigurationService.host.first()
             val conversation =
                 loadConversation() ?: return@async MetisModificationFailure.UPDATE_POST
 
@@ -521,6 +545,9 @@ internal open class ConversationViewModel(
                 serverUrl = serverConfigurationService.serverUrl.first(),
                 authToken = accountService.authToken.first()
             )
+                .onSuccess { updatedPost ->
+                    metisStorageService.updatePost(serverHost, metisContext, updatedPost)
+                }
                 .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
         }
     }
@@ -543,6 +570,7 @@ internal open class ConversationViewModel(
                 serverUrl = serverConfigurationService.serverUrl.first(),
                 authToken = accountService.authToken.first()
             )
+                .onSuccess { onRequestReload() }
                 .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
         }
     }
@@ -598,15 +626,17 @@ internal open class ConversationViewModel(
     }
 
     init {
-        // Reload the newMessageText whenever postId changes
+        // A server switch and a thread switch both select a different draft.
         viewModelScope.launch(coroutineContext) {
-            postId.collect { newPostId ->
-                newMessageText.value = TextFieldValue(
-                    retrieveNewMessageText(
-                        metisContext,
-                        getPostId(newPostId)
-                    )
-                )
+            replyDraftKeys.collectLatest { key ->
+                activeDraftKey = key
+                newMessageText.value = draftTextByKey[key] ?: TextFieldValue()
+                replyTextStorageService.observeStoredReplyDraft(
+                    key.serverHost, courseId, conversationId, getPostId(key.postId)
+                ).collect { stored ->
+                    // A delayed hydration event must not replace newer local input.
+                    if (!dirtyDraftRevisions.containsKey(key)) reconcileDraft(key, stored)
+                }
             }
         }
     }
@@ -625,7 +655,76 @@ internal open class ConversationViewModel(
     }
 
     override fun updateInitialReplyText(text: TextFieldValue) {
-        newMessageText.value = text
+        val targetPostId = _postId.value
+        viewModelScope.launch(coroutineContext + NonCancellable, start = CoroutineStart.UNDISPATCHED) {
+            val key = ReplyDraftKey(serverConfigurationService.host.first(), targetPostId)
+            if (activeDraftKey == null && _postId.value == targetPostId) activeDraftKey = key
+            updateReplyDraft(key, text)
+        }
+    }
+
+    private fun reconcileDraft(key: ReplyDraftKey, stored: StoredReplyDraft) {
+        // Storage changes to the same body must keep the user's current caret and IME state.
+        val text = draftTextByKey[key]?.takeIf { it.text == stored.text } ?: TextFieldValue(stored.text)
+        draftTextByKey[key] = text
+        draftRevisionByKey[key] = stored.revision
+        if (activeDraftKey == key) newMessageText.value = text
+    }
+
+    private fun updateReplyDraft(key: ReplyDraftKey, text: TextFieldValue) {
+        val previousBody = draftTextByKey[key]?.text
+        draftTextByKey[key] = text
+        if (activeDraftKey == key) newMessageText.value = text
+        if (previousBody == text.text) return
+
+        val draft = StoredReplyDraft(text.text, UUID.randomUUID().toString())
+        draftRevisionByKey[key] = draft.revision
+        dirtyDraftRevisions[key] = requireNotNull(draft.revision)
+        // These finite writes must survive navigation and ViewModel disposal. There is no debounce
+        // window in which the final keystroke exists only in a canceled UI scope.
+        pendingDraftWrites[key] = viewModelScope.launch(
+            coroutineContext + NonCancellable, start = CoroutineStart.UNDISPATCHED
+        ) {
+            val serverPostId = getPostId(key.postId)
+            replyDraftStorageMutex.withLock {
+                if (draftRevisionByKey[key] != draft.revision) return@withLock
+                replyTextStorageService.updateStoredReplyDraft(
+                    key.serverHost, courseId, conversationId, serverPostId, draft
+                )
+                val current = replyTextStorageService.observeStoredReplyDraft(
+                    key.serverHost, courseId, conversationId, serverPostId
+                ).first()
+                if (dirtyDraftRevisions[key] == draft.revision) {
+                    dirtyDraftRevisions.remove(key)
+                    reconcileDraft(key, current)
+                }
+            }
+        }
+    }
+
+    override fun captureAttachmentTarget(): (String) -> Unit {
+        val targetPostId = _postId.value
+        val storageContext = viewModelScope.async(coroutineContext, start = CoroutineStart.UNDISPATCHED) {
+            ReplyDraftKey(serverConfigurationService.host.first(), targetPostId)
+        }
+
+        return { markdown ->
+            viewModelScope.launch(coroutineContext) {
+                val key = storageContext.await()
+                val revisionBeforeRead = draftRevisionByKey[key]
+                val stored = replyTextStorageService.observeStoredReplyDraft(
+                    key.serverHost, courseId, conversationId, getPostId(key.postId)
+                ).first()
+                replyDraftStorageMutex.withLock {
+                    // Recheck after the storage read and lock acquisition; both may suspend.
+                    if (!dirtyDraftRevisions.containsKey(key) && draftRevisionByKey[key] == revisionBeforeRead) {
+                        reconcileDraft(key, stored)
+                    }
+                    val latestText = draftTextByKey[key] ?: TextFieldValue(stored.text)
+                    updateReplyDraft(key, MarkdownEditEngine.insertMarkup(latestText, markdown))
+                }
+            }
+        }
     }
 
     private fun IBasePost.getAsAffectedPost(): MetisModificationService.AffectedPost? {
@@ -650,31 +749,28 @@ internal open class ConversationViewModel(
         ).orNull()
     }
 
-    private suspend fun storeNewMessageText(text: String) {
-        replyTextStorageService.updateStoredReplyText(
-            serverHost = serverConfigurationService.host.first(),
-            courseId = metisContext.courseId,
-            conversationId = metisContext.conversationId,
-            postId = getPostId(),
-            text = text
+    private fun captureReplyForSend(): SentReplyDraft {
+        val targetPostId = _postId.value
+        val key = activeDraftKey?.takeIf { it.postId == targetPostId }
+        return SentReplyDraft(
+            key = key,
+            postId = targetPostId,
+            draft = StoredReplyDraft(newMessageText.value.text, key?.let(draftRevisionByKey::get)),
+            pendingWrite = key?.let(pendingDraftWrites::get)
         )
     }
 
-    private suspend fun retrieveNewMessageText(
-        metisContext: MetisContext,
-        postId: Long?
-    ): String {
-        return when (metisContext) {
-            is MetisContext.Conversation -> {
-                replyTextStorageService.getStoredReplyText(
-                    serverHost = serverConfigurationService.host.first(),
-                    courseId = metisContext.courseId,
-                    conversationId = metisContext.conversationId,
-                    postId = postId
-                )
-            }
-
-            else -> ""
+    private suspend fun finishAcceptedSend(sent: SentReplyDraft) {
+        val key = sent.key ?: return
+        sent.pendingWrite?.join()
+        replyDraftStorageMutex.withLock {
+            val remaining = replyTextStorageService.clearStoredReplyDraftAfterSend(
+                key.serverHost, courseId, conversationId, getPostId(sent.postId), sent.draft
+            )
+            // New input, including a change away and back to the same body, owns a new revision.
+            if (!dirtyDraftRevisions.containsKey(key) && draftRevisionByKey[key] == sent.draft.revision &&
+                draftTextByKey[key]?.text == sent.draft.text
+            ) reconcileDraft(key, remaining)
         }
     }
 
@@ -688,9 +784,12 @@ internal open class ConversationViewModel(
         }
 
     fun createPost(): MetisModificationTask {
-        createPostService.createPost(courseId, conversationId, newMessageText.value.text)
-
-        return CompletableDeferred(value = null)
+        val sent = captureReplyForSend()
+        createPostService.createPost(courseId, conversationId, sent.draft.text)
+        return viewModelScope.async(coroutineContext, start = CoroutineStart.UNDISPATCHED) {
+            withContext(NonCancellable) { finishAcceptedSend(sent) }
+            null
+        }
     }
 
     fun retryCreatePost(standalonePostId: StandalonePostId) {
@@ -717,17 +816,18 @@ internal open class ConversationViewModel(
     }
 
     fun createAnswerPost(): MetisModificationTask {
+        val sent = captureReplyForSend()
         return viewModelScope.async(coroutineContext) {
             val serverSideParentPostId =
-                getPostId() ?: return@async MetisModificationFailure.CREATE_POST
+                getPostId(sent.postId) ?: return@async MetisModificationFailure.CREATE_POST
 
             createPostService.createAnswerPost(
                 courseId,
                 conversationId,
                 serverSideParentPostId,
-                newMessageText.value.text
+                sent.draft.text
             )
-
+            withContext(NonCancellable) { finishAcceptedSend(sent) }
             null
         }
     }
@@ -747,17 +847,39 @@ internal open class ConversationViewModel(
     }
 
     fun updateOpenedThread(newPostId: StandalonePostId?) {
+        val previousPostId = _postId.value
+        if (previousPostId == newPostId) return
+
+        val nextKey = activeDraftKey?.copy(postId = newPostId)
+        activeDraftKey = nextKey
         _postId.value = newPostId
+        newMessageText.value = nextKey?.let(draftTextByKey::get) ?: TextFieldValue()
     }
 
-    fun onFileSelected(uri: Uri, context: Context) {
+    fun onFileSelected(
+        uri: Uri,
+        context: Context,
+        onAppendMarkdown: (String) -> Unit
+    ) {
         val fileName = resolveFileName(context, uri)
-        uploadFileOrImage(context = context, fileUri = uri, fileName = fileName)
+        uploadFileOrImage(
+            context = context,
+            fileUri = uri,
+            fileName = fileName,
+            onAppendMarkdown = onAppendMarkdown
+        )
     }
 
-    private fun uploadFileOrImage(context: Context, fileUri: Uri, fileName: String) {
-        viewModelScope.launch(coroutineContext) {
+    private fun uploadFileOrImage(
+        context: Context,
+        fileUri: Uri,
+        fileName: String,
+        onAppendMarkdown: (String) -> Unit
+    ) {
+        viewModelScope.launch(coroutineContext, start = CoroutineStart.UNDISPATCHED) {
             try {
+                val uploadServerUrl = serverConfigurationService.serverUrl.first()
+                val uploadAuthToken = accountService.authToken.first()
                 val fileBytes = withContext(Dispatchers.IO) {
                     context.contentResolver.openInputStream(fileUri)?.use { inputStream ->
                         val fileSize = inputStream.available()
@@ -784,8 +906,8 @@ internal open class ConversationViewModel(
                     context = metisContext,
                     fileBytes = fileBytes,
                     fileName = fileName,
-                    serverUrl = serverConfigurationService.serverUrl.first(),
-                    authToken = accountService.authToken.first()
+                    serverUrl = uploadServerUrl,
+                    authToken = uploadAuthToken
                 )
 
                 when (response) {
@@ -800,10 +922,8 @@ internal open class ConversationViewModel(
                                 )
                             )
 
-                        val currentText = newMessageText.value.text
-
                         val transformer = PostArtemisMarkdownTransformer(
-                            serverUrl = serverConfigurationService.serverUrl.first(),
+                            serverUrl = uploadServerUrl,
                             courseId = metisContext.courseId
                         )
 
@@ -812,8 +932,7 @@ internal open class ConversationViewModel(
                             fileName = fileName,
                             filePath = filePath
                         )
-                        val updatedText = "$currentText\n$markdown\n"
-                        newMessageText.value = TextFieldValue(updatedText)
+                        onAppendMarkdown(markdown)
                     }
 
                     else -> {

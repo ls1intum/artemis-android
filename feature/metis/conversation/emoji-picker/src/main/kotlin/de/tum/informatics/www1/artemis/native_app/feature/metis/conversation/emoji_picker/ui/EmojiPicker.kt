@@ -18,6 +18,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.IconButton
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -98,6 +106,9 @@ fun EmojiPicker(
         Spacer(modifier = Modifier.height(8.dp))
 
         if (searchQuery.isNotBlank()) {
+            if (filteredEmojis.isEmpty()) {
+                Text(stringResource(R.string.emojis_search_no_results), modifier = Modifier.padding(16.dp))
+            }
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -181,20 +192,16 @@ private fun EmojiCategoryIconsRow(
 
             val isSelected = gridState.firstVisibleItemIndex in headerIndex..<nextHeaderIndex
 
-            Icon(
-                modifier = Modifier
-                    .padding(2.dp)
-                    .clip(CircleShape)
-                    .clickable {
-                        coroutineScope.launch {
-                            gridState.animateScrollToItem(headerIndex)
-                        }
-                    }
-                    .padding(8.dp),
-                imageVector = category.id.icon,
-                tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                contentDescription = null,
-            )
+            IconButton(
+                modifier = Modifier.size(48.dp).semantics { selected = isSelected },
+                onClick = { coroutineScope.launch { gridState.animateScrollToItem(headerIndex) } },
+            ) {
+                Icon(
+                    imageVector = category.id.icon,
+                    tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    contentDescription = category.id.uiText(),
+                )
+            }
         }
     }
 }
@@ -212,7 +219,7 @@ private fun EmojiCategoryList(
             .padding(horizontal = 8.dp),
         contentPadding = Spacings.calculateEndOfPagePaddingValues(),
         state = gridState,
-        columns = GridCells.Adaptive(minSize = 32.dp)
+        columns = GridCells.Adaptive(minSize = 48.dp)
     ) {
         emojiCategories.forEach { category ->
             header {
@@ -252,7 +259,8 @@ private fun EmojiCategoryHeader(
     Text(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = 8.dp)
+            .semantics { heading() },
         text = text.uppercase(),
         style = MaterialTheme.typography.titleSmall
     )
@@ -265,8 +273,10 @@ private fun EmojiItem(
 ) {
     Text(
         modifier = Modifier
-            .padding(2.dp)
-            .clickable { onClick() },
+            .size(48.dp)
+            .clickable { onClick() }
+            .semantics { contentDescription = emoji.emojiId.replace('_', ' ') }
+            .wrapContentSize(Alignment.Center),
         text = emoji.unicode,
         style = MaterialTheme.typography.headlineMedium
     )

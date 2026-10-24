@@ -178,7 +178,7 @@ fun `Metis - Conversation Channel`() {
                     bottomItem = null,
                     onClickViewPost = {},
                     onRequestRetrySend = {},
-                    onFileSelected = { _ -> },
+                    onFileSelected = { _, _ -> },
                     conversationName = conversation.name,
                     emojiService = EmojiServiceStub,
                 )

@@ -24,6 +24,7 @@ dependencies {
     implementation(libs.androidx.paging.runtime)
     implementation(libs.androidx.paging.compose)
     implementation(libs.placeholder.material)
+    implementation(libs.jetbrains.markdown)
 
     implementation(libs.koin.androidx.workmanager)
     implementation(libs.androidx.work.runtime.ktx)

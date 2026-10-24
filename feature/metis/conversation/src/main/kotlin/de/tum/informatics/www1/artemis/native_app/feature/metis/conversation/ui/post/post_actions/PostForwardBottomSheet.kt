@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -34,6 +32,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.sha
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.post.ForwardedMessagePreview
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ForwardMessageReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member_selection.MemberSelection
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member_selection.util.MemberSelectionMode
 import kotlinx.coroutines.CompletableDeferred
@@ -55,6 +54,16 @@ fun PostForwardBottomSheet(
     val postToForward =
         if (chatListItem is ChatListItem.PostItem.ForwardedMessage && post.content.orEmpty().isEmpty())
             chatListItem.forwardedPosts.firstOrNull() ?: post else post
+
+    val serverHost by forwardMessageUseCase.forwardingServerHost.collectAsState(initial = null)
+    LaunchedEffect(
+        forwardMessageUseCase,
+        serverHost,
+        postToForward is IAnswerPost,
+        postToForward.serverPostId ?: postToForward.key
+    ) {
+        if (serverHost != null) forwardMessageUseCase.beginForwarding(postToForward)
+    }
 
     val selectedRecipients = forwardMessageUseCase.recipients.collectAsState()
     val selectedConversations = forwardMessageUseCase.conversations.collectAsState()
@@ -84,7 +93,6 @@ fun PostForwardBottomSheet(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
                 .pagePadding(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -118,11 +126,10 @@ fun PostForwardBottomSheet(
                 modifier = Modifier.weight(1f),
                 initialReplyTextProvider = forwardMessageUseCase,
                 hintText = stringResource(R.string.post_forward_hint),
-                onFileSelected = { uri ->
-                    forwardMessageUseCase.onFileSelected(uri, context)
+                onFileSelected = { uri, onAppendMarkdown ->
+                    forwardMessageUseCase.onFileSelected(uri, context, onAppendMarkdown)
                 },
                 sendButton = { },
-                textOptionsColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                 onCreateForwardedMessage = { CompletableDeferred() },
                 textOptionsTopContent = {
                     ForwardedMessagePreview(

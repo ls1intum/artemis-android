@@ -259,7 +259,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                     onUndoDeletePost = {},
                     onRequestReload = {},
                     onRequestRetrySend = { _, _ -> },
-                    onFileSelect = { _, _ -> },
+                    onFileSelect = { _, _, _ -> },
                 )
             }
         }
@@ -330,7 +330,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                         onClickViewPost = {},
                         onRequestRetrySend = { _ -> },
                         conversationName = "Title",
-                        onFileSelected = { _ -> }
+                        onFileSelected = { _, _ -> }
                     )
                 }
             }
@@ -358,10 +358,10 @@ abstract class BaseChatUITest : BaseComposeTest() {
         }
     }
 
-    fun setupReplyTextField() {
+    fun setupReplyTextField(composerModifier: Modifier = Modifier.fillMaxWidth(), initialText: String = "", onSourceChanged: (TextFieldValue) -> Unit = {}) {
         composeTestRule.setContent {
             CompositionLocalProvider(LocalReplyAutoCompleteHintProvider provides hintProviderStub) {
-                val text = remember { mutableStateOf(TextFieldValue()) }
+                val text = remember { mutableStateOf(TextFieldValue(initialText)) }
 
                 Column {
                     // This Spacer is required to allocate some space where the autocompletion dialog can be
@@ -369,16 +369,16 @@ abstract class BaseChatUITest : BaseComposeTest() {
                     Spacer(modifier = Modifier.weight(1f))
 
                     ReplyTextField(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = composerModifier,
                         replyMode = ReplyMode.NewMessage(
                             text,
-                            onUpdateTextUpstream = { text.value = it }
+                            onUpdateTextUpstream = { text.value = it; onSourceChanged(it) }
                         ) {
                             CompletableDeferred()
                         },
                         updateFailureState = {},
                         conversationName = "TestChat",
-                        onFileSelected = { _ -> },
+                        onFileSelected = { _, _ -> },
                         surfaceShape = MaterialTheme.shapes.large,
                         emojiService = EmojiServiceStub
                     )
