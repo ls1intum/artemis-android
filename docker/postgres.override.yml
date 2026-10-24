@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------------------------------------------------------
-# Android overrides for the PostgreSQL service of Artemis (docker/postgres.yml in ls1intum/Artemis, see e2e-tests.yml)
+# Android overrides for the PostgreSQL service of Artemis (deployment/docker/postgres.yml in ls1intum/Artemis, see e2e-tests.yml)
 # ----------------------------------------------------------------------------------------------------------------------
 
 services:
