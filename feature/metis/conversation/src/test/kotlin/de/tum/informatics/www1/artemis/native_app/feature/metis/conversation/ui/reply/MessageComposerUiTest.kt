@@ -21,6 +21,10 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.performSemanticsAction
@@ -39,6 +43,27 @@ import org.robolectric.RobolectricTestRunner
 @Category(UnitTest::class)
 @RunWith(RobolectricTestRunner::class)
 class MessageComposerUiTest : BaseChatUITest() {
+    @Test
+    fun `resizing a long draft keeps the whole caret line above the toolbar`() {
+        val height = mutableStateOf(280.dp)
+        val text = (1..20).joinToString("\n") { "Draft line $it" }
+        setupReplyTextField(Modifier.composed { Modifier.fillMaxWidth().heightIn(max = height.value) }, initialText = text)
+        val field = composeTestRule.onNodeWithTag(TEST_TAG_MARKDOWN_TEXTFIELD)
+        field.performClick().performTextInputSelection(TextRange(text.length))
+        composeTestRule.runOnIdle { height.value = 160.dp }
+        composeTestRule.waitForIdle()
+
+        val layouts = mutableListOf<TextLayoutResult>()
+        field.performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(layouts) }
+        val viewport = composeTestRule.onNode(
+            hasScrollAction() and hasAnyDescendant(hasTestTag(TEST_TAG_MARKDOWN_TEXTFIELD)),
+            useUnmergedTree = true,
+        ).fetchSemanticsNode().boundsInRoot
+        val cursorBottom = field.fetchSemanticsNode().positionInRoot.y + layouts.single().getCursorRect(text.length).bottom
+        org.junit.Assert.assertTrue("Caret bottom $cursorBottom is below viewport $viewport", cursorBottom <= viewport.bottom + 1f)
+        composeTestRule.onNodeWithTag(TEST_TAG_REPLY_SEND_BUTTON).assertIsDisplayed()
+    }
+
     @Test
     fun `code blocks keep block controls available and disable inline insertions`() {
         setupReplyTextField(initialText = "```\ncode\n```")

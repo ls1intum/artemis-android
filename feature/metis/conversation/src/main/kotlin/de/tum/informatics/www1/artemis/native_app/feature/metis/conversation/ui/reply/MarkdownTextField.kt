@@ -19,7 +19,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.SideEffect
@@ -32,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -63,6 +66,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.util.MarkdownPresentation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.util.MarkdownStyleUtil
+import kotlin.math.ceil
 
 const val TEST_TAG_MARKDOWN_TEXTFIELD = "TEST_TAG_MARKDOWN_TEXTFIELD"
 
@@ -151,6 +155,8 @@ internal fun MarkdownTextField(
                     hintText = hintText,
                     focusRequester = focusRequester,
                     backgroundColor = Color.Transparent,
+                    isCodeInput = !capabilities.inlineActions || MarkdownStyle.InlineCode in
+                        (typingMarks ?: MarkdownEditEngine.activeMarks(textFieldValue)),
                     onTextChanged = { native ->
                         val previous = MarkdownEditEngine.visibleValue(textFieldValue)
                         if (native.text == previous.text && native.selection != previous.selection) typingMarkNames = null
@@ -230,6 +236,7 @@ fun BasicMarkdownTextField(
     focusRequester: FocusRequester,
     backgroundColor: Color,
     maxVisibleLines: Int = 8,
+    isCodeInput: Boolean = false,
     onTextChanged: (TextFieldValue) -> Unit,
     onFocusAcquired: () -> Unit = {},
     onFocusLost: () -> Unit = {},
@@ -241,13 +248,28 @@ fun BasicMarkdownTextField(
         textFieldValue.composition?.let { TextRange(presentation.offsetMapping.originalToTransformed(it.start), presentation.offsetMapping.originalToTransformed(it.end)) })
     val styled = remember(presentation, colors) { composerStyledText(presentation, colors) }
     var layout by remember { mutableStateOf<TextLayoutResult?>(null) }
+    val scroll = rememberScrollState()
+    var viewportHeight by remember { mutableIntStateOf(0) }
+    // The viewport can shrink without a selection change (IME, rotation, large
+    // text). Keep the complete caret line visible inside our bounded scroller.
+    LaunchedEffect(layout, nativeValue.selection, viewportHeight) {
+        val result = layout
+        if (result != null && viewportHeight > 0) {
+            val caret = result.getCursorRect(nativeValue.selection.end.coerceIn(0, result.layoutInput.text.length))
+            when {
+                caret.bottom > scroll.value + viewportHeight -> scroll.scrollTo(ceil(caret.bottom - viewportHeight).toInt())
+                caret.top < scroll.value -> scroll.scrollTo(caret.top.toInt().coerceAtLeast(0))
+            }
+        }
+    }
     val transformation = remember(styled) {
         VisualTransformation { input ->
             TransformedText(if (input.text == styled.text) styled else input, OffsetMapping.Identity)
         }
     }
     val maxHeight = with(LocalDensity.current) { MaterialTheme.typography.bodyLarge.lineHeight.toDp() * maxVisibleLines }
-    Box(modifier = modifier.heightIn(min = 48.dp, max = maxHeight).verticalScroll(rememberScrollState())) {
+    Box(modifier = modifier.heightIn(min = 48.dp, max = maxHeight)
+        .onSizeChanged { viewportHeight = it.height }.verticalScroll(scroll)) {
     BasicTextField(
         modifier = Modifier
             .fillMaxWidth()
@@ -260,7 +282,10 @@ fun BasicMarkdownTextField(
         onValueChange = onTextChanged,
         textStyle = MaterialTheme.typography.bodyLarge.copy(color = colors.onSurface),
         cursorBrush = SolidColor(colors.primary),
-        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+        keyboardOptions = KeyboardOptions(
+            capitalization = if (isCodeInput) KeyboardCapitalization.None else KeyboardCapitalization.Sentences,
+            autoCorrectEnabled = if (isCodeInput) false else null,
+        ),
         maxLines = Int.MAX_VALUE,
         onTextLayout = { layout = it },
         visualTransformation = transformation,
