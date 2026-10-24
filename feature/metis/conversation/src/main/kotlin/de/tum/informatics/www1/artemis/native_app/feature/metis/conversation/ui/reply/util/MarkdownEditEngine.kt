@@ -249,8 +249,9 @@ internal object MarkdownEditEngine {
         if (selected.any { it.atom != null }) return current
         if (selected.isEmpty()) {
             if (code != null) return TextFieldValue(current.text.removeRange(code.start, code.end), TextRange(code.start))
-            val at = current.selection.start
-            return TextFieldValue(current.text.replaceRange(at, at, "```\n\n```"), TextRange(at + 4))
+            // Replace enclosing empty inline/quote spans too; a fence inside their
+            // transport markup would become literal text rather than a code block.
+            return replace(p, range.min, range.max, emptyList(), range, null, setOf(MarkdownStyle.CodeBlock))
         }
         val remove = selected.all { MarkdownStyle.CodeBlock in it.marks }
         val changed = selected.map { it.copy(marks = if (remove) it.marks - MarkdownStyle.CodeBlock else setOf(MarkdownStyle.CodeBlock), link = null) }

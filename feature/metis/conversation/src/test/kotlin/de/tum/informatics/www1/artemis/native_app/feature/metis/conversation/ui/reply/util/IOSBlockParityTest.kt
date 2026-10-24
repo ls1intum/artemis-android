@@ -13,6 +13,27 @@ import org.robolectric.RobolectricTestRunner
 @Category(UnitTest::class)
 @RunWith(RobolectricTestRunner::class)
 class IOSBlockParityTest {
+    @Test fun `code block replaces pending inline markup after clearing formatted text`() {
+        val cleared = MarkdownEditEngine.applyVisibleEdit(
+            TextFieldValue("**hello**", TextRange(2, 7)), TextFieldValue(),
+        )
+        assertEquals("", MarkdownEditEngine.visibleValue(cleared).text)
+
+        val code = MarkdownEditEngine.toggleCodeBlock(cleared)
+        assertEquals("```\n\n```", code.text)
+        assertTrue(MarkdownStyleUtil.isActive(MarkdownStyle.CodeBlock, code))
+        val typed = MarkdownEditEngine.insertText(code, "**literal**")
+        assertEquals("```\n**literal**\n```", typed.text)
+        assertEquals("**literal**", MarkdownEditEngine.visibleValue(typed).text)
+    }
+
+    @Test fun `code block replaces an empty quote with nested pending inline marks`() {
+        val code = MarkdownEditEngine.toggleCodeBlock(caret("> <strong><em></em></strong>", 0))
+        assertEquals("```\n\n```", code.text)
+        assertTrue(MarkdownStyleUtil.isActive(MarkdownStyle.CodeBlock, code))
+        assertEquals(setOf(MarkdownStyle.CodeBlock), MarkdownEditEngine.activeMarks(code))
+    }
+
     @Test fun `quotes expose only body text with source mapped selections`() {
         val source = "> **hello** 👋\n> [user]Ada(ada)[/user]"
         val presentation = MarkdownPresentation.parse(source)
