@@ -27,6 +27,7 @@ concurrency:
   # Queued rather than cancelled: every one of these runs is a result somebody is waiting on.
   group: e2e-tests
   cancel-in-progress: false
+  queue: max
 
 jobs:
   end-to-end-tests:
