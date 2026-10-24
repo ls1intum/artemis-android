@@ -142,7 +142,7 @@ browser = { group = "androidx.browser", name = "browser", version.ref = "browser
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
 android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "5.3.0" }
+google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "5.3.1" }
 google-ksp = { id = "com.google.devtools.ksp", version = "2.3.12" }
 google-services = { id = "com.google.gms.google-services", version = "4.5.0" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
