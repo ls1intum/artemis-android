@@ -59,7 +59,9 @@ internal fun ComposerResizeHandle(
     val enabled = maximumExpansion > 0f
 
     Box(
-        modifier = modifier.size(width = 80.dp, height = 48.dp)
+        // clickable retains Compose's 48 dp minimum touch target. The parent
+        // reserves the lower extension as padding outside the editable text.
+        modifier = modifier.size(width = 80.dp, height = 24.dp)
             .onGloballyPositioned { coordinates = it }
             .clip(RoundedCornerShape(24.dp))
             .semantics {

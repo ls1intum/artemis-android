@@ -179,7 +179,8 @@ internal fun MarkdownTextField(
                             CompositionLocalProvider(LocalClipboard provides clipboard) {
                                 BasicMarkdownTextField(
                                     // Measure the action row first so long drafts cannot consume Send's space.
-                                    modifier = Modifier.weight(1f, fill = false).padding(horizontal = 8.dp, vertical = 4.dp)
+                                    modifier = Modifier.weight(1f, fill = false)
+                                        .padding(start = 8.dp, end = 8.dp, top = if (showResizeHandle) 12.dp else 4.dp, bottom = 4.dp)
                                         .onPreviewKeyEvent { event ->
                                             if (event.type == KeyEventType.KeyDown && event.key == Key.Backspace && !event.isCtrlPressed &&
                                                 MarkdownEditEngine.removeBlockAtStart(textFieldValue)?.let { commit(it); true } == true) true

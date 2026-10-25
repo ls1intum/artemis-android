@@ -28,6 +28,8 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.editableText
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextRange
@@ -63,6 +65,15 @@ internal fun BasicMarkdownTextField(
         TextRange(presentation.offsetMapping.originalToTransformed(textFieldValue.selection.start), presentation.offsetMapping.originalToTransformed(textFieldValue.selection.end)),
         textFieldValue.composition?.let { TextRange(presentation.offsetMapping.originalToTransformed(it.start), presentation.offsetMapping.originalToTransformed(it.end)) })
     val styled = remember(presentation, colors) { composerStyledText(presentation, colors) }
+    val requestedKeyboardOptions = KeyboardOptions(
+        capitalization = if (isCodeInput) KeyboardCapitalization.None else KeyboardCapitalization.Sentences,
+        autoCorrectEnabled = if (isCodeInput) false else null,
+    )
+    var isFocused by remember { mutableStateOf(false) }
+    var sessionKeyboardOptions by remember { mutableStateOf(requestedKeyboardOptions) }
+    // Changing IME options while focused restarts Android's input session and
+    // flickers the keyboard. Adopt code/prose options between focus sessions.
+    val keyboardOptions = if (isFocused) sessionKeyboardOptions else requestedKeyboardOptions
     var layout by remember { mutableStateOf<TextLayoutResult?>(null) }
     val scroll = rememberScrollState()
     var viewportHeight by remember { mutableIntStateOf(0) }
@@ -78,9 +89,9 @@ internal fun BasicMarkdownTextField(
             }
         }
     }
-    val transformation = remember(styled) {
+    val transformation = remember(styled, presentation.text) {
         VisualTransformation { input ->
-            TransformedText(if (input.text == styled.text) styled else input, OffsetMapping.Identity)
+            TransformedText(if (input.text == presentation.text) styled else input, OffsetMapping.Identity)
         }
     }
     val collapsedHeightLimit = if (LocalConfiguration.current.screenHeightDp < 480) 80.dp else 160.dp
@@ -104,18 +115,20 @@ internal fun BasicMarkdownTextField(
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = with(LocalDensity.current) { viewportHeight.toDp() }.coerceAtLeast(48.dp))
-                    .composerBlockBackgrounds(presentation, layout, colors)
+                    .composerBlockBackgrounds(presentation, styled, layout, colors)
                     .focusRequester(focusRequester)
-                    .onFocusChanged { if (it.isFocused) onFocusAcquired() else onFocusLost() }
+                    .onFocusChanged {
+                        if (it.isFocused && !isFocused) sessionKeyboardOptions = requestedKeyboardOptions
+                        isFocused = it.isFocused
+                        if (it.isFocused) onFocusAcquired() else onFocusLost()
+                    }
+                    .semantics { editableText = nativeValue.annotatedString }
                     .testTag(TEST_TAG_MARKDOWN_TEXTFIELD),
                 value = nativeValue,
                 onValueChange = onTextChanged,
                 textStyle = MaterialTheme.typography.bodyLarge.copy(color = colors.onSurface),
                 cursorBrush = SolidColor(colors.primary),
-                keyboardOptions = KeyboardOptions(
-                    capitalization = if (isCodeInput) KeyboardCapitalization.None else KeyboardCapitalization.Sentences,
-                    autoCorrectEnabled = if (isCodeInput) false else null,
-                ),
+                keyboardOptions = keyboardOptions,
                 maxLines = Int.MAX_VALUE,
                 onTextLayout = { layout = it },
                 visualTransformation = transformation,
