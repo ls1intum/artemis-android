@@ -93,7 +93,7 @@ jobs:
           # build-logic and the Android modules target JVM 25; Gradle refuses to configure the
           # build on an older JDK. Pinned to an exact build, like the other workflows, so every job
           # in this repository compiles and runs on the same JDK; Renovate bumps it.
-          java-version: 25.0.4+101.0.LTS
+          java-version: 25.0.5+8.0.LTS
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v4
