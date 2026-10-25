@@ -27,6 +27,7 @@ concurrency:
   # Queued rather than cancelled: every one of these runs is a result somebody is waiting on.
   group: e2e-tests
   cancel-in-progress: false
+  queue: max
 
 jobs:
   end-to-end-tests:
@@ -35,6 +36,10 @@ jobs:
     timeout-minutes: 60
 
     env:
+      # The runner's preinstalled SDK is read-only and can lag behind compileSdk. Use a writable
+      # SDK so Gradle can install the platform and build tools requested by the version catalog.
+      ANDROID_HOME: ${{ github.workspace }}/.android-sdk
+      ANDROID_SDK_ROOT: ${{ github.workspace }}/.android-sdk
       # setup-gradle restores the cache only into a Gradle home that does not exist yet ("Gradle User Home already
       # exists: will not restore from cache"), and ~/.gradle of the runner does, so the cache was saved and never
       # restored. The workspace is empty at the start of every run.
@@ -43,22 +48,20 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Set Android Sdk Env
-        run: export ANDROID_HOME=/usr/lib/android-sdk
-
       - name: Set local.properties
-        run: echo "sdk.dir=/usr/lib/android-sdk" > local.properties
+        run: echo "sdk.dir=$ANDROID_HOME" > local.properties
 
       - name: Gradle Wrapper Verification
         uses: gradle/actions/wrapper-validation@v6
 
-      - name: Fetch the database version Artemis uses
+      - name: Fetch the database version and validate the E2E stack
         # Every docker compose call below reads it from docker/.env, including the cleanup of the previous run.
         # The stack includes the PostgreSQL service from the Artemis repository, which needs a Compose version
         # with remote includes, so the step also records the version the runner has.
         run: |
           docker compose version
           bash docker/fetch-artemis-versions.sh
+          docker compose -f docker/e2e-tests.yml config --quiet
 
       - name: Remove the stack left behind by the previous run
         # Runs are serialised repository wide, so the previous job on this runner can finish seconds
@@ -90,7 +93,12 @@ jobs:
           # build-logic and the Android modules target JVM 25; Gradle refuses to configure the
           # build on an older JDK. Pinned to an exact build, like the other workflows, so every job
           # in this repository compiles and runs on the same JDK; Renovate bumps it.
-          java-version: 25.0.4+101.0.LTS
+          java-version: 25.0.5+8.0.LTS
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools'
 
       - name: Restore the Gradle dependencies
         # Without it every run downloads all dependencies from Maven Central, which answers the shared address of the

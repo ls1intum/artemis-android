@@ -2,7 +2,7 @@
 # with, next to the develop image of Artemis. Its version is read from docker/.env, written by fetch-artemis-versions.sh.
 include:
   - path:
-      - https://github.com/ls1intum/Artemis.git#develop:docker/postgres.yml
+      - https://github.com/ls1intum/Artemis.git#develop:deployment/docker/postgres.yml
       - ./postgres.override.yml
 
 services:
