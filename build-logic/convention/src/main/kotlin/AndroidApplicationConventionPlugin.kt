@@ -1,5 +1,6 @@
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
+import commonConfiguration.configureDependencyConstraints
 import commonConfiguration.configureJacoco
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -23,6 +24,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                 defaultConfig.targetSdk = libs.findVersion("targetSdk").get().toString().toInt()
             }
 
+            configureDependencyConstraints()
             configureJacoco(extensions.getByType<ApplicationAndroidComponentsExtension>())
         }
     }

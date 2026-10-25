@@ -87,6 +87,8 @@ coil2-base = { group = "io.coil-kt", name = "coil-base", version.ref = "coil2" }
 edge2edge-preview = { group = "de.drick.compose", name = "edge-to-edge-preview", version = "0.10.1" }
 google-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version = "35.1.0" }
 google-firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
+google-play-services-basement = { group = "com.google.android.gms", name = "play-services-basement", version = "18.12.0" }
+guava = { group = "com.google.guava", name = "guava", version = "33.7.2-jre" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 kotlinx-coroutines-core-jvm = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core-jvm", version.ref = "kotlinxCoroutines" }
@@ -110,6 +112,8 @@ ktor-client-websockets = { group = "io.ktor", name = "ktor-client-websockets", v
 ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
 ktor-client-cio = { group = "io.ktor", name = "ktor-client-cio", version.ref = "ktor" }
+ktor-io = { group = "io.ktor", name = "ktor-io", version.ref = "ktor" }
+ktor-http-cio = { group = "io.ktor", name = "ktor-http-cio", version.ref = "ktor" }
 krop-core = { group = "com.attafitamim.krop", name = "core", version.ref = "krop" }
 krop-ui = { group = "com.attafitamim.krop", name = "ui", version.ref = "krop" }
 krossbow-stomp-core = { group = "org.hildan.krossbow", name = "krossbow-stomp-core", version.ref = "krossbow" }
@@ -126,8 +130,10 @@ noties-markwon-linkify = { group = "io.noties.markwon", name = "linkify", versio
 noties-markwon-simple-ext = { group = "io.noties.markwon", name = "simple-ext", version.ref = "markwon" }
 noties-markwon-image-coil = { group = "io.noties.markwon", name = "image-coil", version.ref = "markwon" }
 oss-licenses-plugin = { module = "com.google.android.gms:oss-licenses-plugin", version.ref = "ossLicensesPlugin" }
+objenesis = { group = "org.objenesis", name = "objenesis", version = "3.6" }
 placeholder-material = { group = "io.github.fornewid", name = "placeholder-material3", version.ref = "placeholderMaterial" }
 play-services-oss-licences = { group = "com.google.android.gms", name = "play-services-oss-licenses", version = "17.5.2" }
+protobuf-java = { group = "com.google.protobuf", name = "protobuf-java", version = "4.36.2" }
 robolectric = { group = "org.robolectric", name = "robolectric", version = "4.17" }
 sentry-android = { group = "io.sentry", name = "sentry-android", version.ref = "sentry-android" }
 sentry-compose-android = { group = "io.sentry", name = "sentry-compose-android", version.ref = "sentry-android" }
