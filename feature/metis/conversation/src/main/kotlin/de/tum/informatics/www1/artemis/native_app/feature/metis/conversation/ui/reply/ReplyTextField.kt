@@ -130,6 +130,15 @@ internal fun ReplyTextField(
                         .fillMaxWidth()
                         .align(Alignment.Center),
                     targetState = replyState,
+                    // Updating an editor session is not a send-state transition.
+                    // One editor owns restoration, focus and the native IME.
+                    contentKey = {
+                        when (it) {
+                            is ReplyState.CanCreate -> "create"
+                            ReplyState.HasSentReply -> "sent"
+                            is ReplyState.IsSendingReply -> "sending"
+                        }
+                    },
                     label = "CanCreate -> HasSentReply -> IsSendingReply"
                 ) { targetReplyState ->
                     when (targetReplyState) {
@@ -280,6 +289,9 @@ private fun CreateReplyUi(
     onPrepareAttachment: () -> Unit,
     onRequestAutocompleteType: (AutoCompleteType) -> Unit
 ) {
+    // Do not restore editor UI against a temporary provider identity while the
+    // actual host/thread session is still loading.
+    if (replyMode is ReplyMode.NewMessage && replyMode.editorSessionKey == null) return
     val currentTextFieldValue by replyMode.currentText
     val hint = if (replyMode is ReplyMode.EditMessage) {
         stringResource(R.string.reply_edit_placeholder)

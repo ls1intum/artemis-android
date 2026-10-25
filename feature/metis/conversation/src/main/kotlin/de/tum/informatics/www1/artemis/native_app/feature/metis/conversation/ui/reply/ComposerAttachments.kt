@@ -45,14 +45,16 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.util.ComposerAttachment
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.util.MarkdownAttachments
 
+internal val ComposerAttachmentPreviewMaxHeight = 96.dp
+
 /** Source remains authoritative; every action is validated against the current draft. */
 @Composable
 internal fun ComposerAttachments(
     value: TextFieldValue,
     onTextChanged: (TextFieldValue) -> Unit,
     modifier: Modifier = Modifier,
+    attachments: List<ComposerAttachment> = remember(value.text) { MarkdownAttachments.list(value.text) },
 ) {
-    val attachments = remember(value.text) { MarkdownAttachments.list(value.text) }
     val currentValue by rememberUpdatedState(value)
     val currentOnTextChanged by rememberUpdatedState(onTextChanged)
     var renaming by remember { mutableStateOf<ComposerAttachment?>(null) }
@@ -60,7 +62,7 @@ internal fun ComposerAttachments(
 
     if (attachments.isNotEmpty()) {
         LazyRow(
-            modifier = modifier.fillMaxWidth().heightIn(max = 96.dp),
+            modifier = modifier.fillMaxWidth().heightIn(max = ComposerAttachmentPreviewMaxHeight),
             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {

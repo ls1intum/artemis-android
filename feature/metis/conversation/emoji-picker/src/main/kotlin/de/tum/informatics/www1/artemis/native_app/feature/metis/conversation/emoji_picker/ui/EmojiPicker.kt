@@ -259,10 +259,11 @@ private fun EmojiCategoryHeader(
     Text(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
+            .padding(top = 12.dp, bottom = 4.dp)
             .semantics { heading() },
-        text = text.uppercase(),
-        style = MaterialTheme.typography.titleSmall
+        text = text,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        style = MaterialTheme.typography.labelLarge
     )
 }
 

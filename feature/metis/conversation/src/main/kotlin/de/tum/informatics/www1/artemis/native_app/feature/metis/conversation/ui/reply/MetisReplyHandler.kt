@@ -128,7 +128,8 @@ private fun <T : IBasePost> rememberReplyMode(
 ): ReplyMode {
     val newMessageText = initialReplyTextProvider.newMessageText.collectAsState(initial = TextFieldValue())
 
-    val editorSessionKey by initialReplyTextProvider.editorSessionKey.collectAsState(initial = initialReplyTextProvider)
+    val sessionKeys = remember(initialReplyTextProvider) { initialReplyTextProvider.editorSessionKey }
+    val editorSessionKey by sessionKeys.collectAsState(initial = null)
 
     val replyModeNewMessage =
         remember(initialReplyTextProvider::updateInitialReplyText, onCreatePost, editorSessionKey) {

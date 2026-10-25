@@ -42,7 +42,8 @@ fun ForwardMessageReplyTextField(
     val context = LocalContext.current
     val newMessageText =
         initialReplyTextProvider.newMessageText.collectAsState(initial = TextFieldValue())
-    val editorSessionKey by initialReplyTextProvider.editorSessionKey.collectAsState(initial = initialReplyTextProvider)
+    val sessionKeys = remember(initialReplyTextProvider) { initialReplyTextProvider.editorSessionKey }
+    val editorSessionKey by sessionKeys.collectAsState(initial = null)
 
     val replyMode = ReplyMode.NewMessage(
         currentText = newMessageText,
@@ -64,6 +65,8 @@ fun ForwardMessageReplyTextField(
         onFileSelected(uri, captured)
     }
     var requestedAutoCompleteType by remember { mutableStateOf<AutoCompleteType?>(null) }
+
+    if (editorSessionKey == null) return
 
     AutoCompletionDialog(
         replyMode = replyMode,

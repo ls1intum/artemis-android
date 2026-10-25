@@ -19,7 +19,7 @@ sealed class ReplyMode() {
         override val currentText: State<TextFieldValue>,
         private val onUpdateTextUpstream: (TextFieldValue) -> Unit,
         val onCaptureAttachmentTarget: (() -> ((String) -> Unit)?)? = null,
-        val editorSessionKey: Any? = null,
+        val editorSessionKey: Any? = currentText,
         val handlesAcceptedSend: Boolean = false,
         private val onCreateNewMessageUpstream: () -> MetisModificationTask,
     ) : ReplyMode() {
@@ -28,7 +28,7 @@ sealed class ReplyMode() {
             currentText: State<TextFieldValue>,
             onUpdateTextUpstream: (TextFieldValue) -> Unit,
             onCreateNewMessageUpstream: () -> MetisModificationTask,
-        ) : this(currentText, onUpdateTextUpstream, null, null, false, onCreateNewMessageUpstream)
+        ) : this(currentText, onUpdateTextUpstream, null, currentText, false, onCreateNewMessageUpstream)
 
         override fun onUpdate(new: TextFieldValue) {
             onUpdateTextUpstream(new)

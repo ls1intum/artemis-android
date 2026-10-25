@@ -7,6 +7,7 @@ interface InitialReplyTextProvider {
     /** The owner clears the accepted draft with its persisted revision. */
     val handlesAcceptedSend: Boolean get() = false
 
+    /** Null means the host/thread identity has not resolved; do not present an editable draft yet. */
     val editorSessionKey: kotlinx.coroutines.flow.Flow<Any?> get() = kotlinx.coroutines.flow.flowOf(this)
 
     val newMessageText: Flow<TextFieldValue>
