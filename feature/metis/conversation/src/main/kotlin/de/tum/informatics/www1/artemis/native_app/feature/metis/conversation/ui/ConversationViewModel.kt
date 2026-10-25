@@ -1,9 +1,10 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
-import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
-import android.provider.OpenableColumns
+import kotlinx.coroutines.CancellationException
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.upload.UploadContentReader
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.upload.UploadContentTooLargeException
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.text.input.TextFieldValue
@@ -861,11 +862,9 @@ internal open class ConversationViewModel(
         context: Context,
         onAppendMarkdown: (String) -> Unit
     ) {
-        val fileName = resolveFileName(context, uri)
         uploadFileOrImage(
             context = context,
             fileUri = uri,
-            fileName = fileName,
             onAppendMarkdown = onAppendMarkdown
         )
     }
@@ -873,38 +872,20 @@ internal open class ConversationViewModel(
     private fun uploadFileOrImage(
         context: Context,
         fileUri: Uri,
-        fileName: String,
         onAppendMarkdown: (String) -> Unit
     ) {
         viewModelScope.launch(coroutineContext, start = CoroutineStart.UNDISPATCHED) {
             try {
                 val uploadServerUrl = serverConfigurationService.serverUrl.first()
                 val uploadAuthToken = accountService.authToken.first()
-                val fileBytes = withContext(Dispatchers.IO) {
-                    context.contentResolver.openInputStream(fileUri)?.use { inputStream ->
-                        val fileSize = inputStream.available()
-
-                        val maxFileSize = 5 * 1024 * 1024
-                        if (fileSize > maxFileSize) {
-                            throw IllegalArgumentException(
-                                getString(
-                                    context,
-                                    R.string.conversation_vm_file_size_exceed
-                                )
-                            )
-                        }
-                        inputStream.readBytes()
-                    }
-                } ?: throw IllegalArgumentException(
-                    getString(
-                        context,
-                        R.string.conversation_vm_file_upload_failed
-                    )
-                )
+                val upload = withContext(Dispatchers.IO) {
+                    UploadContentReader.read(context.contentResolver, fileUri)
+                }
+                val fileName = upload.fileName
 
                 val response = metisModificationService.uploadFileOrImage(
                     context = metisContext,
-                    fileBytes = fileBytes,
+                    fileBytes = upload.bytes,
                     fileName = fileName,
                     serverUrl = uploadServerUrl,
                     authToken = uploadAuthToken
@@ -943,11 +924,16 @@ internal open class ConversationViewModel(
                             ))
                     }
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
+                    val message = getString(context, if (e is UploadContentTooLargeException) {
+                        R.string.conversation_vm_file_size_exceed
+                    } else R.string.conversation_vm_file_upload_failed)
                     Toast.makeText(
                         context,
-                        e.message,
+                        message,
                         Toast.LENGTH_SHORT
                     ).show()
                 }
@@ -955,12 +941,4 @@ internal open class ConversationViewModel(
         }
     }
 
-    private fun resolveFileName(context: Context, uri: Uri): String {
-        val resolver: ContentResolver = context.contentResolver
-        return resolver.query(uri, null, null, null, null)?.use { cursor ->
-            val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-            cursor.moveToFirst()
-            cursor.getString(nameIndex)
-        } ?: uri.lastPathSegment.orEmpty()
-    }
 }

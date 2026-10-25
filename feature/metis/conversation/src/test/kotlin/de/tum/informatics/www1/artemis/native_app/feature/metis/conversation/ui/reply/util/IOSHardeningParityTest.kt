@@ -37,6 +37,14 @@ class IOSHardeningParityTest {
         }
     }
 
+    @Test fun `references inside a link label retain their original payload`() {
+        val reference = "[user]Alice(alice)[/user]"
+        val source = "[$reference](https://example.org)"
+        val p = MarkdownPresentation.parse(source)
+        assertEquals("Alice", p.text)
+        assertEquals(reference, p.spans.single { it.kind == MarkdownPresentation.Kind.REFERENCE }.let { source.substring(it.start, it.end) })
+    }
+
     @Test fun `combining text after atomic references retains exact payload and visible tail`() {
         for (reference in listOf("[user]Alice(alice)[/user]", "[channel]general(5)[/channel]", "[faq]Help(12)[/faq]")) {
             for (tail in listOf("\u0301", "\uFE0F", "\u200D👩")) {

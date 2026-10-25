@@ -65,8 +65,11 @@ internal class MarkdownPresentation private constructor(
             val masked = source.toCharArray()
             val originalTree = MarkdownParser(GFMFlavourDescriptor()).buildMarkdownTreeFromString(source)
             val protected = mutableListOf<IntRange>()
+            val linkStarts = mutableMapOf<Int, IntRange>()
             fun protect(node: ASTNode) {
-                if (node.type in setOf(E.CODE_SPAN, E.CODE_FENCE, E.CODE_BLOCK, E.HTML_BLOCK, E.INLINE_LINK, E.IMAGE)) {
+                if (node.type == E.INLINE_LINK) linkStarts[node.startOffset] = node.startOffset until node.endOffset
+                if (node.type == E.IMAGE) linkStarts[node.startOffset + 1] = node.startOffset until node.endOffset
+                if (node.type in setOf(E.CODE_SPAN, E.CODE_FENCE, E.CODE_BLOCK, E.HTML_BLOCK)) {
                     protected += node.startOffset until node.endOffset
                     return
                 }
@@ -88,7 +91,7 @@ internal class MarkdownPresentation private constructor(
             while (referenceOffset < source.length) {
                 val match = reference.find(source, referenceOffset) ?: break
                 referenceOffset = match.range.last + 1
-                val protectedRange = protected.firstOrNull { match.range.first in it }
+                val protectedRange = protected.firstOrNull { match.range.first in it } ?: linkStarts[match.range.first]
                 if (protectedRange != null) {
                     // A link label can equal an Artemis tag. Skip only that link,
                     // not a greedy match that also consumed a later reference.
