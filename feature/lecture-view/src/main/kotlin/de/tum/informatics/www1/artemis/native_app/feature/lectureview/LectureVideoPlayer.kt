@@ -78,10 +78,10 @@ internal fun LectureVideoPlayer(url: String, identity: String, onDismiss: () -> 
                             } else {
                                 NativeLectureVideo(
                                     url, kind, session.serverUrl, session.authTokenOrEmptyString,
-                                    progressKey, store,
+                                    progressKey, store, fullscreen,
                                     Modifier.weight(1f).fillMaxWidth(),
                                     onRetry = { attempt++ },
-                                    onFullscreen = { fullscreen = !fullscreen }
+                                    onFullscreen = { fullscreen = it }
                                 )
                                 TextButton(onClick = { fullscreen = !fullscreen }) {
                                     Text(stringResource(if (fullscreen) CoreR.string.lecture_media_exit_fullscreen else CoreR.string.lecture_media_fullscreen))
@@ -105,9 +105,10 @@ private fun NativeLectureVideo(
     token: String,
     progressKey: String,
     store: MediaProgressStore,
+    fullscreen: Boolean,
     modifier: Modifier,
     onRetry: () -> Unit,
-    onFullscreen: () -> Unit
+    onFullscreen: (Boolean) -> Unit
 ) {
     val context = LocalContext.current
     var error by remember { mutableStateOf(false) }
@@ -153,16 +154,7 @@ private fun NativeLectureVideo(
         }
     }
     Box(modifier.background(androidx.compose.ui.graphics.Color.Black)) {
-        AndroidView(
-            modifier = Modifier.fillMaxSize(),
-            factory = { PlayerView(it).apply {
-                this.player = player
-                setShowSubtitleButton(true)
-                setFullscreenButtonClickListener { onFullscreen() }
-                controllerShowTimeoutMs = 5000
-            } },
-            onRelease = { it.player = null }
-        )
+        LecturePlayerView(player, fullscreen, Modifier.fillMaxSize(), onFullscreen)
         if (loading && !error) CircularProgressIndicator(Modifier.align(androidx.compose.ui.Alignment.Center))
         if (error) MediaFailure(Modifier.fillMaxSize(), onRetry)
     }
@@ -175,4 +167,20 @@ private fun MediaFailure(modifier: Modifier, onRetry: () -> Unit) {
         Text(stringResource(CoreR.string.lecture_media_access_recovery), style = MaterialTheme.typography.bodySmall)
         Button(onClick = onRetry) { Text(stringResource(CoreR.string.lecture_media_retry)) }
     }
+}
+
+/** Keep Media3's own fullscreen control in the same state as the surrounding dialog. */
+@Composable
+internal fun LecturePlayerView(player: Player?, fullscreen: Boolean, modifier: Modifier, onFullscreen: (Boolean) -> Unit) {
+    AndroidView(
+        modifier = modifier,
+        factory = { PlayerView(it).apply {
+            this.player = player
+            setShowSubtitleButton(true)
+            setFullscreenButtonClickListener { onFullscreen(it) }
+            controllerShowTimeoutMs = 5000
+        } },
+        update = { it.setFullscreenButtonState(fullscreen) },
+        onRelease = { it.player = null }
+    )
 }
