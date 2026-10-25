@@ -19,6 +19,8 @@ The old security constraints were attached to each library's resolvable configur
 
 [Guava 33.7.2](https://github.com/google/guava/releases/tag/v33.7.2) fixes CVE-2026-102554. [Objenesis 3.6](https://github.com/easymock/objenesis/releases/tag/3.6) fixes parent-classloader caching. [Protobuf's Java compatibility guarantee](https://protobuf.dev/support/cross-version-runtime-guarantee/) supports older 3.x generated code with the 4.x runtime; [4.36.x is actively supported](https://protobuf.dev/support/version-support/). Protobuf is absent from the audited runtime graphs, and the constraint does not introduce it.
 
+The standalone Docker dependency build also needs to register the Compose compiler plugin used by the shared conventions, read the catalog through `VersionCatalogsExtension`, and import BOMs as platforms. Without these changes it fails before resolution or silently leaves Firebase Messaging unresolved. Its dependency report now completes with no `FAILED` entries across configurations.
+
 ## Catalog review
 
 Every artifact sharing a version reference was checked, including the deprecated Accompanist artifacts, each Koin/Coil/Ktor/Krossbow module and the AndroidX test libraries. Versionless Compose and Firebase artifacts remain managed by their latest stable BOMs. Other transitive dependencies remain controlled by their owning libraries/BOMs; changing every transitive version independently would bypass those compatibility choices.
