@@ -66,7 +66,7 @@ internal class MarkdownPresentation private constructor(
             val originalTree = MarkdownParser(GFMFlavourDescriptor()).buildMarkdownTreeFromString(source)
             val protected = mutableListOf<IntRange>()
             fun protect(node: ASTNode) {
-                if (node.type in setOf(E.CODE_SPAN, E.CODE_FENCE, E.CODE_BLOCK, E.HTML_BLOCK)) {
+                if (node.type in setOf(E.CODE_SPAN, E.CODE_FENCE, E.CODE_BLOCK, E.HTML_BLOCK, E.INLINE_LINK, E.IMAGE)) {
                     protected += node.startOffset until node.endOffset
                     return
                 }
@@ -84,11 +84,24 @@ internal class MarkdownPresentation private constructor(
                     hasMaskedContent = true
                 }
             var hasReferences = false
-            reference.findAll(source).forEach { match ->
+            var referenceOffset = 0
+            while (referenceOffset < source.length) {
+                val match = reference.find(source, referenceOffset) ?: break
+                referenceOffset = match.range.last + 1
+                val protectedRange = protected.firstOrNull { match.range.first in it }
+                if (protectedRange != null) {
+                    // A link label can equal an Artemis tag. Skip only that link,
+                    // not a greedy match that also consumed a later reference.
+                    referenceOffset = protectedRange.last + 1
+                    continue
+                }
                 var slashes = 0
                 var before = match.range.first - 1
                 while (before >= 0 && source[before--] == '\\') slashes++
-                if (slashes % 2 != 0 || protected.any { match.range.first in it }) return@forEach
+                if (slashes % 2 != 0) {
+                    referenceOffset = match.range.first + 1
+                    continue
+                }
                 val label = match.groups[2]!!
                 add(Span(match.range.first, label.range.first, label.range.last + 1, match.range.last + 1,
                     destination = "artemis:${match.groupValues[1]}", kind = Kind.REFERENCE))
