@@ -2,6 +2,12 @@ package de.tum.informatics.www1.artemis.native_app.core.ui
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
+import de.tum.informatics.www1.artemis.native_app.core.ui.media.mediaProgressKey
+import de.tum.informatics.www1.artemis.native_app.core.ui.media.sameMediaOrigin
+import de.tum.informatics.www1.artemis.native_app.core.ui.media.mediaHttpUri
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -17,34 +23,54 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.P
 @Composable
 fun AttachmentHandler(
     url: String?,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    initialPage: Int? = null,
+    mediaIdentity: String = "attachment"
 ) {
     if (url == null) return
 
     val context = LocalContext.current
     val artemisContext by LocalArtemisContextProvider.current.collectArtemisContextAsState()
 
-    val fileName = url.substringAfterLast("/")
+    if (mediaHttpUri(url) == null) {
+        TextAlertDialog(
+            title = stringResource(R.string.lecture_media_invalid),
+            text = stringResource(R.string.lecture_media_failed),
+            confirmButtonText = stringResource(R.string.lecture_media_close),
+            dismissButtonText = null,
+            onPressPositiveButton = onDismiss,
+            onDismissRequest = onDismiss
+        )
+        return
+    }
+
+    val fileName = mediaHttpUri(url)?.path?.substringAfterLast('/').orEmpty()
+    val account = (artemisContext as? ArtemisContext.LoggedIn)?.loginName.orEmpty()
+    val progressKey = mediaProgressKey(account, artemisContext.serverUrl, mediaIdentity, url)
+    val openedScope = remember(url) { account to artemisContext.serverUrl }
+    if (openedScope != (account to artemisContext.serverUrl)) {
+        androidx.compose.runtime.LaunchedEffect(openedScope) { onDismiss() }
+        return
+    }
+    val token = if (sameMediaOrigin(artemisContext.serverUrl, url)) artemisContext.authTokenOrEmptyString else ""
     val type = AttachmentUtil.detectAttachmentType(url)
 
     when (type) {
         is AttachmentUtil.AttachmentType.PDF -> {
-            val pdfFile = PdfFile(
-                url,
-                artemisContext.authTokenOrEmptyString,
-                fileName
-            )
-            LinkBottomSheet(
-                modifier = Modifier.fillMaxSize(),
-                state = LinkBottomSheetState.PDFVIEWSTATE(pdfFile),
-                onDismissRequest = onDismiss
-            )
+            val pdfFile = remember(url, artemisContext) { PdfFile(url, token, fileName, artemisContext.serverUrl) }
+            key(progressKey, token) {
+                LinkBottomSheet(
+                    modifier = Modifier.fillMaxSize(),
+                    state = LinkBottomSheetState.PDFVIEWSTATE(pdfFile, progressKey, initialPage),
+                    onDismissRequest = onDismiss
+                )
+            }
         }
 
         is AttachmentUtil.AttachmentType.Image -> {
             val imageFile = ImageFile(
                 url,
-                artemisContext.authTokenOrEmptyString,
+                token,
                 fileName
             )
             LinkBottomSheet(

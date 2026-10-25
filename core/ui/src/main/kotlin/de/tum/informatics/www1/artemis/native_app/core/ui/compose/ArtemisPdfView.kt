@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.compose
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +19,14 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.key
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
+import de.tum.informatics.www1.artemis.native_app.core.ui.media.MediaProgressStore
+import de.tum.informatics.www1.artemis.native_app.core.ui.media.initialPdfPageIndex
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,13 +48,37 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.r
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.render.state.VerticalPdfReaderState
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.render.state.rememberHorizontalPdfReaderState
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.render.state.rememberVerticalPdfReaderState
-import java.net.UnknownHostException
 
 @Composable
 fun ArtemisPdfView(
     modifier: Modifier,
     pdfFile: PdfFile,
-    dismiss: () -> Unit
+    dismiss: () -> Unit,
+    progressKey: String? = null,
+    initialPage: Int? = null
+) {
+    val context = LocalContext.current
+    val store = remember(context) { MediaProgressStore(context) }
+    var currentPage by rememberSaveable(progressKey, initialPage) {
+        mutableStateOf(initialPage ?: progressKey?.let { store.read(it)?.toInt() } ?: 1)
+    }
+    var attempt by remember { mutableStateOf(0) }
+    key(pdfFile, attempt) {
+        ArtemisPdfContent(modifier, pdfFile, dismiss, currentPage, { page ->
+            currentPage = page
+            progressKey?.let { store.save(it, page.toLong()) }
+        }, { attempt++ })
+    }
+}
+
+@Composable
+private fun ArtemisPdfContent(
+    modifier: Modifier,
+    pdfFile: PdfFile,
+    dismiss: () -> Unit,
+    initialPage: Int,
+    onPageChanged: (Int) -> Unit,
+    onRetry: () -> Unit
 ) {
     val isVertical = remember { mutableStateOf(true) }
     val context = LocalContext.current
@@ -64,24 +95,16 @@ fun ArtemisPdfView(
     var pdfState = if (isVertical.value) verticalPdfState else horizontalPdfState
 
     var showMenu by remember { mutableStateOf(false) }
-
-    if (pdfState.mError != null) {
-        val errorMessage = when (pdfState.mError) {
-            is UnknownHostException -> {
-                R.string.file_error_no_internet
-            }
-            else -> {
-                R.string.pdf_view_error_loading
+    LaunchedEffect(pdfState, pdfState.pdfPageCount) {
+        val activeState = pdfState
+        if (activeState.pdfPageCount > 0) {
+            val index = initialPdfPageIndex(initialPage, null, activeState.pdfPageCount)
+            if (activeState is VerticalPdfReaderState) activeState.lazyState.scrollToItem(index)
+            else activeState.currentPage = index + 1
+            snapshotFlow { if (activeState is VerticalPdfReaderState) activeState.lazyState.firstVisibleItemIndex + 1 else activeState.currentPage }.collect { page ->
+                if (page > 0) onPageChanged(page)
             }
         }
-
-        Toast.makeText(
-            LocalContext.current,
-            stringResource(id = errorMessage),
-            Toast.LENGTH_LONG
-        ).show()
-
-        dismiss()
     }
 
     Box(
@@ -128,7 +151,7 @@ fun ArtemisPdfView(
                 onClick = { showMenu = !showMenu },
                 modifier = Modifier
             ) {
-                Icon(imageVector = Icons.Default.MoreHoriz, contentDescription = null)
+                Icon(imageVector = Icons.Default.MoreHoriz, contentDescription = stringResource(R.string.pdf_view_actions))
             }
 
             PdfActionDropDownMenu(
@@ -137,7 +160,7 @@ fun ArtemisPdfView(
                 onDismissRequest = { showMenu = false },
                 downloadPdf = {
                     showMenu = false
-                    pdfState.file?.let { pdfFile.download(context) }
+                    pdfState.file?.let { pdfFile.download(context, it) }
                 },
                 sharePdf = {
                     showMenu = false
@@ -145,13 +168,17 @@ fun ArtemisPdfView(
                 },
                 toggleViewMode = {
                     showMenu = false
+                    val page = if (pdfState is VerticalPdfReaderState) (pdfState as VerticalPdfReaderState).lazyState.firstVisibleItemIndex + 1
+                        else pdfState.currentPage.coerceAtLeast(1)
+                    onPageChanged(page)
                     pdfState = if (isVertical.value) horizontalPdfState else verticalPdfState
+                    pdfState.currentPage = page
                     isVertical.value = !isVertical.value
                 }
             )
         }
 
-        if (!pdfState.isLoaded) {
+        if (!pdfState.isLoaded && pdfState.error == null) {
             Box(
                 modifier = Modifier
                     .fillMaxSize(),
@@ -178,7 +205,19 @@ fun ArtemisPdfView(
                 pdfState = pdfState
             )
         }
+        if (pdfState.error != null) {
+            Column(
+                modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface).padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(stringResource(R.string.pdf_view_error_loading))
+                Text(stringResource(R.string.lecture_media_access_recovery))
+                Button(onClick = onRetry) { Text(stringResource(R.string.lecture_media_retry)) }
+                TextButton(onClick = dismiss) { Text(stringResource(R.string.lecture_media_close)) }
+            }
+        }
     }
+
 }
 
 @Composable

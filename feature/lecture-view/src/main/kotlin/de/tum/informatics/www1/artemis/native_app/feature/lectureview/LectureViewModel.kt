@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
@@ -177,6 +178,9 @@ internal class LectureViewModel(
             }
         }
             .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
+
+    val lectureUnitsLoaded: StateFlow<Boolean> = visibleLectureUnits.map { true }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
     val lectureUnits: StateFlow<List<LectureUnit>> = combine(
         visibleLectureUnits,

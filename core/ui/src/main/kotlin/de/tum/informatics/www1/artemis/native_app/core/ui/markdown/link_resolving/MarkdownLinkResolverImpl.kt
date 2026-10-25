@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.markdown.link_resolving
 
+import de.tum.informatics.www1.artemis.native_app.core.ui.media.*
 import android.view.View
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -10,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.authTokenOrEmptyString
-import de.tum.informatics.www1.artemis.native_app.core.common.markdown.MarkdownUrlUtil
 import de.tum.informatics.www1.artemis.native_app.core.ui.LinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
@@ -27,7 +27,7 @@ class MarkdownLinkResolverImpl(): MarkdownLinkResolver {
         val context = LocalContext.current
         val localLinkOpener = LocalLinkOpener.current
 
-        val (bottomSheetState, setBottomSheetState) = remember { mutableStateOf<LinkBottomSheetState?>(null) }
+        val (bottomSheetState, setBottomSheetState) = remember(artemisContext) { mutableStateOf<LinkBottomSheetState?>(null) }
 
         if (bottomSheetState != null) {
             LinkBottomSheet(
@@ -55,11 +55,12 @@ class BaseMarkdownLinkResolver(
         view.isPressed = false
 
         when {
-            link.endsWith(".pdf") -> {
-                val pdfFile = PdfFile(link, artemisContext.authTokenOrEmptyString, MarkdownUrlUtil.decodeUrl(
-                    link.substringAfterLast("/")
-                ))
-                setBottomSheetState(LinkBottomSheetState.PDFVIEWSTATE(pdfFile))
+            mediaHttpUri(link)?.path?.endsWith(".pdf", ignoreCase = true) == true -> {
+                val token = if (sameMediaOrigin(artemisContext.serverUrl, link)) artemisContext.authTokenOrEmptyString else ""
+                val pdfFile = PdfFile(link, token, mediaHttpUri(link)?.path?.substringAfterLast('/').orEmpty(), artemisContext.serverUrl)
+                val account = (artemisContext as? ArtemisContext.LoggedIn)?.loginName.orEmpty()
+                val key = mediaProgressKey(account, artemisContext.serverUrl, "attachment", link)
+                setBottomSheetState(LinkBottomSheetState.PDFVIEWSTATE(pdfFile, key))
             }
             // TODO: open Artemis link in a Modal Bottom Sheet webview to attach session cookie (https://github.com/ls1intum/artemis-android/issues/245)
 //            link.startsWith(serverUrl) -> {

@@ -10,7 +10,7 @@ abstract class ArtemisMarkdownTransformer {
         "\\[(text|quiz|lecture|modeling|file-upload|programming)](.*)\\(((?:/|\\w|\\d)+)\\)\\[/\\1]".toRegex()
     private val userMarkdownPattern = "\\[user](.*?)\\((.*?)\\)\\[/user]".toRegex()
     private val channelMarkdownPattern = "\\[channel](.*?)\\((\\d+?)\\)\\[/channel]".toRegex()
-    private val lectureContentMarkdownPattern = "\\[(attachment|lecture-unit|slide)](.*?)\\(([/\\w\\d\\-_\\.\\s]+)\\)\\[/\\1]".toRegex()
+    private val lectureContentMarkdownPattern = "\\[(attachment|lecture-unit|slide)](.*?)\\((.*?)\\)\\[/\\1]".toRegex()
     private val fileUploadMessagePattern = "(\\!?)\\[(.*?)]\\((/api(/core)?/files/[\\w\\d/\\-_.\\s]+)\\)".toRegex()
     private val faqMarkdownPattern = "\\[faq](.*?)\\((.*?)\\)\\[/faq]".toRegex()
 

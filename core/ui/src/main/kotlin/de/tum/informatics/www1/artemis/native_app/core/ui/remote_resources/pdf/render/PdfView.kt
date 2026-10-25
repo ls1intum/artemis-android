@@ -124,8 +124,11 @@ fun HorizontalPdfView(
                 state.close()
             }
         }
-        val pagerState = rememberPagerState( state.currentPage - 1 ) { state.pdfPageCount }
+        val pagerState = rememberPagerState((state.currentPage - 1).coerceAtLeast(0)) { state.pdfPageCount }
 
+        LaunchedEffect(state.pdfPageCount) {
+            if (state.pdfPageCount > 0) pagerState.scrollToPage((state.currentPage - 1).coerceIn(0, state.pdfPageCount - 1))
+        }
         state.pdfRender?.let { pdf ->
             HorizontalPager(
                 modifier = Modifier

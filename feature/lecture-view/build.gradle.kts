@@ -15,6 +15,10 @@ dependencies {
     implementation(project(":core:device"))
     implementation(project(":feature:metis"))
 
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.hls)
+    implementation(libs.androidx.media3.ui)
+    implementation(libs.androidx.media3.okhttp)
     implementation(libs.kotlinx.datetime)
     implementation(libs.placeholder.material)
     implementation(libs.accompanist.swiperefresh)

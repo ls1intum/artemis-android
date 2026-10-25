@@ -52,6 +52,12 @@
         </activity>
 
         <activity
+            android:name=".ui.LectureWebVideoActivity"
+            android:exported="false"
+            android:process=":lecture_media"
+            android:theme="@style/AppTheme" />
+
+        <activity
             android:name="com.google.android.gms.oss.licenses.OssLicensesActivity"
             android:theme="@style/AppThemeActionBar" />
 

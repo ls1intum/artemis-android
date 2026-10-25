@@ -46,7 +46,7 @@ object AttachmentUtil {
     fun detectAttachmentType(link: String?): AttachmentType {
         if (link.isNullOrEmpty()) return AttachmentType.Other
 
-        val extension = MimeTypeMap.getFileExtensionFromUrl(link)?.lowercase() ?: return AttachmentType.Other
+        val extension = de.tum.informatics.www1.artemis.native_app.core.ui.media.mediaHttpUri(link)?.path?.substringAfterLast('.', "")?.lowercase() ?: return AttachmentType.Other
         val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension) ?: return AttachmentType.Other
 
         return when {

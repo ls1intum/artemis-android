@@ -36,7 +36,8 @@ internal fun LectureScreenBody(
     onDisplaySetCompletedFailureDialog: () -> Unit,
     onReloadLecture: () -> Unit,
     onUpdateLectureUnitIsComplete: (lectureUnitId: Long, isCompleted: Boolean) -> Deferred<Boolean>,
-    linkResolver: LinkResolver
+    linkResolver: LinkResolver,
+    initialUnitId: Long? = null
 ) {
     val markLectureUnitDeferredMap = remember { SnapshotStateMap<Long, Deferred<Boolean>>() }
 
@@ -90,7 +91,8 @@ internal fun LectureScreenBody(
                 onRequestViewLink = onRequestViewLink,
                 onRequestOpenAttachment = onRequestOpenAttachment,
                 linkResolver = linkResolver,
-                state = overviewListState
+                state = overviewListState,
+                initialUnitId = initialUnitId
             )
 
         }

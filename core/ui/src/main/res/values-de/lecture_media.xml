@@ -1,0 +1,14 @@
+<resources>
+    <string name="pdf_view_actions">PDF-Aktionen</string>
+    <string name="lecture_media_retry">Erneut versuchen</string>
+    <string name="lecture_media_close">Schließen</string>
+    <string name="lecture_media_access_recovery">Prüfe deine Verbindung und melde dich erneut an, falls deine Sitzung abgelaufen ist.</string>
+    <string name="lecture_media_browser">Im Browser öffnen</string>
+    <string name="lecture_media_failed">Dieses Medium konnte nicht geladen werden.</string>
+    <string name="lecture_media_invalid">Dieser Medienlink ist ungültig.</string>
+    <string name="lecture_media_loading">Medium wird geladen…</string>
+    <string name="lecture_media_provider">Manche Anbieter erfordern ihre Website oder erlauben keine eingebettete Wiedergabe.</string>
+    <string name="lecture_media_fullscreen">Vollbild</string>
+    <string name="lecture_media_exit_fullscreen">Vollbild beenden</string>
+    <string name="lecture_media_missing">Diese Vorlesungsressource ist nicht verfügbar oder noch nicht freigegeben.</string>
+</resources>

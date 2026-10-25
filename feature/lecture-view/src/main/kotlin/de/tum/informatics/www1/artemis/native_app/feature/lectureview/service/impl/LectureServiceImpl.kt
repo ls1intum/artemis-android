@@ -15,17 +15,30 @@ import io.ktor.http.appendPathSegments
 import io.ktor.http.contentType
 
 class LectureServiceImpl(private val ktorProvider: KtorProvider) : LectureService {
+    // Metadata is always fetched from the configured server. A redirect must be retried explicitly,
+    // rather than forwarding its Artemis cookie to another origin.
+    private val lectureClient = ktorProvider.ktorClient.config { followRedirects = false }
     override suspend fun loadLecture(
         lectureId: Long,
         serverUrl: String,
         authToken: String
     ): NetworkResponse<Lecture> {
         return performNetworkCall {
-            ktorProvider.ktorClient.get(serverUrl) {
+            lectureClient.get(serverUrl) {
                 url {
                     appendPathSegments(*Api.Lecture.Lectures.path, lectureId.toString(), "details")
                 }
 
+                contentType(ContentType.Application.Json)
+                cookieAuth(authToken)
+            }.body()
+        }
+    }
+
+    override suspend fun loadCourseLecturesWithSlides(courseId: Long, serverUrl: String, authToken: String): NetworkResponse<List<Lecture>> {
+        return performNetworkCall {
+            lectureClient.get(serverUrl) {
+                url { appendPathSegments(*Api.Lecture.path, "courses", courseId.toString(), "lectures-with-slides") }
                 contentType(ContentType.Application.Json)
                 cookieAuth(authToken)
             }.body()

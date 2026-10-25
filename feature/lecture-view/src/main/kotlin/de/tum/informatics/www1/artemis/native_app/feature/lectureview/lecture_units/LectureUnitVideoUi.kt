@@ -4,6 +4,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import de.tum.informatics.www1.artemis.native_app.feature.lectureview.LectureVideoPlayer
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
+import de.tum.informatics.www1.artemis.native_app.core.ui.media.classifyMediaSource
+import de.tum.informatics.www1.artemis.native_app.core.ui.media.MediaSourceKind
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -19,6 +27,9 @@ internal fun LectureUnitVideoUi(
     onClickOpenLink: () -> Unit,
     onClickOpenAttachment: (Attachment) -> Unit,
 ) {
+    val linkOpener = LocalLinkOpener.current
+    var showPlayer by rememberSaveable(lectureUnit.id) { mutableStateOf(false) }
+    if (showPlayer) LectureVideoPlayer(lectureUnit.videoSource.orEmpty(), "unit/${lectureUnit.id}") { showPlayer = false }
     LectureUnitBody(
         modifier = modifier,
         name = lectureUnit.name.orEmpty(),
@@ -34,7 +45,12 @@ internal fun LectureUnitVideoUi(
         if (lectureUnit.hasVideo) {
             OpenLinkButton(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
-                onClickOpenLink = onClickOpenLink,
+                onClickOpenLink = {
+                    val url = lectureUnit.videoSource.orEmpty()
+                    if (classifyMediaSource(url) == MediaSourceKind.WEB) {
+                        linkOpener.openLectureVideoPage(url)
+                    } else showPlayer = true
+                },
                 text = stringResource(R.string.lecture_view_open_video_link_button),
             )
         }

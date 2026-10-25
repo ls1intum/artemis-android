@@ -27,6 +27,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -83,10 +85,15 @@ internal fun LectureOverviewTab(
     onRequestViewLink: (String) -> Unit,
     onRequestOpenAttachment: (Attachment) -> Unit,
     linkResolver: LinkResolver,
-    state: LazyListState
+    state: LazyListState,
+    initialUnitId: Long? = null
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
-    var selectedLectureUnit: LectureUnit? by remember { mutableStateOf(null) }
+    var selectedLectureUnitId: Long? by rememberSaveable { mutableStateOf(null) }
+    val selectedLectureUnit = lectureUnits.firstOrNull { it.lectureUnit.id == selectedLectureUnitId }?.lectureUnit
+    LaunchedEffect(initialUnitId) {
+        if (initialUnitId != null) selectedLectureUnitId = initialUnitId
+    }
     val channel = lectureChannel.bind { it }.orNull()
     val startDate = lecture.startDate
     val endDate = lecture.endDate
@@ -99,7 +106,7 @@ internal fun LectureOverviewTab(
             modifier = Modifier.statusBarsPadding(),
             contentWindowInsets = { WindowInsets.statusBars },
             sheetState = bottomSheetState,
-            onDismissRequest = { selectedLectureUnit = null }
+            onDismissRequest = { selectedLectureUnitId = null }
         ) {
             LectureUnitBottomSheetContent(
                 modifier = modifier,
@@ -134,7 +141,7 @@ internal fun LectureOverviewTab(
                 onViewExercise = onViewExercise,
                 onMarkAsCompleted = onMarkAsCompleted,
                 onHeaderClick = { lectureUnit ->
-                    selectedLectureUnit = lectureUnit
+                    selectedLectureUnitId = lectureUnit.id
                     coroutineScope.launch {
                         bottomSheetState.show()
                     }

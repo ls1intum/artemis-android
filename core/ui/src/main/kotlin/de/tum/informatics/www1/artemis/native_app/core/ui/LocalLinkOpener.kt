@@ -13,6 +13,9 @@ val LocalLinkOpener: ProvidableCompositionLocal<LinkOpener> = compositionLocalOf
  */
 interface LinkOpener {
     fun openLink(url: String)
+
+    /** A lecture provider page, rendered with a cookie store isolated from Artemis login. */
+    fun openLectureVideoPage(url: String) = openLink(url)
 }
 
 /**

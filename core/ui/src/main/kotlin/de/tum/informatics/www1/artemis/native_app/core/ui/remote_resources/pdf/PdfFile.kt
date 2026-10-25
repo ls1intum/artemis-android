@@ -4,7 +4,6 @@ import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.os.ParcelFileDescriptor
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
@@ -17,11 +16,15 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.BaseFile
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.render.PdfRendering
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.render.state.PdfReaderState
-import io.ktor.http.HttpHeaders
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import okhttp3.OkHttpClient
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.CancellationException
+import de.tum.informatics.www1.artemis.native_app.core.ui.media.mediaHttpClient
+import de.tum.informatics.www1.artemis.native_app.core.ui.media.withMediaResponse
+import java.io.IOException
 import okhttp3.Request
 import java.io.File
 
@@ -36,7 +39,8 @@ import java.io.File
 class PdfFile(
     override val url: String,
     override val authToken: String,
-    override val filename: String
+    override val filename: String,
+    val serverUrl: String
 ): BaseFile(authToken, filename, url) {
 
     fun load(
@@ -47,76 +51,77 @@ class PdfFile(
         height: Int,
         portrait: Boolean
     ) {
-        val client = OkHttpClient()
-        val request = Request.Builder()
-            .url(url)
-            .header(HttpHeaders.Cookie, "jwt=$authToken")
-            .build()
-
-        runCatching {
-            if (state.isLoaded) {
-                coroutineScope.launch(Dispatchers.IO) {
-                    runCatching {
-                        val pFD =
-                            ParcelFileDescriptor.open(
-                                state.mFile,
-                                ParcelFileDescriptor.MODE_READ_ONLY
-                            )
-                        state.pdfRender =
-                            PdfRendering(pFD, width, height, portrait)
-                    }.onFailure {
-                        state.mError = it
-                    }
-                }
-            } else {
-                coroutineScope.launch(Dispatchers.IO) {
-                    runCatching {
-
-                        val bufferSize = 8192
-                        var downloaded = 0
-                        val file = File(context.cacheDir, filename)
-                        val response = client.newCall(request).execute()
-                        if (!response.isSuccessful) {
-                            state.mError = Exception("Failed to download PDF: ${response.code}")
-                            Log.e("PdfView", "Failed to download PDF: ${response.code}")
-                        }
-
-                        val byteStream = response.body?.byteStream()
-                        byteStream.use { input ->
-                            file.outputStream().use { output ->
-                                val totalBytes = response.body?.contentLength()
-                                var data = ByteArray(bufferSize)
-                                var count = input?.read(data)
-                                while (count != -1) {
-                                    if (totalBytes != null) {
-                                        if (totalBytes > 0) {
-                                            downloaded += bufferSize
-                                            state.mLoadPercent =
-                                                (downloaded * (100 / totalBytes.toFloat())).toInt()
-                                        }
+        coroutineScope.launch(Dispatchers.IO) {
+            var downloadedFile: File? = null
+            try {
+                val file = state.file ?: run {
+                    val ownerContext = coroutineContext
+                    withMediaResponse(mediaHttpClient(serverUrl, authToken), Request.Builder().url(url).build()) { response ->
+                            if (!response.isSuccessful) throw IOException("PDF request failed (${response.code})")
+                            val body = response.body ?: throw IOException("Empty PDF response")
+                            val target = File.createTempFile("lecture-", ".pdf", context.cacheDir)
+                            downloadedFile = target
+                            body.byteStream().use { input ->
+                                target.outputStream().use { output ->
+                                    val buffer = ByteArray(8192)
+                                    var total = 0L
+                                    while (true) {
+                                        ownerContext.ensureActive()
+                                        val count = input.read(buffer)
+                                        if (count == -1) break
+                                        output.write(buffer, 0, count)
+                                        total += count
+                                        if (body.contentLength() > 0) state.mLoadPercent =
+                                            (total * 100 / body.contentLength()).toInt().coerceIn(0, 100)
                                     }
-                                    if (count != null) {
-                                        output.write(data, 0, count)
-                                    }
-                                    data = ByteArray(bufferSize)
-                                    count = input?.read(data)
                                 }
                             }
-                        }
-                        val pFD = ParcelFileDescriptor.open(
-                            file,
-                            ParcelFileDescriptor.MODE_READ_ONLY
-                        )
-                        state.pdfRender =
-                            PdfRendering(pFD, width, height, portrait)
-                        state.mFile = file
-                    }.onFailure {
-                        state.mError = it
+                            target
                     }
                 }
+                coroutineContext.ensureActive()
+                val descriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+                val rendering = try { PdfRendering(descriptor, width, height, portrait) }
+                    catch (error: Throwable) { descriptor.close(); throw error }
+                if (!isActive) { rendering.close(); return@launch }
+                state.mFile = file
+                state.pdfRender = rendering
+            } catch (error: CancellationException) {
+                downloadedFile?.delete()
+                throw error
+            } catch (error: Exception) {
+                downloadedFile?.delete()
+                if (isActive) state.mError = error
             }
-        }.onFailure {
-            state.mError = it
+        }
+    }
+
+    /** Export the already authenticated file; DownloadManager must not forward a session cookie. */
+    fun download(context: Context, file: File) {
+        CoroutineScope(Dispatchers.IO).launch {
+            var destination: android.net.Uri? = null
+            val resolver = context.contentResolver
+            val message = try {
+                val values = android.content.ContentValues().apply {
+                    put(android.provider.MediaStore.Downloads.DISPLAY_NAME, filename.substringAfterLast('/'))
+                    put(android.provider.MediaStore.Downloads.MIME_TYPE, "application/pdf")
+                    put(android.provider.MediaStore.Downloads.IS_PENDING, 1)
+                }
+                destination = resolver.insert(android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
+                    ?: throw IOException("Cannot create download")
+                resolver.openOutputStream(destination)?.use { output -> file.inputStream().use { it.copyTo(output) } }
+                    ?: throw IOException("Cannot write download")
+                resolver.update(destination, android.content.ContentValues().apply {
+                    put(android.provider.MediaStore.Downloads.IS_PENDING, 0)
+                }, null, null)
+                R.string.file_downloading_toast
+            } catch (_: Exception) {
+                destination?.let { resolver.delete(it, null, null) }
+                R.string.file_error_downloading
+            }
+            kotlinx.coroutines.withContext(Dispatchers.Main) {
+                android.widget.Toast.makeText(context, getString(context, message), android.widget.Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
