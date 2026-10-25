@@ -1,6 +1,6 @@
 # Native composer resize follow-up
 
-Reference: iOS PR 554 commit `683decfac717505fbf354894710772cb571ef0e5`, compared with the previously reviewed `da316f0`. The new commit adds bounded drag expansion, tap/accessibility alternatives, and secondary, transparent, non-pinned emoji headings.
+Reference: iOS PR 554 commit `683decfac717505fbf354894710772cb571ef0e5`, compared with the previously reviewed `da316f0`. A final comparison also covers correctness follow-up `78356bf29f45c80b0dfa27e92f7a9bf86c9c06d0`. The resize commit adds bounded drag expansion, tap/accessibility alternatives, and secondary, transparent, non-pinned emoji headings.
 
 Add a centered native grabber to the existing rounded Android composer. Dragging up grows the editor continuously; dragging down shrinks it. A dominant vertical release of at least 24 dp settles in its direction; shorter drags settle at the nearest size. Horizontal movement must not resize. Tap, keyboard activation, and accessible expand/collapse actions provide alternatives. Keep a 48 dp target and a Material capsule. Do not change focus, text, selection, composition, history, or the draft when resizing.
 
