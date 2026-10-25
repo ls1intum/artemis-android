@@ -16,6 +16,16 @@ internal fun resolveLectureReference(lectures: List<Lecture>, type: String, refe
         .find(reference)?.groupValues?.get(1)?.toLongOrNull()
     val page = Regex("/slide/(-?\\d+)(?:$|[?#])").find(reference)?.groupValues?.get(1)?.toIntOrNull()
     val path = reference.substringBefore('?').substringBefore('#').trimStart('/').substringAfter("attachments/")
+    if (type == "attachment") {
+        val numeric = Regex("^/?(?:(?:lecture|lectures)/)?(\\d+)/(\\d+)/?$").matchEntire(path)
+        if (numeric != null) {
+            val lectureId = numeric.groupValues[1].toLongOrNull()?.takeIf { it > 0 } ?: return null
+            val attachmentId = numeric.groupValues[2].toIntOrNull()?.takeIf { it > 0 } ?: return null
+            val lecture = lectures.firstOrNull { it.id == lectureId } ?: return null
+            val attachments = lecture.attachments + lecture.lectureUnits.filterIsInstance<LectureUnitAttachmentVideo>().mapNotNull { it.attachment }
+            return attachments.firstOrNull { it.id == attachmentId }?.let { ResolvedLectureReference(lectureId, attachmentId = it.id) }
+        }
+    }
     lectures.forEach { lecture ->
         val lectureId = lecture.id ?: return@forEach
         lecture.lectureUnits.filterIsInstance<LectureUnitAttachmentVideo>().forEach { unit ->

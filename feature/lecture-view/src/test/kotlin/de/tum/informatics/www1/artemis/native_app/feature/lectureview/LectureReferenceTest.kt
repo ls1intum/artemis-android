@@ -41,4 +41,11 @@ class LectureReferenceTest {
     @Test fun attachmentReferenceInsideAUnitOpensTheFileDirectly() {
         assertEquals(ResolvedLectureReference(7, attachmentId = 4), resolveLectureReference(lectures, "attachment", "attachment-unit/8/slides.pdf"))
     }
+    @Test fun numericLegacyAttachmentReferencesOpenStandaloneAndUnitFiles() {
+        for (reference in listOf("lecture/7/4", "/lecture/7/4", "lectures/7/4", "7/4")) {
+            assertEquals(reference, ResolvedLectureReference(7, attachmentId = 4), resolveLectureReference(lectures, "attachment", reference))
+            assertEquals(reference, ResolvedLectureReference(7, attachmentId = 4), resolveLectureReference(listOf(Lecture(id = 7, attachments = listOf(attachment))), "attachment", reference))
+        }
+        assertNull(resolveLectureReference(lectures, "attachment", "lecture/99/4"))
+    }
 }

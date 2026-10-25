@@ -13,30 +13,10 @@ class VerticalPdfReaderState(
     internal var lazyState: LazyListState = LazyListState()
         private set
 
-    override var currentPage: Int = currentPage()
-        get() = currentPage()
+    override var currentPage: Int = 0
+        get() = if (pdfPageCount > 0) lazyState.firstVisibleItemIndex.coerceIn(0, pdfPageCount - 1) + 1 else 0
 
     override var isScrolling: Boolean = lazyState.isScrollInProgress
-
-    private fun currentPage(): Int {
-        return pdfRender?.let { pdfRender ->
-            val currentMinIndex = lazyState.firstVisibleItemIndex.coerceIn(0, (pdfPageCount - 1).coerceAtLeast(0))
-            var lastVisibleIndex = currentMinIndex
-            var totalVisiblePortion =
-                (pdfRender.pageLists[currentMinIndex].dimension.height * scale) - lazyState.firstVisibleItemScrollOffset
-            for (i in currentMinIndex + 1 until pdfPageCount) {
-                val newTotalVisiblePortion =
-                    totalVisiblePortion + (pdfRender.pageLists[i].dimension.height * scale)
-                if (newTotalVisiblePortion <= pdfRender.height) {
-                    lastVisibleIndex = i
-                    totalVisiblePortion = newTotalVisiblePortion
-                } else {
-                    break
-                }
-            }
-            lastVisibleIndex + 1
-        } ?: 0
-    }
 
 }
 

@@ -37,7 +37,7 @@ class MarkdownLinkResolverImpl(): MarkdownLinkResolver {
             )
         }
 
-        return remember(context, localLinkOpener, artemisContext.serverUrl, artemisContext.authTokenOrEmptyString) {
+        return remember(context, localLinkOpener, artemisContext, setBottomSheetState) {
             BaseMarkdownLinkResolver(artemisContext, localLinkOpener, setBottomSheetState)
         }
     }
@@ -57,9 +57,9 @@ class BaseMarkdownLinkResolver(
         when {
             mediaHttpUri(link)?.path?.endsWith(".pdf", ignoreCase = true) == true -> {
                 val token = if (sameMediaOrigin(artemisContext.serverUrl, link)) artemisContext.authTokenOrEmptyString else ""
-                val pdfFile = PdfFile(link, token, mediaHttpUri(link)?.path?.substringAfterLast('/').orEmpty(), artemisContext.serverUrl)
                 val account = (artemisContext as? ArtemisContext.LoggedIn)?.loginName.orEmpty()
                 val key = mediaProgressKey(account, artemisContext.serverUrl, "attachment", link)
+                val pdfFile = PdfFile(link, token, mediaHttpUri(link)?.path?.substringAfterLast('/').orEmpty(), artemisContext.serverUrl, key)
                 setBottomSheetState(LinkBottomSheetState.PDFVIEWSTATE(pdfFile, key))
             }
             // TODO: open Artemis link in a Modal Bottom Sheet webview to attach session cookie (https://github.com/ls1intum/artemis-android/issues/245)

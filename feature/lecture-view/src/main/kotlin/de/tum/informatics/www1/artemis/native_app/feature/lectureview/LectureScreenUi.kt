@@ -64,14 +64,16 @@ private data class LectureScreenRoute(
     val lectureId: Long,
     val lectureUnitId: Long? = null,
     val attachmentId: Int? = null,
-    val page: Int? = null
+    val page: Int? = null,
+    val courseId: Long? = null
 )
 
 fun NavController.navigateToLecture(
     lectureId: Long,
+    courseId: Long? = null,
     builder: NavOptionsBuilder.() -> Unit
 ) {
-    navigate(LectureScreenRoute(lectureId), builder)
+    navigate(LectureScreenRoute(lectureId, courseId = courseId?.takeIf { it > 0 }), builder)
 }
 
 fun NavGraphBuilder.lecture(
@@ -91,7 +93,8 @@ fun NavGraphBuilder.lecture(
             onViewExercise = onViewExercise,
             initialUnitId = route.lectureUnitId,
             initialAttachmentId = route.attachmentId,
-            initialPage = route.page
+            initialPage = route.page,
+            displayedCourseId = route.courseId
         )
     }
 }
@@ -103,12 +106,23 @@ fun LectureDetailContent(
     onSidebarToggle: () -> Unit = {},
     initialUnitId: Long? = null,
     initialAttachmentId: Int? = null,
-    initialPage: Int? = null
+    initialPage: Int? = null,
+    displayedCourseId: Long? = null
 ) {
     val session by LocalArtemisContextProvider.current.collectArtemisContextAsState()
     val account = (session as? ArtemisContext.LoggedIn)?.loginName.orEmpty()
     val viewModel: LectureViewModel = koinViewModel(key = "lecture|$lectureId|$account|${normalizedMediaOrigin(session.serverUrl)}") {
         parametersOf(lectureId)
+    }
+
+    val lectureState by viewModel.lectureDataState.collectAsState()
+    val actualCourseId = (lectureState as? DataState.Success)?.data?.course?.id?.takeIf { it > 0 }
+        ?: displayedCourseId?.takeIf { it > 0 }
+    val contextProvider = LocalArtemisContextProvider.current
+    LaunchedEffect(actualCourseId, account, session.serverUrl) {
+        if (actualCourseId != null && (session as? ArtemisContext.Course)?.courseId != actualCourseId) {
+            contextProvider.setCourseId(actualCourseId)
+        }
     }
 
     key(account, normalizedMediaOrigin(session.serverUrl)) {
@@ -119,7 +133,8 @@ fun LectureDetailContent(
             onSidebarToggle = onSidebarToggle,
             initialUnitId = initialUnitId,
             initialAttachmentId = initialAttachmentId,
-            initialPage = initialPage
+            initialPage = initialPage,
+            displayedCourseId = displayedCourseId
         )
     }
 }
@@ -132,7 +147,8 @@ internal fun LectureScreen(
     onSidebarToggle: () -> Unit = {},
     initialUnitId: Long? = null,
     initialAttachmentId: Int? = null,
-    initialPage: Int? = null
+    initialPage: Int? = null,
+    displayedCourseId: Long? = null
 ) {
     val lectureDataState by viewModel.lectureDataState.collectAsState()
     val serverUrl by viewModel.serverUrl.collectAsState()
@@ -153,7 +169,8 @@ internal fun LectureScreen(
         initialUnitId = initialUnitId,
         initialAttachmentId = initialAttachmentId,
         initialPage = initialPage,
-        unitsLoaded = unitsLoaded
+        unitsLoaded = unitsLoaded,
+        displayedCourseId = displayedCourseId
     )
 }
 
@@ -171,7 +188,8 @@ internal fun LectureScreen(
     initialUnitId: Long? = null,
     initialAttachmentId: Int? = null,
     initialPage: Int? = null,
-    unitsLoaded: Boolean = true
+    unitsLoaded: Boolean = true,
+    displayedCourseId: Long? = null
 ) {
     val context = LocalContext.current
     val linkOpener = LocalLinkOpener.current
@@ -224,7 +242,7 @@ internal fun LectureScreen(
             )
         }
     ) { padding ->
-        val markdownTransformer = rememberLectureArtemisMarkdownTransformer(serverUrl)
+        val markdownTransformer = rememberLectureArtemisMarkdownTransformer(serverUrl, loadedLecture?.course?.id?.takeIf { it > 0 } ?: displayedCourseId)
         val imageLoader = LocalArtemisImageProvider.current.rememberArtemisImageLoader()
 
         val linkResolver = remember(serverUrl) {

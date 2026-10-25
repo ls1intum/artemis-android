@@ -129,9 +129,10 @@ fun NavGraphBuilder.rootNavGraph(
         onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
         onParticipateInQuiz = onParticipateInQuiz,
         onViewQuizResults = onClickViewQuizResults,
-        onNavigateToLecture = { _, lectureId ->
+        onNavigateToLecture = { courseId, lectureId ->
             navController.navigateToLecture(
-                lectureId = lectureId
+                lectureId = lectureId,
+                courseId = courseId
             ) { }
         },
         onNavigateToFaq = { faqId ->

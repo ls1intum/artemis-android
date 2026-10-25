@@ -9,6 +9,7 @@ import androidx.compose.ui.geometry.Offset
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.PdfFile
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.render.PdfRendering
 import java.io.File
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.PdfDocumentCache
 
 abstract class PdfReaderState(
     val pdfFile: PdfFile,
@@ -48,8 +49,32 @@ abstract class PdfReaderState(
 
     open var isScrolling by mutableStateOf(false)
 
-    fun close() {
+    private var loadGeneration = 0L
+    private var documentLease: PdfDocumentCache.Lease? = null
+
+    @Synchronized internal fun beginLoad(): Long {
+        mError = null
+        return ++loadGeneration
+    }
+
+    @Synchronized internal fun isCurrentLoad(generation: Long): Boolean = generation == loadGeneration
+
+    @Synchronized internal fun installDocument(generation: Long, lease: PdfDocumentCache.Lease, rendering: PdfRendering): Boolean {
+        if (generation != loadGeneration) return false
+        pdfRender?.close()
+        documentLease?.close()
+        documentLease = lease
+        mFile = lease.file
+        pdfRender = rendering
+        return true
+    }
+
+    @Synchronized fun close() {
+        loadGeneration++
         pdfRender?.close()
         pdfRender = null
+        mFile = null
+        documentLease?.close()
+        documentLease = null
     }
 }

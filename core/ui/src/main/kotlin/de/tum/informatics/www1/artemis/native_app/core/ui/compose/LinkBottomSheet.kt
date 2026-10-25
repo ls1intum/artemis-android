@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -38,8 +39,10 @@ fun LinkBottomSheet(
     state: LinkBottomSheetState,
     onDismissRequest: () -> Unit
 ) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = state is LinkBottomSheetState.PDFVIEWSTATE)
     ModalBottomSheet(
         modifier = modifier.statusBarsPadding(),
+        sheetState = sheetState,
         contentWindowInsets = { WindowInsets.statusBars },
         onDismissRequest = onDismissRequest
     ) {

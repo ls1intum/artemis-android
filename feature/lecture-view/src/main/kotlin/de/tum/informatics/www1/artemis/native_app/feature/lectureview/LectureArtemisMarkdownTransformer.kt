@@ -3,10 +3,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.lectureview
 import android.view.View
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
-import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextProvider
-import de.tum.informatics.www1.artemis.native_app.core.ui.collectArtemisContextAsState
-import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.PostArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.ui.media.sameMediaOrigin
 import de.tum.informatics.www1.artemis.native_app.core.common.markdown.ArtemisMarkdownTransformer
@@ -16,9 +12,8 @@ import io.noties.markwon.LinkResolver
 
 
 @Composable
-fun rememberLectureArtemisMarkdownTransformer(serverUrl: String): LectureArtemisMarkdownTransformer {
-    val session by LocalArtemisContextProvider.current.collectArtemisContextAsState()
-    val courseId = (session as? ArtemisContext.Course)?.courseId
+fun rememberLectureArtemisMarkdownTransformer(serverUrl: String, displayedCourseId: Long? = null): LectureArtemisMarkdownTransformer {
+    val courseId = displayedCourseId?.takeIf { it > 0 }
     return remember(serverUrl, courseId) {
         val strippedServerUrl = serverUrl.removeSuffix("/")
         LectureArtemisMarkdownTransformer(strippedServerUrl, courseId)

@@ -31,7 +31,7 @@ internal fun NavGraphBuilder.lectureMediaReferences(onViewExercise: (Long) -> Un
         val route = entry.toRoute<LectureReferenceRoute>()
         val session by LocalArtemisContextProvider.current.collectArtemisContextAsState()
         // A changed session destroys the old result and cancels its producer before showing another account.
-        key(session) { LectureReferenceContent(route, session, onViewExercise) }
+        key(session.serverUrl, (session as? ArtemisContext.LoggedIn)?.loginName, (session as? ArtemisContext.LoggedIn)?.authToken) { LectureReferenceContent(route, session, onViewExercise) }
     }
 }
 
@@ -43,18 +43,9 @@ private fun LectureReferenceContent(route: LectureReferenceRoute, session: Artem
         value = DataState.Loading()
         val loggedIn = session as? ArtemisContext.LoggedIn
         if (loggedIn == null) { value = DataState.Failure(IllegalStateException("Sign in to open lecture media")); return@produceState }
-        val lectureId = referenceLectureId(route.reference)
-        val response: NetworkResponse<List<Lecture>> = if (route.referenceType == "attachment" && lectureId != null) {
-            service.loadLecture(lectureId, loggedIn.serverUrl, loggedIn.authToken).bind { listOf(it) }
-        } else {
-            service.loadCourseLecturesWithSlides(route.courseId, loggedIn.serverUrl, loggedIn.authToken)
-        }
-        coroutineContext.ensureActive()
-        value = when (response) {
-            is NetworkResponse.Failure -> DataState.Failure(response.exception)
-            is NetworkResponse.Response -> resolveLectureReference(response.data, route.referenceType, route.reference)
-                ?.let { DataState.Success(it) } ?: DataState.Failure(NoSuchElementException("Lecture resource unavailable"))
-        }
+        value = loadLectureReference(service, loggedIn, route.courseId, route.referenceType, route.reference).map(
+            { DataState.Success(it) }, { DataState.Failure(it) }
+        )
     }
     when (val current = state) {
         is DataState.Success -> LectureDetailContent(
@@ -62,7 +53,8 @@ private fun LectureReferenceContent(route: LectureReferenceRoute, session: Artem
             onViewExercise = onViewExercise,
             initialUnitId = current.data.unitId,
             initialAttachmentId = current.data.attachmentId,
-            initialPage = current.data.page
+            initialPage = current.data.page,
+            displayedCourseId = route.courseId
         )
         else -> Scaffold(topBar = { Row { NavigationBackButton() } }) { padding ->
             Column(Modifier.fillMaxSize().padding(padding).padding(24.dp), verticalArrangement = Arrangement.Center) {
@@ -76,5 +68,26 @@ private fun LectureReferenceContent(route: LectureReferenceRoute, session: Artem
                 }
             }
         }
+    }
+}
+
+internal suspend fun loadLectureReference(
+    service: LectureService,
+    session: ArtemisContext.LoggedIn,
+    courseId: Long,
+    type: String,
+    reference: String
+): NetworkResponse<ResolvedLectureReference> {
+    val lectureId = referenceLectureId(reference)
+    val response: NetworkResponse<List<Lecture>> = if (type == "attachment" && lectureId != null) {
+        service.loadLecture(lectureId, session.serverUrl, session.authToken).bind { listOf(it) }
+    } else {
+        service.loadCourseLecturesWithSlides(courseId, session.serverUrl, session.authToken)
+    }
+    kotlin.coroutines.coroutineContext.ensureActive()
+    return when (response) {
+        is NetworkResponse.Failure -> NetworkResponse.Failure(response.exception)
+        is NetworkResponse.Response -> resolveLectureReference(response.data, type, reference)
+            ?.let { NetworkResponse.Response(it) } ?: NetworkResponse.Failure(NoSuchElementException("Lecture resource unavailable"))
     }
 }

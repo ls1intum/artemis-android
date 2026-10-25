@@ -234,7 +234,7 @@ class MainActivity : AppCompatActivity(),
         }
 
         val linkOpener = remember {
-            CustomTabsLinkOpener(this@MainActivity, navController)
+            AppLinkOpener(this@MainActivity, navController)
         }
 
         CompositionLocalProvider(
@@ -287,22 +287,6 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
-    private class CustomTabsLinkOpener(private val context: Context, private val navController: NavHostController) : LinkOpener {
-        override fun openLectureVideoPage(url: String) {
-            if (de.tum.informatics.www1.artemis.native_app.core.ui.media.mediaHttpUri(url) == null) return
-            context.startActivity(Intent(context, LectureWebVideoActivity::class.java).putExtra(LectureWebVideoActivity.URL_EXTRA, url))
-        }
-
-        override fun openLink(url: String) {
-            val uri = Uri.parse(url)
-            if (uri.scheme == "artemis" && uri.host == "courses" && uri.pathSegments.lastOrNull() == "lecture-media") {
-                navController.navigate(uri)
-                return
-            }
-            CustomTabsIntent.Builder().build()
-                .launchUrl(context, Uri.parse(url))
-        }
-    }
 
     override fun onResume() {
         super.onResume()

@@ -8,6 +8,11 @@ import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.Ar
 import de.tum.informatics.www1.artemis.native_app.core.ui.media.mediaProgressKey
 import de.tum.informatics.www1.artemis.native_app.core.ui.media.sameMediaOrigin
 import de.tum.informatics.www1.artemis.native_app.core.ui.media.mediaHttpUri
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -57,7 +62,7 @@ fun AttachmentHandler(
 
     when (type) {
         is AttachmentUtil.AttachmentType.PDF -> {
-            val pdfFile = remember(url, artemisContext) { PdfFile(url, token, fileName, artemisContext.serverUrl) }
+            val pdfFile = remember(url, artemisContext) { PdfFile(url, token, fileName, artemisContext.serverUrl, progressKey) }
             key(progressKey, token) {
                 LinkBottomSheet(
                     modifier = Modifier.fillMaxSize(),
@@ -81,33 +86,28 @@ fun AttachmentHandler(
         }
 
         is AttachmentUtil.AttachmentType.Other -> {
-            DownloadAttachmentDialog(
-                onDismissRequest = onDismiss,
-                onDownload = {
-                    AttachmentUtil.downloadAttachment(
-                        context = context,
-                        artemisContext = artemisContext,
-                        link = url,
-                        name = fileName
-                    )
-                    onDismiss()
-                }
+            val scope = rememberCoroutineScope()
+            var downloading by remember(url, artemisContext) { mutableStateOf(false) }
+            var failed by remember(url, artemisContext) { mutableStateOf(false) }
+            TextAlertDialog(
+                title = stringResource(if (failed) R.string.lecture_media_failed else R.string.download_attachment_dialog_title),
+                text = stringResource(if (downloading) R.string.lecture_media_loading else if (failed) R.string.lecture_media_access_recovery else R.string.download_attachment_dialog_message),
+                confirmButtonText = if (downloading) null else stringResource(if (failed) R.string.lecture_media_retry else R.string.download_file_attachment_dialog_positive),
+                dismissButtonText = stringResource(R.string.lecture_media_close),
+                onPressPositiveButton = {
+                    if (!downloading) scope.launch {
+                        downloading = true
+                        failed = false
+                        try {
+                            AttachmentUtil.downloadAttachment(context, artemisContext, fileName, url)
+                            onDismiss()
+                        } catch (error: CancellationException) { throw error }
+                        catch (_: Exception) { failed = true }
+                        finally { downloading = false }
+                    }
+                },
+                onDismissRequest = onDismiss
             )
         }
     }
 }
-
-@Composable
-private fun DownloadAttachmentDialog(
-    onDismissRequest: () -> Unit,
-    onDownload: () -> Unit
-) {
-    TextAlertDialog(
-        title = stringResource(id = R.string.download_attachment_dialog_title),
-        text = stringResource(id = R.string.download_attachment_dialog_message),
-        confirmButtonText = stringResource(id = R.string.download_file_attachment_dialog_positive),
-        dismissButtonText = stringResource(id = R.string.download__file_attachment_dialog_negative),
-        onPressPositiveButton = onDownload,
-        onDismissRequest = onDismissRequest
-    )
-} 
