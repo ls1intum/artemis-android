@@ -1,5 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="reply_undo">Undo</string>
+    <string name="reply_redo">Redo</string>
+    <string name="reply_placeholder">Message %1$s</string>
+    <string name="reply_editing">Editing message</string>
+    <string name="reply_edit_placeholder">Edit message</string>
+    <string name="reply_cancel">Cancel</string>
+    <string name="reply_send">Send message</string>
+    <string name="reply_save">Save changes</string>
+    <string name="reply_attach">Add attachment or reference</string>
+    <string name="reply_show_formatting">Show formatting</string>
+    <string name="reply_hide_formatting">Hide formatting</string>
+    <string name="reply_add_emoji">Add emoji</string>
+    <string name="reply_mention_member">Mention a member</string>
+    <string name="reply_reference">Mention a channel</string>
+    <string name="reply_format_bold">Bold</string>
+    <string name="reply_format_italic">Italic</string>
+    <string name="reply_format_underline">Underline</string>
+    <string name="reply_format_strikethrough">Strikethrough</string>
+    <string name="reply_format_quote">Quote</string>
+    <string name="reply_format_link">Link</string>
+    <string name="reply_link_text">Text to display</string>
+    <string name="reply_link_url">Link address</string>
+    <string name="reply_link_invalid">Enter a valid https://, http:// or mailto: address</string>
+    <string name="reply_link_apply">Apply</string>
+    <string name="reply_link_draft_changed">The selected text changed. Close this dialog and select the text again.</string>
     <string name="reply_format_unordered">Unordered List</string>
     <string name="reply_format_ordered">Ordered List</string>
     <string name="reply_format_code_block">Code block</string>
@@ -11,4 +36,5 @@
     <string name="reply_format_mention_exercises">Exercises</string>
     <string name="reply_format_mention_lectures">Lectures</string>
     <string name="reply_format_mention_faqs">FAQs</string>
+    <string name="reply_thread_placeholder">Reply to thread</string>
 </resources>

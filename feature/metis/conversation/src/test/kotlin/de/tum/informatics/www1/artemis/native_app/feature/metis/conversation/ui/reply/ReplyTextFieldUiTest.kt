@@ -25,8 +25,7 @@ class ReplyTextFieldUiTest : BaseChatUITest() {
     fun setUp() {
         setupReplyTextField()
 
-        // Click the unfocused textField to focus and expand the textField
-        composeTestRule.onNodeWithTag(TEST_TAG_UNFOCUSED_TEXT_FIELD).performClick()
+        composeTestRule.onNodeWithTag(TEST_TAG_MARKDOWN_TEXTFIELD).performClick()
     }
 
     @Test

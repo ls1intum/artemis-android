@@ -12,4 +12,5 @@
     <string name="emoji_category_unknown">Unknown</string>
     <string name="no_recent_emojis">No recent emojis</string>
     <string name="emojis_search_hint">Search emojis</string>
+    <string name="emojis_search_no_results">No emojis found</string>
 </resources>

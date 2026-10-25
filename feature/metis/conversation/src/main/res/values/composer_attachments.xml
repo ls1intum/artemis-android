@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reply_attachment_manage_file">Manage file attachment: %1$s</string>
+    <string name="reply_attachment_manage_image">Manage image attachment: %1$s</string>
+    <string name="reply_attachment_file">File</string>
+    <string name="reply_attachment_image">Image</string>
+    <string name="reply_attachment_rename_title">Rename attachment</string>
+    <string name="reply_attachment_remove">Remove attachment</string>
+    <string name="reply_attachment_name">Attachment name</string>
+    <string name="reply_attachment_rename">Rename</string>
+    <string name="reply_attachment_cancel">Cancel</string>
+    <string name="reply_attachment_changed">This attachment has changed. Close this dialog and try again.</string>
+    <string name="reply_attachment_invalid_name">Enter a name without line breaks or control characters.</string>
+</resources>
