@@ -1,6 +1,9 @@
 package de.tum.informatics.www1.artemis.native_app.core.common.markdown
+import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import org.junit.experimental.categories.Category
+@Category(UnitTest::class)
 class ArtemisLectureMarkdownTest {
     private val transformer = object : ArtemisMarkdownTransformer() {
         override fun transformLectureContentMarkdown(type: String, fileName: String, url: String): String = "$type|$url"

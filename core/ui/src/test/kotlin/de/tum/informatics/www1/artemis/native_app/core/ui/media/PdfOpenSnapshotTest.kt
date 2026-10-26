@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.core.ui.media
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.sun.net.httpserver.HttpServer
+import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.*
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.render.state.VerticalPdfReaderState
 import java.net.InetSocketAddress
@@ -11,6 +12,7 @@ import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.*
 import org.junit.Assert.*
 import org.junit.Test
+import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
@@ -19,6 +21,7 @@ import org.robolectric.annotation.GraphicsMode
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34], shadows = [FixturePdfRendererShadow::class, FixturePdfPageShadow::class])
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
+@Category(UnitTest::class)
 class PdfOpenSnapshotTest {
     @Test(timeout = 60000)
     fun openPageRetainsExactBytesThroughRecreationAndReleasesThemAtPageClose() = runBlocking {

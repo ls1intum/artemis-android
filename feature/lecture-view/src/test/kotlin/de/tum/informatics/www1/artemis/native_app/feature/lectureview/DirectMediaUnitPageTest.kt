@@ -13,6 +13,7 @@ import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.composable
 import androidx.navigation.createGraph
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.*
+import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.*
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.*
@@ -23,10 +24,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
+@Category(UnitTest::class)
 class DirectMediaUnitPageTest {
     @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
     private val video =

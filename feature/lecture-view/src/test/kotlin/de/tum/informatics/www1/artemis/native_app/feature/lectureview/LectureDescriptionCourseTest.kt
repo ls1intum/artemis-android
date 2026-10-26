@@ -7,6 +7,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.core.app.ApplicationProvider
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.*
+import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.*
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.*
@@ -17,10 +18,12 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
+@Category(UnitTest::class)
 class LectureDescriptionCourseTest {
     @get:Rule val compose = createComposeRule()
     @Test fun freshLaunchUsesDisplayedCourseForDescriptionSlide() = follow(false)

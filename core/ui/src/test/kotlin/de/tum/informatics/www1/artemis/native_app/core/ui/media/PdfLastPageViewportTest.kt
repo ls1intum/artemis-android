@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.unit.dp
 import com.sun.net.httpserver.HttpServer
+import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.PdfFile
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.render.VerticalPdfView
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.render.state.VerticalPdfReaderState
@@ -14,6 +15,7 @@ import java.net.InetSocketAddress
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
@@ -22,6 +24,7 @@ import org.robolectric.annotation.GraphicsMode
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk=[34],qualifiers="w600dp-h1200dp-mdpi",shadows=[FixturePdfRendererShadow::class,FixturePdfPageShadow::class])
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
+@Category(UnitTest::class)
 class PdfLastPageViewportTest {
     @get:Rule val compose=createComposeRule()
     @Test(timeout=60000) fun exactLastPageCanAlignAtTopEvenWhenTheWholeShortDeckFits() {

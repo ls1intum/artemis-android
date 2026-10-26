@@ -4,21 +4,24 @@ import android.content.Context
 import android.graphics.pdf.PdfDocument
 import androidx.test.core.app.ApplicationProvider
 import com.sun.net.httpserver.HttpServer
+import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.*
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.render.state.*
-import kotlinx.coroutines.*
-import org.junit.Assert.*
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import java.io.File
 import java.net.InetSocketAddress
 import java.nio.file.Files
 import java.util.concurrent.atomic.AtomicInteger
+import kotlinx.coroutines.*
+import org.junit.Assert.*
+import org.junit.Test
+import org.junit.experimental.categories.Category
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 @org.robolectric.annotation.Config(sdk = [34], shadows = [FixturePdfRendererShadow::class, FixturePdfPageShadow::class])
 @org.robolectric.annotation.GraphicsMode(org.robolectric.annotation.GraphicsMode.Mode.NATIVE)
+@Category(UnitTest::class)
 class PdfCacheOwnershipTest {
     @Test fun repeatedAcquisitionWithinReaderSessionRetainsOneLocalCopy() = runBlocking {
         val directory = Files.createTempDirectory("pdf-cache-test").toFile()

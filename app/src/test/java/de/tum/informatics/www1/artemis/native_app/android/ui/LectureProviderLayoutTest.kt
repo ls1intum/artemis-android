@@ -8,16 +8,19 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
-import org.junit.Assert.assertEquals
+import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 @Config(application=NavigationBoundaryTestApplication::class)
+@Category(UnitTest::class)
 class LectureProviderLayoutTest {
     @get:Rule val compose=createEmptyComposeRule()
     @After fun stopServices(){ org.koin.core.context.stopKoin() }

@@ -6,17 +6,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
+import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.PdfPage
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.PdfFile
 import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 @Config(qualifiers = "w1280dp-h800dp-mdpi")
+@Category(UnitTest::class)
 class PdfPageNavigationTest {
     @get:Rule val compose = createComposeRule()
 

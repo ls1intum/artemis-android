@@ -7,9 +7,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import androidx.navigation.createGraph
 import androidx.test.core.app.ApplicationProvider
+import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.LectureDeeplinks
 import org.junit.Assert.*
 import org.junit.Test
+import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
@@ -17,6 +19,7 @@ import org.robolectric.shadows.ShadowToast
 
 @RunWith(RobolectricTestRunner::class)
 @Config(application = NavigationBoundaryTestApplication::class)
+@Category(UnitTest::class)
 class AppLinkOpenerTest {
     @org.junit.After
     fun stopTestServices() {

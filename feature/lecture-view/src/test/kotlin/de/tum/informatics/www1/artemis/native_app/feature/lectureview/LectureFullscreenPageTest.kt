@@ -2,13 +2,16 @@ package de.tum.informatics.www1.artemis.native_app.feature.lectureview
 
 import android.app.Activity
 import android.content.pm.ActivityInfo
+import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import org.junit.Assert.*
 import org.junit.Test
+import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
+@Category(UnitTest::class)
 class LectureFullscreenPageTest {
     @Test
     fun fullscreenUsesLandscapeAndRestoresRequestedPortraitOnExit() {

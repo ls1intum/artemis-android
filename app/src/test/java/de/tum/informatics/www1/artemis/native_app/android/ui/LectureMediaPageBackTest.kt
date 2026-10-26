@@ -12,6 +12,7 @@ import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.composable
 import androidx.navigation.createGraph
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.*
+import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.ui.*
 import de.tum.informatics.www1.artemis.native_app.core.ui.media.*
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.completeLectureMediaReference
@@ -20,6 +21,7 @@ import org.junit.After
 import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.koin.core.context.loadKoinModules
 import org.koin.dsl.module
@@ -30,6 +32,7 @@ import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 @Config(application = NavigationBoundaryTestApplication::class)
+@Category(UnitTest::class)
 class LectureMediaPageBackTest {
     @get:Rule val compose = createEmptyComposeRule()
     private val session = ArtemisContextImpl.LoggedIn("https://a.test", "session-token", "alice")
