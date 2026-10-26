@@ -56,6 +56,18 @@ class LectureVideoUiTest {
         compose.runOnIdle { assertFalse(fullscreen.value) }
     }
 
+    @Test fun nativeVideoNavigatesToAFullWindowPageInsteadOfOpeningADialog() {
+        var request: de.tum.informatics.www1.artemis.native_app.core.ui.media.MediaPageRequest? = null
+        compose.setContent { MaterialTheme {
+            CompositionLocalProvider(LocalLinkOpener provides object: LinkOpener {
+                override fun openLink(url:String) {}
+                override fun openMediaPage(value:de.tum.informatics.www1.artemis.native_app.core.ui.media.MediaPageRequest):Boolean { request=value;return true }
+            }) { LectureUnitVideoUi(Modifier,LectureUnitAttachmentVideo(id=3,name="Recording",videoSource="https://a.test/lecture.MP4?signature=private"),{},{}) }
+        } }
+        compose.onNodeWithText(context.getString(R.string.lecture_view_open_video_link_button)).performClick()
+        compose.runOnIdle { assertNotNull("Native video must navigate instead of creating a Dialog",request) }
+    }
+
     @Test fun providerButtonUsesIsolatedLecturePageOpener() {
         var provider: String? = null
         var external: String? = null
@@ -90,7 +102,6 @@ class LectureVideoUiTest {
         }
         compose.onNodeWithText(context.getString(R.string.lecture_view_open_video_link_button)).performClick()
         compose.onNodeWithText(context.getString(CoreR.string.lecture_media_invalid)).assertIsDisplayed()
-        compose.onNodeWithText(context.getString(CoreR.string.lecture_media_close)).performClick()
         compose.runOnIdle { assertFalse(external) }
     }
 }

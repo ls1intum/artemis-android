@@ -27,17 +27,17 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.R as CoreR
 @Serializable
 private data class LectureReferenceRoute(val courseId: Long, val referenceType: String, val reference: String)
 
-internal fun NavGraphBuilder.lectureMediaReferences(onViewExercise: (Long) -> Unit) {
+internal fun NavGraphBuilder.lectureMediaReferences(onViewExercise: (Long) -> Unit, onPageOpened: (String) -> Unit) {
     animatedComposable<LectureReferenceRoute>(deepLinks = LectureDeeplinks.ToLectureMediaReference.generateLinks()) { entry ->
         val route = entry.toRoute<LectureReferenceRoute>()
         val session by LocalArtemisContextProvider.current.collectArtemisContextAsState()
         // A changed session destroys the old result and cancels its producer before showing another account.
-        key(session.serverUrl, (session as? ArtemisContext.LoggedIn)?.loginName, (session as? ArtemisContext.LoggedIn)?.authToken) { LectureReferenceContent(route, session, onViewExercise) }
+        key(session.serverUrl, (session as? ArtemisContext.LoggedIn)?.loginName, (session as? ArtemisContext.LoggedIn)?.authToken) { LectureReferenceContent(route, session, onViewExercise) { onPageOpened(entry.id) } }
     }
 }
 
 @Composable
-private fun LectureReferenceContent(route: LectureReferenceRoute, session: ArtemisContext, onViewExercise: (Long) -> Unit) {
+private fun LectureReferenceContent(route: LectureReferenceRoute, session: ArtemisContext, onViewExercise: (Long) -> Unit, onPageOpened: () -> Unit) {
     val service = koinInject<LectureService>()
     var attempt by remember { mutableIntStateOf(0) }
     val state by produceState<DataState<ResolvedLectureReference>>(DataState.Loading(), route, attempt) {
@@ -57,6 +57,7 @@ private fun LectureReferenceContent(route: LectureReferenceRoute, session: Artem
             initialPage = current.data.page,
             initialResolvedAttachment = current.data.document,
             onRetryMediaReference = { attempt++ },
+            onMediaPageOpened = onPageOpened,
             displayedCourseId = route.courseId
         )
         else -> Scaffold(topBar = { Row { NavigationBackButton() } }) { padding ->

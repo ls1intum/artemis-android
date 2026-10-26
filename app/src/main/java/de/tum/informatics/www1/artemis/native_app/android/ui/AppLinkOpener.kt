@@ -11,6 +11,17 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.media.mediaHttpUri
 import de.tum.informatics.www1.artemis.native_app.core.ui.R as CoreR
 
 internal class AppLinkOpener(private val context: Context, private val navController: NavHostController) : LinkOpener {
+    override fun openMediaPage(request: de.tum.informatics.www1.artemis.native_app.core.ui.media.MediaPageRequest): Boolean {
+        if (mediaHttpUri(request.url) == null) return false
+        return try {
+            val intent = LectureMediaActivity.intent(context, request)
+            if (context !is android.app.Activity) intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(intent)
+            true
+        } catch (_: android.content.ActivityNotFoundException) { false }
+          catch (_: SecurityException) { false }
+    }
+
     override fun openLectureVideoPage(url: String) {
         if (mediaHttpUri(url) == null) return
         context.startActivity(Intent(context, LectureWebVideoActivity::class.java).putExtra(LectureWebVideoActivity.URL_EXTRA, url))

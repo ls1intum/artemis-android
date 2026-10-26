@@ -112,7 +112,8 @@ internal fun LectureOverviewTab(
                 modifier = modifier,
                 lectureUnit = selectedLectureUnit ?: return@ModalBottomSheet,
                 onRequestViewLink = onRequestViewLink,
-                onRequestOpenAttachment = onRequestOpenAttachment
+                onRequestOpenAttachment = { onRequestOpenAttachment(it); selectedLectureUnitId = null },
+                onPageOpened = { selectedLectureUnitId = null }
             )
         }
     }
@@ -423,6 +424,7 @@ private fun LectureUnitBottomSheetContent(
     lectureUnit: LectureUnit,
     onRequestViewLink: (String) -> Unit,
     onRequestOpenAttachment: (Attachment) -> Unit,
+    onPageOpened: () -> Unit
 ) {
     val childModifier = Modifier.fillMaxWidth().navigationBarsPadding()
 
@@ -439,7 +441,8 @@ private fun LectureUnitBottomSheetContent(
                     onClickOpenLink = {
                         onRequestViewLink(lectureUnit.videoSource.orEmpty())
                     },
-                    onClickOpenAttachment = onRequestOpenAttachment
+                    onClickOpenAttachment = onRequestOpenAttachment,
+                    onPageOpened = onPageOpened
                 )
             }
 

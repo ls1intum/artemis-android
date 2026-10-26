@@ -11,4 +11,5 @@
     <string name="lecture_media_fullscreen">Fullscreen</string>
     <string name="lecture_media_exit_fullscreen">Exit fullscreen</string>
     <string name="lecture_media_missing">This lecture resource is unavailable or has not been released.</string>
+    <string name="lecture_media_reopen_source">Open this resource again from the lecture or message.</string>
 </resources>

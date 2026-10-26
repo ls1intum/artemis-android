@@ -20,6 +20,19 @@ import org.robolectric.shadows.ShadowToast
 @Config(application = NavigationBoundaryTestApplication::class)
 class AppLinkOpenerTest {
     @org.junit.After fun stopTestServices() { org.koin.core.context.stopKoin() }
+    @Test fun nativeMediaLaunchIsPrivateAndDoesNotForwardAuthentication() {
+        val context=ApplicationProvider.getApplicationContext<Context>()
+        val controller=NavHostController(context)
+        val request=de.tum.informatics.www1.artemis.native_app.core.ui.media.MediaPageRequest("https://a.test/file.pdf?signature=private","Slides","lecture/1/attachment/3","scope",de.tum.informatics.www1.artemis.native_app.core.ui.media.MediaPageKind.PDF,3)
+        assertTrue(AppLinkOpener(context,controller).openMediaPage(request))
+        val launched=org.robolectric.Shadows.shadowOf(context as Application).nextStartedActivity
+        assertEquals("de.tum.informatics.www1.artemis.native_app.android.ui.LectureMediaActivity",launched.component!!.className)
+        assertEquals("https://a.test/file.pdf?signature=private", launched.getStringExtra("source"))
+        assertFalse(launched.extras.toString().contains("session-token"))
+        val info=context.packageManager.getActivityInfo(launched.component!!,0)
+        assertFalse(info.exported)
+    }
+
     @Test fun malformedMediaRoutesRecoverThroughTheRealOpener() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val controller = NavHostController(context)

@@ -21,6 +21,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.navigateT
 import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.detail.faqDetail
 import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.detail.navigateToFaqDetail
 import de.tum.informatics.www1.artemis.native_app.feature.force_update.ui.updateNavGraph
+import de.tum.informatics.www1.artemis.native_app.feature.lectureview.completeLectureMediaReference
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.navigateToLecture
 import de.tum.informatics.www1.artemis.native_app.feature.login.LoginScreenRoute
@@ -151,6 +152,9 @@ fun NavGraphBuilder.rootNavGraph(
     )
 
     lecture(
+        onReferencePageOpened = { entryId ->
+            navController.completeLectureMediaReference(entryId)
+        },
         onViewExercise = { exerciseId ->
             navController.navigateToExercise(
                 exerciseId,

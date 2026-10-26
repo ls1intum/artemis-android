@@ -12,6 +12,8 @@ val LocalLinkOpener: ProvidableCompositionLocal<LinkOpener> = compositionLocalOf
  * Allows the ui to open links
  */
 interface LinkOpener {
+    fun openMediaPage(request: de.tum.informatics.www1.artemis.native_app.core.ui.media.MediaPageRequest): Boolean = false
+
     fun openLink(url: String)
 
     /** A lecture provider page, rendered with a cookie store isolated from Artemis login. */

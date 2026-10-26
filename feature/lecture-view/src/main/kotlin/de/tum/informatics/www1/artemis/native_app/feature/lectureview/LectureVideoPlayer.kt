@@ -7,13 +7,17 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.activity.compose.BackHandler
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Fullscreen
+import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -35,8 +39,9 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.media.*
 import de.tum.informatics.www1.artemis.native_app.core.ui.R as CoreR
 
 /** One foreground player per open unit. Reopening and foregrounding always wait for user play. */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun LectureVideoPlayer(url: String, identity: String, onDismiss: () -> Unit) {
+fun LectureVideoPlayer(url: String, identity: String, onDismiss: () -> Unit, title: String = "", onReloadSource: (() -> Unit)? = null) {
     val session by LocalArtemisContextProvider.current.collectArtemisContextAsState()
     val account = (session as? ArtemisContext.LoggedIn)?.loginName.orEmpty()
     val scope = "$account|${normalizedMediaOrigin(session.serverUrl)}"
@@ -62,36 +67,39 @@ internal fun LectureVideoPlayer(url: String, identity: String, onDismiss: () -> 
         lifecycle.addObserver(observer)
         onDispose { lifecycle.removeObserver(observer) }
     }
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
-            Column(Modifier.fillMaxSize().safeDrawingPadding().padding(12.dp)) {
-                if (!fullscreen) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                    TextButton(onClick = onDismiss) { Text(stringResource(CoreR.string.lecture_media_close)) }
+    val activity = context as? android.app.Activity
+    val originalOrientation by rememberSaveable { mutableStateOf(activity?.requestedOrientation ?: android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) }
+    val fullscreenController = remember(activity, originalOrientation) { activity?.let { LectureFullscreenController(it, originalOrientation) } }
+    DisposableEffect(fullscreenController) { onDispose { fullscreenController?.close() } }
+    LaunchedEffect(fullscreen) { fullscreenController?.setFullscreen(fullscreen) }
+    BackHandler {
+        if (fullscreenController != null) fullscreenController.back({ fullscreen = false }, onDismiss)
+        else if (fullscreen) fullscreen = false else onDismiss()
+    }
+    Scaffold(
+        modifier = Modifier.fillMaxSize().testTag("media_video_page"),
+        containerColor = androidx.compose.ui.graphics.Color.Black,
+        contentWindowInsets = if (fullscreen) WindowInsets(0, 0, 0, 0) else WindowInsets.safeDrawing,
+        topBar = {
+            if (!fullscreen) TopAppBar(
+                title = { Text(title, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
+                navigationIcon = { NavigationBackButton(onNavigateBack = onDismiss) },
+                actions = {
+                    IconButton(onClick = { fullscreen = true }) { Icon(Icons.Default.Fullscreen, stringResource(CoreR.string.lecture_media_fullscreen)) }
+                    IconButton(onClick = { browser.openLink(url) }) { Icon(Icons.Default.OpenInBrowser, stringResource(CoreR.string.lecture_media_browser)) }
                 }
-                if (kind == MediaSourceKind.INVALID) {
-                    Text(stringResource(CoreR.string.lecture_media_invalid))
-                } else {
-                    key(progressKey, attempt, session.authTokenOrEmptyString) {
-                        if (foreground) {
-                            if (kind == MediaSourceKind.WEB) {
-                                Text(stringResource(CoreR.string.lecture_media_provider))
-                            } else {
-                                NativeLectureVideo(
-                                    url, kind, session.serverUrl, session.authTokenOrEmptyString,
-                                    progressKey, store, fullscreen,
-                                    Modifier.weight(1f).fillMaxWidth(),
-                                    onRetry = { attempt++ },
-                                    onFullscreen = { fullscreen = it }
-                                )
-                                TextButton(onClick = { fullscreen = !fullscreen }) {
-                                    Text(stringResource(if (fullscreen) CoreR.string.lecture_media_exit_fullscreen else CoreR.string.lecture_media_fullscreen))
-                                }
-                            }
-                        } else Spacer(Modifier.weight(1f))
-                    }
-                    if (kind == MediaSourceKind.WEB) Text(stringResource(CoreR.string.lecture_media_provider), style = MaterialTheme.typography.bodySmall)
-                    if (!fullscreen) TextButton(onClick = { browser.openLink(url) }) { Text(stringResource(CoreR.string.lecture_media_browser)) }
-                }
+            )
+        }
+    ) { padding ->
+        Box(Modifier.fillMaxSize().padding(padding)) {
+            if (kind == MediaSourceKind.INVALID) Text(stringResource(CoreR.string.lecture_media_invalid), color = MaterialTheme.colorScheme.onSurface)
+            else key(progressKey, attempt, session.authTokenOrEmptyString) {
+                if (foreground) NativeLectureVideo(
+                    url, kind, session.serverUrl, session.authTokenOrEmptyString,
+                    progressKey, store, fullscreen, Modifier.fillMaxSize(),
+                    onRetry = { if (onReloadSource != null) onReloadSource() else attempt++ },
+                    onFullscreen = { fullscreen = it }
+                )
             }
         }
     }
@@ -169,7 +177,7 @@ private fun MediaFailure(modifier: Modifier, onRetry: () -> Unit) {
     }
 }
 
-/** Keep Media3's own fullscreen control in the same state as the surrounding dialog. */
+/** Keep Media3's own fullscreen control in the same state as the surrounding page. */
 @Composable
 internal fun LecturePlayerView(player: Player?, fullscreen: Boolean, modifier: Modifier, onFullscreen: (Boolean) -> Unit) {
     AndroidView(

@@ -10,6 +10,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.LectureVideoPlayer
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
+import de.tum.informatics.www1.artemis.native_app.core.ui.collectArtemisContextAsState
+import de.tum.informatics.www1.artemis.native_app.core.ui.media.*
 import de.tum.informatics.www1.artemis.native_app.core.ui.media.classifyMediaSource
 import de.tum.informatics.www1.artemis.native_app.core.ui.media.MediaSourceKind
 import androidx.compose.ui.Alignment
@@ -26,10 +28,11 @@ internal fun LectureUnitVideoUi(
     lectureUnit: LectureUnitAttachmentVideo,
     onClickOpenLink: () -> Unit,
     onClickOpenAttachment: (Attachment) -> Unit,
+    onPageOpened: () -> Unit = {},
 ) {
     val linkOpener = LocalLinkOpener.current
-    var showPlayer by rememberSaveable(lectureUnit.id) { mutableStateOf(false) }
-    if (showPlayer) LectureVideoPlayer(lectureUnit.videoSource.orEmpty(), "unit/${lectureUnit.id}") { showPlayer = false }
+    val session by de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextProvider.current.collectArtemisContextAsState()
+    var invalid by androidx.compose.runtime.remember { mutableStateOf(false) }
     LectureUnitBody(
         modifier = modifier,
         name = lectureUnit.name.orEmpty(),
@@ -49,11 +52,16 @@ internal fun LectureUnitVideoUi(
                     val url = lectureUnit.videoSource.orEmpty()
                     if (classifyMediaSource(url) == MediaSourceKind.WEB) {
                         linkOpener.openLectureVideoPage(url)
-                    } else showPlayer = true
+                        onPageOpened()
+                    } else if (classifyMediaSource(url) == MediaSourceKind.INVALID) invalid = true
+                    else if (linkOpener.openMediaPage(MediaPageRequest(url, lectureUnit.name.orEmpty(), "unit/${lectureUnit.id}", mediaPageScope(session), MediaPageKind.VIDEO))) onPageOpened()
+                    else invalid = true
                 },
                 text = stringResource(R.string.lecture_view_open_video_link_button),
             )
         }
+
+        if (invalid) androidx.compose.material3.Text(stringResource(de.tum.informatics.www1.artemis.native_app.core.ui.R.string.lecture_media_invalid))
 
         if (lectureUnit.hasAttachment) {
             OpenLinkButton(

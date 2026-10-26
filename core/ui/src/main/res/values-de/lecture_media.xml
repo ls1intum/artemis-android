@@ -11,4 +11,5 @@
     <string name="lecture_media_fullscreen">Vollbild</string>
     <string name="lecture_media_exit_fullscreen">Vollbild beenden</string>
     <string name="lecture_media_missing">Diese Vorlesungsressource ist nicht verfügbar oder noch nicht freigegeben.</string>
+    <string name="lecture_media_reopen_source">Öffne diese Ressource erneut über die Vorlesung oder Nachricht.</string>
 </resources>

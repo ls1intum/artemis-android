@@ -22,15 +22,19 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class MarkdownResolverLifetimeTest {
     @get:Rule val compose = createComposeRule()
-    @Test fun courseOnlyContextChangeStillOpensTheLivePdfSheet() {
+    @Test fun courseOnlyContextChangeStillDispatchesTheLivePdfPage() {
         val provider = object : ArtemisContextProvider {
             override val stateFlow = MutableStateFlow<ArtemisContext>(ArtemisContextImpl.LoggedIn("http://127.0.0.1:1", "test-token", "alice"))
             override fun setCourseId(courseId: Long) { stateFlow.value = ArtemisContextImpl.Course("http://127.0.0.1:1", "test-token", "alice", courseId) }
             override fun clearCourseId() {}
         }
+        var opened: MediaPageRequest? = null
         compose.setContent {
             MaterialTheme {
-                CompositionLocalProvider(LocalArtemisContextProvider provides provider) {
+                CompositionLocalProvider(LocalArtemisContextProvider provides provider, LocalLinkOpener provides object:LinkOpener {
+                    override fun openLink(url:String){}
+                    override fun openMediaPage(request:MediaPageRequest):Boolean { opened=request;return true }
+                }) {
                     val resolver = MarkdownLinkResolverImpl().rememberMarkdownLinkResolver()
                     val context = LocalContext.current
                     Button(onClick = { resolver.resolve(View(context), "http://127.0.0.1:1/slides.pdf") }) { Text("Open slides") }
@@ -39,8 +43,10 @@ class MarkdownResolverLifetimeTest {
         }
         compose.runOnIdle { provider.setCourseId(2) }
         compose.onNodeWithText("Open slides").performClick()
-        val error = ApplicationProvider.getApplicationContext<Context>().getString(R.string.pdf_view_error_loading)
-        compose.waitUntil(8_000) { compose.onAllNodes(androidx.compose.ui.test.hasText(error)).fetchSemanticsNodes().isNotEmpty() }
-        compose.onNodeWithText(error).assertExists()
+        compose.runOnIdle {
+            org.junit.Assert.assertNotNull(opened)
+            org.junit.Assert.assertEquals(MediaPageKind.PDF, opened!!.kind)
+            org.junit.Assert.assertEquals(mediaPageScope(provider.stateFlow.value), opened!!.scope)
+        }
     }
 }

@@ -27,7 +27,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.Image
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.PdfFile
 
 sealed class LinkBottomSheetState {
-    class PDFVIEWSTATE(val pdfFile: PdfFile, val progressKey: String? = null, val initialPage: Int? = null) : LinkBottomSheetState()
     class IMAGEVIEWSTATE(val imageFile: ImageFile) : LinkBottomSheetState()
     data class WEBVIEWSTATE(val url: String) : LinkBottomSheetState()
 }
@@ -39,7 +38,7 @@ fun LinkBottomSheet(
     state: LinkBottomSheetState,
     onDismissRequest: () -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = state is LinkBottomSheetState.PDFVIEWSTATE)
+    val sheetState = rememberModalBottomSheetState()
     ModalBottomSheet(
         modifier = modifier.statusBarsPadding(),
         sheetState = sheetState,
@@ -52,16 +51,6 @@ fun LinkBottomSheet(
                 .padding(8.dp)
         ) {
             when (state) {
-                is LinkBottomSheetState.PDFVIEWSTATE -> {
-                    ArtemisPdfView(
-                        modifier = Modifier.fillMaxSize(),
-                        pdfFile = state.pdfFile,
-                        dismiss = onDismissRequest,
-                        progressKey = state.progressKey,
-                        initialPage = state.initialPage
-                    )
-                }
-
                 is LinkBottomSheetState.IMAGEVIEWSTATE -> {
                     ArtemisImageView(
                         modifier = Modifier.fillMaxSize(),

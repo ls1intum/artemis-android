@@ -76,10 +76,15 @@ fun NavController.navigateToLecture(
     navigate(LectureScreenRoute(lectureId, courseId = courseId?.takeIf { it > 0 }), builder)
 }
 
+/** Ignore a late launch callback after its lookup destination has already been left. */
+fun NavController.completeLectureMediaReference(entryId: String): Boolean =
+    currentBackStackEntry?.id == entryId && popBackStack()
+
 fun NavGraphBuilder.lecture(
     onViewExercise: (exerciseId: Long) -> Unit,
+    onReferencePageOpened: (String) -> Unit = {}
 ) {
-    lectureMediaReferences(onViewExercise)
+    lectureMediaReferences(onViewExercise, onReferencePageOpened)
     animatedComposable<LectureScreenRoute>(
         deepLinks = LectureDeeplinks.ToLecture.generateLinks() +
                 LectureDeeplinks.ToLectureCourseAgnostic.generateLinks() +
@@ -109,7 +114,8 @@ fun LectureDetailContent(
     initialPage: Int? = null,
     displayedCourseId: Long? = null,
     initialResolvedAttachment: Attachment? = null,
-    onRetryMediaReference: (() -> Unit)? = null
+    onRetryMediaReference: (() -> Unit)? = null,
+    onMediaPageOpened: (() -> Unit)? = null
 ) {
     val session by LocalArtemisContextProvider.current.collectArtemisContextAsState()
     val account = (session as? ArtemisContext.LoggedIn)?.loginName.orEmpty()
@@ -138,7 +144,8 @@ fun LectureDetailContent(
             initialPage = initialPage,
             displayedCourseId = displayedCourseId,
             initialResolvedAttachment = initialResolvedAttachment,
-            onRetryMediaReference = onRetryMediaReference
+            onRetryMediaReference = onRetryMediaReference,
+            onMediaPageOpened = onMediaPageOpened
         )
     }
 }
@@ -154,7 +161,8 @@ internal fun LectureScreen(
     initialPage: Int? = null,
     displayedCourseId: Long? = null,
     initialResolvedAttachment: Attachment? = null,
-    onRetryMediaReference: (() -> Unit)? = null
+    onRetryMediaReference: (() -> Unit)? = null,
+    onMediaPageOpened: (() -> Unit)? = null
 ) {
     val lectureDataState by viewModel.lectureDataState.collectAsState()
     val serverUrl by viewModel.serverUrl.collectAsState()
@@ -178,7 +186,8 @@ internal fun LectureScreen(
         unitsLoaded = unitsLoaded,
         displayedCourseId = displayedCourseId,
         initialResolvedAttachment = initialResolvedAttachment,
-        onRetryMediaReference = onRetryMediaReference
+        onRetryMediaReference = onRetryMediaReference,
+        onMediaPageOpened = onMediaPageOpened
     )
 }
 
@@ -199,7 +208,8 @@ internal fun LectureScreen(
     unitsLoaded: Boolean = true,
     displayedCourseId: Long? = null,
     initialResolvedAttachment: Attachment? = null,
-    onRetryMediaReference: (() -> Unit)? = null
+    onRetryMediaReference: (() -> Unit)? = null,
+    onMediaPageOpened: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
     val linkOpener = LocalLinkOpener.current
@@ -322,6 +332,7 @@ internal fun LectureScreen(
                     url = formattedUrl,
                     onDismiss = { attachmentDispatch.clear() },
                     initialPage = attachmentDispatch.pending?.page,
+                    onPageOpened = onMediaPageOpened,
                     mediaIdentity = "lecture/${loadedLecture?.id}/attachment/${currentPendingOpenFileAttachment.id}"
                 )
             }

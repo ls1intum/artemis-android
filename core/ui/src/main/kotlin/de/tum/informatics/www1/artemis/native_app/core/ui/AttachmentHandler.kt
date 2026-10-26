@@ -30,7 +30,8 @@ fun AttachmentHandler(
     url: String?,
     onDismiss: () -> Unit,
     initialPage: Int? = null,
-    mediaIdentity: String = "attachment"
+    mediaIdentity: String = "attachment",
+    onPageOpened: (() -> Unit)? = null
 ) {
     if (url == null) return
 
@@ -62,14 +63,28 @@ fun AttachmentHandler(
 
     when (type) {
         is AttachmentUtil.AttachmentType.PDF -> {
-            val pdfFile = remember(url, artemisContext) { PdfFile(url, token, fileName, artemisContext.serverUrl, progressKey) }
-            key(progressKey, token) {
-                LinkBottomSheet(
-                    modifier = Modifier.fillMaxSize(),
-                    state = LinkBottomSheetState.PDFVIEWSTATE(pdfFile, progressKey, initialPage),
-                    onDismissRequest = onDismiss
+            val opener = LocalLinkOpener.current
+            var failed by remember(url, artemisContext) { mutableStateOf(false) }
+            var attempt by remember(url, artemisContext) { mutableStateOf(0) }
+            androidx.compose.runtime.LaunchedEffect(url, progressKey, attempt) {
+                val request = de.tum.informatics.www1.artemis.native_app.core.ui.media.MediaPageRequest(
+                    url, fileName, mediaIdentity,
+                    de.tum.informatics.www1.artemis.native_app.core.ui.media.mediaPageScope(artemisContext),
+                    de.tum.informatics.www1.artemis.native_app.core.ui.media.MediaPageKind.PDF, initialPage
                 )
+                if (opener.openMediaPage(request)) {
+                    onDismiss()
+                    onPageOpened?.invoke()
+                } else failed = true
             }
+            if (failed) TextAlertDialog(
+                title = stringResource(R.string.lecture_media_failed),
+                text = stringResource(R.string.lecture_media_access_recovery),
+                confirmButtonText = stringResource(R.string.lecture_media_retry),
+                dismissButtonText = stringResource(R.string.lecture_media_close),
+                onPressPositiveButton = { failed = false; attempt++ },
+                onDismissRequest = onDismiss
+            )
         }
 
         is AttachmentUtil.AttachmentType.Image -> {

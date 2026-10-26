@@ -55,7 +55,9 @@ fun ArtemisPdfView(
     pdfFile: PdfFile,
     dismiss: () -> Unit,
     progressKey: String? = null,
-    initialPage: Int? = null
+    initialPage: Int? = null,
+    showFilename: Boolean = true,
+    onReloadSource: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
     val store = remember(context) { MediaProgressStore(context) }
@@ -67,7 +69,7 @@ fun ArtemisPdfView(
         ArtemisPdfContent(modifier, pdfFile, dismiss, currentPage, { page ->
             currentPage = page
             progressKey?.let { store.save(it, page.toLong()) }
-        }, { attempt++ })
+        }, { onReloadSource?.invoke() ?: run { attempt++ } }, showFilename)
     }
 }
 
@@ -78,7 +80,8 @@ private fun ArtemisPdfContent(
     dismiss: () -> Unit,
     initialPage: Int,
     onPageChanged: (Int) -> Unit,
-    onRetry: () -> Unit
+    onRetry: () -> Unit,
+    showFilename: Boolean
 ) {
     val isVertical = remember { mutableStateOf(true) }
     val context = LocalContext.current
@@ -111,7 +114,7 @@ private fun ArtemisPdfContent(
         modifier = modifier.padding(8.dp),
     ) {
         Column {
-            pdfState.file?.let {
+            if (showFilename) pdfState.file?.let {
                 Text(
                     text = pdfFile.filename,
                     modifier = Modifier.padding(8.dp),
@@ -196,7 +199,7 @@ private fun ArtemisPdfContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.TopStart)
-                .padding(top = 54.dp, end = 4.dp)
+                .padding(top = if (showFilename) 54.dp else 0.dp, end = 4.dp)
                 .padding(16.dp),
             contentAlignment = Alignment.TopEnd
         ) {

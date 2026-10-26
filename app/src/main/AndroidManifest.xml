@@ -52,6 +52,12 @@
         </activity>
 
         <activity
+            android:name=".ui.LectureMediaActivity"
+            android:exported="false"
+            android:configChanges="smallestScreenSize|screenSize|screenLayout|orientation"
+            android:theme="@style/AppTheme" />
+
+        <activity
             android:name=".ui.LectureWebVideoActivity"
             android:exported="false"
             android:process=":lecture_media"
