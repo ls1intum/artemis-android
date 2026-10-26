@@ -3,7 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.lectureview
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitAttachmentVideo
 
-internal data class ResolvedLectureReference(val lectureId: Long, val unitId: Long? = null, val attachmentId: Int? = null, val page: Int? = null)
+internal data class ResolvedLectureReference(val lectureId: Long, val unitId: Long? = null, val attachmentId: Int? = null, val page: Int? = null, val document: de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment? = null)
 
 internal fun referenceLectureId(reference: String): Long? =
     Regex("(?:^|/)(?:lecture|lectures)/(\\d+)(?:/|$)").find(reference)?.groupValues?.get(1)?.toLongOrNull()

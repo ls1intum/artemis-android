@@ -46,7 +46,7 @@ class LectureDescriptionCourseTest {
         var requestedCourse: Long? = null
         val slides = Attachment(id = 4, link = "/attachments/attachment-unit/8/a.pdf", attachmentType = Attachment.AttachmentType.FILE)
         val service = object : LectureService {
-            override suspend fun loadLecture(lectureId: Long, serverUrl: String, authToken: String): NetworkResponse<Lecture> = error("Unexpected lecture fetch")
+            override suspend fun loadLecture(lectureId: Long, serverUrl: String, authToken: String): NetworkResponse<Lecture> = NetworkResponse.Response(Lecture(id = 7, lectureUnits = listOf(LectureUnitAttachmentVideo(id = 8, attachment = slides))))
             override suspend fun completeLectureUnit(lectureUnitId: Long, lectureId: Long, completed: Boolean, serverUrl: String, authToken: String): NetworkResponse<Unit> = error("No completion")
             override suspend fun loadCourseLecturesWithSlides(courseId: Long, serverUrl: String, authToken: String): NetworkResponse<List<Lecture>> {
                 requestedCourse = courseId
@@ -55,6 +55,6 @@ class LectureDescriptionCourseTest {
         }
         val result = runBlocking { loadLectureReference(service, session, url.pathSegments.first().toLong(), url.getQueryParameter("referenceType")!!, url.getQueryParameter("reference")!!) }
         assertEquals(2L, requestedCourse)
-        assertEquals(ResolvedLectureReference(7, 8, page = 3), result.orThrow())
+        assertEquals(ResolvedLectureReference(7, 8, page = 3, document = slides), result.orThrow())
     }
 }

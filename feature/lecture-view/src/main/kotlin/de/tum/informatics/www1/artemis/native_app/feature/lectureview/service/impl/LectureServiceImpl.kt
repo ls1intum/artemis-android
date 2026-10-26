@@ -6,6 +6,10 @@ import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitAttachmentVideo
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureSlide
+import kotlinx.serialization.Serializable
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.service.LectureService
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -41,7 +45,7 @@ class LectureServiceImpl(private val ktorProvider: KtorProvider) : LectureServic
                 url { appendPathSegments(*Api.Lecture.path, "courses", courseId.toString(), "lectures-with-slides") }
                 contentType(ContentType.Application.Json)
                 cookieAuth(authToken)
-            }.body()
+            }.body<List<LectureSlideMetadata>>().map { it.toLecture() }
         }
     }
 
@@ -72,3 +76,16 @@ class LectureServiceImpl(private val ktorProvider: KtorProvider) : LectureServic
         }
     }
 }
+// This endpoint deliberately sends a projection, not full lecture/attachment details.
+@Serializable
+private data class LectureSlideMetadata(val id: Long, val lectureUnits: List<UnitSlideMetadata> = emptyList()) {
+    fun toLecture() = Lecture(id = id, lectureUnits = lectureUnits.filter { it.type == "attachment" }.map { unit ->
+        LectureUnitAttachmentVideo(id = unit.id, slides = unit.slides, attachment = unit.attachment?.let {
+            Attachment(id = it.id, link = it.link, name = it.name, attachmentType = Attachment.AttachmentType.FILE)
+        })
+    })
+}
+@Serializable
+private data class UnitSlideMetadata(val id: Long, val type: String, val slides: List<LectureSlide> = emptyList(), val attachment: SlideAttachmentMetadata? = null)
+@Serializable
+private data class SlideAttachmentMetadata(val id: Int, val link: String? = null, val name: String? = null)

@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.android.ui
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.view.ViewGroup
 import android.webkit.*
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -55,7 +56,7 @@ class LectureWebVideoActivity : ComponentActivity() {
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-private fun ProviderPage(url: String, modifier: Modifier) {
+internal fun ProviderPage(url: String, modifier: Modifier) {
     var attempt by remember { mutableIntStateOf(0) }
     key(attempt) {
         var failed by remember { mutableStateOf(false) }
@@ -83,6 +84,8 @@ private fun ProviderPage(url: String, modifier: Modifier) {
             if (foreground) AndroidView(
                 modifier = Modifier.fillMaxSize(),
                 factory = { context -> WebView(context).apply {
+                    // AndroidView defaults to WRAP_CONTENT, which gives CSS vh a zero-height viewport.
+                    layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
                     webView = this
                     settings.javaScriptEnabled = true
                     settings.domStorageEnabled = true

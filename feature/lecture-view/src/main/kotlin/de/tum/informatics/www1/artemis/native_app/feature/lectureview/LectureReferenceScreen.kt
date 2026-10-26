@@ -12,6 +12,7 @@ import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.Ar
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitAttachmentVideo
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.collectArtemisContextAsState
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
@@ -54,6 +55,7 @@ private fun LectureReferenceContent(route: LectureReferenceRoute, session: Artem
             initialUnitId = current.data.unitId,
             initialAttachmentId = current.data.attachmentId,
             initialPage = current.data.page,
+            initialResolvedAttachment = current.data.document,
             displayedCourseId = route.courseId
         )
         else -> Scaffold(topBar = { Row { NavigationBackButton() } }) { padding ->
@@ -85,9 +87,48 @@ internal suspend fun loadLectureReference(
         service.loadCourseLecturesWithSlides(courseId, session.serverUrl, session.authToken)
     }
     kotlin.coroutines.coroutineContext.ensureActive()
-    return when (response) {
-        is NetworkResponse.Failure -> NetworkResponse.Failure(response.exception)
-        is NetworkResponse.Response -> resolveLectureReference(response.data, type, reference)
-            ?.let { NetworkResponse.Response(it) } ?: NetworkResponse.Failure(NoSuchElementException("Lecture resource unavailable"))
+    if (response is NetworkResponse.Failure) return NetworkResponse.Failure(response.exception)
+    val metadata = (response as NetworkResponse.Response).data
+    val target = resolveLectureReference(metadata, type, reference)
+        ?: return NetworkResponse.Failure(NoSuchElementException("Lecture resource unavailable"))
+    if (type != "slide") return NetworkResponse.Response(target)
+    return loadConsistentSlideAccess(service, session, courseId, reference, target)
+}
+
+/** Visible slide IDs/numbers and the selected PDF must describe the same attachment revision. */
+private suspend fun loadConsistentSlideAccess(
+    service: LectureService,
+    session: ArtemisContext.LoggedIn,
+    courseId: Long,
+    reference: String,
+    target: ResolvedLectureReference
+): NetworkResponse<ResolvedLectureReference> {
+    suspend fun details() = service.loadLecture(target.lectureId, session.serverUrl, session.authToken)
+    fun unit(lecture: Lecture) = lecture.lectureUnits.filterIsInstance<LectureUnitAttachmentVideo>().firstOrNull { it.id == target.unitId }
+    val before = details()
+    if (before is NetworkResponse.Failure) return NetworkResponse.Failure(before.exception)
+    val beforeAttachment = unit((before as NetworkResponse.Response).data)?.attachment
+        ?: return NetworkResponse.Failure(NoSuchElementException("Lecture attachment unavailable"))
+    val fresh = service.loadCourseLecturesWithSlides(courseId, session.serverUrl, session.authToken)
+    if (fresh is NetworkResponse.Failure) return NetworkResponse.Failure(fresh.exception)
+    val freshLectures = (fresh as NetworkResponse.Response).data
+    // Resolve the original modern ID again; never retain only its old page/index.
+    val freshTarget = resolveLectureReference(freshLectures, "slide", reference)
+    val freshUnit = freshLectures.firstOrNull { it.id == target.lectureId }?.let(::unit)
+    val after = details()
+    if (after is NetworkResponse.Failure) return NetworkResponse.Failure(after.exception)
+    kotlin.coroutines.coroutineContext.ensureActive()
+    val afterLecture = (after as NetworkResponse.Response).data
+    val afterUnit = unit(afterLecture)
+    val afterAttachment = afterUnit?.attachment
+    if (freshTarget?.lectureId != target.lectureId || freshTarget.unitId != target.unitId ||
+        freshUnit?.attachment?.id != afterAttachment?.id ||
+        freshUnit?.attachment?.link?.trimStart('/') != afterAttachment?.link?.trimStart('/') ||
+        beforeAttachment != afterAttachment || afterUnit == null || freshUnit == null) {
+        return NetworkResponse.Failure(IllegalStateException("Lecture attachment changed; retry the reference"))
     }
+    val consistent = afterLecture.copy(lectureUnits = listOf(afterUnit.copy(slides = freshUnit.slides)))
+    return resolveLectureReference(listOf(consistent), "slide", reference)
+        ?.let { NetworkResponse.Response(it.copy(document = afterAttachment)) }
+        ?: NetworkResponse.Failure(NoSuchElementException("Lecture slide unavailable"))
 }
