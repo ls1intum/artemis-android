@@ -9,6 +9,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -21,7 +22,27 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.util.MarkdownPresentation
 
 internal fun composerStyledText(presentation: MarkdownPresentation, colors: ColorScheme): AnnotatedString = buildAnnotatedString {
-    append(presentation.text)
+    // Compose inserts paragraph breaks at style boundaries. Merge consecutive
+    // quote lines and replace only boundary newlines with zero-width separators
+    // in the visual text, avoiding a second break. UTF-16 offsets remain native;
+    // the editable value, clipboard and Markdown still contain real newlines.
+    val quotes = mutableListOf<TextRange>()
+    for (span in presentation.spans.filter { it.style == MarkdownStyle.Blockquote }) {
+        val visible = presentation.visibleRange(span)
+        val end = visible.max + if (presentation.text.getOrNull(visible.max) == '\n') 1 else 0
+        val previous = quotes.lastOrNull()
+        if (previous != null && previous.max == visible.min && !visible.collapsed) {
+            quotes[quotes.lastIndex] = TextRange(previous.min, end)
+        } else quotes += TextRange(visible.min, end)
+    }
+    val display = StringBuilder(presentation.text)
+    for ((index, range) in quotes.withIndex()) {
+        if (range.min > 0 && display[range.min - 1] == '\n') display[range.min - 1] = '\u200B'
+        if ((range.max < display.length || index < quotes.lastIndex) && range.max > 0 && display[range.max - 1] == '\n') {
+            display[range.max - 1] = '\u200B'
+        }
+    }
+    append(display)
     val glyphs = MarkdownDocument.glyphs(presentation)
     var index = 0
     while (index < glyphs.size) {
@@ -42,15 +63,18 @@ internal fun composerStyledText(presentation: MarkdownPresentation, colors: Colo
             textDecoration = TextDecoration.combine(decorations),
         ), start, index)
     }
-    for (span in presentation.spans.filter { it.style == MarkdownStyle.Blockquote }) {
-        val range = presentation.visibleRange(span)
+    for (range in quotes) {
         addStyle(ParagraphStyle(textIndent = TextIndent(20.sp, 20.sp)), range.min, range.max)
     }
 }
 
 /** Draw inside the scrollable editor content, so wrapped blocks move with the native text. */
-internal fun Modifier.composerBlockBackgrounds(presentation: MarkdownPresentation, layout: TextLayoutResult?, colors: ColorScheme): Modifier = drawBehind {
-    val textLayout = layout?.takeIf { it.layoutInput.text.text == presentation.text } ?: return@drawBehind
+internal fun Modifier.composerBlockBackgrounds(presentation: MarkdownPresentation, styled: AnnotatedString, layout: TextLayoutResult?, colors: ColorScheme): Modifier = drawBehind {
+    // The IME adds inline composition underlines after our transformation.
+    // They must not invalidate block painting; text and paragraph geometry must match.
+    val textLayout = layout?.takeIf {
+        it.layoutInput.text.text == styled.text && it.layoutInput.text.paragraphStyles == styled.paragraphStyles
+    } ?: return@drawBehind
     val blocks = presentation.spans.filter { it.style == MarkdownStyle.Blockquote || it.style == MarkdownStyle.CodeBlock }
     for (line in 0 until textLayout.lineCount) {
         val start = textLayout.getLineStart(line)
