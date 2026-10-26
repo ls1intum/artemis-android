@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -29,6 +30,8 @@ private const val VIEWER_INDEX = "$VIEWER_ORIGIN/model-review/index.html"
 internal fun ModelReviewCanvas(model: String?, diagramType: String?, feedback: List<ReviewFeedback>, selectedReference: String?, onSelect: (String) -> Unit) {
     if (model.isNullOrBlank()) { Text(stringResource(R.string.review_model_unavailable)); return }
     var error by remember(model) { mutableStateOf(false) }
+    val context = LocalContext.current
+    val svgRepairScript = remember(context) { context.assets.open("model-review-android.js").bufferedReader().use { it.readText() } }
     val dark = isSystemInDarkTheme()
     val selection by rememberUpdatedState(onSelect)
     val payload = remember(model, diagramType, feedback, selectedReference, dark) {
@@ -59,7 +62,7 @@ internal fun ModelReviewCanvas(model: String?, diagramType: String?, feedback: L
             object : WebView(context) {
                 override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
                     super.onSizeChanged(w, h, oldw, oldh)
-                    if (w > 0 && h > 0) post { renderModelPayload(currentPayload) }
+                    if (w > 0 && h > 0) post { renderModelPayload(currentPayload, svgRepairScript) }
                 }
             }.apply {
                 layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
@@ -72,7 +75,7 @@ internal fun ModelReviewCanvas(model: String?, diagramType: String?, feedback: L
                 settings.domStorageEnabled = false
                 settings.blockNetworkLoads = true
                 settings.mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_NEVER_ALLOW
-                fun render() = renderModelPayload(currentPayload)
+                fun render() = renderModelPayload(currentPayload, svgRepairScript)
                 addJavascriptInterface(object {
                     @JavascriptInterface fun selectElement(reference: String) {
                         if (reference in references) post { selection(reference) }
@@ -101,18 +104,20 @@ internal fun ModelReviewCanvas(model: String?, diagramType: String?, feedback: L
             }
         },
         update = { view ->
-            view.renderModelPayload(payload)
+            view.renderModelPayload(payload, svgRepairScript)
         },
-        onRelease = { view -> view.removeJavascriptInterface("ArtemisModelBridge"); view.stopLoading(); view.destroy() },
+        onRelease = { view ->
+            view.evaluateJavascript("window.ArtemisNativeSvgRepair && window.ArtemisNativeSvgRepair.dispose();", null)
+            view.removeJavascriptInterface("ArtemisModelBridge"); view.stopLoading(); view.destroy() },
     )
     if (error) Text(stringResource(R.string.review_model_unavailable))
 }
 
 /** Android WebView in a native scrolling pane reports zero CSS percent/vh height despite a measured viewport. */
-private fun WebView.renderModelPayload(payload: String) {
+private fun WebView.renderModelPayload(payload: String, svgRepairScript: String) {
     if (width <= 0 || height <= 0) return
     val viewportHeight = (height / resources.displayMetrics.density).toInt().coerceAtLeast(1)
-    evaluateJavascript("""
+    evaluateJavascript(svgRepairScript + "\n" + """
         (function() {
             if (!document.body) return;
             var h = '${viewportHeight}px';
@@ -122,7 +127,10 @@ private fun WebView.renderModelPayload(payload: String) {
             document.documentElement.style.webkitTextSizeAdjust = '100%';
             document.body.style.webkitTextSizeAdjust = '100%';
             var canvas = document.getElementById('canvas');
-            if (canvas) canvas.style.height = h;
+            if (canvas) {
+                canvas.style.height = h;
+                window.ArtemisNativeSvgRepair.attach(canvas);
+            }
             if (resized) window.dispatchEvent(new Event('resize'));
             if (window.ArtemisModelReview && window.ArtemisModelReview.isReady) {
                 window.ArtemisModelReview.renderBase64('$payload');
