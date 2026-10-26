@@ -16,18 +16,34 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@Config(qualifiers="w1280dp-h800dp-mdpi")
+@Config(qualifiers = "w1280dp-h800dp-mdpi")
 class PdfPageNavigationTest {
-    @get:Rule val compose=createComposeRule()
-    @Test fun tabletPdfOwnsTheWholePageAndHasStandardBackWithoutAModalPane() {
-        var backs=0
-        val file=PdfFile("http://127.0.0.1:1/slides.pdf","","slides.pdf","http://127.0.0.1:1","page-test")
-        compose.setContent { MaterialTheme { PdfPage(Modifier.fillMaxSize(),file,"Lecture slides",null,3,{backs++}) } }
-        compose.onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsProperties.PaneTitle)).assertCountEquals(0)
-        val page=compose.onNodeWithTag("media_pdf_page").fetchSemanticsNode().boundsInRoot
-        val root=compose.onRoot().fetchSemanticsNode().boundsInRoot
-        assertEquals(root.width,page.width,1f);assertEquals(root.height,page.height,1f)
+    @get:Rule val compose = createComposeRule()
+
+    @Test
+    fun tabletPdfOwnsTheWholePageAndHasStandardBackWithoutAModalPane() {
+        var backs = 0
+        val file =
+            PdfFile(
+                "http://127.0.0.1:1/slides.pdf",
+                "",
+                "slides.pdf",
+                "http://127.0.0.1:1",
+                "page-test",
+            )
+        compose.setContent {
+            MaterialTheme {
+                PdfPage(Modifier.fillMaxSize(), file, "Lecture slides", null, 3, { backs++ })
+            }
+        }
+        compose
+            .onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsProperties.PaneTitle))
+            .assertCountEquals(0)
+        val page = compose.onNodeWithTag("media_pdf_page").fetchSemanticsNode().boundsInRoot
+        val root = compose.onRoot().fetchSemanticsNode().boundsInRoot
+        assertEquals(root.width, page.width, 1f)
+        assertEquals(root.height, page.height, 1f)
         compose.onNodeWithContentDescription("Back").performClick()
-        compose.runOnIdle { assertEquals(1,backs) }
+        compose.runOnIdle { assertEquals(1, backs) }
     }
 }

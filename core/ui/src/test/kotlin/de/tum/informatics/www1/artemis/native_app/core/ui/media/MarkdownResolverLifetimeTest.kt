@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.media
 
-import android.content.Context
 import android.view.View
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -8,10 +7,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.test.core.app.ApplicationProvider
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.*
 import de.tum.informatics.www1.artemis.native_app.core.ui.*
-import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.link_resolving.MarkdownLinkResolverImpl
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Rule
@@ -22,22 +19,52 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class MarkdownResolverLifetimeTest {
     @get:Rule val compose = createComposeRule()
-    @Test fun courseOnlyContextChangeStillDispatchesTheLivePdfPage() {
-        val provider = object : ArtemisContextProvider {
-            override val stateFlow = MutableStateFlow<ArtemisContext>(ArtemisContextImpl.LoggedIn("http://127.0.0.1:1", "test-token", "alice"))
-            override fun setCourseId(courseId: Long) { stateFlow.value = ArtemisContextImpl.Course("http://127.0.0.1:1", "test-token", "alice", courseId) }
-            override fun clearCourseId() {}
-        }
+
+    @Test
+    fun courseOnlyContextChangeStillDispatchesTheLivePdfPage() {
+        val provider =
+            object : ArtemisContextProvider {
+                override val stateFlow =
+                    MutableStateFlow<ArtemisContext>(
+                        ArtemisContextImpl.LoggedIn("http://127.0.0.1:1", "test-token", "alice")
+                    )
+
+                override fun setCourseId(courseId: Long) {
+                    stateFlow.value =
+                        ArtemisContextImpl.Course(
+                            "http://127.0.0.1:1",
+                            "test-token",
+                            "alice",
+                            courseId,
+                        )
+                }
+
+                override fun clearCourseId() {}
+            }
         var opened: MediaPageRequest? = null
         compose.setContent {
             MaterialTheme {
-                CompositionLocalProvider(LocalArtemisContextProvider provides provider, LocalLinkOpener provides object:LinkOpener {
-                    override fun openLink(url:String){}
-                    override fun openMediaPage(request:MediaPageRequest):Boolean { opened=request;return true }
-                }) {
+                CompositionLocalProvider(
+                    LocalArtemisContextProvider provides provider,
+                    LocalLinkOpener provides
+                        object : LinkOpener {
+                            override fun openLink(url: String) {}
+
+                            override fun openMediaPage(request: MediaPageRequest): Boolean {
+                                opened = request
+                                return true
+                            }
+                        },
+                ) {
                     val resolver = MarkdownLinkResolverImpl().rememberMarkdownLinkResolver()
                     val context = LocalContext.current
-                    Button(onClick = { resolver.resolve(View(context), "http://127.0.0.1:1/slides.pdf") }) { Text("Open slides") }
+                    Button(
+                        onClick = {
+                            resolver.resolve(View(context), "http://127.0.0.1:1/slides.pdf")
+                        }
+                    ) {
+                        Text("Open slides")
+                    }
                 }
             }
         }

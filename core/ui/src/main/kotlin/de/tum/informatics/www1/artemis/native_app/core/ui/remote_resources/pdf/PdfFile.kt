@@ -13,24 +13,24 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.core.content.ContextCompat.getString
 import androidx.core.content.FileProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
+import de.tum.informatics.www1.artemis.native_app.core.ui.media.mediaHttpClient
+import de.tum.informatics.www1.artemis.native_app.core.ui.media.withMediaResponse
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.BaseFile
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.render.PdfRendering
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.render.state.PdfReaderState
+import java.io.File
+import java.io.IOException
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.CancellationException
-import de.tum.informatics.www1.artemis.native_app.core.ui.media.mediaHttpClient
-import de.tum.informatics.www1.artemis.native_app.core.ui.media.withMediaResponse
-import java.io.IOException
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import okhttp3.Request
-import java.io.File
 
 /**
- * Class representing a PDF file that can be downloaded and shared.
- * Used for lecture unit attachments and pdf attachments sent to the chat.
+ * Class representing a PDF file that can be downloaded and shared. Used for lecture unit
+ * attachments and pdf attachments sent to the chat.
  *
  * @property url The URL of the PDF file.
  * @property authToken The authentication token used for downloading the file.
@@ -41,12 +41,40 @@ class PdfFile(
     override val authToken: String,
     override val filename: String,
     val serverUrl: String,
-    documentScopeKey: String
-): BaseFile(authToken, filename, url) {
+    documentScopeKey: String,
+) : BaseFile(authToken, filename, url) {
 
     // Position identity deliberately ignores token/version queries. Bytes belong only to this open
     // reader: reuse between modes, but fetch again after dismissal/reopen even at a stable URL.
     private val readerCacheKey = "$documentScopeKey:${java.util.UUID.randomUUID()}"
+
+    private var pageOwners = 0
+    private var retainedDocument: PdfDocumentCache.Lease? = null
+
+    @Synchronized
+    fun retainOpenDocument(): AutoCloseable {
+        pageOwners++
+        val closed = java.util.concurrent.atomic.AtomicBoolean(false)
+        return AutoCloseable {
+            if (closed.compareAndSet(false, true)) {
+                synchronized(this) {
+                    pageOwners--
+                    if (pageOwners == 0) {
+                        retainedDocument?.close()
+                        retainedDocument = null
+                    }
+                }
+            }
+        }
+    }
+
+    val hasRetainedDocument: Boolean
+        @Synchronized get() = retainedDocument?.file?.exists() == true
+
+    @Synchronized
+    private fun retainValidatedBytes(cache: PdfDocumentCache, file: File) {
+        if (pageOwners > 0 && retainedDocument == null) retainedDocument = cache.retain(file)
+    }
 
     fun load(
         coroutineScope: CoroutineScope,
@@ -54,7 +82,7 @@ class PdfFile(
         state: PdfReaderState,
         width: Int,
         height: Int,
-        portrait: Boolean
+        portrait: Boolean,
     ): kotlinx.coroutines.Job {
         val generation = state.beginLoad()
         return coroutineScope.launch(Dispatchers.IO) {
@@ -63,38 +91,69 @@ class PdfFile(
             var rendering: PdfRendering? = null
             try {
                 val owner = coroutineContext
-                val lease = cache.acquire(readerCacheKey) { target ->
-                    withMediaResponse(mediaHttpClient(serverUrl, authToken), Request.Builder().url(url).build()) { response ->
-                        if (!response.isSuccessful) throw IOException("PDF request failed (${response.code})")
-                        val body = response.body ?: throw IOException("Empty PDF response")
-                        body.byteStream().use { input -> target.outputStream().use { output ->
-                            val buffer = ByteArray(8192)
-                            var total = 0L
-                            while (true) {
-                                owner.ensureActive()
-                                val count = input.read(buffer)
-                                if (count == -1) break
-                                output.write(buffer, 0, count)
-                                total += count
-                                if (body.contentLength() > 0 && state.isCurrentLoad(generation)) {
-                                    state.mLoadPercent = (total * 100 / body.contentLength()).toInt().coerceIn(0, 100)
+                val retained =
+                    synchronized(this@PdfFile) {
+                        retainedDocument?.let {
+                            cache.retain(it.file)
+                                ?: throw IOException(
+                                    "The opened PDF snapshot is unavailable; reopen it from the source"
+                                )
+                        }
+                    }
+                val lease =
+                    retained
+                        ?: cache.acquire(readerCacheKey) { target ->
+                            withMediaResponse(
+                                mediaHttpClient(serverUrl, authToken),
+                                Request.Builder().url(url).build(),
+                            ) { response ->
+                                if (!response.isSuccessful)
+                                    throw IOException("PDF request failed (${response.code})")
+                                val body = response.body ?: throw IOException("Empty PDF response")
+                                body.byteStream().use { input ->
+                                    target.outputStream().use { output ->
+                                        val buffer = ByteArray(8192)
+                                        var total = 0L
+                                        while (true) {
+                                            owner.ensureActive()
+                                            val count = input.read(buffer)
+                                            if (count == -1) break
+                                            output.write(buffer, 0, count)
+                                            total += count
+                                            if (
+                                                body.contentLength() > 0 &&
+                                                    state.isCurrentLoad(generation)
+                                            ) {
+                                                state.mLoadPercent =
+                                                    (total * 100 / body.contentLength())
+                                                        .toInt()
+                                                        .coerceIn(0, 100)
+                                            }
+                                        }
+                                    }
                                 }
                             }
-                        } }
-                    }
-                }
+                        }
                 ownedLease = lease
                 owner.ensureActive()
-                val descriptor = ParcelFileDescriptor.open(lease.file, ParcelFileDescriptor.MODE_READ_ONLY)
-                rendering = try { PdfRendering(descriptor, width, height, portrait) }
-                    catch (error: Throwable) { descriptor.close(); throw error }
+                val descriptor =
+                    ParcelFileDescriptor.open(lease.file, ParcelFileDescriptor.MODE_READ_ONLY)
+                rendering =
+                    try {
+                        PdfRendering(descriptor, width, height, portrait)
+                    } catch (error: Throwable) {
+                        descriptor.close()
+                        throw error
+                    }
                 owner.ensureActive()
+                retainValidatedBytes(cache, lease.file)
                 if (state.installDocument(generation, lease, rendering)) {
                     ownedLease = null
                     rendering = null
                 }
-            } catch (error: CancellationException) { throw error }
-            catch (error: Exception) {
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
                 ownedLease?.let { cache.invalidate(it.file) }
                 if (isActive && state.isCurrentLoad(generation)) state.mError = error
             } finally {
@@ -108,39 +167,56 @@ class PdfFile(
     fun download(context: Context, file: File) {
         val lease = PdfDocumentCache.shared(context.cacheDir).retain(file) ?: return
         CoroutineScope(Dispatchers.IO).launch {
-            val message = try {
-                de.tum.informatics.www1.artemis.native_app.core.ui.media.exportMediaFile(context, file, filename, "application/pdf")
-                R.string.file_downloading_toast
-            } catch (_: Exception) { R.string.file_error_downloading }
-            finally { lease.close() }
+            val message =
+                try {
+                    de.tum.informatics.www1.artemis.native_app.core.ui.media.exportMediaFile(
+                        context,
+                        file,
+                        filename,
+                        "application/pdf",
+                    )
+                    R.string.file_downloading_toast
+                } catch (_: Exception) {
+                    R.string.file_error_downloading
+                } finally {
+                    lease.close()
+                }
             kotlinx.coroutines.withContext(Dispatchers.Main) {
-                android.widget.Toast.makeText(context, getString(context, message), android.widget.Toast.LENGTH_SHORT).show()
+                android.widget.Toast.makeText(
+                        context,
+                        getString(context, message),
+                        android.widget.Toast.LENGTH_SHORT,
+                    )
+                    .show()
             }
         }
     }
 
     override fun share(context: Context, file: File) {
         PdfDocumentCache.shared(context.cacheDir).retainForShare(file)
-        val pdfUri = FileProvider.getUriForFile(
-            context,
-            "${context.packageName}.fileprovider",
-            file
-        )
-
-        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-            type = "application/pdf"
-            clipData = ClipData(
-                "pdf",
-                arrayOf("application/pdf"),
-                ClipData.Item(pdfUri)
+        val pdfUri =
+            FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                file,
             )
-            putExtra(Intent.EXTRA_STREAM, pdfUri) // to support sharing to older applications
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
+
+        val shareIntent =
+            Intent(Intent.ACTION_SEND).apply {
+                type = "application/pdf"
+                clipData =
+                    ClipData(
+                        "pdf",
+                        arrayOf("application/pdf"),
+                        ClipData.Item(pdfUri),
+                    )
+                putExtra(Intent.EXTRA_STREAM, pdfUri) // to support sharing to older applications
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
         context.startActivity(
             Intent.createChooser(
                 shareIntent,
-                getString(context, R.string.pdf_view_share_title)
+                getString(context, R.string.pdf_view_share_title),
             )
         )
     }
@@ -155,6 +231,6 @@ internal fun PdfImage(
         bitmap = bitmap(),
         contentDescription = contentDescription,
         contentScale = ContentScale.FillWidth,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     )
 }

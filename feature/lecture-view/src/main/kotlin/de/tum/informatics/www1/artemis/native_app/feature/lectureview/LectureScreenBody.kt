@@ -37,7 +37,8 @@ internal fun LectureScreenBody(
     onReloadLecture: () -> Unit,
     onUpdateLectureUnitIsComplete: (lectureUnitId: Long, isCompleted: Boolean) -> Deferred<Boolean>,
     linkResolver: LinkResolver,
-    initialUnitId: Long? = null
+    initialUnitId: Long? = null,
+    onMediaPageOpened: () -> Unit = {},
 ) {
     val markLectureUnitDeferredMap = remember { SnapshotStateMap<Long, Deferred<Boolean>>() }
 
@@ -53,38 +54,36 @@ internal fun LectureScreenBody(
 
     Column(modifier = modifier) {
         BasicDataStateUi(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
+            modifier = Modifier.fillMaxWidth().weight(1f),
             dataState = lectureDataState,
             loadingText = stringResource(id = R.string.lecture_view_lecture_loading),
             failureText = stringResource(id = R.string.lecture_view_lecture_loading_failure),
             retryButtonText = stringResource(id = R.string.lecture_view_lecture_loading_try_again),
             onClickRetry = onReloadLecture,
         ) { lecture ->
-
-            val lectureUnitsWithData by remember(lectureUnits, markLectureUnitDeferredMap) {
-                derivedStateOf {
-                    lectureUnits.map {
-                        LectureUnitData(it, markLectureUnitDeferredMap[it.id] != null)
+            val lectureUnitsWithData by
+                remember(lectureUnits, markLectureUnitDeferredMap) {
+                    derivedStateOf {
+                        lectureUnits.map {
+                            LectureUnitData(it, markLectureUnitDeferredMap[it.id] != null)
+                        }
                     }
                 }
-            }
 
             LectureOverviewTab(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = Spacings.ScreenHorizontalSpacing),
+                modifier =
+                    Modifier.fillMaxSize().padding(horizontal = Spacings.ScreenHorizontalSpacing),
                 lecture = lecture,
                 lectureChannel = lectureChannel,
                 lectureUnits = lectureUnitsWithData,
                 attachments = lecture.attachments,
                 onViewExercise = onViewExercise,
                 onMarkAsCompleted = { lectureUnitId, isCompleted ->
-                    val deferred = onUpdateLectureUnitIsComplete(
-                        lectureUnitId,
-                        isCompleted
-                    )
+                    val deferred =
+                        onUpdateLectureUnitIsComplete(
+                            lectureUnitId,
+                            isCompleted,
+                        )
 
                     markLectureUnitDeferredMap[lectureUnitId] = deferred
                 },
@@ -92,9 +91,9 @@ internal fun LectureScreenBody(
                 onRequestOpenAttachment = onRequestOpenAttachment,
                 linkResolver = linkResolver,
                 state = overviewListState,
-                initialUnitId = initialUnitId
+                initialUnitId = initialUnitId,
+                onMediaPageOpened = onMediaPageOpened,
             )
-
         }
     }
 }

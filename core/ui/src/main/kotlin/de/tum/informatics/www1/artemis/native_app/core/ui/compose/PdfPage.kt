@@ -13,12 +13,37 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.P
 /** A reading destination in the activity window, independent of the originating pane or sheet. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PdfPage(modifier:Modifier,pdfFile:PdfFile,title:String,progressKey:String?,initialPage:Int?,onBack:()->Unit,onReloadSource:(()->Unit)?=null) {
-    BackHandler(onBack=onBack)
+fun PdfPage(
+    modifier: Modifier,
+    pdfFile: PdfFile,
+    title: String,
+    progressKey: String?,
+    initialPage: Int?,
+    onBack: () -> Unit,
+    onReloadSource: (() -> Unit)? = null,
+    description: String? = null,
+) {
+    BackHandler(onBack = onBack)
     Scaffold(
-        modifier=modifier.testTag("media_pdf_page"),
-        topBar={TopAppBar(title={Text(title,maxLines=1,overflow=TextOverflow.Ellipsis)},navigationIcon={NavigationBackButton(onNavigateBack=onBack)})}
+        modifier = modifier.testTag("media_pdf_page"),
+        topBar = {
+            TopAppBar(
+                title = { Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                navigationIcon = { NavigationBackButton(onNavigateBack = onBack) },
+            )
+        },
     ) { padding ->
-        ArtemisPdfView(Modifier.fillMaxSize().padding(padding),pdfFile,onBack,progressKey,initialPage,showFilename=false,onReloadSource=onReloadSource)
+        androidx.compose.foundation.layout.Column(Modifier.fillMaxSize().padding(padding)) {
+            if (!description.isNullOrBlank()) MediaDescription(description)
+            ArtemisPdfView(
+                Modifier.weight(1f).fillMaxSize(),
+                pdfFile,
+                onBack,
+                progressKey,
+                initialPage,
+                showFilename = false,
+                onReloadSource = onReloadSource,
+            )
+        }
     }
 }
