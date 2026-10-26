@@ -5,6 +5,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
@@ -63,10 +64,13 @@ fun VerticalPdfView(
             }
         }
         state.pdfRender?.let { pdf ->
+            // Leave enough trailing space to align even the last short page at the top.
+            val lastPageHeight = pdf.pageLists.lastOrNull()?.dimension?.let { maxWidth * (it.height.toFloat() / it.width) } ?: maxHeight
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .tapToZoomVertical(state, constraints),
+                contentPadding = PaddingValues(bottom = (maxHeight - lastPageHeight).coerceAtLeast(0.dp)),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 state = lazyState
@@ -124,8 +128,11 @@ fun HorizontalPdfView(
                 state.close()
             }
         }
-        val pagerState = rememberPagerState( state.currentPage - 1 ) { state.pdfPageCount }
+        val pagerState = rememberPagerState((state.currentPage - 1).coerceAtLeast(0)) { state.pdfPageCount }
 
+        LaunchedEffect(state.pdfPageCount) {
+            if (state.pdfPageCount > 0) pagerState.scrollToPage((state.currentPage - 1).coerceIn(0, state.pdfPageCount - 1))
+        }
         state.pdfRender?.let { pdf ->
             HorizontalPager(
                 modifier = Modifier

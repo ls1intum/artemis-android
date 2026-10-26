@@ -3,6 +3,8 @@ package de.tum.informatics.www1.artemis.native_app.feature.lectureview
 import android.view.View
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.PostArtemisMarkdownTransformer
+import de.tum.informatics.www1.artemis.native_app.core.ui.media.sameMediaOrigin
 import de.tum.informatics.www1.artemis.native_app.core.common.markdown.ArtemisMarkdownTransformer
 import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
@@ -10,17 +12,24 @@ import io.noties.markwon.LinkResolver
 
 
 @Composable
-fun rememberLectureArtemisMarkdownTransformer(serverUrl: String): LectureArtemisMarkdownTransformer {
-    return remember(serverUrl) {
+fun rememberLectureArtemisMarkdownTransformer(serverUrl: String, displayedCourseId: Long? = null): LectureArtemisMarkdownTransformer {
+    val courseId = displayedCourseId?.takeIf { it > 0 }
+    return remember(serverUrl, courseId) {
         val strippedServerUrl = serverUrl.removeSuffix("/")
-        LectureArtemisMarkdownTransformer(strippedServerUrl)
+        LectureArtemisMarkdownTransformer(strippedServerUrl, courseId)
     }
 }
 
 
 class LectureArtemisMarkdownTransformer(
-    private val serverUrl: String
+    private val serverUrl: String,
+    private val courseId: Long? = null
 ) : ArtemisMarkdownTransformer() {
+
+    override fun transformLectureContentMarkdown(type: String, fileName: String, url: String): String {
+        val id = courseId ?: return fileName
+        return PostArtemisMarkdownTransformer(serverUrl, id).transformMarkdown("[$type]$fileName($url)[/$type]")
+    }
 
     override fun transformFileUploadMessageMarkdown(
         isImage: Boolean,
@@ -46,7 +55,7 @@ class LectureLinkResolver(
     private val onRequestOpenLink: (String) -> Unit
 ) : LinkResolver {
     override fun resolve(view: View, link: String) {
-        if (link.startsWith(serverUrl) && (link.contains("/api/files/attachments/lecture") || link.contains("/api/core/files/markdown"))) {
+        if (sameMediaOrigin(serverUrl, link) && (link.contains("/api/files/attachments/lecture") || link.contains("/api/core/files/markdown"))) {
             onRequestOpenAttachment(link)
         } else {
             onRequestOpenLink(link)

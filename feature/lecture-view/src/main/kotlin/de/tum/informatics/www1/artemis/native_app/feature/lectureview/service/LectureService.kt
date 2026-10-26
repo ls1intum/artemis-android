@@ -11,6 +11,8 @@ interface LectureService {
         authToken: String
     ): NetworkResponse<Lecture>
 
+    suspend fun loadCourseLecturesWithSlides(courseId: Long, serverUrl: String, authToken: String): NetworkResponse<List<Lecture>>
+
     suspend fun completeLectureUnit(
         lectureUnitId: Long,
         lectureId: Long,

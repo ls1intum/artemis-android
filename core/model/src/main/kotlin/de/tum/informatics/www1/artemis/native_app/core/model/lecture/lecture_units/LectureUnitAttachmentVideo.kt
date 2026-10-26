@@ -16,6 +16,7 @@ data class LectureUnitAttachmentVideo(
     val description: String? = null,
     val attachment: Attachment? = null,
     val videoSource: String? = null,
+    val slides: List<LectureSlide> = emptyList(),
 ) : LectureUnit() {
     override fun withCompleted(newCompleted: Boolean): LectureUnit = copy(completed = newCompleted)
 
@@ -23,3 +24,5 @@ data class LectureUnitAttachmentVideo(
     val hasAttachment = attachment != null
     val onlyHasAttachment = hasAttachment && !hasVideo
 }
+@Serializable
+data class LectureSlide(val id: Long = 0, val slideNumber: Int = 1)

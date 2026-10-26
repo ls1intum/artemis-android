@@ -12,10 +12,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -25,13 +28,18 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.toRoute
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitAttachmentVideo
 import de.tum.informatics.www1.artemis.native_app.core.ui.AttachmentHandler
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
+import de.tum.informatics.www1.artemis.native_app.core.ui.R as CoreR
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
+import de.tum.informatics.www1.artemis.native_app.core.ui.collectArtemisContextAsState
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.AdaptiveNavigationIcon
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.LectureDeeplinks
@@ -39,6 +47,9 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.AttachmentUti
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.LocalMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.LocalMarkwon
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownRenderFactory
+import de.tum.informatics.www1.artemis.native_app.core.ui.media.mediaHttpUri
+import de.tum.informatics.www1.artemis.native_app.core.ui.media.normalizedMediaOrigin
+import de.tum.informatics.www1.artemis.native_app.core.ui.media.sameMediaOrigin
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
@@ -49,21 +60,36 @@ import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 @Serializable
-private data class LectureScreenRoute(val lectureId: Long)
+private data class LectureScreenRoute(
+    val lectureId: Long,
+    val lectureUnitId: Long? = null,
+    val attachmentId: Int? = null,
+    val page: Int? = null,
+    val courseId: Long? = null,
+)
 
 fun NavController.navigateToLecture(
     lectureId: Long,
-    builder: NavOptionsBuilder.() -> Unit
+    courseId: Long? = null,
+    builder: NavOptionsBuilder.() -> Unit,
 ) {
-    navigate(LectureScreenRoute(lectureId), builder)
+    navigate(LectureScreenRoute(lectureId, courseId = courseId?.takeIf { it > 0 }), builder)
 }
+
+/** Ignore a late launch callback after its lookup destination has already been left. */
+fun NavController.completeLectureMediaReference(entryId: String): Boolean =
+    currentBackStackEntry?.id == entryId && popBackStack()
 
 fun NavGraphBuilder.lecture(
     onViewExercise: (exerciseId: Long) -> Unit,
+    onReferencePageOpened: (String) -> Unit = {},
 ) {
+    lectureMediaReferences(onViewExercise, onReferencePageOpened)
     animatedComposable<LectureScreenRoute>(
-        deepLinks = LectureDeeplinks.ToLecture.generateLinks() +
-                LectureDeeplinks.ToLectureCourseAgnostic.generateLinks()
+        deepLinks =
+            LectureDeeplinks.ToLecture.generateLinks() +
+                LectureDeeplinks.ToLectureCourseAgnostic.generateLinks() +
+                LectureDeeplinks.ToLectureUnit.generateLinks()
     ) { backStackEntry ->
         val route: LectureScreenRoute = backStackEntry.toRoute()
         val lectureId = route.lectureId
@@ -71,6 +97,10 @@ fun NavGraphBuilder.lecture(
         LectureDetailContent(
             lectureId = lectureId,
             onViewExercise = onViewExercise,
+            initialUnitId = route.lectureUnitId,
+            initialAttachmentId = route.attachmentId,
+            initialPage = route.page,
+            displayedCourseId = route.courseId,
         )
     }
 }
@@ -79,18 +109,53 @@ fun NavGraphBuilder.lecture(
 fun LectureDetailContent(
     lectureId: Long,
     onViewExercise: (exerciseId: Long) -> Unit,
-    onSidebarToggle: () -> Unit = {}
+    onSidebarToggle: () -> Unit = {},
+    initialUnitId: Long? = null,
+    initialAttachmentId: Int? = null,
+    initialPage: Int? = null,
+    displayedCourseId: Long? = null,
+    initialResolvedAttachment: Attachment? = null,
+    onRetryMediaReference: (() -> Unit)? = null,
+    onMediaPageOpened: (() -> Unit)? = null,
 ) {
-    val viewModel: LectureViewModel = koinViewModel(key = "lecture|$lectureId") {
-        parametersOf(lectureId)
+    val session by LocalArtemisContextProvider.current.collectArtemisContextAsState()
+    val account = (session as? ArtemisContext.LoggedIn)?.loginName.orEmpty()
+    val viewModel: LectureViewModel =
+        koinViewModel(
+            key = "lecture|$lectureId|$account|${normalizedMediaOrigin(session.serverUrl)}"
+        ) {
+            parametersOf(lectureId)
+        }
+
+    val lectureState by viewModel.lectureDataState.collectAsState()
+    val actualCourseId =
+        (lectureState as? DataState.Success)?.data?.course?.id?.takeIf { it > 0 }
+            ?: displayedCourseId?.takeIf { it > 0 }
+    val contextProvider = LocalArtemisContextProvider.current
+    LaunchedEffect(actualCourseId, account, session.serverUrl) {
+        if (
+            actualCourseId != null &&
+                (session as? ArtemisContext.Course)?.courseId != actualCourseId
+        ) {
+            contextProvider.setCourseId(actualCourseId)
+        }
     }
 
-    LectureScreen(
-        modifier = Modifier.fillMaxSize(),
-        viewModel = viewModel,
-        onViewExercise = onViewExercise,
-        onSidebarToggle = onSidebarToggle
-    )
+    key(account, normalizedMediaOrigin(session.serverUrl)) {
+        LectureScreen(
+            modifier = Modifier.fillMaxSize(),
+            viewModel = viewModel,
+            onViewExercise = onViewExercise,
+            onSidebarToggle = onSidebarToggle,
+            initialUnitId = initialUnitId,
+            initialAttachmentId = initialAttachmentId,
+            initialPage = initialPage,
+            displayedCourseId = displayedCourseId,
+            initialResolvedAttachment = initialResolvedAttachment,
+            onRetryMediaReference = onRetryMediaReference,
+            onMediaPageOpened = onMediaPageOpened,
+        )
+    }
 }
 
 @Composable
@@ -99,11 +164,19 @@ internal fun LectureScreen(
     viewModel: LectureViewModel,
     onViewExercise: (exerciseId: Long) -> Unit,
     onSidebarToggle: () -> Unit = {},
+    initialUnitId: Long? = null,
+    initialAttachmentId: Int? = null,
+    initialPage: Int? = null,
+    displayedCourseId: Long? = null,
+    initialResolvedAttachment: Attachment? = null,
+    onRetryMediaReference: (() -> Unit)? = null,
+    onMediaPageOpened: (() -> Unit)? = null,
 ) {
     val lectureDataState by viewModel.lectureDataState.collectAsState()
     val serverUrl by viewModel.serverUrl.collectAsState()
     val lectureChannel by viewModel.channelDataState.collectAsState()
     val lectureUnits by viewModel.lectureUnits.collectAsState()
+    val unitsLoaded by viewModel.lectureUnitsLoaded.collectAsState()
 
     LectureScreen(
         modifier = modifier,
@@ -114,7 +187,15 @@ internal fun LectureScreen(
         onViewExercise = onViewExercise,
         onReloadLecture = viewModel::onRequestReload,
         onUpdateLectureUnitIsComplete = viewModel::updateLectureUnitIsComplete,
-        onSidebarToggle = onSidebarToggle
+        onSidebarToggle = onSidebarToggle,
+        initialUnitId = initialUnitId,
+        initialAttachmentId = initialAttachmentId,
+        initialPage = initialPage,
+        unitsLoaded = unitsLoaded,
+        displayedCourseId = displayedCourseId,
+        initialResolvedAttachment = initialResolvedAttachment,
+        onRetryMediaReference = onRetryMediaReference,
+        onMediaPageOpened = onMediaPageOpened,
     )
 }
 
@@ -128,7 +209,15 @@ internal fun LectureScreen(
     onViewExercise: (exerciseId: Long) -> Unit,
     onReloadLecture: () -> Unit,
     onUpdateLectureUnitIsComplete: (lectureUnitId: Long, isCompleted: Boolean) -> Deferred<Boolean>,
-    onSidebarToggle: () -> Unit
+    onSidebarToggle: () -> Unit,
+    initialUnitId: Long? = null,
+    initialAttachmentId: Int? = null,
+    initialPage: Int? = null,
+    unitsLoaded: Boolean = true,
+    displayedCourseId: Long? = null,
+    initialResolvedAttachment: Attachment? = null,
+    onRetryMediaReference: (() -> Unit)? = null,
+    onMediaPageOpened: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val linkOpener = LocalLinkOpener.current
@@ -136,8 +225,63 @@ internal fun LectureScreen(
     val lectureTitle = lectureDataState.bind<String?> { it.title }.orElse(null)
 
     // Set if the user clicked on a file attachment.
-    var pendingOpenFileAttachment: Attachment? by remember { mutableStateOf(null) }
-    var pendingOpenFileAttachmentByUrl: String? by remember { mutableStateOf(null) }
+    val attachmentDispatch =
+        rememberSaveable(saver = LectureAttachmentDispatch.Saver) { LectureAttachmentDispatch() }
+    val loadedLecture = (lectureDataState as? DataState.Success)?.data
+    val pendingOpenFileAttachment =
+        attachmentDispatch.resolve(
+            initialResolvedAttachment,
+            initialPage,
+            loadedLecture?.attachments.orEmpty() +
+                lectureUnits.filterIsInstance<LectureUnitAttachmentVideo>().mapNotNull {
+                    it.attachment
+                },
+        )
+    var pendingOpenFileAttachmentByUrl: String? by rememberSaveable { mutableStateOf(null) }
+    var requestedUnitId: Long? by rememberSaveable { mutableStateOf(null) }
+    var missingTarget by rememberSaveable { mutableStateOf(false) }
+    var targetHandled by
+        rememberSaveable(initialUnitId, initialAttachmentId, initialPage) { mutableStateOf(false) }
+    LaunchedEffect(loadedLecture, lectureUnits, unitsLoaded, targetHandled) {
+        if (
+            !targetHandled &&
+                loadedLecture != null &&
+                unitsLoaded &&
+                (initialUnitId != null || initialAttachmentId != null)
+        ) {
+            if (initialResolvedAttachment != null) {
+                attachmentDispatch.openTarget(
+                    initialResolvedAttachment,
+                    initialResolvedAttachment,
+                    initialPage,
+                )
+            } else
+                when (
+                    val target =
+                        resolveLectureMediaTarget(
+                            loadedLecture,
+                            lectureUnits,
+                            initialUnitId,
+                            initialAttachmentId,
+                            initialPage,
+                        )
+                ) {
+                    is LectureMediaDestination.Unit -> requestedUnitId = target.unit.id
+                    is LectureMediaDestination.Slides ->
+                        attachmentDispatch.openTarget(target.attachment, null, target.page)
+                    LectureMediaDestination.Missing -> missingTarget = true
+                }
+            targetHandled = true
+        }
+    }
+
+    LaunchedEffect(attachmentDispatch.pending, initialResolvedAttachment, initialPage) {
+        if (
+            attachmentDispatch.pending?.requiresSnapshot == true &&
+                pendingOpenFileAttachment == null
+        )
+            missingTarget = true
+    }
 
     var pendingOpenLink: String? by remember { mutableStateOf(null) }
 
@@ -154,58 +298,70 @@ internal fun LectureScreen(
                         text = lectureTitle.orEmpty(),
                         modifier = Modifier.placeholder(lectureTitle == null),
                         maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
                     )
                 },
                 navigationIcon = {
                     AdaptiveNavigationIcon(onSidebarToggle = onSidebarToggle)
                 },
-                isElevated = false
+                isElevated = false,
             )
-        }
+        },
     ) { padding ->
-        val markdownTransformer = rememberLectureArtemisMarkdownTransformer(serverUrl)
+        val markdownTransformer =
+            rememberLectureArtemisMarkdownTransformer(
+                serverUrl,
+                loadedLecture?.course?.id?.takeIf { it > 0 } ?: displayedCourseId,
+            )
         val imageLoader = LocalArtemisImageProvider.current.rememberArtemisImageLoader()
 
-        val linkResolver = remember(serverUrl) {
-            LectureLinkResolver(
-                serverUrl = serverUrl,
-                onRequestOpenAttachment = { pendingOpenFileAttachmentByUrl = it },
-                onRequestOpenLink = { pendingOpenLink = it }
-            )
-        }
+        val linkResolver =
+            remember(serverUrl) {
+                LectureLinkResolver(
+                    serverUrl = serverUrl,
+                    onRequestOpenAttachment = { pendingOpenFileAttachmentByUrl = it },
+                    onRequestOpenLink = { pendingOpenLink = it },
+                )
+            }
 
-        val markwon = remember(linkResolver, imageLoader) {
-            MarkdownRenderFactory.create(context, imageLoader, linkResolver)
-        }
+        val markwon =
+            remember(linkResolver, imageLoader) {
+                MarkdownRenderFactory.create(context, imageLoader, linkResolver)
+            }
 
         CompositionLocalProvider(
             LocalMarkdownTransformer provides markdownTransformer,
-            LocalMarkwon provides markwon
+            LocalMarkwon provides markwon,
         ) {
             LectureScreenBody(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = padding.calculateTopPadding())
-                    .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top)),
+                modifier =
+                    Modifier.fillMaxSize()
+                        .padding(top = padding.calculateTopPadding())
+                        .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top)),
                 lectureDataState = lectureDataState,
                 lectureChannel = lectureChannel,
                 lectureUnits = lectureUnits,
                 onViewExercise = onViewExercise,
                 overviewListState = overviewListState,
                 onRequestViewLink = { pendingOpenLink = it },
-                onRequestOpenAttachment = { pendingOpenFileAttachment = it },
+                onRequestOpenAttachment = {
+                    if (it.link.isNullOrBlank() && it.studentVersion.isNullOrBlank())
+                        missingTarget = true
+                    else attachmentDispatch.openTarget(it, null, null)
+                },
                 onDisplaySetCompletedFailureDialog = {
                     displaySetCompletedFailureDialog = true
                 },
                 onReloadLecture = onReloadLecture,
                 onUpdateLectureUnitIsComplete = onUpdateLectureUnitIsComplete,
-                linkResolver = linkResolver
+                linkResolver = linkResolver,
+                initialUnitId = requestedUnitId,
+                onMediaPageOpened = { onMediaPageOpened?.invoke() },
             )
 
             AttachmentHandler(
                 url = pendingOpenFileAttachmentByUrl,
-                onDismiss = { pendingOpenFileAttachmentByUrl = null }
+                onDismiss = { pendingOpenFileAttachmentByUrl = null },
             )
 
             val currentPendingOpenFileAttachment = pendingOpenFileAttachment
@@ -213,41 +369,88 @@ internal fun LectureScreen(
                 val fileName = currentPendingOpenFileAttachment.name.orEmpty()
                 val link = currentPendingOpenFileAttachment.link.orEmpty()
 
-                val url = AttachmentUtil.buildOpenAttachmentLink(serverUrl, link)
+                val actualLink = currentPendingOpenFileAttachment.studentVersion ?: link
+                val url =
+                    if (mediaHttpUri(actualLink) != null) actualLink
+                    else AttachmentUtil.buildOpenAttachmentLink(serverUrl, actualLink)
                 val formattedUrl =
-                    AttachmentUtil.createAttachmentFileUrl(url, fileName, true)
+                    if (
+                        currentPendingOpenFileAttachment.studentVersion != null ||
+                            !sameMediaOrigin(serverUrl, url)
+                    )
+                        url
+                    else AttachmentUtil.createAttachmentFileUrl(url, fileName, true)
 
                 AttachmentHandler(
                     url = formattedUrl,
-                    onDismiss = { pendingOpenFileAttachment = null }
+                    onDismiss = { attachmentDispatch.clear() },
+                    initialPage = attachmentDispatch.pending?.page,
+                    displayName = currentPendingOpenFileAttachment.name,
+                    onPageOpened = onMediaPageOpened,
+                    mediaIdentity =
+                        "lecture/${loadedLecture?.id}/attachment/${currentPendingOpenFileAttachment.id}",
+                )
+            }
+
+            if (missingTarget) {
+                TextAlertDialog(
+                    title = stringResource(CoreR.string.lecture_media_missing),
+                    text = stringResource(CoreR.string.lecture_media_access_recovery),
+                    confirmButtonText = stringResource(CoreR.string.lecture_media_retry),
+                    dismissButtonText = stringResource(CoreR.string.lecture_media_close),
+                    onPressPositiveButton = {
+                        missingTarget = false
+                        attachmentDispatch.clear()
+                        targetHandled = false
+                        if (onRetryMediaReference != null) onRetryMediaReference()
+                        else onReloadLecture()
+                    },
+                    onDismissRequest = { missingTarget = false },
                 )
             }
 
             if (pendingOpenLink != null) {
                 TextAlertDialog(
                     title = stringResource(id = R.string.lecture_view_open_link_dialog_title),
-                    text = stringResource(
-                        id = R.string.lecture_view_open_link_dialog_message,
-                        pendingOpenLink.orEmpty()
-                    ),
-                    confirmButtonText = stringResource(id = R.string.lecture_view_open_link_dialog_positive),
-                    dismissButtonText = stringResource(id = R.string.lecture_view_open_link_dialog_negative),
+                    text =
+                        stringResource(
+                            id = R.string.lecture_view_open_link_dialog_message,
+                            pendingOpenLink.orEmpty(),
+                        ),
+                    confirmButtonText =
+                        stringResource(id = R.string.lecture_view_open_link_dialog_positive),
+                    dismissButtonText =
+                        stringResource(id = R.string.lecture_view_open_link_dialog_negative),
                     onPressPositiveButton = {
                         linkOpener.openLink(pendingOpenLink.orEmpty())
                         pendingOpenLink = null
                     },
-                    onDismissRequest = { pendingOpenLink = null }
+                    onDismissRequest = { pendingOpenLink = null },
                 )
             }
 
             if (displaySetCompletedFailureDialog) {
                 TextAlertDialog(
-                    title = stringResource(id = R.string.lecture_view_lecture_unit_set_completed_failed_dialog_title),
-                    text = stringResource(id = R.string.lecture_view_lecture_unit_set_completed_failed_dialog_message),
-                    confirmButtonText = stringResource(id = R.string.lecture_view_lecture_unit_set_completed_failed_dialog_positive),
+                    title =
+                        stringResource(
+                            id =
+                                R.string.lecture_view_lecture_unit_set_completed_failed_dialog_title
+                        ),
+                    text =
+                        stringResource(
+                            id =
+                                R.string
+                                    .lecture_view_lecture_unit_set_completed_failed_dialog_message
+                        ),
+                    confirmButtonText =
+                        stringResource(
+                            id =
+                                R.string
+                                    .lecture_view_lecture_unit_set_completed_failed_dialog_positive
+                        ),
                     dismissButtonText = null,
                     onPressPositiveButton = { displaySetCompletedFailureDialog = false },
-                    onDismissRequest = { displaySetCompletedFailureDialog = false }
+                    onDismissRequest = { displaySetCompletedFailureDialog = false },
                 )
             }
         }

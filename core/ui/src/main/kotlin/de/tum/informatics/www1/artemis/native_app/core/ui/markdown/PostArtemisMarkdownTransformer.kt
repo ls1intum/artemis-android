@@ -51,15 +51,9 @@ class PostArtemisMarkdownTransformer(val serverUrl: String, val courseId: Long) 
         fileName: String,
         url: String
     ): String {
-        val fileIconImage = createFileTypeIconMarkdown(R.drawable.file_link_icon)
-        val link = createAttachmentsLink(serverUrl, fileName, MarkdownUrlUtil.encodeUrl(url))
-
-        return when (type) {
-            "attachment" -> "$fileIconImage $link"
-            "lecture-unit" -> "$fileIconImage $link"
-            "slide" -> "!$link"
-            else -> fileName
-        }
+        val encodedReference = java.net.URLEncoder.encode(url, "UTF-8").replace("+", "%20")
+        val link = "[${fileName}](${ArtemisDeeplink.IN_APP_HOST}/courses/$courseId/lecture-media?referenceType=$type&reference=$encodedReference)"
+        return "${createFileTypeIconMarkdown(R.drawable.file_link_icon)} $link"
     }
 
     public override fun transformFileUploadMessageMarkdown(

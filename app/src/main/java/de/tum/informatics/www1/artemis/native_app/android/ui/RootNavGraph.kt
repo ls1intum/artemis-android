@@ -21,6 +21,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.navigateT
 import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.detail.faqDetail
 import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.detail.navigateToFaqDetail
 import de.tum.informatics.www1.artemis.native_app.feature.force_update.ui.updateNavGraph
+import de.tum.informatics.www1.artemis.native_app.feature.lectureview.completeLectureMediaReference
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.navigateToLecture
 import de.tum.informatics.www1.artemis.native_app.feature.login.LoginScreenRoute
@@ -37,20 +38,19 @@ fun NavGraphBuilder.rootNavGraph(
     navController: NavController,
     onDisplayThirdPartyLicenses: () -> Unit,
     onOpenPlayStore: () -> Unit,
-    onSkipUpdate: () -> Unit
+    onSkipUpdate: () -> Unit,
 ) {
-    val onNavigateToTextExerciseParticipation =
-        { exerciseId: Long, participationId: Long ->
-            navController.navigateToExercise(
-                exerciseId = exerciseId,
-                viewMode = ExerciseViewMode.TextParticipation(participationId)
-            ) {}
-        }
+    val onNavigateToTextExerciseParticipation = { exerciseId: Long, participationId: Long ->
+        navController.navigateToExercise(
+            exerciseId = exerciseId,
+            viewMode = ExerciseViewMode.TextParticipation(participationId),
+        ) {}
+    }
 
     val onNavigateToExerciseResultView = { exerciseId: Long ->
         navController.navigateToExercise(
             exerciseId = exerciseId,
-            viewMode = ExerciseViewMode.ViewResult
+            viewMode = ExerciseViewMode.ViewResult,
         ) {}
     }
 
@@ -58,7 +58,7 @@ fun NavGraphBuilder.rootNavGraph(
         navController.navigateToQuizParticipation(
             courseId,
             exerciseId,
-            if (isPractice) QuizType.Practice else QuizType.Live
+            if (isPractice) QuizType.Practice else QuizType.Live,
         )
     }
 
@@ -66,11 +66,11 @@ fun NavGraphBuilder.rootNavGraph(
         navController.navigateToQuizResult(courseId, exerciseId)
     }
 
-
     loginNavGraph(
         onFinishedLoginFlow = { deepLink ->
             if (deepLink == null) {
-                // Navigate to the course overview and remove the login screen from the navigation stack.
+                // Navigate to the course overview and remove the login screen from the navigation
+                // stack.
                 navController.navigateToDashboard {
                     popUpTo<LoginScreenRoute> {
                         inclusive = true
@@ -82,7 +82,7 @@ fun NavGraphBuilder.rootNavGraph(
                         Uri.parse(deepLink),
                         navOptions {
                             popUpTo<LoginScreenRoute>()
-                        }
+                        },
                     )
                 } catch (_: IllegalArgumentException) {
                     navController.navigateToDashboard {
@@ -94,26 +94,26 @@ fun NavGraphBuilder.rootNavGraph(
             }
         },
         onRequestOpenSettings = {
-            navController.navigateToSettings { }
-        }
+            navController.navigateToSettings {}
+        },
     )
 
     dashboard(
         onOpenSettings = {
-            navController.navigateToSettings { }
+            navController.navigateToSettings {}
         },
         onClickRegisterForCourse = {
-            navController.navigateToCourseRegistration { }
+            navController.navigateToCourseRegistration {}
         },
         onViewCourse = { courseId ->
-            navController.navigateToCourse(courseId) { }
-        }
+            navController.navigateToCourse(courseId) {}
+        },
     )
 
     courseRegistration(
         onRegisteredInCourse = { courseId ->
             navController.navigateUp()
-            navController.navigateToCourse(courseId) { }
+            navController.navigateToCourse(courseId) {}
         }
     )
 
@@ -122,41 +122,45 @@ fun NavGraphBuilder.rootNavGraph(
             navController.navigateToExercise(
                 exerciseId = exerciseId,
                 showSideBarIcon = false,
-                viewMode = ExerciseViewMode.Overview
-            ) { }
+                viewMode = ExerciseViewMode.Overview,
+            ) {}
         },
         onNavigateToExerciseResultView = onNavigateToExerciseResultView,
         onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
         onParticipateInQuiz = onParticipateInQuiz,
         onViewQuizResults = onClickViewQuizResults,
-        onNavigateToLecture = { _, lectureId ->
+        onNavigateToLecture = { courseId, lectureId ->
             navController.navigateToLecture(
-                lectureId = lectureId
-            ) { }
+                lectureId = lectureId,
+                courseId = courseId,
+            ) {}
         },
         onNavigateToFaq = { faqId ->
-            navController.navigateToFaqDetail(faqId) { }
+            navController.navigateToFaqDetail(faqId) {}
         },
         onNavigateBack = navController::navigateUp,
         onNavigateNotificationSection = { courseId ->
             navController.navigateToCourseNotification(courseId)
-        }
+        },
     )
 
     exercise(
         onNavigateBack = navController::navigateUp,
         onParticipateInQuiz = onParticipateInQuiz,
-        onClickViewQuizResults = onClickViewQuizResults
+        onClickViewQuizResults = onClickViewQuizResults,
     )
 
     lecture(
+        onReferencePageOpened = { entryId ->
+            navController.completeLectureMediaReference(entryId)
+        },
         onViewExercise = { exerciseId ->
             navController.navigateToExercise(
                 exerciseId,
                 showSideBarIcon = false,
-                ExerciseViewMode.Overview
-            ) { }
-        }
+                ExerciseViewMode.Overview,
+            ) {}
+        },
     )
 
     faqDetail()
@@ -165,8 +169,8 @@ fun NavGraphBuilder.rootNavGraph(
         onLeaveQuiz = {
             val previousBackStackEntry = navController.previousBackStackEntry
             if (previousBackStackEntry?.destination?.hasRoute<ExerciseScreenRoute>() == true) {
-                previousBackStackEntry.savedStateHandle[ExerciseViewDestination.REQUIRE_RELOAD_KEY] =
-                    true
+                previousBackStackEntry.savedStateHandle[
+                        ExerciseViewDestination.REQUIRE_RELOAD_KEY] = true
             }
             navController.navigateUp()
         }
@@ -176,16 +180,13 @@ fun NavGraphBuilder.rootNavGraph(
 
     settingsNavGraph(
         navController = navController,
-        onDisplayThirdPartyLicenses = onDisplayThirdPartyLicenses
+        onDisplayThirdPartyLicenses = onDisplayThirdPartyLicenses,
     )
 
     updateNavGraph(
         onOpenPlayStore = onOpenPlayStore,
-        onSkipUpdate = onSkipUpdate
+        onSkipUpdate = onSkipUpdate,
     )
 
-    courseNotificationScreen(
-        navController = navController
-    )
-
+    courseNotificationScreen(navController = navController)
 }

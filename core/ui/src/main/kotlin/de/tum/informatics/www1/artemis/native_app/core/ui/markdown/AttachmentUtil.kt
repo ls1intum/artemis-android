@@ -5,10 +5,8 @@ import android.webkit.MimeTypeMap
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.authTokenOrEmptyString
 import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
-import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.BaseFile
 import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
-import java.io.File
 import java.net.URLEncoder
 
 object AttachmentUtil {
@@ -46,7 +44,7 @@ object AttachmentUtil {
     fun detectAttachmentType(link: String?): AttachmentType {
         if (link.isNullOrEmpty()) return AttachmentType.Other
 
-        val extension = MimeTypeMap.getFileExtensionFromUrl(link)?.lowercase() ?: return AttachmentType.Other
+        val extension = de.tum.informatics.www1.artemis.native_app.core.ui.media.mediaHttpUri(link)?.path?.substringAfterLast('.', "")?.lowercase() ?: return AttachmentType.Other
         val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension) ?: return AttachmentType.Other
 
         return when {
@@ -56,17 +54,15 @@ object AttachmentUtil {
         }
     }
 
-    fun downloadAttachment(
+    suspend fun downloadAttachment(
         context: Context,
         artemisContext: ArtemisContext,
         name: String?,
         link: String
     ) {
-        // We can use the download function of the BaseFile class to download the file
-        val newName = name ?: link.substringAfterLast("/")
-        val file = object : BaseFile(artemisContext.authTokenOrEmptyString, newName, link) {
-            override fun share(context: Context, file: File) {}
-        }
-        file.download(context)
+        val newName = name ?: de.tum.informatics.www1.artemis.native_app.core.ui.media.mediaHttpUri(link)?.path?.substringAfterLast('/').orEmpty()
+        de.tum.informatics.www1.artemis.native_app.core.ui.media.downloadMediaAttachment(
+            context, artemisContext.serverUrl, artemisContext.authTokenOrEmptyString, link, newName
+        )
     }
 }
