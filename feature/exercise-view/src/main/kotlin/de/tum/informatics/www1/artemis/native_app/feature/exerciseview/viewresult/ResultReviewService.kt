@@ -67,6 +67,12 @@ internal class ResultReviewService(private val ktorProvider: KtorProvider) {
         return ReviewContent(source, feedback)
     }
 
+    suspend fun publishedSolution(session: ArtemisContext.LoggedIn, exerciseId: Long): Exercise {
+        val solution = read<Exercise>(session, "api", "exercise", "exercises", exerciseId.toString(), "example-solution")
+        require(solution.id == exerciseId)
+        return solution
+    }
+
     suspend fun longFeedback(session: ArtemisContext.LoggedIn, feedbackId: Long): String =
         read(session, "api", "assessment", "feedbacks", feedbackId.toString(), "long-feedback")
 

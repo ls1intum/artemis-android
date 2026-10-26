@@ -51,4 +51,8 @@
     <string name="review_test_failed">Failed</string>
     <string name="review_test_unknown">No test outcome available</string>
     <string name="review_long_collapse">Collapse full feedback</string>
+    <string name="review_solution_browser_signin">This opens the same exercise in your browser. You may need to sign in to Artemis there.</string>
+    <string name="review_solution_browser_open">View published solution in Artemis</string>
+    <string name="review_solution_show">Show example solution</string>
+    <string name="review_solution_unavailable">The example solution is unavailable or has not been released. Try again later.</string>
 </resources>

@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.exerciseview.viewresu
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Submission
+import io.ktor.http.appendPathSegments
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -156,3 +157,10 @@ internal fun reviewDate(date: String?): String? = date?.let { raw ->
             .format(java.util.Date(kotlin.time.Instant.parse(raw).toEpochMilliseconds()))
     }.getOrNull()
 }
+
+internal fun reviewExampleSolutionUrl(serverUrl: String, courseId: Long, exerciseId: Long): String =
+    io.ktor.http.URLBuilder(serverUrl).apply {
+        parameters.clear()
+        fragment = ""
+        appendPathSegments("courses", courseId.toString(), "exercises", exerciseId.toString())
+    }.buildString()

@@ -52,4 +52,8 @@
     <string name="review_test_unknown">Kein Testergebnis verfügbar</string>
     <string name="result_view_title">Ergebnisse und Feedback</string>
     <string name="review_long_collapse">Vollständiges Feedback einklappen</string>
+    <string name="review_solution_browser_signin">Die Aufgabe wird im Browser geöffnet. Möglicherweise musst du dich dort bei Artemis anmelden.</string>
+    <string name="review_solution_browser_open">Veröffentlichte Lösung in Artemis ansehen</string>
+    <string name="review_solution_show">Beispiellösung anzeigen</string>
+    <string name="review_solution_unavailable">Die Beispiellösung ist nicht verfügbar oder noch nicht veröffentlicht. Versuche es später erneut.</string>
 </resources>

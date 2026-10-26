@@ -123,7 +123,7 @@ private fun ResultReviewBody(
                         }
                         else -> Text(stringResource(R.string.review_source_unavailable))
                     }
-                    PublishedSolution(exercise)
+                    PublishedSolutionReview(exercise, service, session, onDenied)
                 }
             }
             val feedback: @Composable (Modifier) -> Unit = { pane ->
@@ -249,15 +249,4 @@ private fun LongFeedback(feedback: ReviewFeedback, service: ResultReviewService,
         }
     }) { Text(stringResource(if (failed) R.string.review_long_retry else if (loading) R.string.review_loading else if (expanded) R.string.review_long_collapse else R.string.review_long_expand)) }
     if (expanded) full?.let { SelectionContainer { Text(it, style = MaterialTheme.typography.bodyMedium) } }
-}
-
-@Composable
-private fun PublishedSolution(exercise: Exercise) {
-    // These fields are filtered by the authorized student exercise endpoint, independently of assessment release.
-    val solution = when (exercise) { is TextExercise -> exercise.exampleSolution; is FileUploadExercise -> exercise.exampleSolution; else -> null }
-    if (!solution.isNullOrBlank()) {
-        HorizontalDivider()
-        ReviewHeading(R.string.review_example_solution)
-        MarkdownText(markdown = solution, selectable = true)
-    }
 }

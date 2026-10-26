@@ -117,6 +117,22 @@ class ResultReviewServiceTest {
         }
     }
 
+    @Test fun `published solution uses its independent student authorization and validates exact exercise`() = runBlocking {
+        val engine = MockEngine { request ->
+            assertEquals(HttpMethod.Get, request.method)
+            assertEquals("/api/exercise/exercises/3/example-solution", request.url.encodedPath)
+            assertEquals("jwt=captured-token", request.headers[HttpHeaders.Cookie])
+            respond("""{"id":3,"type":"modeling","exampleSolutionModel":"{\"nodes\":[]}","exampleSolutionExplanation":"Public model explanation"}""", HttpStatusCode.OK, headersOf(HttpHeaders.ContentType, "application/json"))
+        }
+        withService(engine) { service ->
+            val exercise = service.publishedSolution(session, 3)
+            assertEquals(3L, exercise.id)
+            assertEquals("Public model explanation", (exercise as de.tum.informatics.www1.artemis.native_app.core.model.exercise.ModelingExercise).exampleSolutionExplanation)
+        }
+        assertEquals("https://artemis.example/courses/9/exercises/3", reviewExampleSolutionUrl(session.serverUrl, 9, 3))
+        assertFalse(reviewExampleSolutionUrl(session.serverUrl, 9, 3).contains(session.authToken))
+    }
+
     private suspend fun withService(engine: MockEngine, block: suspend (ResultReviewService) -> Unit) {
         val client = HttpClient(engine) { expectSuccess = true; install(ContentNegotiation) { json(JsonProvider().applicationJsonConfiguration) } }
         try { block(ResultReviewService(object : KtorProvider { override val ktorClient = client })) }
