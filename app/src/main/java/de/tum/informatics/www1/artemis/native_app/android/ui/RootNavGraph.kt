@@ -28,6 +28,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.loginNavGraph
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.navigateToQuizParticipation
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.quizParticipation
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.training.navigateToQuizTraining
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.training.quizTraining
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.navigateToQuizResult
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.quizResults
 import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.navigateToSettings
@@ -129,6 +131,7 @@ fun NavGraphBuilder.rootNavGraph(
         onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
         onParticipateInQuiz = onParticipateInQuiz,
         onViewQuizResults = onClickViewQuizResults,
+        onQuizTraining = navController::navigateToQuizTraining,
         onNavigateToLecture = { _, lectureId ->
             navController.navigateToLecture(
                 lectureId = lectureId
@@ -173,6 +176,7 @@ fun NavGraphBuilder.rootNavGraph(
     )
 
     quizResults()
+    quizTraining()
 
     settingsNavGraph(
         navController = navController,

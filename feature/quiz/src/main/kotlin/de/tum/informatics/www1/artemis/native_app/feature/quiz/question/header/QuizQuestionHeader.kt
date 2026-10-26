@@ -63,7 +63,7 @@ internal fun QuizQuestionHeader(
         modifier = modifier,
         questionIndex = questionIndex,
         title = question.title.orEmpty(),
-        points = question.points ?: 1.0,
+        points = question.points,
         type = type,
     )
 }
@@ -73,7 +73,7 @@ internal fun QuizQuestionHeader(
     modifier: Modifier,
     questionIndex: Int,
     title: String,
-    points: Double = 1.0,
+    points: Double? = 1.0,
     type: QuizQuestionHeaderType
 ) {
     Column(modifier = modifier) {
@@ -118,9 +118,10 @@ internal fun QuizQuestionHeader(
 @Composable
 private fun ScoreInfo(
     modifier: Modifier,
-    points: Double,
+    points: Double?,
     type: QuizQuestionHeaderType
 ) {
+    if (points == null || !points.isFinite()) return
     val (scoreText, scoreTextColor) = when (type) {
         is QuizQuestionHeaderType.NoResult -> {
             stringResource(

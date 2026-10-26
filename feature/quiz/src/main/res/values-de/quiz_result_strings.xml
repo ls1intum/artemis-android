@@ -1,0 +1,14 @@
+<resources>
+    <string name="quiz_results_title">Quizergebnisse ansehen</string>
+    <string name="quiz_result_score_result">Du hast das Quiz mit %1$s von %2$s Punkten (%3$s) abgeschlossen.</string>
+    <string name="quiz_result_loading">Quizergebnisse werden geladen…</string>
+    <string name="quiz_result_failure">Die Quizergebnisse konnten nicht geladen werden.</string>
+    <string name="quiz_result_try_again">Erneut versuchen</string>
+    <string name="quiz_result_question_header_points">Deine Punkte: %1$s/%2$s</string>
+    <string name="quiz_result_mc_correct">Richtig</string>
+    <string name="quiz_result_mc_wrong">Falsch</string>
+    <string name="quiz_result_sa_show_sample_solution">Beispiellösung anzeigen</string>
+    <string name="quiz_result_sa_hide_sample_solution">Beispiellösung ausblenden</string>
+    <string name="quiz_result_dnd_show_sample_solution">Beispiellösung anzeigen</string>
+    <string name="quiz_result_dnd_hide_sample_solution">Beispiellösung ausblenden</string>
+</resources>

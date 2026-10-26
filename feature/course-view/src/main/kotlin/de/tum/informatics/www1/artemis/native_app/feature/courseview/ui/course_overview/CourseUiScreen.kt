@@ -1,8 +1,11 @@
 package de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -96,6 +99,7 @@ fun NavGraphBuilder.course(
     onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
     onParticipateInQuiz: (courseId: Long, exerciseId: Long, isPractice: Boolean) -> Unit,
     onViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
+    onQuizTraining: (courseId: Long) -> Unit = {},
     onNavigateToLecture: (courseId: Long, lectureId: Long) -> Unit,
     onNavigateToFaq: (faqId: Long) -> Unit,
     onNavigateBack: () -> Unit,
@@ -142,6 +146,7 @@ fun NavGraphBuilder.course(
                 )
             },
             onClickViewQuizResults = onViewQuizResults,
+            onQuizTraining = onQuizTraining,
             onNavigateToLecture = { lectureId -> onNavigateToLecture(courseId, lectureId) },
             onNavigateToFaq = onNavigateToFaq,
             onNavigateBack = onNavigateBack,
@@ -164,6 +169,7 @@ fun CourseUiScreen(
     onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
     onParticipateInQuiz: (exerciseId: Long, isPractice: Boolean) -> Unit,
     onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
+    onQuizTraining: (courseId: Long) -> Unit = {},
     onNavigateToLecture: (lectureId: Long) -> Unit,
     onNavigateToFaq: (faqId: Long) -> Unit,
     onNavigateBack: () -> Unit,
@@ -210,6 +216,7 @@ fun CourseUiScreen(
         onParticipateInQuiz = onParticipateInQuiz,
         onNavigateToExerciseResultView = onNavigateToExerciseResultView,
         onClickViewQuizResults = onClickViewQuizResults,
+        onQuizTraining = onQuizTraining,
         courseId = courseId,
         lecturesTimeFrameDataState = lecturesTimeFrameDataState,
         onNavigateToLecture = onNavigateToLecture,
@@ -247,6 +254,7 @@ internal fun CourseUiScreen(
     onParticipateInQuiz: (exerciseId: Long, isPractice: Boolean) -> Unit,
     onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
     onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
+    onQuizTraining: (courseId: Long) -> Unit = {},
     onNavigateToLecture: (lectureId: Long) -> Unit,
     onClickStartTextExercise: (exerciseId: Long) -> Unit,
     onNavigateToFaq: (faqId: Long) -> Unit,
@@ -312,36 +320,44 @@ internal fun CourseUiScreen(
     ) {
         composable<CourseTab.Exercises> {
             scaffold(exerciseSearchConfiguration) {
-                EmptyDataStateUi(dataState = exercisesTimeFrameDataState) { exercises ->
-                    SinglePageExerciseBody(
-                        modifier = Modifier.fillMaxSize(),
-                        exercises = exercises,
-                        query = if (exerciseSearchConfiguration is CourseSearchConfiguration.Search) exerciseSearchConfiguration.query else "",
-                        collapsingContentState = collapsingContentState,
-                        onClickExercise = onNavigateToExercise,
-                        actions = BoundExerciseActions(
-                            onClickStartTextExercise = onClickStartTextExercise,
-                            onClickOpenQuiz = { exerciseId ->
-                                onParticipateInQuiz(exerciseId, false)
-                            },
-                            onClickPracticeQuiz = { exerciseId ->
-                                onParticipateInQuiz(exerciseId, true)
-                            },
-                            onClickStartQuiz = { exerciseId ->
-                                onParticipateInQuiz(exerciseId, false)
-                            },
-                            onClickOpenTextExercise = onNavigateToTextExerciseParticipation,
-                            onClickViewResult = onNavigateToExerciseResultView,
-                            onClickViewQuizResults = { exerciseId ->
-                                onClickViewQuizResults(
-                                    courseId,
-                                    exerciseId
-                                )
-                            }
-                        ),
-                        title = courseName,
-                        searchConfiguration = exerciseSearchConfiguration
-                    )
+                Column(Modifier.fillMaxSize()) {
+                    OutlinedButton(
+                        onClick = { onQuizTraining(courseId) },
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        Text(stringResource(R.string.course_quiz_training))
+                    }
+                    EmptyDataStateUi(dataState = exercisesTimeFrameDataState) { exercises ->
+                        SinglePageExerciseBody(
+                            modifier = Modifier.weight(1f),
+                            exercises = exercises,
+                            query = if (exerciseSearchConfiguration is CourseSearchConfiguration.Search) exerciseSearchConfiguration.query else "",
+                            collapsingContentState = collapsingContentState,
+                            onClickExercise = onNavigateToExercise,
+                            actions = BoundExerciseActions(
+                                onClickStartTextExercise = onClickStartTextExercise,
+                                onClickOpenQuiz = { exerciseId ->
+                                    onParticipateInQuiz(exerciseId, false)
+                                },
+                                onClickPracticeQuiz = { exerciseId ->
+                                    onParticipateInQuiz(exerciseId, true)
+                                },
+                                onClickStartQuiz = { exerciseId ->
+                                    onParticipateInQuiz(exerciseId, false)
+                                },
+                                onClickOpenTextExercise = onNavigateToTextExerciseParticipation,
+                                onClickViewResult = onNavigateToExerciseResultView,
+                                onClickViewQuizResults = { exerciseId ->
+                                    onClickViewQuizResults(
+                                        courseId,
+                                        exerciseId
+                                    )
+                                }
+                            ),
+                            title = courseName,
+                            searchConfiguration = exerciseSearchConfiguration
+                        )
+                    }
                 }
             }
         }

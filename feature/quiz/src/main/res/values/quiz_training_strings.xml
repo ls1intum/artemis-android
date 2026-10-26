@@ -1,0 +1,62 @@
+<resources>
+    <string name="training_title">Quiz training</string>
+    <string name="training_heading">Make your knowledge stick</string>
+    <string name="training_intro">Practise one question at a time. Your answers help Artemis choose what to revisit. Take a break after ten answers, or keep going.</string>
+    <string name="training_progress">Your progress</string>
+    <string name="training_points">%1$.1f training points</string>
+    <string name="training_start">Start training</string>
+    <string name="training_continue">Continue training</string>
+    <string name="training_privacy">Leaderboard privacy</string>
+    <string name="training_private_first">Your training starts privately. Choose whether your name and training points appear in rankings across your courses.</string>
+    <string name="training_privacy_detail">This preference applies to quiz training leaderboards across your courses.</string>
+    <string name="training_public">Show me in leaderboards</string>
+    <string name="training_keep_private">Keep my training private</string>
+    <string name="training_overview_error">Progress or privacy settings could not be loaded. Your current answer is saved for this session.</string>
+    <string name="training_retry">Try again</string>
+    <string name="training_leaderboard">Leaderboard and league</string>
+    <string name="training_league">League: %1$s</string>
+    <string name="training_no_ranking">No leaderboard entries yet.</string>
+    <string name="training_loading">Finding your next question…</string>
+    <string name="training_page_error">The next questions could not be loaded. Try again to continue from the same place.</string>
+    <string name="training_restart_detail">The available revision questions have changed. Start a fresh session to use the updated recommendations.</string>
+    <string name="training_restart">Start a fresh session</string>
+    <string name="training_unrated_title">Extra practice</string>
+    <string name="training_unrated_detail">You have reached questions that do not earn training points. Your answers are still evaluated. Continue with extra practice or finish here.</string>
+    <string name="training_practice">Continue with extra practice</string>
+    <string name="training_finish">Finish</string>
+    <string name="training_summary">Session complete</string>
+    <string name="training_access">Training is unavailable for this account. Return to your course and sign in again.</string>
+    <string name="training_rated">Revision · earns training points</string>
+    <string name="training_submit">Submit answer</string>
+    <string name="training_submitting">Waiting for evaluation…</string>
+    <string name="training_uncertain">Confirmation was not received. Your answer may already have been accepted. You can explicitly send the same answer again; it may count twice.</string>
+    <string name="training_retry_submission">Send the same answer again</string>
+    <string name="training_next">Next question</string>
+    <string name="training_end_session">End this session</string>
+    <string name="training_unsupported">This question cannot be displayed safely on this device. You can finish this session and try again later.</string>
+    <string name="training_skip">Skip question</string>
+    <plurals name="training_correct">
+        <item quantity="one">1 correct answer</item>
+        <item quantity="other">%1$d correct answers</item>
+    </plurals>
+    <plurals name="training_pool">
+        <item quantity="one">1 available question</item>
+        <item quantity="other">%1$d available questions</item>
+    </plurals>
+    <plurals name="training_streak">
+        <item quantity="one">1 day streak</item>
+        <item quantity="other">%1$d day streak</item>
+    </plurals>
+    <plurals name="training_count">
+        <item quantity="one">1 answer this session</item>
+        <item quantity="other">%1$d answers this session</item>
+    </plurals>
+    <plurals name="training_exhausted">
+        <item quantity="one">You answered one question and reached the end of this question pool. Start again for current recommendations.</item>
+        <item quantity="other">You answered %1$d questions and reached the end of this question pool. Start again for current recommendations.</item>
+    </plurals>
+    <plurals name="training_summary_detail">
+        <item quantity="one">You answered one question. This is a good place for a break. More questions are available if you want to continue.</item>
+        <item quantity="other">You answered %1$d questions. This is a good place for a break. More questions are available if you want to continue.</item>
+    </plurals>
+</resources>

@@ -1,0 +1,82 @@
+[
+  {
+    "quizQuestionWithSolutionDTO": {
+      "id": 34,
+      "title": "Practice 13: binary search",
+      "text": "What is the worst-case complexity of **binary search** on sorted input?",
+      "points": 2.0,
+      "scoringType": "ALL_OR_NOTHING",
+      "randomizeOrder": false,
+      "invalid": false,
+      "type": "multiple-choice",
+      "explanation": "Each comparison halves the remaining interval, giving logarithmic growth.",
+      "answerOptions": [
+        {
+          "id": 1,
+          "text": "O(log n)",
+          "invalid": false,
+          "explanation": "The search interval is halved each step.",
+          "isCorrect": true
+        },
+        {
+          "id": 2,
+          "text": "O(n)",
+          "invalid": false,
+          "explanation": "A linear scan checks every item.",
+          "isCorrect": false
+        },
+        {
+          "id": 3,
+          "text": "O(1)",
+          "invalid": false,
+          "explanation": "More input requires more comparisons.",
+          "isCorrect": false
+        }
+      ],
+      "singleChoice": true
+    },
+    "isRated": true,
+    "isNewSession": false,
+    "id": 34
+  },
+  {
+    "quizQuestionWithSolutionDTO": {
+      "id": 36,
+      "title": "Practice 15: binary search",
+      "text": "What is the worst-case complexity of **binary search** on sorted input?",
+      "points": 2.0,
+      "scoringType": "ALL_OR_NOTHING",
+      "randomizeOrder": false,
+      "invalid": false,
+      "type": "multiple-choice",
+      "explanation": "Each comparison halves the remaining interval, giving logarithmic growth.",
+      "answerOptions": [
+        {
+          "id": 1,
+          "text": "O(log n)",
+          "invalid": false,
+          "explanation": "The search interval is halved each step.",
+          "isCorrect": true
+        },
+        {
+          "id": 2,
+          "text": "O(n)",
+          "invalid": false,
+          "explanation": "A linear scan checks every item.",
+          "isCorrect": false
+        },
+        {
+          "id": 3,
+          "text": "O(1)",
+          "invalid": false,
+          "explanation": "More input requires more comparisons.",
+          "isCorrect": false
+        }
+      ],
+      "singleChoice": true
+    },
+    "isRated": true,
+    "isNewSession": false,
+    "id": 36
+  }
+]
