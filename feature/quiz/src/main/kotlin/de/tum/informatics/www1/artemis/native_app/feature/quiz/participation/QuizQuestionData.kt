@@ -26,7 +26,8 @@ sealed class QuizQuestionData<T : QuizQuestion>(val question: T) {
         class Result(
             question: ShortAnswerQuizQuestion,
             solutionTexts: Map<Int, String>,
-            override val achievedPoints: Double?
+            override val achievedPoints: Double?,
+            val correctness: Map<Int, Boolean?> = emptyMap(),
         ) : ShortAnswerData(question, solutionTexts), ResultData
     }
 

@@ -50,7 +50,8 @@ internal class QuizResultViewModel(
     serverConfigurationService: ServerConfigurationService,
     accountService: AccountService,
     participationService: ParticipationService,
-    coroutineContext: CoroutineContext = EmptyCoroutineContext
+    coroutineContext: CoroutineContext = EmptyCoroutineContext,
+    reviewContextProvider: de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider,
 ) : BaseQuizViewModel<QuizResultViewModel.ResultShortAnswerStorageData, QuizResultViewModel.ResultDragAndDropStorageData, QuizResultViewModel.ResultMultipleChoiceStorageData>(
     exerciseId,
     quizType,
@@ -59,7 +60,8 @@ internal class QuizResultViewModel(
     serverConfigurationService,
     accountService,
     participationService,
-    coroutineContext
+    coroutineContext,
+    reviewContextProvider,
 ) {
 
     val submission: StateFlow<DataState<QuizSubmission>> = when (quizType) {
@@ -190,6 +192,7 @@ internal class QuizResultViewModel(
 
                             val data = ResultShortAnswerStorageData(
                                 value = value,
+                                correctness = shortAnswerReviewCorrectness(submittedAnswer),
                                 achievedPoints = submittedAnswer.scoreInPoints
                             )
 
@@ -240,6 +243,7 @@ internal class QuizResultViewModel(
         return QuizQuestionData.ShortAnswerData.Result(
             question = question,
             solutionTexts = solutionTexts,
+            correctness = storageData?.correctness.orEmpty(),
             achievedPoints = if (storageData == null) 0.0 else storageData.achievedPoints
         )
     }
@@ -256,6 +260,7 @@ internal class QuizResultViewModel(
 
     data class ResultShortAnswerStorageData(
         override val value: Map<Int, String>,
-        val achievedPoints: Double?
+        val achievedPoints: Double?,
+        val correctness: Map<Int, Boolean?> = emptyMap(),
     ) : ShortAnswerStorageData
 }

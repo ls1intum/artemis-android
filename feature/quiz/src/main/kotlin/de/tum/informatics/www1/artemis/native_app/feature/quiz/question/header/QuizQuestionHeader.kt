@@ -29,6 +29,8 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.QuizQ
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExercisePointsDecimalFormat
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ExerciseColors
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.LocalQuizReviewPrecision
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.formatExercisePoints
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizQuestionData
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.HelpText
 
@@ -42,7 +44,8 @@ internal sealed interface QuizQuestionHeaderType {
 
     data class Result(
         val achievedPoints: Double?,
-        val hint: String?
+        val hint: String?,
+        val invalid: Boolean = false,
     ) : QuizQuestionHeaderType
 }
 
@@ -126,21 +129,22 @@ private fun ScoreInfo(
             ) to LocalTextStyle.current.color
         }
         is QuizQuestionHeaderType.Result -> {
-            val maxPointsFormatted = remember(points) {
-                QuizQuestionPointsDecimalFormat.format(points)
+            val precision = LocalQuizReviewPrecision.current
+            val maxPointsFormatted = remember(points, precision) {
+                formatExercisePoints(points, precision)
             }
 
-            val achievedPointsFormatted = remember(type.achievedPoints) {
-                type.achievedPoints?.let { QuizQuestionPointsDecimalFormat.format(it) } ?: "–"
+            val achievedPointsFormatted = remember(type.achievedPoints, precision) {
+                type.achievedPoints?.let { formatExercisePoints(it, precision) } ?: "–"
             }
 
             val isCorrect = type.achievedPoints == points
 
-            stringResource(
+            (if (type.invalid) stringResource(R.string.quiz_review_invalid) else stringResource(
                 id = R.string.quiz_result_question_header_points,
                 achievedPointsFormatted,
                 maxPointsFormatted
-            ) to if (type.achievedPoints == null) LocalTextStyle.current.color else if (isCorrect) ExerciseColors.Result.success else ExerciseColors.Result.medium
+            )) to if (type.invalid || type.achievedPoints == null) LocalTextStyle.current.color else if (isCorrect) ExerciseColors.Result.success else ExerciseColors.Result.medium
         }
     }
 
@@ -168,7 +172,8 @@ internal fun <T : QuizQuestion> QuizQuestionData<T>.toQuizQuestionHeaderType(
     if (this is QuizQuestionData.ResultData) {
         QuizQuestionHeaderType.Result(
             achievedPoints = achievedPoints,
-            hint = question.hint
+            hint = question.hint,
+            invalid = question.invalid,
         )
     } else QuizQuestionHeaderType.NoResult(
         canDisplayQuestionHint = question.hint != null,

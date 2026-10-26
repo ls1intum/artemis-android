@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="review_image_unavailable">Ein Bild konnte nicht angezeigt werden. Es ist möglicherweise nicht verfügbar, nicht zugänglich oder hat ein nicht unterstütztes Format. Lade die Ansicht erneut.</string>
+</resources>

@@ -39,6 +39,7 @@ fun `Quiz - Multiple Choice Question`() {
         quizType = QuizType.Live,
         savedStateHandle = SavedStateHandle(),
         quizExerciseService = object : QuizExerciseService {
+            override suspend fun findReviewAttempts(exerciseId: Long, serverUrl: String, authToken: String): NetworkResponse<List<de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.QuizReviewAttempt>> = NetworkResponse.Failure(RuntimeException("Stub"))
             override suspend fun findResultParticipation(
                 exerciseId: Long,
                 serverUrl: String,

@@ -1,6 +1,13 @@
 package de.tum.informatics.www1.artemis.native_app.feature.quiz
 
 import androidx.lifecycle.viewModelScope
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
+import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.QuizReviewAttempt
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.initialQuizReviewAttempt
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
@@ -48,10 +55,19 @@ internal abstract class BaseQuizViewModel<
     serverConfigurationService: ServerConfigurationService,
     accountService: AccountService,
     participationService: ParticipationService,
-    private val coroutineContext: CoroutineContext
+    private val coroutineContext: CoroutineContext,
+    private val reviewContextProvider: ArtemisContextProvider? = null,
 ) : ReloadableViewModel() {
     private var selectedResultAttempt: Pair<Long, Int>? = null
     private var selectedResultSession: Pair<String, String>? = null
+    private val _reviewAttempts = MutableStateFlow<List<QuizReviewAttempt>>(emptyList())
+    val reviewAttempts: StateFlow<List<QuizReviewAttempt>> = _reviewAttempts
+
+    fun onSelectReviewAttempt(attempt: QuizReviewAttempt) {
+        if (attempt !in _reviewAttempts.value) return
+        selectedResultAttempt = attempt.participationId to attempt.submissionId
+        onRequestReload()
+    }
 
     /**
      * In live quizzes, a participation is loaded to get the exercise.
@@ -66,26 +82,42 @@ internal abstract class BaseQuizViewModel<
                     findParticipation(exerciseId)
                 }
 
-            QuizType.ViewResults -> transformLatest(
-                serverConfigurationService.serverUrl,
-                accountService.authToken,
-                requestReload.onStart { emit(Unit) }
-            ) { serverUrl, token, _ ->
+            QuizType.ViewResults -> combine(
+                requireNotNull(reviewContextProvider).stateFlow,
+                requestReload.onStart { emit(Unit) },
+            ) { context, _ -> context }.transformLatest { context ->
+                if (context !is ArtemisContext.LoggedIn) {
+                    selectedResultAttempt = null
+                    selectedResultSession = null
+                    _reviewAttempts.value = emptyList()
+                    emit(DataState.Failure(IllegalStateException("No captured quiz review session")))
+                    return@transformLatest
+                }
+                val serverUrl = context.serverUrl
+                val token = context.authToken
                 val session = serverUrl to token
                 if (selectedResultSession != session) {
                     selectedResultAttempt = null
                     selectedResultSession = session
+                    _reviewAttempts.value = emptyList()
                 }
                 emitAll(retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                    quizExerciseService.findResultParticipation(
-                        exerciseId, serverUrl, token,
-                        selectedResultAttempt?.first, selectedResultAttempt?.second
-                    ).also { response ->
-                        if (response is de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse.Response && selectedResultSession == session) {
-                            val participation = response.data
-                            val pid = participation.id
-                            val sid = participation.quizSubmission?.id
-                            if (pid != null && sid != null) selectedResultAttempt = pid to sid
+                    val history = quizExerciseService.findReviewAttempts(exerciseId, serverUrl, token)
+                    if (history is NetworkResponse.Failure) NetworkResponse.Failure<Participation>(history.exception)
+                    else {
+                        val attempts = (history as NetworkResponse.Response).data
+                        _reviewAttempts.value = attempts
+                        if (selectedResultAttempt == null) selectedResultAttempt = initialQuizReviewAttempt(attempts)?.let { it.participationId to it.submissionId }
+                        quizExerciseService.findResultParticipation(
+                            exerciseId, serverUrl, token,
+                            selectedResultAttempt?.first, selectedResultAttempt?.second
+                        ).also { response ->
+                            if (response is NetworkResponse.Response && selectedResultSession == session) {
+                                val participation = response.data
+                                val pid = participation.id
+                                val sid = participation.quizSubmission?.id
+                                if (pid != null && sid != null) selectedResultAttempt = pid to sid
+                            }
                         }
                     }
                 })

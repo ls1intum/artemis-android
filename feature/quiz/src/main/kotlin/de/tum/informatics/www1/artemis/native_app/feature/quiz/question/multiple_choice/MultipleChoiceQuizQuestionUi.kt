@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.multipleChoiceReviewOutcome
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.QuizReviewOutcome
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.MultipleChoiceQuizQuestion
@@ -83,7 +85,8 @@ internal fun MultipleChoiceQuizQuestionUi(
                         is QuizQuestionData.MultipleChoiceData.Result -> ChoiceItemType.ViewResult(
                             explanation = option.explanation,
                             help = option.hint,
-                            isCorrectChoice = option.isCorrect
+                            isCorrectChoice = option.isCorrect,
+                            invalid = multipleChoiceReviewOutcome(data.question, option) == QuizReviewOutcome.INVALID
                         )
                     },
                     onRequestDisplayHint = { onRequestDisplayAnswerOptionHint(option) }

@@ -41,6 +41,7 @@ internal fun QuizResultUi(
     maxPoints: Double,
     quizQuestions: List<QuizQuestion>,
     quizQuestionsWithData: List<QuizQuestionData<*>>,
+    precision: Int = 2,
 ) {
     val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
@@ -51,6 +52,7 @@ internal fun QuizResultUi(
         }
     }
 
+    androidx.compose.runtime.CompositionLocalProvider(LocalQuizReviewPrecision provides precision) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -95,7 +97,7 @@ internal fun QuizResultUi(
                             .fillMaxWidth()
                             .border(
                                 width = 1.dp,
-                                color = if (questionWithData.achievedPoints == null) MaterialTheme.colorScheme.outline else if (isCorrect) ExerciseColors.Result.success else ExerciseColors.Result.medium
+                                color = if (questionWithData.question.invalid || questionWithData.achievedPoints == null) MaterialTheme.colorScheme.outline else if (isCorrect) ExerciseColors.Result.success else ExerciseColors.Result.medium
                             )
                             .padding(8.dp)
                     ) {
@@ -111,6 +113,7 @@ internal fun QuizResultUi(
             }
         }
     }
+}
 }
 
 @Composable
@@ -151,18 +154,11 @@ private fun QuizQuestionListHeader(
 
 @Composable
 private fun QuizScoreResultOverview(modifier: Modifier, achievedPoints: Double?, maxPoints: Double) {
-    val achievedPointsFormatted = remember(achievedPoints) {
-        achievedPoints?.let { ExercisePointsDecimalFormat.format(it) } ?: "–"
-    }
-
-    val maxPointsFormatted = remember(maxPoints) {
-        ExercisePointsDecimalFormat.format(maxPoints)
-    }
-
-    val percentFormatted = remember(achievedPoints, maxPoints) {
-        val fraction = quizResultFraction(achievedPoints, maxPoints)
-        fraction?.let { DecimalFormat.getPercentInstance().format(it) } ?: "–"
-    }
+    val precision = LocalQuizReviewPrecision.current
+    val score = remember(achievedPoints, maxPoints, precision) { quizReviewScore(achievedPoints, maxPoints, precision) }
+    val achievedPointsFormatted = score.points ?: "–"
+    val maxPointsFormatted = score.maximum ?: "–"
+    val percentFormatted = score.percentage ?: "–"
 
     Text(
         modifier = modifier,

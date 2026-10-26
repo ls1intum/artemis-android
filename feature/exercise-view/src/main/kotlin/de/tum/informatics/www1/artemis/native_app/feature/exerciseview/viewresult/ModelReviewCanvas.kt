@@ -64,6 +64,8 @@ internal fun ModelReviewCanvas(model: String?, diagramType: String?, feedback: L
             }.apply {
                 layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
                 settings.textZoom = 100
+                settings.minimumFontSize = 1
+                settings.minimumLogicalFontSize = 1
                 settings.javaScriptEnabled = true
                 settings.allowFileAccess = false
                 settings.allowContentAccess = false

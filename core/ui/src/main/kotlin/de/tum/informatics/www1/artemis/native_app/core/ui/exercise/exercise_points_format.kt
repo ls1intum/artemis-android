@@ -34,3 +34,7 @@ private fun formatResultNumber(value: java.math.BigDecimal, precision: Int, loca
         isGroupingUsed = false
     }.format(rounded)
 }
+
+/** Absolute quiz points use the same decimal rounding as percentage-based exercise scores. */
+fun formatExercisePoints(points: Double, precision: Int, locale: java.util.Locale = java.util.Locale.getDefault()): String =
+    formatResultNumber(java.math.BigDecimal(points.toString()), precision, locale)

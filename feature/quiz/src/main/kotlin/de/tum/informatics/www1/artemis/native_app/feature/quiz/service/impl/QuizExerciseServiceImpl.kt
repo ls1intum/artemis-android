@@ -5,11 +5,15 @@ import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.Api
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
+import de.tum.informatics.www1.artemis.native_app.core.data.service.studentReviewGet
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.QuizSubmission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.service.QuizExerciseService
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.QuizReviewAttempt
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.quizReviewAttempts
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.initialQuizReviewAttempt
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.post
@@ -26,6 +30,12 @@ internal class QuizExerciseServiceImpl(
     @Serializable
     private data class ExerciseDetails(val exercise: QuizExercise)
 
+    override suspend fun findReviewAttempts(exerciseId: Long, serverUrl: String, authToken: String): NetworkResponse<List<QuizReviewAttempt>> = performNetworkCall {
+        val details = ktorProvider.studentReviewGet<ExerciseDetails>(serverUrl, authToken, "api", "exercise", "exercises", exerciseId.toString(), "details")
+        require(details.exercise.id == exerciseId)
+        quizReviewAttempts(details.exercise)
+    }
+
     override suspend fun findResultParticipation(
         exerciseId: Long,
         serverUrl: String,
@@ -34,26 +44,14 @@ internal class QuizExerciseServiceImpl(
         submissionId: Int?,
     ): NetworkResponse<Participation> = performNetworkCall {
         val selected = if (participationId != null && submissionId != null) participationId to submissionId else {
-            val details = ktorProvider.ktorClient.get(serverUrl) {
-                cookieAuth(authToken)
-                url { appendPathSegments("api", "exercise", "exercises", exerciseId.toString(), "details") }
-            }.body<ExerciseDetails>()
+            val details = ktorProvider.studentReviewGet<ExerciseDetails>(serverUrl, authToken, "api", "exercise", "exercises", exerciseId.toString(), "details")
             require(details.exercise.id == exerciseId)
-            details.exercise.studentParticipations.orEmpty().flatMap { participation ->
-                participation.submissions.orEmpty()
-                    .filterIsInstance<QuizSubmission>()
-                    .flatMap { submission -> submission.results.orEmpty().map { Triple(participation, submission, it) } }
-            }.filter { it.first.id != null && it.second.id != null && it.third.id != null }
-                .maxWithOrNull(compareBy<Triple<Participation, QuizSubmission, Result>> { it.third.completionDate }.thenBy { it.third.id })
-                ?.let { it.first.id!! to it.second.id!! } ?: throw IllegalStateException("No evaluated quiz submission")
+            initialQuizReviewAttempt(quizReviewAttempts(details.exercise))?.let { it.participationId to it.submissionId }
+                ?: throw IllegalStateException("No evaluated quiz submission")
         }
-        val participation = ktorProvider.ktorClient.get(serverUrl) {
-            cookieAuth(authToken)
-            url {
-                appendPathSegments(*Api.Quiz.QuizExercises.path, exerciseId.toString(), "participations", selected.first.toString(), "result")
-                parameters.append("submissionId", selected.second.toString())
-            }
-        }.body<Participation>()
+        val participation = ktorProvider.studentReviewGet<Participation>(serverUrl, authToken,
+            *Api.Quiz.QuizExercises.path, exerciseId.toString(), "participations", selected.first.toString(), "result",
+            query = mapOf("submissionId" to selected.second.toString()))
         require(participation.id == selected.first && participation.exercise?.id == exerciseId)
         require(participation.submissions?.singleOrNull()?.id == selected.second)
         participation
@@ -65,14 +63,7 @@ internal class QuizExerciseServiceImpl(
         authToken: String
     ): NetworkResponse<QuizExercise> {
         return performNetworkCall {
-            ktorProvider.ktorClient.get(serverUrl) {
-                url {
-                    appendPathSegments(*Api.Quiz.QuizExercises.path, exerciseId.toString(), "for-student")
-                }
-
-                contentType(ContentType.Application.Json)
-                cookieAuth(authToken)
-            }.body()
+            ktorProvider.studentReviewGet<QuizExercise>(serverUrl, authToken, *Api.Quiz.QuizExercises.path, exerciseId.toString(), "for-student")
         }
     }
 

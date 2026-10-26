@@ -20,6 +20,7 @@ import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.Ar
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.*
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ProvideReviewImages
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.R
 import io.ktor.client.plugins.ClientRequestException
 import kotlinx.coroutines.CancellationException
@@ -53,8 +54,8 @@ internal fun NativeResultReview(modifier: Modifier, exercise: Exercise, target: 
     when (val current = state) {
         ReviewLoad.Loading -> Box(modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) { CircularProgressIndicator() }
         is ReviewLoad.Failed -> ReviewMessage(modifier, if (current.denied) R.string.review_access_unavailable else R.string.review_load_error) { retry++ }
-        is ReviewLoad.Ready -> ResultReviewBody(modifier, exercise, target, current.content, service, session) {
-            state = ReviewLoad.Failed(true)
+        is ReviewLoad.Ready -> ProvideReviewImages(session, onDenied = { state = ReviewLoad.Failed(true) }) {
+            ResultReviewBody(modifier, exercise, target, current.content, service, session) { state = ReviewLoad.Failed(true) }
         }
     }
 }
@@ -160,13 +161,16 @@ private fun AssessedText(content: ReviewContent, selected: Int?, onSelect: (Int)
     if (text == null) { Text(stringResource(R.string.review_source_unavailable)); return }
     val highlight = MaterialTheme.colorScheme.secondaryContainer
     val active = MaterialTheme.colorScheme.primaryContainer
-    val foreground = MaterialTheme.colorScheme.onSurface
+    val normalForeground = MaterialTheme.colorScheme.onSecondaryContainer
+    val activeForeground = MaterialTheme.colorScheme.onPrimaryContainer
     val answer = buildAnnotatedString {
         append(text)
         content.feedback.forEachIndexed { index, feedback ->
             submission.rangeFor(feedback)?.let { range ->
-                addStyle(SpanStyle(background = if (index == selected) active else highlight, color = foreground), range.first, range.last + 1)
-                addLink(LinkAnnotation.Clickable("feedback-$index") { onSelect(index) }, range.first, range.last + 1)
+                val style = SpanStyle(background = if (index == selected) active else highlight, color = if (index == selected) activeForeground else normalForeground)
+                val focusStyle = SpanStyle(background = active, color = activeForeground)
+                addStyle(style, range.first, range.last + 1)
+                addLink(LinkAnnotation.Clickable("feedback-$index", styles = TextLinkStyles(style = style, focusedStyle = focusStyle, hoveredStyle = focusStyle, pressedStyle = focusStyle)) { onSelect(index) }, range.first, range.last + 1)
             }
         }
     }

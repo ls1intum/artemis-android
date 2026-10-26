@@ -20,6 +20,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.shortAnswerReviewOutcome
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.label
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.color
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
@@ -70,7 +75,7 @@ internal fun ShortAnswerQuizQuestionUi(
         }
     } else data.solutionTexts
 
-    val inlineContentMap = remember(question.spots, solutionTexts) {
+    val inlineContentMap = remember(question, solutionTexts, data, isSampleSolutionDisplayed) {
         val maxSpotNr = question.spots.maxOfOrNull { it.spotNr ?: 0 } ?: 0
         question.spots.associate { spot ->
             val spotNr = spot.spotNr ?: 0
@@ -83,14 +88,18 @@ internal fun ShortAnswerQuizQuestionUi(
                 ),
                 children = {
                     val textColor = if (isSystemInDarkTheme()) Color.White else Color.Black
+                    val reviewOutcome = (data as? QuizQuestionData.ShortAnswerData.Result)?.let { shortAnswerReviewOutcome(question, spot, it.correctness[spotNr]) }
+                    val outcomeLabel = if (isSampleSolutionDisplayed) stringResource(R.string.quiz_review_sample) else reviewOutcome?.label()
+                    val outline = if (isSampleSolutionDisplayed) MaterialTheme.colorScheme.outline else reviewOutcome?.color() ?: MaterialTheme.colorScheme.outline
                     val imeAction = if (spotNr == maxSpotNr) ImeAction.Done else ImeAction.Next
 
                     BasicTextField(
                         modifier = Modifier
                             .fillMaxSize()
+                            .semantics { outcomeLabel?.let { stateDescription = it } }
                             .border(
                                 width = 1.dp,
-                                color = MaterialTheme.colorScheme.outline
+                                color = outline
                             )
                             .padding(horizontal = 2.dp),
                         value = solutionTexts[spotNr].orEmpty(),
@@ -128,7 +137,15 @@ internal fun ShortAnswerQuizQuestionUi(
             inlineContent = inlineContentMap
         )
 
-        if (data is QuizQuestionData.ShortAnswerData.Result && question.correctMappings != null) {
+        if (data is QuizQuestionData.ShortAnswerData.Result) {
+            question.spots.forEach { spot ->
+                val nr = spot.spotNr ?: return@forEach
+                val status = shortAnswerReviewOutcome(question, spot, data.correctness[nr])
+                Text(stringResource(R.string.quiz_review_blank_outcome, nr, status.label()), color = status.color(), style = MaterialTheme.typography.bodySmall)
+            }
+        }
+
+        if (data is QuizQuestionData.ShortAnswerData.Result && !question.invalid && question.correctMappings != null) {
             val buttonText = if (isSampleSolutionDisplayed) {
                 R.string.quiz_result_sa_hide_sample_solution
             } else R.string.quiz_result_sa_show_sample_solution

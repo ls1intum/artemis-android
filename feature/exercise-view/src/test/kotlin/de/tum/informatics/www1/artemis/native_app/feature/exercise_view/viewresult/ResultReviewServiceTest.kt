@@ -133,6 +133,19 @@ class ResultReviewServiceTest {
         assertFalse(reviewExampleSolutionUrl(session.serverUrl, 9, 3).contains(session.authToken))
     }
 
+    @Test fun `redirected result details never forward the captured cookie or read submitted work`() = runBlocking {
+        var calls = 0
+        val engine = MockEngine { request ->
+            calls++
+            if (request.url.host == "artemis.example") respond("", HttpStatusCode.Found, headersOf(HttpHeaders.Location, "https://foreign.example/details"))
+            else respond("[]", HttpStatusCode.OK, headersOf(HttpHeaders.ContentType, "application/json"))
+        }
+        withService(engine) { service ->
+            try { service.load(session, TextExercise(id = 3), target); fail("Must reject redirect before leaving captured origin") }
+            catch (error: Exception) { assertEquals(1, calls) }
+        }
+    }
+
     private suspend fun withService(engine: MockEngine, block: suspend (ResultReviewService) -> Unit) {
         val client = HttpClient(engine) { expectSuccess = true; install(ContentNegotiation) { json(JsonProvider().applicationJsonConfiguration) } }
         try { block(ResultReviewService(object : KtorProvider { override val ktorClient = client })) }

@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.exerciseview.viewresu
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
+import de.tum.informatics.www1.artemis.native_app.core.data.service.studentReviewGet
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ModelingExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExercise
@@ -16,20 +17,12 @@ import io.ktor.http.appendPathSegments
 import io.ktor.http.isSuccess
 
 internal data class ReviewContent(val submission: ReviewSubmission?, val feedback: List<ReviewFeedback>)
-internal class ReviewHttpException(val status: Int) : Exception("Result review HTTP $status")
+internal typealias ReviewHttpException = de.tum.informatics.www1.artemis.native_app.core.data.service.StudentReviewHttpException
 
 /** Every read uses one immutable account/server snapshot, including lazy long output and commit files. */
 internal class ResultReviewService(private val ktorProvider: KtorProvider) {
     private suspend inline fun <reified T> read(session: ArtemisContext.LoggedIn, vararg path: String, query: Map<String, String> = emptyMap()): T {
-        val response = ktorProvider.ktorClient.get(session.serverUrl) {
-            cookieAuth(session.authToken)
-            url {
-                appendPathSegments(*path)
-                query.forEach { (key, value) -> parameters.append(key, value) }
-            }
-        }
-        if (!response.status.isSuccess()) throw ReviewHttpException(response.status.value)
-        return response.body()
+        return ktorProvider.studentReviewGet(session.serverUrl, session.authToken, *path, query = query)
     }
 
     suspend fun load(session: ArtemisContext.LoggedIn, exercise: Exercise, target: ReviewTarget): ReviewContent {
