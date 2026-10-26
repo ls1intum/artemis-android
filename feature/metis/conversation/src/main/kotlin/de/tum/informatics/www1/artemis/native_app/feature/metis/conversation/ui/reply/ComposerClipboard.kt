@@ -1,9 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply
 
+import android.annotation.SuppressLint
 import android.content.ClipData
 import android.os.PersistableBundle
+import androidx.compose.ui.platform.AndroidClipboard
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.Clipboard
+import androidx.compose.ui.platform.nativeClipboardManager
 import androidx.compose.ui.text.input.TextFieldValue
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.util.MarkdownDocument
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.util.MarkdownEditEngine
@@ -11,13 +14,16 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import java.util.UUID
 
 /** Keep Android's selection menu and readable clipboard text, with a Markdown companion for Artemis. */
+@SuppressLint("VisibleForTests") // Compose requires this platform interface for native clipboard metadata access.
 internal class ComposerClipboard(
     private val delegate: Clipboard,
     private val currentValue: () -> TextFieldValue,
-) : Clipboard {
+) : AndroidClipboard {
     private data class Paste(val source: TextFieldValue, val markdown: String, val plainText: String, val token: String, val expected: String)
     private val pendingPastes = ArrayDeque<Paste>()
-    override val nativeClipboard get() = delegate.nativeClipboard
+    // Compose's native selection menu queries Android clipboard metadata directly.
+    // A generic Clipboard wrapper crashes before the Copy/Paste menu can open.
+    override val clipboardManager get() = delegate.nativeClipboardManager
 
     override suspend fun setClipEntry(clipEntry: ClipEntry?) {
         if (clipEntry == null) { delegate.setClipEntry(null); return }

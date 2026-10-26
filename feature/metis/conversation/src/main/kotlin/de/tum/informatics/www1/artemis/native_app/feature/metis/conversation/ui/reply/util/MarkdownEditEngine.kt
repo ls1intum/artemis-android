@@ -236,12 +236,14 @@ internal object MarkdownEditEngine {
 
     fun toggleCodeBlock(current: TextFieldValue): TextFieldValue {
         val p = MarkdownPresentation.parse(current.text)
-        var range = snapAtoms(p, visibleValue(current).selection)
+        val visible = visibleValue(current)
+        val selection = snapAtoms(p, visible.selection)
+        var range = selection
         val code = p.spans.firstOrNull { it.style == MarkdownStyle.CodeBlock && current.selection.min in it.contentStart..it.contentEnd }
         if (code != null) range = p.visibleRange(code)
         else {
-                val start = p.text.lastIndexOf('\n', range.start - 1) + 1
-                val end = p.text.indexOf('\n', range.end).let { if (it < 0) p.text.length else it }
+                val start = p.text.lastIndexOf('\n', range.min - 1) + 1
+                val end = p.text.indexOf('\n', range.max).let { if (it < 0) p.text.length else it }
                 range = TextRange(start, end)
         }
         val glyphs = MarkdownDocument.glyphs(p)
@@ -255,7 +257,8 @@ internal object MarkdownEditEngine {
         }
         val remove = selected.all { MarkdownStyle.CodeBlock in it.marks }
         val changed = selected.map { it.copy(marks = if (remove) it.marks - MarkdownStyle.CodeBlock else setOf(MarkdownStyle.CodeBlock), link = null) }
-        return replace(p, range.min, range.max, changed, range, null, emptySet())
+        return replace(p, range.min, range.max, changed, selection, visible.composition,
+            if (remove) emptySet() else setOf(MarkdownStyle.CodeBlock))
     }
 
     fun isActive(style: MarkdownStyle, current: TextFieldValue): Boolean {
