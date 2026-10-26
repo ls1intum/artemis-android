@@ -10,6 +10,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.*
 import androidx.navigation.compose.*
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
@@ -18,27 +21,26 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ProvideReviewImages
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.QuizQuestionBody
 import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
-@Serializable private data class QuizTrainingRoute(val courseId: Long)
+@Serializable private data class QuizTrainingRoute(val courseId: Long, val scorePrecision: Int = 1)
 
-fun NavController.navigateToQuizTraining(courseId: Long) {
-    navigate(QuizTrainingRoute(courseId))
+fun NavController.navigateToQuizTraining(courseId: Long, scorePrecision: Int) {
+    navigate(QuizTrainingRoute(courseId, scorePrecision))
 }
 
 fun NavGraphBuilder.quizTraining() {
     animatedComposable<QuizTrainingRoute> { entry ->
         val route = entry.toRoute<QuizTrainingRoute>()
         val vm: QuizTrainingViewModel = koinViewModel { parametersOf(route.courseId) }
-        QuizTrainingScreens(vm)
+        QuizTrainingScreens(vm, route.scorePrecision)
     }
 }
 
 @Composable
-private fun QuizTrainingScreens(vm: QuizTrainingViewModel) {
+private fun QuizTrainingScreens(vm: QuizTrainingViewModel, scorePrecision: Int) {
     val state by vm.session.state.collectAsState()
     val pages = rememberNavController()
     Scaffold(
@@ -73,7 +75,12 @@ private fun QuizTrainingScreens(vm: QuizTrainingViewModel) {
                         )
                     }
                     composable("session") {
-                        TrainingSessionPage(state, vm, onFinish = { pages.popBackStack() })
+                        TrainingSessionPage(
+                            state,
+                            vm,
+                            scorePrecision,
+                            onFinish = { pages.popBackStack() },
+                        )
                     }
                 }
             }
@@ -87,6 +94,14 @@ private fun TrainingOverviewPage(
     vm: QuizTrainingViewModel,
     onStart: () -> Unit,
 ) {
+    val owner = LocalLifecycleOwner.current
+    DisposableEffect(owner, vm) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) vm.act { onOverviewResumed() }
+        }
+        owner.lifecycle.addObserver(observer)
+        onDispose { owner.lifecycle.removeObserver(observer) }
+    }
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -166,9 +181,7 @@ private fun TrainingOverviewPage(
                 Text(stringResource(R.string.training_leaderboard))
             }
             if (expanded) {
-                overview.currentUserEntry?.selectedLeague?.let {
-                    Text(stringResource(R.string.training_league, it))
-                }
+                overview.currentUserEntry?.let { TrainingLeaderboardContext(it) }
                 if (overview.leaderboardEntries.isEmpty())
                     Text(stringResource(R.string.training_no_ranking))
                 overview.leaderboardEntries.forEach { entry ->
@@ -190,6 +203,7 @@ private fun TrainingOverviewPage(
 private fun TrainingSessionPage(
     state: TrainingState,
     vm: QuizTrainingViewModel,
+    scorePrecision: Int,
     onFinish: () -> Unit,
 ) {
     Column(
@@ -269,12 +283,7 @@ private fun TrainingSessionPage(
                     )
                     if (trainingQuestionSupported(current.quizQuestionWithSolutionDTO)) {
                         key(current.quizQuestionWithSolutionDTO.id, state.evaluation != null) {
-                            QuizQuestionBody(
-                                Modifier.fillMaxWidth(),
-                                state.answered - (if (state.evaluation != null) 1 else 0),
-                                state.evaluation?.let(::trainingResultData)
-                                    ?: trainingEditableData(state, vm.session),
-                            )
+                            TrainingQuestionContent(state, vm.session, scorePrecision)
                         }
                         if (state.stage == TrainingStage.ANSWERING)
                             Button(

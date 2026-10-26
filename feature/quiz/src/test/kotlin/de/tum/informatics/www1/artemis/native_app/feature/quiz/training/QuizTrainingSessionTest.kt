@@ -22,13 +22,19 @@ class QuizTrainingSessionTest {
 
         var waitOverview: CompletableDeferred<Unit>? = null
         var hasSettings = false
+        var overviewScore = 0.0
+        var failOverview = false
         var failSettings = false
         var waitSettings: CompletableDeferred<Unit>? = null
         val privacyWrites = mutableListOf<Boolean>()
 
         override suspend fun loadOverview(): TrainingOverview {
             waitOverview?.await()
-            return TrainingOverview(hasUserSetSettings = hasSettings)
+            if (failOverview) error("overview unavailable")
+            return TrainingOverview(
+                hasUserSetSettings = hasSettings,
+                currentUserEntry = TrainingEntry(score = overviewScore),
+            )
         }
 
         override suspend fun loadSettings(): TrainingPrivacy {
@@ -427,4 +433,114 @@ class QuizTrainingSessionTest {
         assertEquals(listOf(true), api.privacyWrites)
         assertEquals(true, s.state.value.privacy?.showInLeaderboard)
     }
+
+    @Test
+    fun `mixed rating pages fail before accepting equal snapshots or any current question`() =
+        runBlocking {
+            for ((ratedSnapshot, unratedSnapshot) in
+                listOf(listOf(80L, 90L) to listOf(80L, 90L), null to emptyList<Long>())) {
+                val api = Api()
+                api.pages +=
+                    page(question(1, true, ratedSnapshot), question(2, false, unratedSnapshot))
+                api.pages += page(question(3, true, listOf(7)))
+                val s = QuizTrainingSession(api)
+                s.start()
+                assertEquals(TrainingStage.PAGE_ERROR, s.state.value.stage)
+                assertNull(s.state.value.current)
+                s.retryPage()
+                assertEquals(TrainingPageRequest(), api.requests.last())
+                assertEquals(3L, s.state.value.current!!.quizQuestionWithSolutionDTO.id)
+                assertTrue(api.submissions.isEmpty())
+            }
+        }
+
+    @Test
+    fun `overview reentry refresh preserves confirmed work and original onboarding even after read failure`() =
+        runBlocking {
+            val api = Api()
+            api.pages += page(question(1))
+            val s = QuizTrainingSession(api)
+            s.loadOverview()
+            s.start()
+            s.selectOption(100, true)
+            s.submit()
+            s.finish()
+            val confirmed = s.state.value.evaluation
+            val draft = s.state.value.draft
+            api.hasSettings = true
+            api.overviewScore = 2.0
+            s.onOverviewResumed()
+            assertEquals(2.0, s.state.value.overview!!.currentUserEntry!!.score)
+            assertEquals(false, s.state.value.overview!!.hasUserSetSettings)
+            assertSame(confirmed, s.state.value.evaluation)
+            assertEquals(draft, s.state.value.draft)
+            api.failOverview = true
+            s.onOverviewResumed()
+            assertTrue(s.state.value.overviewError)
+            assertSame(confirmed, s.state.value.evaluation)
+            assertEquals(1, api.submissions.size)
+        }
+
+    @Test
+    fun `accessible setters retain exact drag member and blank IDs and ignore unavailable members`() =
+        runBlocking {
+            val api = Api()
+            val dnd =
+                DragAndDropQuizQuestion(
+                    id = 41,
+                    dragItems =
+                        listOf(
+                            DragAndDropQuizQuestion.DragItem(id = 501, text = "Alpha"),
+                            DragAndDropQuizQuestion.DragItem(id = 502, text = "Beta"),
+                        ),
+                    dropLocations =
+                        listOf(
+                            DragAndDropQuizQuestion.DropLocation(id = 91),
+                            DragAndDropQuizQuestion.DropLocation(id = 92),
+                        ),
+                )
+            val sa =
+                ShortAnswerQuizQuestion(
+                    id = 42,
+                    spots = listOf(ShortAnswerQuizQuestion.ShortAnswerSpot(id = 913, spotNr = 1)),
+                )
+            api.pages +=
+                TrainingPage(
+                    listOf(
+                        TrainingQuestion(dnd, true, emptyList()),
+                        TrainingQuestion(sa, true, emptyList()),
+                    ),
+                    false,
+                )
+            val s = QuizTrainingSession(api)
+            s.start()
+            s.moveItem(501, 91)
+            s.moveItem(501, 92)
+            s.moveItem(999, 91)
+            s.moveItem(502, 999)
+            assertEquals(mapOf(92L to 501L), s.state.value.draft.mappings)
+            val mapping =
+                trainingPayload(dnd, s.state.value.draft)["mappings"]!!
+                    .jsonArray
+                    .single()
+                    .jsonObject
+            assertEquals(92L, mapping["dropLocation"]!!.jsonObject["id"]!!.jsonPrimitive.long)
+            assertEquals(501L, mapping["dragItem"]!!.jsonObject["id"]!!.jsonPrimitive.long)
+            s.clearDrop(92)
+            assertTrue(s.state.value.draft.mappings.isEmpty())
+            s.skipQuestion()
+            s.setText(913, "wrong member")
+            s.setText(1, "binary search")
+            assertEquals(mapOf(1 to "binary search"), s.state.value.draft.texts)
+            assertEquals(
+                913L,
+                trainingPayload(sa, s.state.value.draft)["submittedTexts"]!!
+                    .jsonArray
+                    .single()
+                    .jsonObject["spot"]!!
+                    .jsonObject["id"]!!
+                    .jsonPrimitive
+                    .long,
+            )
+        }
 }

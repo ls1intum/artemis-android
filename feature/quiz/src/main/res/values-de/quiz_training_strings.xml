@@ -59,4 +59,17 @@
         <item quantity="one">Du hast eine Frage beantwortet. Das ist ein guter Zeitpunkt für eine Pause. Du kannst auch mit weiteren Fragen fortfahren.</item>
         <item quantity="other">Du hast %1$d Fragen beantwortet. Das ist ein guter Zeitpunkt für eine Pause. Du kannst auch mit weiteren Fragen fortfahren.</item>
     </plurals>
+    <string name="training_blank_label">Lücke %1$d</string>
+    <string name="training_assign_without_drag">Elemente ohne Ziehen zuordnen</string>
+    <string name="training_target_position">Position: %1$.0f %% vom linken Rand, %2$.0f %% vom oberen Rand</string>
+    <string name="training_target_selection">Ziel %1$d: %2$s</string>
+    <string name="training_image_item">Bildelement %1$d</string>
+    <string name="training_empty_target">Leer</string>
+    <string name="training_leave_empty">Leer lassen</string>
+    <string name="training_league_master">Master</string>
+    <string name="training_league_diamond">Diamant</string>
+    <string name="training_league_gold">Gold</string>
+    <string name="training_league_silver">Silber</string>
+    <string name="training_league_bronze">Bronze</string>
+    <string name="training_own_rank">Dein Rang: %1$d</string>
 </resources>

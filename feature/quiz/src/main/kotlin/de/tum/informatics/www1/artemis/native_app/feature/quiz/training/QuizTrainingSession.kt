@@ -42,6 +42,8 @@ internal class QuizTrainingSession(private val api: QuizTrainingApi) {
         change { TrainingState(stage = TrainingStage.ACCESS_LOST) }
     }
 
+    suspend fun onOverviewResumed() = loadOverview()
+
     suspend fun loadOverview() {
         if (overviewLoading || state.value.stage == TrainingStage.ACCESS_LOST) return
         overviewLoading = true
@@ -149,6 +151,7 @@ internal class QuizTrainingSession(private val api: QuizTrainingApi) {
                 }
                 return
             }
+            require(result.questions.map { it.isRated }.distinct().size <= 1)
             require(result.questions.isNotEmpty() || !result.hasNext)
             val first = result.questions.firstOrNull()
             if (request.page == 0 && first != null) {
@@ -248,22 +251,28 @@ internal class QuizTrainingSession(private val api: QuizTrainingApi) {
     }
 
     fun setText(spot: Int, text: String) {
-        if (state.value.stage == TrainingStage.ANSWERING)
-            change { it.copy(draft = it.draft.copy(texts = it.draft.texts + (spot to text))) }
+        if (state.value.stage != TrainingStage.ANSWERING) return
+        val question =
+            state.value.current?.quizQuestionWithSolutionDTO as? ShortAnswerQuizQuestion ?: return
+        if (question.spots.none { it.spotNr == spot && it.id != null }) return
+        change { it.copy(draft = it.draft.copy(texts = it.draft.texts + (spot to text))) }
     }
 
     fun moveItem(item: Long, drop: Long) {
-        if (state.value.stage == TrainingStage.ANSWERING)
-            change {
-                it.copy(
-                    draft =
-                        it.draft.copy(
-                            mappings =
-                                it.draft.mappings.filterValues { value -> value != item } +
-                                    (drop to item)
-                        )
-                )
-            }
+        if (state.value.stage != TrainingStage.ANSWERING) return
+        val question =
+            state.value.current?.quizQuestionWithSolutionDTO as? DragAndDropQuizQuestion ?: return
+        if (item !in question.dragItemById || drop !in question.dropLocationById) return
+        change {
+            it.copy(
+                draft =
+                    it.draft.copy(
+                        mappings =
+                            it.draft.mappings.filterValues { value -> value != item } +
+                                (drop to item)
+                    )
+            )
+        }
     }
 
     fun clearDrop(drop: Long) {
@@ -273,6 +282,9 @@ internal class QuizTrainingSession(private val api: QuizTrainingApi) {
 
     fun swapDrops(old: Long, new: Long) {
         if (state.value.stage != TrainingStage.ANSWERING) return
+        val question =
+            state.value.current?.quizQuestionWithSolutionDTO as? DragAndDropQuizQuestion ?: return
+        if (old !in question.dropLocationById || new !in question.dropLocationById) return
         val mappings = state.value.draft.mappings
         val item = mappings[old] ?: return
         val other = mappings[new]

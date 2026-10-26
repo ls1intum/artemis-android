@@ -22,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.contentDescription
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.shortAnswerReviewOutcome
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.label
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.color
@@ -48,7 +49,8 @@ internal fun ShortAnswerQuizQuestionUi(
     modifier: Modifier,
     questionIndex: Int,
     data: QuizQuestionData.ShortAnswerData,
-    onRequestDisplayHint: () -> Unit
+    onRequestDisplayHint: () -> Unit,
+    blankLabel: ((Int) -> String)? = null,
 ) {
     var isSampleSolutionDisplayed by remember { mutableStateOf(false) }
 
@@ -75,11 +77,12 @@ internal fun ShortAnswerQuizQuestionUi(
         }
     } else data.solutionTexts
 
-    val inlineContentMap = remember(question, solutionTexts, data, isSampleSolutionDisplayed) {
+    val inlineContentMap = remember(question, solutionTexts, data, isSampleSolutionDisplayed, blankLabel) {
         val maxSpotNr = question.spots.maxOfOrNull { it.spotNr ?: 0 } ?: 0
         question.spots.associate { spot ->
             val spotNr = spot.spotNr ?: 0
             val key = spotNr.toString()
+            val accessibleBlankLabel = blankLabel?.invoke(spotNr)
             val value = InlineTextContent(
                 placeholder = Placeholder(
                     width = (spot.width ?: 10).em,
@@ -96,7 +99,10 @@ internal fun ShortAnswerQuizQuestionUi(
                     BasicTextField(
                         modifier = Modifier
                             .fillMaxSize()
-                            .semantics { outcomeLabel?.let { stateDescription = it } }
+                            .semantics {
+                                outcomeLabel?.let { stateDescription = it }
+                                accessibleBlankLabel?.let { contentDescription = it }
+                            }
                             .border(
                                 width = 1.dp,
                                 color = outline

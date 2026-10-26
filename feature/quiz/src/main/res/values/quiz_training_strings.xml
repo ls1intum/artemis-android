@@ -59,4 +59,17 @@
         <item quantity="one">You answered one question. This is a good place for a break. More questions are available if you want to continue.</item>
         <item quantity="other">You answered %1$d questions. This is a good place for a break. More questions are available if you want to continue.</item>
     </plurals>
+    <string name="training_blank_label">Blank %1$d</string>
+    <string name="training_assign_without_drag">Assign items without dragging</string>
+    <string name="training_target_position">Position: %1$.0f%% from left, %2$.0f%% from top</string>
+    <string name="training_target_selection">Target %1$d: %2$s</string>
+    <string name="training_image_item">Image item %1$d</string>
+    <string name="training_empty_target">Empty</string>
+    <string name="training_leave_empty">Leave empty</string>
+    <string name="training_league_master">Master</string>
+    <string name="training_league_diamond">Diamond</string>
+    <string name="training_league_gold">Gold</string>
+    <string name="training_league_silver">Silver</string>
+    <string name="training_league_bronze">Bronze</string>
+    <string name="training_own_rank">Your rank: %1$d</string>
 </resources>

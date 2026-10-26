@@ -99,7 +99,7 @@ fun NavGraphBuilder.course(
     onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
     onParticipateInQuiz: (courseId: Long, exerciseId: Long, isPractice: Boolean) -> Unit,
     onViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
-    onQuizTraining: (courseId: Long) -> Unit = {},
+    onQuizTraining: (courseId: Long, scorePrecision: Int) -> Unit = { _, _ -> },
     onNavigateToLecture: (courseId: Long, lectureId: Long) -> Unit,
     onNavigateToFaq: (faqId: Long) -> Unit,
     onNavigateBack: () -> Unit,
@@ -169,7 +169,7 @@ fun CourseUiScreen(
     onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
     onParticipateInQuiz: (exerciseId: Long, isPractice: Boolean) -> Unit,
     onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
-    onQuizTraining: (courseId: Long) -> Unit = {},
+    onQuizTraining: (courseId: Long, scorePrecision: Int) -> Unit = { _, _ -> },
     onNavigateToLecture: (lectureId: Long) -> Unit,
     onNavigateToFaq: (faqId: Long) -> Unit,
     onNavigateBack: () -> Unit,
@@ -254,7 +254,7 @@ internal fun CourseUiScreen(
     onParticipateInQuiz: (exerciseId: Long, isPractice: Boolean) -> Unit,
     onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
     onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
-    onQuizTraining: (courseId: Long) -> Unit = {},
+    onQuizTraining: (courseId: Long, scorePrecision: Int) -> Unit = { _, _ -> },
     onNavigateToLecture: (lectureId: Long) -> Unit,
     onClickStartTextExercise: (exerciseId: Long) -> Unit,
     onNavigateToFaq: (faqId: Long) -> Unit,
@@ -322,8 +322,12 @@ internal fun CourseUiScreen(
             scaffold(exerciseSearchConfiguration) {
                 Column(Modifier.fillMaxSize()) {
                     OutlinedButton(
-                        onClick = { onQuizTraining(courseId) },
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
+                        onClick = {
+                            val precision = (courseDataState as? DataState.Success)?.data?.accuracyOfScores?.toInt() ?: 1
+                            onQuizTraining(courseId, precision)
+                        },
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                        enabled = courseDataState is DataState.Success
                     ) {
                         Text(stringResource(R.string.course_quiz_training))
                     }

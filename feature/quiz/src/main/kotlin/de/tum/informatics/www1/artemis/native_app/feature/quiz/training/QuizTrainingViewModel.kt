@@ -49,7 +49,6 @@ internal class QuizTrainingViewModel(
                     session.invalidate()
             }
         }
-        act { loadOverview() }
     }
 
     fun act(action: suspend QuizTrainingSession.() -> Unit) {
