@@ -108,7 +108,8 @@ fun LectureDetailContent(
     initialAttachmentId: Int? = null,
     initialPage: Int? = null,
     displayedCourseId: Long? = null,
-    initialResolvedAttachment: Attachment? = null
+    initialResolvedAttachment: Attachment? = null,
+    onRetryMediaReference: (() -> Unit)? = null
 ) {
     val session by LocalArtemisContextProvider.current.collectArtemisContextAsState()
     val account = (session as? ArtemisContext.LoggedIn)?.loginName.orEmpty()
@@ -136,7 +137,8 @@ fun LectureDetailContent(
             initialAttachmentId = initialAttachmentId,
             initialPage = initialPage,
             displayedCourseId = displayedCourseId,
-            initialResolvedAttachment = initialResolvedAttachment
+            initialResolvedAttachment = initialResolvedAttachment,
+            onRetryMediaReference = onRetryMediaReference
         )
     }
 }
@@ -151,7 +153,8 @@ internal fun LectureScreen(
     initialAttachmentId: Int? = null,
     initialPage: Int? = null,
     displayedCourseId: Long? = null,
-    initialResolvedAttachment: Attachment? = null
+    initialResolvedAttachment: Attachment? = null,
+    onRetryMediaReference: (() -> Unit)? = null
 ) {
     val lectureDataState by viewModel.lectureDataState.collectAsState()
     val serverUrl by viewModel.serverUrl.collectAsState()
@@ -174,7 +177,8 @@ internal fun LectureScreen(
         initialPage = initialPage,
         unitsLoaded = unitsLoaded,
         displayedCourseId = displayedCourseId,
-        initialResolvedAttachment = initialResolvedAttachment
+        initialResolvedAttachment = initialResolvedAttachment,
+        onRetryMediaReference = onRetryMediaReference
     )
 }
 
@@ -194,7 +198,8 @@ internal fun LectureScreen(
     initialPage: Int? = null,
     unitsLoaded: Boolean = true,
     displayedCourseId: Long? = null,
-    initialResolvedAttachment: Attachment? = null
+    initialResolvedAttachment: Attachment? = null,
+    onRetryMediaReference: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
     val linkOpener = LocalLinkOpener.current
@@ -202,25 +207,31 @@ internal fun LectureScreen(
     val lectureTitle = lectureDataState.bind<String?> { it.title }.orElse(null)
 
     // Set if the user clicked on a file attachment.
-    var pendingAttachmentId: Int? by rememberSaveable { mutableStateOf(null) }
+    val attachmentDispatch = rememberSaveable(saver = LectureAttachmentDispatch.Saver) { LectureAttachmentDispatch() }
     val loadedLecture = (lectureDataState as? DataState.Success)?.data
-    var useResolvedDocument by remember { mutableStateOf(false) }
-    val pendingOpenFileAttachment = if (useResolvedDocument && initialResolvedAttachment?.id == pendingAttachmentId) initialResolvedAttachment else (loadedLecture?.attachments.orEmpty() + lectureUnits.filterIsInstance<LectureUnitAttachmentVideo>().mapNotNull { it.attachment })
-        .firstOrNull { it.id == pendingAttachmentId }
+    val pendingOpenFileAttachment = attachmentDispatch.resolve(
+        initialResolvedAttachment, initialPage,
+        loadedLecture?.attachments.orEmpty() + lectureUnits.filterIsInstance<LectureUnitAttachmentVideo>().mapNotNull { it.attachment }
+    )
     var pendingOpenFileAttachmentByUrl: String? by rememberSaveable { mutableStateOf(null) }
-    var pendingPage: Int? by rememberSaveable { mutableStateOf(null) }
     var requestedUnitId: Long? by rememberSaveable { mutableStateOf(null) }
     var missingTarget by rememberSaveable { mutableStateOf(false) }
     var targetHandled by rememberSaveable(initialUnitId, initialAttachmentId, initialPage) { mutableStateOf(false) }
     LaunchedEffect(loadedLecture, lectureUnits, unitsLoaded, targetHandled) {
         if (!targetHandled && loadedLecture != null && unitsLoaded && (initialUnitId != null || initialAttachmentId != null)) {
-            when (val target = resolveLectureMediaTarget(loadedLecture, lectureUnits, initialUnitId, initialAttachmentId, initialPage)) {
+            if (initialResolvedAttachment != null) {
+                attachmentDispatch.openTarget(initialResolvedAttachment, initialResolvedAttachment, initialPage)
+            } else when (val target = resolveLectureMediaTarget(loadedLecture, lectureUnits, initialUnitId, initialAttachmentId, initialPage)) {
                 is LectureMediaDestination.Unit -> requestedUnitId = target.unit.id
-                is LectureMediaDestination.Slides -> { useResolvedDocument = initialResolvedAttachment != null; pendingAttachmentId = target.attachment.id; pendingPage = target.page }
+                is LectureMediaDestination.Slides -> attachmentDispatch.openTarget(target.attachment, null, target.page)
                 LectureMediaDestination.Missing -> missingTarget = true
             }
             targetHandled = true
         }
+    }
+
+    LaunchedEffect(attachmentDispatch.pending, initialResolvedAttachment, initialPage) {
+        if (attachmentDispatch.pending?.requiresSnapshot == true && pendingOpenFileAttachment == null) missingTarget = true
     }
 
     var pendingOpenLink: String? by remember { mutableStateOf(null) }
@@ -280,7 +291,7 @@ internal fun LectureScreen(
                 onRequestViewLink = { pendingOpenLink = it },
                 onRequestOpenAttachment = {
                     if (it.link.isNullOrBlank() && it.studentVersion.isNullOrBlank()) missingTarget = true
-                    else { useResolvedDocument = false; pendingAttachmentId = it.id; pendingPage = null }
+                    else attachmentDispatch.openTarget(it, null, null)
                 },
                 onDisplaySetCompletedFailureDialog = {
                     displaySetCompletedFailureDialog = true
@@ -309,8 +320,8 @@ internal fun LectureScreen(
 
                 AttachmentHandler(
                     url = formattedUrl,
-                    onDismiss = { pendingAttachmentId = null; pendingPage = null; useResolvedDocument = false },
-                    initialPage = pendingPage,
+                    onDismiss = { attachmentDispatch.clear() },
+                    initialPage = attachmentDispatch.pending?.page,
                     mediaIdentity = "lecture/${loadedLecture?.id}/attachment/${currentPendingOpenFileAttachment.id}"
                 )
             }
@@ -321,7 +332,12 @@ internal fun LectureScreen(
                     text = stringResource(CoreR.string.lecture_media_access_recovery),
                     confirmButtonText = stringResource(CoreR.string.lecture_media_retry),
                     dismissButtonText = stringResource(CoreR.string.lecture_media_close),
-                    onPressPositiveButton = { missingTarget = false; targetHandled = false; onReloadLecture() },
+                    onPressPositiveButton = {
+                        missingTarget = false
+                        attachmentDispatch.clear()
+                        targetHandled = false
+                        if (onRetryMediaReference != null) onRetryMediaReference() else onReloadLecture()
+                    },
                     onDismissRequest = { missingTarget = false }
                 )
             }

@@ -130,7 +130,9 @@ class PdfCacheOwnershipTest {
         } finally { scope.cancel(); server.stop(0) }
     }
 
-    private fun fixturePdf(pageCount: Int): ByteArray {
+
+}
+internal fun fixturePdf(pageCount: Int): ByteArray {
         val buffer = java.io.ByteArrayOutputStream()
         val offsets = mutableListOf(0)
         buffer.write("%PDF-1.4\n".toByteArray())
@@ -147,7 +149,6 @@ class PdfCacheOwnershipTest {
         return buffer.toByteArray()
     }
 
-}
 
 /** Deterministic PDF geometry for the viewport/cache tests. Network, files, reader state and share
  * provider remain real; Robolectric has no working native PDF page-count implementation here. */
@@ -168,5 +169,6 @@ class FixturePdfRendererShadow {
 class FixturePdfPageShadow {
     @org.robolectric.annotation.Implementation fun getWidth(): Int = 200
     @org.robolectric.annotation.Implementation fun getHeight(): Int = 300
+    @org.robolectric.annotation.Implementation fun render(bitmap: android.graphics.Bitmap, clip: android.graphics.Rect?, matrix: android.graphics.Matrix?, mode: Int) {}
     @org.robolectric.annotation.Implementation fun close() {}
 }

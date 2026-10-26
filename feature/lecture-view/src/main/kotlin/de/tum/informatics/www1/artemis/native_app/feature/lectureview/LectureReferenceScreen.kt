@@ -56,6 +56,7 @@ private fun LectureReferenceContent(route: LectureReferenceRoute, session: Artem
             initialAttachmentId = current.data.attachmentId,
             initialPage = current.data.page,
             initialResolvedAttachment = current.data.document,
+            onRetryMediaReference = { attempt++ },
             displayedCourseId = route.courseId
         )
         else -> Scaffold(topBar = { Row { NavigationBackButton() } }) { padding ->
