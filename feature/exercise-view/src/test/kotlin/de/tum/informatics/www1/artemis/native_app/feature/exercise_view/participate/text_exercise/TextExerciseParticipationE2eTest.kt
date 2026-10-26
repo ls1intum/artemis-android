@@ -19,12 +19,11 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.TextSubmission
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.R
-import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.participate.textexercise.SyncState
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.participate.textexercise.TEST_TAG_TEXT_FIELD_PARTICIPATION
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.participate.textexercise.TextExerciseParticipationScreen
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.participate.textexercise.TextExerciseParticipationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.service.TextSubmissionService
-import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
@@ -107,12 +106,10 @@ class TextExerciseParticipationE2eTest : BaseExerciseTest() {
             .onNodeWithText(context.getString(R.string.participate_text_exercise_submit_button))
             .performClick()
 
-        // Advance time to continue with the syncing
-        testDispatcher.scheduler.advanceTimeBy(TextExerciseParticipationViewModel.SyncDelay * 2)
 
         runBlocking {
             withTimeoutOrNull(DefaultTimeoutMillis) {
-                viewModel.syncState.filterIsInstance<SyncState.Synced>().first()
+                viewModel.state.filter { it.isSubmitted && !it.submitting }.first()
             } ?: throw RuntimeException("State could not be synced in time.")
         }
 
@@ -127,7 +124,8 @@ class TextExerciseParticipationE2eTest : BaseExerciseTest() {
             participationId = participation.id!!,
             textSubmissionService = get(),
             textEditorService = get(),
-            networkStatusProvider = get(),
+            contextProvider = get(),
+            draftStore = get(),
             coroutineContext = testDispatcher
         )
 
