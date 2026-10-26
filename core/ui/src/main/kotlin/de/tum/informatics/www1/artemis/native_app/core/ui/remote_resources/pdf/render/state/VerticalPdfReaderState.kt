@@ -15,6 +15,9 @@ class VerticalPdfReaderState(
     internal var lazyState: LazyListState = LazyListState()
         private set
 
+    /** The first visible page, used by an embedded review rather than the last fully visible page. */
+    val firstVisiblePage: Int get() = if (pdfPageCount == 0) 0 else (lazyState.firstVisibleItemIndex + 1).coerceAtMost(pdfPageCount)
+
     override var currentPage: Int = currentPage()
         get() = currentPage()
 

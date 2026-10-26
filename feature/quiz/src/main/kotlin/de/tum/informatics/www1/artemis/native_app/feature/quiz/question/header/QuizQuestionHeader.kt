@@ -41,7 +41,7 @@ internal sealed interface QuizQuestionHeaderType {
     ) : QuizQuestionHeaderType
 
     data class Result(
-        val achievedPoints: Double,
+        val achievedPoints: Double?,
         val hint: String?
     ) : QuizQuestionHeaderType
 }
@@ -131,7 +131,7 @@ private fun ScoreInfo(
             }
 
             val achievedPointsFormatted = remember(type.achievedPoints) {
-                QuizQuestionPointsDecimalFormat.format(type.achievedPoints)
+                type.achievedPoints?.let { QuizQuestionPointsDecimalFormat.format(it) } ?: "–"
             }
 
             val isCorrect = type.achievedPoints == points
@@ -140,7 +140,7 @@ private fun ScoreInfo(
                 id = R.string.quiz_result_question_header_points,
                 achievedPointsFormatted,
                 maxPointsFormatted
-            ) to if (isCorrect) ExerciseColors.Result.success else ExerciseColors.Result.medium
+            ) to if (type.achievedPoints == null) LocalTextStyle.current.color else if (isCorrect) ExerciseColors.Result.success else ExerciseColors.Result.medium
         }
     }
 

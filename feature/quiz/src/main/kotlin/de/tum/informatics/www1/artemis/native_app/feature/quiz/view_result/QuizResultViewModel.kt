@@ -125,7 +125,7 @@ internal class QuizResultViewModel(
 
                                 val data = ResultDragAndDropStorageData(
                                     value = value,
-                                    achievedPoints = submittedAnswer.scoreInPoints ?: 0.0
+                                    achievedPoints = submittedAnswer.scoreInPoints
                                 )
 
                                 question.id to data
@@ -156,7 +156,7 @@ internal class QuizResultViewModel(
 
                             val data = ResultMultipleChoiceStorageData(
                                 value = value,
-                                achievedPoints = submittedAnswer.scoreInPoints ?: 0.0
+                                achievedPoints = submittedAnswer.scoreInPoints
                             )
 
                             question.id to data
@@ -190,7 +190,7 @@ internal class QuizResultViewModel(
 
                             val data = ResultShortAnswerStorageData(
                                 value = value,
-                                achievedPoints = submittedAnswer.scoreInPoints ?: 0.0
+                                achievedPoints = submittedAnswer.scoreInPoints
                             )
 
                             question.id to data
@@ -212,7 +212,7 @@ internal class QuizResultViewModel(
             question = question,
             availableDragItems = availableDragItems,
             dropLocationMapping = dropLocationMapping,
-            achievedPoints = storageData?.achievedPoints ?: 0.0
+            achievedPoints = if (storageData == null) 0.0 else storageData.achievedPoints
         )
     }
 
@@ -226,7 +226,7 @@ internal class QuizResultViewModel(
         return QuizQuestionData.MultipleChoiceData.Result(
             question = question,
             optionSelectionMapping = optionSelectionMapping,
-            achievedPoints = storageData?.achievedPoints ?: 0.0
+            achievedPoints = if (storageData == null) 0.0 else storageData.achievedPoints
         )
     }
 
@@ -240,22 +240,22 @@ internal class QuizResultViewModel(
         return QuizQuestionData.ShortAnswerData.Result(
             question = question,
             solutionTexts = solutionTexts,
-            achievedPoints = storageData?.achievedPoints ?: 0.0
+            achievedPoints = if (storageData == null) 0.0 else storageData.achievedPoints
         )
     }
 
     data class ResultDragAndDropStorageData(
         override val value: Map<DropLocationId, DragItemId>,
-        val achievedPoints: Double
+        val achievedPoints: Double?
     ) : DragAndDropStorageData
 
     data class ResultMultipleChoiceStorageData(
         override val value: Map<AnswerOptionId, Boolean>,
-        val achievedPoints: Double
+        val achievedPoints: Double?
     ) : MultipleChoiceStorageData
 
     data class ResultShortAnswerStorageData(
         override val value: Map<Int, String>,
-        val achievedPoints: Double
+        val achievedPoints: Double?
     ) : ShortAnswerStorageData
 }

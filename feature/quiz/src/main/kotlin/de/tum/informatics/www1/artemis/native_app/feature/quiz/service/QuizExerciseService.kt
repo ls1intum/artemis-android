@@ -5,6 +5,16 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExerci
 
 internal interface QuizExerciseService {
 
+    /** Reads an evaluated attempt without starting or changing a participation. */
+    suspend fun findResultParticipation(
+        exerciseId: Long,
+        serverUrl: String,
+        authToken: String,
+        participationId: Long? = null,
+        submissionId: Int? = null,
+    ): NetworkResponse<de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation>
+
+
     /**
      * Find the quiz exercise with the given id, with information filtered for students
      * @param exerciseId the id of the quiz exercise that should be loaded

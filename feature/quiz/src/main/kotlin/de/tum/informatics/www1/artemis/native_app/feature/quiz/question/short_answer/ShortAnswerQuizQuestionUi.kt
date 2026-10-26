@@ -128,7 +128,7 @@ internal fun ShortAnswerQuizQuestionUi(
             inlineContent = inlineContentMap
         )
 
-        if (data is QuizQuestionData.ShortAnswerData.Result) {
+        if (data is QuizQuestionData.ShortAnswerData.Result && question.correctMappings != null) {
             val buttonText = if (isSampleSolutionDisplayed) {
                 R.string.quiz_result_sa_hide_sample_solution
             } else R.string.quiz_result_sa_show_sample_solution

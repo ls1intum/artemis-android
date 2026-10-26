@@ -1,0 +1,81 @@
+{
+  "id": "review-legacy-v2",
+  "version": "2.0.0",
+  "type": "ClassDiagram",
+  "size": {
+    "width": 640,
+    "height": 220
+  },
+  "elements": [
+    {
+      "id": "review-class-person",
+      "type": "Class",
+      "name": "Person",
+      "owner": null,
+      "bounds": {
+        "x": 40,
+        "y": 60,
+        "width": 220,
+        "height": 110
+      },
+      "attributes": [
+        "review-attribute-name"
+      ],
+      "methods": []
+    },
+    {
+      "id": "review-attribute-name",
+      "type": "ClassAttribute",
+      "name": "+ name: String",
+      "owner": "review-class-person",
+      "bounds": {
+        "x": 40,
+        "y": 90,
+        "width": 220,
+        "height": 30
+      }
+    },
+    {
+      "id": "review-class-course",
+      "type": "Class",
+      "name": "Course",
+      "owner": null,
+      "bounds": {
+        "x": 380,
+        "y": 60,
+        "width": 220,
+        "height": 90
+      },
+      "attributes": [],
+      "methods": []
+    }
+  ],
+  "relationships": [
+    {
+      "id": "review-enrolls",
+      "type": "ClassUnidirectional",
+      "name": "enrolls",
+      "owner": null,
+      "bounds": {
+        "x": 260,
+        "y": 110,
+        "width": 120,
+        "height": 0
+      },
+      "path": [],
+      "source": {
+        "element": "review-class-person",
+        "direction": "Right"
+      },
+      "target": {
+        "element": "review-class-course",
+        "direction": "Left"
+      }
+    }
+  ],
+  "assessments": [],
+  "interactive": {
+    "elements": [],
+    "relationships": []
+  }
+}

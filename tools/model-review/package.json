@@ -1,0 +1,28 @@
+{
+  "name": "artemis-offline-model-review",
+  "version": "1.0.0",
+  "description": "Offline read-only Apollon 5.3.1 model canvas for native result review",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test tests/core.test.mjs && playwright test",
+    "test:unit": "node --test tests/core.test.mjs",
+    "test:browser": "playwright test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "@tumaet/apollon": "5.3.1",
+    "@xyflow/react": "12.11.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "y-protocols": "1.0.7",
+    "yjs": "13.6.30"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "esbuild": "0.28.2"
+  },
+  "private": true
+}

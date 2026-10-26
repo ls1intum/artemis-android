@@ -39,7 +39,7 @@ internal fun MultipleChoiceQuizQuestionUi(
             question = data.question
         )
 
-        QuizQuestionInstructionText(
+        if (data is QuizQuestionData.MultipleChoiceData.Editable) QuizQuestionInstructionText(
             modifier = Modifier.fillMaxWidth(),
             instructionText = stringResource(
                 id = if (data.question.singleChoice) {
@@ -51,7 +51,7 @@ internal fun MultipleChoiceQuizQuestionUi(
         )
 
         val questionExplanation = data.question.explanation
-        if (data is QuizQuestionData.MultipleChoiceData.Result && questionExplanation != null) {
+        if (data is QuizQuestionData.MultipleChoiceData.Result && data.question.answerOptions.all { it.isCorrect != null } && questionExplanation != null) {
             ExplanationText(
                 modifier = Modifier.fillMaxWidth(),
                 explanation = questionExplanation

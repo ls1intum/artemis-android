@@ -50,18 +50,46 @@ internal abstract class BaseQuizViewModel<
     participationService: ParticipationService,
     private val coroutineContext: CoroutineContext
 ) : ReloadableViewModel() {
+    private var selectedResultAttempt: Pair<Long, Int>? = null
+    private var selectedResultSession: Pair<String, String>? = null
+
     /**
      * In live quizzes, a participation is loaded to get the exercise.
      */
     protected val initialParticipationDataState: StateFlow<DataState<Participation>> =
         when (quizType) {
-            QuizType.Live, QuizType.ViewResults ->
+            QuizType.Live ->
                 participationService.performAutoReloadingNetworkCall(
                     networkStatusProvider = networkStatusProvider,
                     manualReloadFlow = requestReload
                 ) {
                     findParticipation(exerciseId)
                 }
+
+            QuizType.ViewResults -> transformLatest(
+                serverConfigurationService.serverUrl,
+                accountService.authToken,
+                requestReload.onStart { emit(Unit) }
+            ) { serverUrl, token, _ ->
+                val session = serverUrl to token
+                if (selectedResultSession != session) {
+                    selectedResultAttempt = null
+                    selectedResultSession = session
+                }
+                emitAll(retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+                    quizExerciseService.findResultParticipation(
+                        exerciseId, serverUrl, token,
+                        selectedResultAttempt?.first, selectedResultAttempt?.second
+                    ).also { response ->
+                        if (response is de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse.Response && selectedResultSession == session) {
+                            val participation = response.data
+                            val pid = participation.id
+                            val sid = participation.quizSubmission?.id
+                            if (pid != null && sid != null) selectedResultAttempt = pid to sid
+                        }
+                    }
+                })
+            }
 
             QuizType.Practice, is QuizType.PracticeResults -> emptyFlow()
         }

@@ -80,7 +80,8 @@ fun MarkdownText(
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
     imageLoader: ImageLoader? = null,
-    linkResolver: LinkResolver? = null
+    linkResolver: LinkResolver? = null,
+    selectable: Boolean = false
 ) {
     val defaultColor: Color = LocalContentColor.current
     val context: Context = LocalContext.current
@@ -131,6 +132,7 @@ fun MarkdownText(
                 previousParsedMarkdown = parsedMarkdown
             }
 
+            textView.setTextIsSelectable(selectable)
             textView.movementMethod = LinkMovementMethod.getInstance()
 
             onClick?.let { textView.setOnClickListener { onClick() } }

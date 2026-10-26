@@ -108,7 +108,7 @@ internal fun ViewQuizResultScreen(
                 modifier = Modifier.fillMaxSize(),
                 quizQuestions = data.quizExercise.quizQuestions,
                 quizQuestionsWithData = data.quizQuestions,
-                achievedPoints = data.submission.scoreInPoints ?: 0.0,
+                achievedPoints = data.submission.scoreInPoints,
                 maxPoints = data.maxPoints,
                 quizTitle = data.quizExercise.title.orEmpty()
             )

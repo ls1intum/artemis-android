@@ -56,7 +56,7 @@ internal fun DragAndDropQuizQuestionBody(
                         && targetInfo.dragItem !in data.availableDragItems
             }
 
-            QuizQuestionInstructionText(
+            if (data is QuizQuestionData.DragAndDropData.Editable) QuizQuestionInstructionText(
                 modifier = Modifier.fillMaxWidth(),
                 instructionText = stringResource(id = R.string.quiz_participation_drag_and_drop_instruction)
             )
@@ -128,7 +128,7 @@ internal fun DragAndDropQuizQuestionBody(
                 )
             )
 
-            if (data is QuizQuestionData.DragAndDropData.Result) {
+            if (data is QuizQuestionData.DragAndDropData.Result && question.correctMappings != null) {
                 val buttonText = if (isSampleSolutionDisplayed) {
                     R.string.quiz_result_dnd_hide_sample_solution
                 } else R.string.quiz_result_dnd_show_sample_solution
@@ -188,6 +188,7 @@ private fun QuizQuestionData.DragAndDropData.getDragAndDropAreaType(
         }
         is QuizQuestionData.DragAndDropData.Result -> DragAndDropAreaType.ViewOnly(
             isSampleSolution = isSampleSolutionDisplayed,
+            solutionsAvailable = this.question.correctMappings != null,
             sampleSolutionMappings = sampleSolutionMappings
         )
     }

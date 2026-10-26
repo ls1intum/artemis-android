@@ -31,6 +31,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 internal sealed interface DragAndDropAreaType {
     data class ViewOnly(
         val isSampleSolution: Boolean,
+        val solutionsAvailable: Boolean = true,
         val sampleSolutionMappings: Map<DragAndDropQuizQuestion.DropLocation, DragAndDropQuizQuestion.DragItem>
     ) : DragAndDropAreaType
 
@@ -163,7 +164,7 @@ internal fun DragAndDropWorkArea(
 
                             is DragAndDropAreaType.ViewOnly -> {
                                 val isCorrect =
-                                    type.sampleSolutionMappings[dropLocation] == dropLocationMapping[dropLocation]
+                                    if (type.solutionsAvailable) type.sampleSolutionMappings[dropLocation] == dropLocationMapping[dropLocation] else null
                                 WorkAreaDropLocationType.ViewOnly(
                                     isCorrect = isCorrect,
                                     isDisplayingSampleSolution = type.isSampleSolution

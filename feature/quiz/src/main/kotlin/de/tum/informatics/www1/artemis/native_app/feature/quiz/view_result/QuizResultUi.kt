@@ -37,7 +37,7 @@ import java.text.DecimalFormat
 internal fun QuizResultUi(
     modifier: Modifier,
     quizTitle: String,
-    achievedPoints: Double,
+    achievedPoints: Double?,
     maxPoints: Double,
     quizQuestions: List<QuizQuestion>,
     quizQuestionsWithData: List<QuizQuestionData<*>>,
@@ -95,7 +95,7 @@ internal fun QuizResultUi(
                             .fillMaxWidth()
                             .border(
                                 width = 1.dp,
-                                color = if (isCorrect) ExerciseColors.Result.success else ExerciseColors.Result.medium
+                                color = if (questionWithData.achievedPoints == null) MaterialTheme.colorScheme.outline else if (isCorrect) ExerciseColors.Result.success else ExerciseColors.Result.medium
                             )
                             .padding(8.dp)
                     ) {
@@ -132,7 +132,7 @@ private fun QuizResultHeader(
 private fun QuizQuestionListHeader(
     modifier: Modifier,
     quizTitle: String,
-    achievedPoints: Double,
+    achievedPoints: Double?,
     maxPoints: Double
 ) {
     Column(modifier) {
@@ -150,9 +150,9 @@ private fun QuizQuestionListHeader(
 }
 
 @Composable
-private fun QuizScoreResultOverview(modifier: Modifier, achievedPoints: Double, maxPoints: Double) {
+private fun QuizScoreResultOverview(modifier: Modifier, achievedPoints: Double?, maxPoints: Double) {
     val achievedPointsFormatted = remember(achievedPoints) {
-        ExercisePointsDecimalFormat.format(achievedPoints)
+        achievedPoints?.let { ExercisePointsDecimalFormat.format(it) } ?: "–"
     }
 
     val maxPointsFormatted = remember(maxPoints) {
@@ -160,8 +160,8 @@ private fun QuizScoreResultOverview(modifier: Modifier, achievedPoints: Double, 
     }
 
     val percentFormatted = remember(achievedPoints, maxPoints) {
-        val percent = achievedPoints.toFloat() / maxPoints.toFloat()
-        DecimalFormat.getPercentInstance().format(percent)
+        val fraction = quizResultFraction(achievedPoints, maxPoints)
+        fraction?.let { DecimalFormat.getPercentInstance().format(it) } ?: "–"
     }
 
     Text(
@@ -176,3 +176,6 @@ private fun QuizScoreResultOverview(modifier: Modifier, achievedPoints: Double, 
         fontWeight = FontWeight.Bold
     )
 }
+/** Scores are absolute quiz points; an absent score or zero maximum has no percentage. */
+internal fun quizResultFraction(achievedPoints: Double?, maxPoints: Double): Double? =
+    achievedPoints?.takeIf { it.isFinite() && maxPoints.isFinite() && maxPoints > 0 }?.div(maxPoints)

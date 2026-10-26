@@ -1,0 +1,13 @@
+html,body,#canvas { width:100%; height:100%; margin:0; overflow:hidden; }
+html { color-scheme:light; background:#fff; color:#182230; font:15px/1.45 system-ui,sans-serif; }
+html[data-theme=dark] { color-scheme:dark; background:#161a22; color:#e5e7eb; }
+#canvas { position:absolute; inset:0; touch-action:none; user-select:none; -webkit-user-select:none; }
+#status { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; padding:24px; box-sizing:border-box; text-align:center; pointer-events:none; }
+#status[hidden] { display:none; }
+#status[role=alert] { background:inherit; }
+.apollon-editor { border:0!important; }
+/* The upstream dark-mode selector reads the mount element; inherit host changes. */
+html[data-theme=dark] #canvas { --apollon-background:#161a22; }
+/* Keep handle geometry measurable for edge routing, while hiding authoring affordances. */
+.react-flow__handle { opacity:0!important; pointer-events:none!important; }
+.react-flow__resize-control { visibility:hidden!important; pointer-events:none!important; }

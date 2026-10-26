@@ -39,6 +39,14 @@ fun `Quiz - Multiple Choice Question`() {
         quizType = QuizType.Live,
         savedStateHandle = SavedStateHandle(),
         quizExerciseService = object : QuizExerciseService {
+            override suspend fun findResultParticipation(
+                exerciseId: Long,
+                serverUrl: String,
+                authToken: String,
+                participationId: Long?,
+                submissionId: Int?,
+            ): NetworkResponse<Participation> = NetworkResponse.Failure(RuntimeException("Stub"))
+
             override suspend fun findForStudent(
                 exerciseId: Long,
                 serverUrl: String,

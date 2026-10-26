@@ -10,7 +10,7 @@ sealed class QuizQuestionData<T : QuizQuestion>(val question: T) {
     sealed interface EditableData
 
     sealed interface ResultData {
-        val achievedPoints: Double
+        val achievedPoints: Double?
     }
 
     sealed class ShortAnswerData(
@@ -26,7 +26,7 @@ sealed class QuizQuestionData<T : QuizQuestion>(val question: T) {
         class Result(
             question: ShortAnswerQuizQuestion,
             solutionTexts: Map<Int, String>,
-            override val achievedPoints: Double
+            override val achievedPoints: Double?
         ) : ShortAnswerData(question, solutionTexts), ResultData
     }
 
@@ -43,7 +43,7 @@ sealed class QuizQuestionData<T : QuizQuestion>(val question: T) {
         class Result(
             question: MultipleChoiceQuizQuestion,
             optionSelectionMapping: Map<Long, Boolean>,
-            override val achievedPoints: Double
+            override val achievedPoints: Double?
         ) : MultipleChoiceData(question, optionSelectionMapping), ResultData
     }
 
@@ -71,7 +71,7 @@ sealed class QuizQuestionData<T : QuizQuestion>(val question: T) {
             question: DragAndDropQuizQuestion,
             availableDragItems: List<DragAndDropQuizQuestion.DragItem>,
             dropLocationMapping: Map<DragAndDropQuizQuestion.DropLocation, DragAndDropQuizQuestion.DragItem>,
-            override val achievedPoints: Double
+            override val achievedPoints: Double?
         ) : DragAndDropData(
             question, availableDragItems, dropLocationMapping
         ), ResultData

@@ -6,9 +6,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.currentUserPoints
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.currentUserScore
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.formatExerciseResultScore
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.formatExercisePoints
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.label
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExercisePointsDecimalFormat
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ProvideDefaultExerciseTemplateStatus
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ExerciseColors
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.R
@@ -24,9 +25,9 @@ object ExerciseOverviewChipUtil {
         return buildList {
             // Points
             exercise.maxPoints?.let { max ->
-                val currentUserPoints =
-                    exercise.currentUserPoints.let(ExercisePointsDecimalFormat::format)
-                val maxPoints = max.let(ExercisePointsDecimalFormat::format)
+                val precision = exercise.course?.accuracyOfScores?.toInt() ?: 1
+                val currentUserPoints = formatExerciseResultScore(exercise.currentUserScore, max, precision)?.points
+                val maxPoints = formatExercisePoints(max, precision)
 
                 val pointsText = when {
                     currentUserPoints != null && maxPoints != null -> stringResource(

@@ -29,7 +29,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.dragandd
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.dragPosition
 
 internal sealed interface WorkAreaDropLocationType {
-    data class ViewOnly(val isCorrect: Boolean, val isDisplayingSampleSolution: Boolean) :
+    data class ViewOnly(val isCorrect: Boolean?, val isDisplayingSampleSolution: Boolean) :
         WorkAreaDropLocationType
 
     data class Editable(
@@ -75,8 +75,11 @@ internal fun WorkAreaDropLocation(
             if (type.isDisplayingSampleSolution) {
                 dragItemOutlineColor
             } else {
-                if (type.isCorrect) ExerciseColors.Result.success
-                else ExerciseColors.Result.medium
+                when (type.isCorrect) {
+                    true -> ExerciseColors.Result.success
+                    false -> ExerciseColors.Result.medium
+                    null -> dragItemOutlineColor
+                }
             }
         }
     }
@@ -91,8 +94,11 @@ internal fun WorkAreaDropLocation(
             if (type.isDisplayingSampleSolution) {
                 ExerciseColors.Quiz.dropTargetColorNotDragging
             } else {
-                if (type.isCorrect) ExerciseColors.Result.success.copy(alpha = 0.2f)
-                else ExerciseColors.Result.medium.copy(alpha = 0.2f)
+                when (type.isCorrect) {
+                    true -> ExerciseColors.Result.success.copy(alpha = 0.2f)
+                    false -> ExerciseColors.Result.medium.copy(alpha = 0.2f)
+                    null -> ExerciseColors.Quiz.dropTargetColorNotDragging
+                }
             }
         }
     }
