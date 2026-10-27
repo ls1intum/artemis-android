@@ -543,4 +543,24 @@ class QuizTrainingSessionTest {
                     .long,
             )
         }
+
+    @Test
+    fun `snapshot ID order does not change the training session`() = runBlocking {
+        val api = Api()
+        api.pages += page(
+            question(1, snapshot = listOf(80, 90)),
+            question(2, snapshot = listOf(90, 80)),
+            more = true,
+        )
+        api.pages += page(question(3, snapshot = listOf(90, 80)))
+        val s = QuizTrainingSession(api)
+        s.start()
+        repeat(2) {
+            s.submit()
+            s.next()
+        }
+        assertEquals(TrainingStage.ANSWERING, s.state.value.stage)
+        assertEquals(3L, s.state.value.current!!.quizQuestionWithSolutionDTO.id)
+        assertEquals(TrainingPageRequest(1, listOf(80, 90), false), api.requests.last())
+    }
 }

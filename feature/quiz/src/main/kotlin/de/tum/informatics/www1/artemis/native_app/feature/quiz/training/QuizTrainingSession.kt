@@ -161,7 +161,8 @@ internal class QuizTrainingSession(private val api: QuizTrainingApi) {
             }
             require(
                 result.questions.all {
-                    it.sessionQuestionIds == snapshot &&
+                    // The API represents the excluded IDs as a set; serialization order is not identity.
+                    it.sessionQuestionIds?.toSet() == snapshot?.toSet() &&
                         (legacyUnrated || it.isNewSession == snapshotNew)
                 }
             )
