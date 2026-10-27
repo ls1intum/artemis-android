@@ -22,6 +22,7 @@ internal fun QuizQuestionBody(
     modifier: Modifier,
     questionIndex: Int,
     quizQuestionData: QuizQuestionData<*>,
+    shortAnswerBlankLabel: ((Int) -> String)? = null,
 ) {
     var displayQuestionHint by rememberSaveable { mutableStateOf(false) }
     // Store the hint text of the answer option
@@ -55,6 +56,7 @@ internal fun QuizQuestionBody(
             questionIndex = questionIndex,
             data = quizQuestionData,
             onRequestDisplayHint = onRequestDisplayHint,
+            blankLabel = shortAnswerBlankLabel,
         )
     }
 

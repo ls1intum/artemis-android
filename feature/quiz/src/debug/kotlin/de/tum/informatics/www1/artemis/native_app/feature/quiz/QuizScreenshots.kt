@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.quiz
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -30,6 +31,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.service.QuizExerc
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.service.QuizParticipationService
 import kotlinx.coroutines.flow.flowOf
 
+// Deterministic screenshot fixture, intentionally independent of a production ViewModelStore.
+@SuppressLint("ViewModelConstructorInComposable")
 @PlayStoreScreenshots
 @Composable
 fun `Quiz - Multiple Choice Question`() {

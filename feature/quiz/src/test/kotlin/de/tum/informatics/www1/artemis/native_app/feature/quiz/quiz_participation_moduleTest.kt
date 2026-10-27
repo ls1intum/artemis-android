@@ -32,9 +32,11 @@ internal class quiz_participation_moduleTest {
         quizParticipationModule.verify(
             injections = listOf(
                 definition<QuizParticipationViewModel>(Long::class, Long::class, QuizType.WorkableQuizType::class),
-                definition<QuizResultViewModel>(Long::class, QuizType.ViewableQuizType::class)
+                definition<QuizResultViewModel>(Long::class, QuizType.ViewableQuizType::class),
+                definition<de.tum.informatics.www1.artemis.native_app.feature.quiz.training.QuizTrainingViewModel>(Long::class)
             ),
             extraTypes = listOf(
+                de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider::class,
                 de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider::class,
                 SavedStateHandle::class,
                 ServerConfigurationService::class,

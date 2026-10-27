@@ -1,0 +1,75 @@
+<resources>
+    <string name="training_title">Quiztraining</string>
+    <string name="training_heading">Wissen langfristig festigen</string>
+    <string name="training_intro">Übe eine Frage nach der anderen. Deine Antworten helfen Artemis bei der Auswahl der nächsten Wiederholung. Nach zehn Antworten kannst du pausieren oder weiterüben.</string>
+    <string name="training_progress">Dein Fortschritt</string>
+    <string name="training_points">%1$.1f Trainingspunkte</string>
+    <string name="training_start">Training starten</string>
+    <string name="training_continue">Training fortsetzen</string>
+    <string name="training_privacy">Privatsphäre der Rangliste</string>
+    <string name="training_private_first">Dein Training beginnt privat. Wähle, ob dein Name und deine Trainingspunkte in den Ranglisten deiner Kurse erscheinen.</string>
+    <string name="training_privacy_detail">Diese Einstellung gilt für die Quiztraining-Ranglisten aller deiner Kurse.</string>
+    <string name="training_public">Mich in Ranglisten anzeigen</string>
+    <string name="training_keep_private">Mein Training privat halten</string>
+    <string name="training_overview_error">Fortschritt oder Privatsphäre konnten nicht geladen werden. Deine aktuelle Antwort bleibt für diese Sitzung erhalten.</string>
+    <string name="training_retry">Erneut versuchen</string>
+    <string name="training_leaderboard">Rangliste und Liga</string>
+    <string name="training_league">Liga: %1$s</string>
+    <string name="training_no_ranking">Noch keine Einträge in der Rangliste.</string>
+    <string name="training_loading">Nächste Frage wird gesucht…</string>
+    <string name="training_page_error">Die nächsten Fragen konnten nicht geladen werden. Versuche es erneut, um an derselben Stelle fortzufahren.</string>
+    <string name="training_restart_detail">Die verfügbaren Wiederholungsfragen haben sich geändert. Starte eine neue Sitzung mit den aktuellen Empfehlungen.</string>
+    <string name="training_restart">Neue Sitzung starten</string>
+    <string name="training_unrated_title">Zusätzliches Üben</string>
+    <string name="training_unrated_detail">Für diese Fragen gibt es keine Trainingspunkte. Deine Antworten werden weiterhin ausgewertet. Übe zusätzlich oder beende die Sitzung hier.</string>
+    <string name="training_practice">Zusätzlich weiterüben</string>
+    <string name="training_finish">Beenden</string>
+    <string name="training_summary">Sitzung abgeschlossen</string>
+    <string name="training_access">Das Training ist für dieses Konto nicht verfügbar. Kehre zum Kurs zurück und melde dich erneut an.</string>
+    <string name="training_rated">Wiederholung · mit Trainingspunkten</string>
+    <string name="training_submit">Antwort abgeben</string>
+    <string name="training_submitting">Auswertung wird abgewartet…</string>
+    <string name="training_uncertain">Die Bestätigung ist nicht angekommen. Deine Antwort wurde möglicherweise bereits angenommen. Du kannst dieselbe Antwort ausdrücklich erneut senden; sie könnte doppelt zählen.</string>
+    <string name="training_retry_submission">Dieselbe Antwort erneut senden</string>
+    <string name="training_next">Nächste Frage</string>
+    <string name="training_end_session">Diese Sitzung beenden</string>
+    <string name="training_unsupported">Diese Frage kann auf diesem Gerät nicht sicher angezeigt werden. Du kannst die Sitzung beenden und es später erneut versuchen.</string>
+    <string name="training_skip">Frage überspringen</string>
+    <plurals name="training_correct">
+        <item quantity="one">1 richtige Antwort</item>
+        <item quantity="other">%1$d richtige Antworten</item>
+    </plurals>
+    <plurals name="training_pool">
+        <item quantity="one">1 verfügbare Frage</item>
+        <item quantity="other">%1$d verfügbare Fragen</item>
+    </plurals>
+    <plurals name="training_streak">
+        <item quantity="one">1 Tag hintereinander</item>
+        <item quantity="other">%1$d Tage hintereinander</item>
+    </plurals>
+    <plurals name="training_count">
+        <item quantity="one">1 Antwort in dieser Sitzung</item>
+        <item quantity="other">%1$d Antworten in dieser Sitzung</item>
+    </plurals>
+    <plurals name="training_exhausted">
+        <item quantity="one">Du hast eine Frage beantwortet und das Ende dieses Fragenpools erreicht. Starte erneut für aktuelle Empfehlungen.</item>
+        <item quantity="other">Du hast %1$d Fragen beantwortet und das Ende dieses Fragenpools erreicht. Starte erneut für aktuelle Empfehlungen.</item>
+    </plurals>
+    <plurals name="training_summary_detail">
+        <item quantity="one">Du hast eine Frage beantwortet. Das ist ein guter Zeitpunkt für eine Pause. Du kannst auch mit weiteren Fragen fortfahren.</item>
+        <item quantity="other">Du hast %1$d Fragen beantwortet. Das ist ein guter Zeitpunkt für eine Pause. Du kannst auch mit weiteren Fragen fortfahren.</item>
+    </plurals>
+    <string name="training_blank_label">Lücke %1$d</string>
+    <string name="training_assign_without_drag">Elemente ohne Ziehen zuordnen</string>
+    <string name="training_target_position">Position: %1$.0f %% vom linken Rand, %2$.0f %% vom oberen Rand</string>
+    <string name="training_target_selection">Ziel %1$d: %2$s</string>
+    <string name="training_image_item">Bildelement %1$d</string>
+    <string name="training_empty_target">Leer</string>
+    <string name="training_leave_empty">Leer lassen</string>
+    <string name="training_league_master">Master</string>
+    <string name="training_league_diamond">Diamant</string>
+    <string name="training_league_gold">Gold</string>
+    <string name="training_league_silver">Silber</string>
+    <string name="training_league_bronze">Bronze</string>
+    <string name="training_own_rank">Dein Rang: %1$d</string>
+</resources>

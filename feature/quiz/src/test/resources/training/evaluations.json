@@ -1,0 +1,314 @@
+[
+  {
+    "id": null,
+    "scoreInPoints": 10.0,
+    "quizQuestion": {
+      "id": 101,
+      "title": "Worst-case complexity",
+      "text": "What is the worst-case time complexity of binary search on sorted input?",
+      "points": 10.0,
+      "scoringType": "ALL_OR_NOTHING",
+      "randomizeOrder": false,
+      "invalid": false,
+      "type": "multiple-choice",
+      "explanation": "Each comparison halves the remaining interval.",
+      "answerOptions": [
+        {
+          "id": 1,
+          "text": "O(log n)",
+          "invalid": false,
+          "explanation": "The interval is halved at every step.",
+          "isCorrect": true
+        },
+        {
+          "id": 2,
+          "text": "O(n)",
+          "invalid": false,
+          "explanation": "This describes a linear scan.",
+          "isCorrect": false
+        },
+        {
+          "id": 3,
+          "text": "O(1)",
+          "invalid": false,
+          "explanation": "The number of comparisons increases with input size.",
+          "isCorrect": false
+        }
+      ],
+      "singleChoice": true
+    },
+    "selectedOptions": [
+      {
+        "id": 1,
+        "text": "O(log n)",
+        "invalid": false,
+        "explanation": "The interval is halved at every step.",
+        "isCorrect": true
+      }
+    ],
+    "type": "multiple-choice"
+  },
+  {
+    "id": null,
+    "scoreInPoints": 5.0,
+    "quizQuestion": {
+      "id": 102,
+      "title": "Read the evaluated blanks",
+      "text": "The sorted-input algorithm is [-spot 1]. Its worst-case number of comparisons is [-spot 2].",
+      "points": 10.0,
+      "scoringType": "PROPORTIONAL_WITHOUT_PENALTY",
+      "invalid": false,
+      "type": "short-answer",
+      "explanation": "Case-insensitive answers can be accepted. The published evaluation is authoritative.",
+      "spots": [
+        {
+          "id": 913,
+          "spotNr": 1,
+          "width": 18,
+          "invalid": false
+        },
+        {
+          "id": 914,
+          "spotNr": 2,
+          "width": 18,
+          "invalid": false
+        }
+      ],
+      "solutions": [
+        {
+          "id": 1001,
+          "text": "Binary Search",
+          "invalid": false
+        },
+        {
+          "id": 1002,
+          "text": "logarithmic",
+          "invalid": false
+        }
+      ],
+      "similarityValue": 85,
+      "matchLetterCase": false,
+      "correctMappings": [
+        {
+          "id": 2001,
+          "shortAnswerSpotIndex": 0,
+          "shortAnswerSolutionIndex": 0,
+          "invalid": false,
+          "solution": {
+            "id": 1001,
+            "text": "Binary Search",
+            "invalid": false
+          },
+          "spot": {
+            "id": 913,
+            "spotNr": 1,
+            "width": 18,
+            "invalid": false
+          }
+        },
+        {
+          "id": 2002,
+          "shortAnswerSpotIndex": 1,
+          "shortAnswerSolutionIndex": 1,
+          "invalid": false,
+          "solution": {
+            "id": 1002,
+            "text": "logarithmic",
+            "invalid": false
+          },
+          "spot": {
+            "id": 914,
+            "spotNr": 2,
+            "width": 18,
+            "invalid": false
+          }
+        }
+      ]
+    },
+    "submittedTexts": [
+      {
+        "text": "linear",
+        "isCorrect": false,
+        "spot": {
+          "id": 914,
+          "spotNr": 2,
+          "width": 18,
+          "invalid": false
+        }
+      },
+      {
+        "text": "binary search",
+        "isCorrect": true,
+        "spot": {
+          "id": 913,
+          "spotNr": 1,
+          "width": 18,
+          "invalid": false
+        }
+      }
+    ],
+    "type": "short-answer"
+  },
+  {
+    "id": null,
+    "scoreInPoints": 10.0,
+    "quizQuestion": {
+      "id": 103,
+      "title": "Alternative valid mappings",
+      "text": "Each callout accepts Alpha or Beta. Use each label once.",
+      "points": 10.0,
+      "scoringType": "ALL_OR_NOTHING",
+      "invalid": false,
+      "type": "drag-and-drop",
+      "explanation": "Both submitted labels are valid. A sample solution must use each item only once.",
+      "backgroundFilePath": "drag-and-drop/questions/12/backgrounds/results-alternatives.png",
+      "dropLocations": [
+        {
+          "id": 11,
+          "posX": 20.0,
+          "posY": 60.0,
+          "width": 60.0,
+          "height": 40.0,
+          "invalid": false
+        },
+        {
+          "id": 12,
+          "posX": 120.0,
+          "posY": 60.0,
+          "width": 60.0,
+          "height": 40.0,
+          "invalid": false
+        }
+      ],
+      "dragItems": [
+        {
+          "id": 21,
+          "text": "Alpha",
+          "invalid": false
+        },
+        {
+          "id": 22,
+          "text": "Beta",
+          "invalid": false
+        }
+      ],
+      "correctMappings": [
+        {
+          "id": 304,
+          "dragItemIndex": 1,
+          "dropLocationIndex": 1,
+          "invalid": false,
+          "dragItem": {
+            "id": 22,
+            "text": "Beta",
+            "invalid": false
+          },
+          "dropLocation": {
+            "id": 12,
+            "posX": 120.0,
+            "posY": 60.0,
+            "width": 60.0,
+            "height": 40.0,
+            "invalid": false
+          }
+        },
+        {
+          "id": 301,
+          "dragItemIndex": 0,
+          "dropLocationIndex": 0,
+          "invalid": false,
+          "dragItem": {
+            "id": 21,
+            "text": "Alpha",
+            "invalid": false
+          },
+          "dropLocation": {
+            "id": 11,
+            "posX": 20.0,
+            "posY": 60.0,
+            "width": 60.0,
+            "height": 40.0,
+            "invalid": false
+          }
+        },
+        {
+          "id": 302,
+          "dragItemIndex": 1,
+          "dropLocationIndex": 0,
+          "invalid": false,
+          "dragItem": {
+            "id": 22,
+            "text": "Beta",
+            "invalid": false
+          },
+          "dropLocation": {
+            "id": 11,
+            "posX": 20.0,
+            "posY": 60.0,
+            "width": 60.0,
+            "height": 40.0,
+            "invalid": false
+          }
+        },
+        {
+          "id": 303,
+          "dragItemIndex": 0,
+          "dropLocationIndex": 1,
+          "invalid": false,
+          "dragItem": {
+            "id": 21,
+            "text": "Alpha",
+            "invalid": false
+          },
+          "dropLocation": {
+            "id": 12,
+            "posX": 120.0,
+            "posY": 60.0,
+            "width": 60.0,
+            "height": 40.0,
+            "invalid": false
+          }
+        }
+      ]
+    },
+    "mappings": [
+      {
+        "dragItemIndex": 0,
+        "dropLocationIndex": 0,
+        "invalid": false,
+        "dragItem": {
+          "id": 21,
+          "text": "Alpha",
+          "invalid": false
+        },
+        "dropLocation": {
+          "id": 11,
+          "posX": 20.0,
+          "posY": 60.0,
+          "width": 60.0,
+          "height": 40.0,
+          "invalid": false
+        }
+      },
+      {
+        "dragItemIndex": 1,
+        "dropLocationIndex": 1,
+        "invalid": false,
+        "dragItem": {
+          "id": 22,
+          "text": "Beta",
+          "invalid": false
+        },
+        "dropLocation": {
+          "id": 12,
+          "posX": 120.0,
+          "posY": 60.0,
+          "width": 60.0,
+          "height": 40.0,
+          "invalid": false
+        }
+      }
+    ],
+    "type": "drag-and-drop"
+  }
+]
