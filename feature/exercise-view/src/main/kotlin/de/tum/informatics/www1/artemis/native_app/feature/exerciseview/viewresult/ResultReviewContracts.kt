@@ -99,7 +99,10 @@ internal fun reviewTargets(exercise: Exercise): List<ReviewTarget> {
             submission.results.orEmpty().map { ReviewTarget(pid, submission.id?.toLong(), it, submission) }
         }
         val direct = participation.results.orEmpty().map { result ->
-            val source = result.submission ?: participation.submissions.orEmpty().firstOrNull { s -> s.results.orEmpty().any { it.id == result.id } }
+            // Result DTOs may carry only a submission reference. Prefer its full, exact-id counterpart.
+            val source = result.submission?.let { reference ->
+                participation.submissions.orEmpty().firstOrNull { it.id != null && it.id == reference.id } ?: reference
+            } ?: participation.submissions.orEmpty().firstOrNull { s -> s.results.orEmpty().any { it.id == result.id } }
             ReviewTarget(pid, source?.id?.toLong(), result, source)
         }
         nested + direct
