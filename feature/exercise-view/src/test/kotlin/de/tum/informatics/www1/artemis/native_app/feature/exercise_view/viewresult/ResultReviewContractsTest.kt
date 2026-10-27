@@ -78,4 +78,27 @@ class ResultReviewContractsTest {
         assertEquals("Short note", ReviewFeedback(detailText = "Short note", hasLongFeedbackText = true).previewMessage)
     }
 
+
+    @Test fun `participation result reference resolves the full submission with the same id`() {
+        val assessed = de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.FileUploadSubmission(
+            id = 11, filePath = "file-upload/submissions/assessed.pdf"
+        )
+        val newer = de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.FileUploadSubmission(
+            id = 12, filePath = "file-upload/submissions/newer.pdf"
+        )
+        val result = Result(
+            id = 7, rated = true,
+            submission = de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.FileUploadSubmission(id = 11)
+        )
+        val participation = StudentParticipation.StudentParticipationImpl(
+            id = 5, submissions = listOf(newer, assessed), results = listOf(result)
+        )
+        val exercise = de.tum.informatics.www1.artemis.native_app.core.model.exercise.FileUploadExercise(
+            id = 3, studentParticipations = listOf(participation)
+        )
+        val selected = selectReviewTarget(exercise, 7)!!
+        assertEquals(11L, selected.submissionId)
+        assertSame(assessed, selected.submission)
+    }
+
 }

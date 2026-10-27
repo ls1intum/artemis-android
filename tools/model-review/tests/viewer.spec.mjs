@@ -92,7 +92,8 @@ test('empty model shows a readable state, unsupported model and cyclic containme
 test('selected read-only nodes never expose connection or resize handles',async({page})=>{
  const model=fixture('class-diagram');await render(page,model,{selectedReference:model.nodes[1].id});
  await expect(page.locator('.react-flow__node')).toHaveCount(model.nodes.length);
- expect(await page.locator('.react-flow__handle').evaluateAll(nodes=>nodes.every(node=>getComputedStyle(node).opacity==='0'))).toBe(true);
+ await expect.poll(()=>page.locator('.react-flow__handle').evaluateAll(nodes=>
+  nodes.length>0&&nodes.every(node=>getComputedStyle(node).opacity==='0'))).toBe(true);
 });
 
 for(const name of ['legacy-v2-class','legacy-v3-class']) test(`${name} import preserves node, class-member and relationship references`,async({page})=>{
