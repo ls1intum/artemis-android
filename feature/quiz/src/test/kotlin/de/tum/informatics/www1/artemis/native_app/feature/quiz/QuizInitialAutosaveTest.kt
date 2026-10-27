@@ -24,6 +24,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.Qui
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizQuestionData
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.service.QuizExerciseService
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.service.QuizParticipationService
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.QuizReviewAttempt
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -287,6 +288,10 @@ class QuizInitialAutosaveTest {
             override suspend fun findParticipation(exerciseId: Long) = NetworkResponse.Response<Participation>(participation)
         }
         private val exerciseService = object : QuizExerciseService {
+            override suspend fun findReviewAttempts(exerciseId: Long, serverUrl: String, authToken: String): NetworkResponse<List<QuizReviewAttempt>> = error("not reviewing attempts")
+            override suspend fun findResultParticipation(
+                exerciseId: Long, serverUrl: String, authToken: String, participationId: Long?, submissionId: Int?,
+            ): NetworkResponse<Participation> = error("not reviewing results")
             override suspend fun findForStudent(exerciseId: Long, serverUrl: String, authToken: String) = NetworkResponse.Response(quiz)
             override suspend fun join(exerciseId: Long, password: String, serverUrl: String, authToken: String): NetworkResponse<QuizExercise.QuizBatch> = error("not joining")
         }
