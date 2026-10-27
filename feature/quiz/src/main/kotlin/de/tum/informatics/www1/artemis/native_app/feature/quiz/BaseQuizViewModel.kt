@@ -36,6 +36,7 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
@@ -198,10 +199,14 @@ internal abstract class BaseQuizViewModel<
 
     protected abstract val multipleChoiceData: Flow<Map<Long, MultipleChoiceStorageDataT>>
 
+    /** Workable quizzes can wait for restored answers before exposing editable question data. */
+    protected open val questionDataReady: Flow<Boolean> = flowOf(true)
+
     /*
      * Construct the question data from the questions and the flows (which are itself coming from the saved state handle)
      */
     val quizQuestionsWithData: StateFlow<DataState<List<QuizQuestionData<*>>>> = flow {
+        questionDataReady.first { it }
         // Wrap in flow to avoid compiler warning as properties are abstract
         emitAll(
             combine(
