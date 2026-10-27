@@ -23,10 +23,13 @@ class TextEditorServiceImpl(
     override suspend fun getParticipation(participationId: Long, session: ArtemisContext.LoggedIn?): NetworkResponse<Participation> {
         val pinned = session ?: artemisContext()
         return performNetworkCall {
-            ktorProvider.ktorClient.get(pinned.serverUrl) {
-                url { appendPathSegments(*Api.Text.Participations.path, participationId.toString(), "text-editor") }
-                cookieAuth(pinned.authToken)
-            }.body<TextEditorParticipationDto>().toParticipation()
+            val client = ktorProvider.ktorClient.config { followRedirects = false; expectSuccess = true }
+            try {
+                client.get(pinned.serverUrl) {
+                    url { appendPathSegments(*Api.Text.Participations.path, participationId.toString(), "text-editor") }
+                    cookieAuth(pinned.authToken)
+                }.body<TextEditorParticipationDto>().toParticipation()
+            } finally { client.close() }
         }
     }
 }
