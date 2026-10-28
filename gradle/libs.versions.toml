@@ -134,7 +134,7 @@ noties-markwon-image-coil = { group = "io.noties.markwon", name = "image-coil", 
 oss-licenses-plugin = { module = "com.google.android.gms:oss-licenses-plugin", version.ref = "ossLicensesPlugin" }
 objenesis = { group = "org.objenesis", name = "objenesis", version = "3.6" }
 placeholder-material = { group = "io.github.fornewid", name = "placeholder-material3", version.ref = "placeholderMaterial" }
-play-services-oss-licences = { group = "com.google.android.gms", name = "play-services-oss-licenses", version = "17.5.2" }
+play-services-oss-licences = { group = "com.google.android.gms", name = "play-services-oss-licenses", version = "17.5.3" }
 protobuf-java = { group = "com.google.protobuf", name = "protobuf-java", version = "4.36.2" }
 robolectric = { group = "org.robolectric", name = "robolectric", version = "4.17" }
 sentry-android = { group = "io.sentry", name = "sentry-android", version.ref = "sentry-android" }
