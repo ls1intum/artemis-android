@@ -2,7 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.push.service
 
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ArtemisNotification
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 interface CommunicationNotificationManager {
     suspend fun popNotification(

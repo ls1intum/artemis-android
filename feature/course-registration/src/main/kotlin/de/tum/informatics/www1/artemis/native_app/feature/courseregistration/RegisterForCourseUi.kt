@@ -135,13 +135,13 @@ internal fun RegisterForCourseScreen(
                     }
                 },
                 text = {
-                    if (candidate.registrationConfirmationMessage.isNotBlank()) {
-                        MarkdownText(markdown = candidate.registrationConfirmationMessage)
+                    if (candidate.enrollmentConfirmationMessage.isNotBlank()) {
+                        MarkdownText(markdown = candidate.enrollmentConfirmationMessage)
                     } else {
                         Text(text = stringResource(id = R.string.course_registration_sign_up_dialog_message))
                     }
                 },
-                title = if (candidate.registrationConfirmationMessage.isBlank()) {
+                title = if (candidate.enrollmentConfirmationMessage.isBlank()) {
                     { Text(text = candidate.title) }
                 } else null
             )

@@ -128,7 +128,9 @@ internal class RegisterViewModel(
             }
         }
 
-    val isRegistrationAvailable: StateFlow<Boolean> = combine(
+    // The six flows carry different enum types, so the element type has to be named: inferring it
+    // would reify the reified parameter to an intersection type.
+    val isRegistrationAvailable: StateFlow<Boolean> = combine<Status, Boolean>(
         firstNameStatus,
         lastNameStatus,
         usernameStatus,

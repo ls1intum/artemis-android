@@ -8,7 +8,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.sha
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.work.BaseCreatePostWorker
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 class UpdateReplyNotificationWorker(
     appContext: Context,

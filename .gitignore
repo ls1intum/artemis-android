@@ -33,3 +33,5 @@ test-outputs
 
 # Service credentials
 serviceCredentials.json
+# Written by docker/fetch-artemis-versions.sh
+docker/.env

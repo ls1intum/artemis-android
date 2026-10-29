@@ -128,7 +128,7 @@ internal fun QuizParticipationScreen(
         mutableStateOf(false)
     }
 
-    val latestWebsocketSubmission by viewModel.latestWebsocketSubmission.collectAsState(initial = null)
+    val latestSavedSubmission by viewModel.latestSavedSubmission.collectAsState(initial = null)
 
     AwaitDeferredCompletion(job = submissionDeferred) { successful ->
         if (!successful) {
@@ -235,7 +235,7 @@ internal fun QuizParticipationScreen(
 
         if (displayLeaveQuizDialog) {
             val textRes =
-                if (latestWebsocketSubmission?.isFailure != true) R.string.quiz_participation_leave_without_submit_dialog_message
+                if (latestSavedSubmission?.isFailure != true) R.string.quiz_participation_leave_without_submit_dialog_message
                 else R.string.quiz_participation_leave_without_submit_dialog_message_unsaved_changes
 
             DestructiveMarkdownTextAlertDialog(

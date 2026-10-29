@@ -47,6 +47,7 @@
     <string name="build_update_settings_name">Build Update</string>
     <string name="test_case_changed_settings_name">Test Cases Changed</string>
     <string name="quiz_started_settings_name">Quiz Started</string>
+    <string name="iris_response_needs_review_settings_name">Iris Response Needs Review</string>
     <string name="tutorial_registered_settings_name">Tutorial Group Registered</string>
     <string name="tutorial_assigned_settings_name">Tutorial Group Assigned</string>
     <string name="tutorial_deleted_settings_name">Tutorial Group Deleted</string>

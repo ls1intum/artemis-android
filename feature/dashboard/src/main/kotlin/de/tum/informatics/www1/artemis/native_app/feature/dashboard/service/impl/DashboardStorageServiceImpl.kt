@@ -8,7 +8,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.DashboardStorageService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.serialization.json.Json
 
 // Inspired by course-accessed-storage-service.ts on the Artemis repository

@@ -38,7 +38,7 @@ internal fun QuizResultUi(
     modifier: Modifier,
     quizTitle: String,
     achievedPoints: Double,
-    maxPoints: Int,
+    maxPoints: Double,
     quizQuestions: List<QuizQuestion>,
     quizQuestionsWithData: List<QuizQuestionData<*>>,
 ) {
@@ -88,7 +88,7 @@ internal fun QuizResultUi(
             itemsIndexed(quizQuestionsWithData) { index, questionWithData ->
                 if (questionWithData is QuizQuestionData.ResultData) {
                     val isCorrect =
-                        questionWithData.question.points?.toDouble() == questionWithData.achievedPoints
+                        questionWithData.question.points == questionWithData.achievedPoints
 
                     Box(
                         modifier = Modifier
@@ -133,7 +133,7 @@ private fun QuizQuestionListHeader(
     modifier: Modifier,
     quizTitle: String,
     achievedPoints: Double,
-    maxPoints: Int
+    maxPoints: Double
 ) {
     Column(modifier) {
         Text(
@@ -150,7 +150,7 @@ private fun QuizQuestionListHeader(
 }
 
 @Composable
-private fun QuizScoreResultOverview(modifier: Modifier, achievedPoints: Double, maxPoints: Int) {
+private fun QuizScoreResultOverview(modifier: Modifier, achievedPoints: Double, maxPoints: Double) {
     val achievedPointsFormatted = remember(achievedPoints) {
         ExercisePointsDecimalFormat.format(achievedPoints)
     }

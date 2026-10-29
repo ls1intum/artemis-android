@@ -24,6 +24,13 @@ class EmojiSearchUtilTest {
 
 
 
+    @Test
+    fun `search accepts surrounding whitespace and a Unicode emoji`() {
+        val emojis = listOf(heartEmoji, blueHeartEmoji, smileEmoji)
+        assertContains(EmojiSearchUtil.filterAndSortEmojis(emojis, "  HEART  "), heartEmoji)
+        assertEquals(listOf(blueHeartEmoji), EmojiSearchUtil.filterAndSortEmojis(emojis, "💙"))
+    }
+
     // -------------------- FILTERING TESTS --------------------
 
     @Test

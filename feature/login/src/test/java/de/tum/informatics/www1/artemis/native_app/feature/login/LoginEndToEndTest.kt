@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
@@ -16,6 +17,8 @@ import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.LoginUi
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.LoginViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.adminPassword
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.adminUsername
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Password
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
 import de.tum.informatics.www1.artemis.native_app.feature.push.pushModule
@@ -67,6 +70,7 @@ class LoginEndToEndTest : KoinTest {
             serverProfileInfoService = get(),
             networkStatusProvider = get(),
             passkeyLoginService = get(),
+            oidcAuthService = get(),
             androidCredentialService = get(),
             coroutineContext = UnconfinedTestDispatcher()
         )
@@ -83,17 +87,25 @@ class LoginEndToEndTest : KoinTest {
                 onClickSaml2Login = {}
             )
         }
-
+        // enter username
         composeTestRule.onNodeWithText(
             context.getString(R.string.login_username_label)
-        )
-            .performTextInput(user1Username)
+        ).performTextInput(adminUsername)
+        // go to 'credentials' phase
+        composeTestRule.onNodeWithText("Continue")
+            .performClick()
 
+        composeTestRule.waitUntil(DefaultTimeoutMillis) {
+            composeTestRule
+                .onAllNodesWithText(context.getString(R.string.login_password_label))
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+        // enter the password
         composeTestRule.onNodeWithText(
             context.getString(R.string.login_password_label)
-        )
-            .performTextInput(user1Password)
-
+        ).performTextInput(adminPassword)
+        // login to the account
         composeTestRule
             .onNodeWithText(context.getString(R.string.login_perform_login_button_text))
             .performClick()

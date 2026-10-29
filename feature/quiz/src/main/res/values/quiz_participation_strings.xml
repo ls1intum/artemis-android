@@ -32,7 +32,7 @@
     <string name="quiz_participation_multiple_choice_short">MC</string>
     <string name="quiz_participation_short_answer_short">SA</string>
     <string name="quiz_participation_drag_and_drop_short">DD</string>
-    <string name="quiz_participation_overall_score_points">Overall: %1$dP</string>
+    <string name="quiz_participation_overall_score_points">Overall: %1$sP</string>
 
     <!-- Participation footer -->
     <string name="quiz_participation_time_left">Deadline: %1$s</string>
@@ -53,7 +53,7 @@
     <!--  Quiz question header  -->
     <string name="quiz_participation_question_header_title">%1$d) %2$s</string>
     <string name="quiz_participation_question_header_hint_button">Hint</string>
-    <string name="quiz_participation_question_header_points">%1$dP</string>
+    <string name="quiz_participation_question_header_points">%1$sP</string>
 
     <!--  Multiple choice question  -->
     <string name="quiz_participation_multiple_choice_instruction">Please choose all correct answer options.</string>

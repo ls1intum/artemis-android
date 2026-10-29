@@ -8,12 +8,18 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonPro
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.UnknownExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.QuizSubmission
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Submission
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateId
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateShortName
+import io.ktor.client.request.parameter
+import kotlinx.coroutines.delay
 import io.ktor.client.call.body
+import io.ktor.client.plugins.ServerResponseException
 import io.ktor.client.request.accept
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
@@ -25,16 +31,12 @@ import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.appendPathSegments
+import io.ktor.http.HttpMethod
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import kotlinx.coroutines.flow.first
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
-
-private const val DEFAULT = "default"
-private val studentGroupName: String get() = System.getenv("studentGroupName") ?: DEFAULT
-private val teachingAssistantGroupName: String get() = System.getenv("tutorGroupName") ?: DEFAULT
-private val editorGroupName: String get() = System.getenv("editorGroupName") ?: DEFAULT
-private val instructorGroupName: String get() = System.getenv("instructorGroupName") ?: DEFAULT
 
 private const val TAG = "CourseCreationService"
 
@@ -45,15 +47,10 @@ val KoinComponent.serverConfigurationService: ServerConfigurationService get() =
 suspend fun KoinComponent.createCourse(
     accessToken: String,
     courseName: String = "Course ${generateId()}",
-    courseShortName: String = "ae2e${generateId()}",
+    courseShortName: String = generateShortName(),
     forceSelfRegistration: Boolean = false
 ): Course {
-    Log.i(
-        TAG, """
-        Creating new course with name $courseName and shortName $courseShortName
-        Using studentGroupName=$studentGroupName, teachingAssistantGroupName=$teachingAssistantGroupName, editorGroupName=$editorGroupName, instructorGroupName=$instructorGroupName
-        """.trimIndent()
-    )
+    Log.i(TAG, "Creating new course with name $courseName and shortName $courseShortName")
 
     val courseJsonString = if (forceSelfRegistration) {
         createCourseWithSelfRegistration(
@@ -61,22 +58,10 @@ suspend fun KoinComponent.createCourse(
             shortName = courseShortName
         )
     } else {
-        val course = Course(
-            id = null,
-            title = courseName,
-            shortName = courseShortName,
-            testCourse = true,
-            courseInformationSharingConfiguration = Course.CourseInformationSharingConfiguration.COMMUNICATION_AND_MESSAGING,
-            studentGroupName = studentGroupName,
-            teachingAssistantGroupName = teachingAssistantGroupName,
-            editorGroupName = editorGroupName,
-            instructorGroupName = instructorGroupName,
-            courseInformationSharingMessagingCodeOfConduct = "Code of conduct…"
-        )
-        jsonProvider.applicationJsonConfiguration.encodeToString(course)
+        createCourseTemplate(title = courseName, shortName = courseShortName)
     }
 
-    return ktorProvider.ktorClient.submitFormWithBinaryData(
+    val course: Course = ktorProvider.ktorClient.submitFormWithBinaryData(
         formData {
             append(
                 "course",
@@ -90,7 +75,7 @@ suspend fun KoinComponent.createCourse(
     ) {
         url(serverConfigurationService.serverUrl.first())
         url {
-            appendPathSegments(*Api.Core.path, "admin", "courses")
+            appendPathSegments(*Api.Admin.path, "courses")
         }
 
         cookieAuth(accessToken)
@@ -99,6 +84,17 @@ suspend fun KoinComponent.createCourse(
         accept(ContentType.Application.Json)
     }
         .body()
+
+    // Every field of the course model has a default and unknown keys are ignored, so an error body
+    // decodes into a course rather than failing: without this check a rejected creation surfaces
+    // much later as a course with no id.
+    check(course.id != null && course.id != 0L) {
+        "Creating the course did not answer with one: $course"
+    }
+
+    // Artemis 10 answers with the id of the new course only, so the title and short name the tests
+    // look for and send back when updating the course are taken from the payload.
+    return course.copy(title = courseName, shortName = courseShortName)
 }
 
 suspend fun KoinComponent.createExercise(
@@ -120,7 +116,19 @@ suspend fun KoinComponent.createExercise(
         contentType(ContentType.Application.Json)
         accept(ContentType.Application.Json)
     }
-        .body()
+        .body<Exercise>()
+        .also(::checkCreated)
+}
+
+/**
+ * An error body decodes into an [UnknownExercise] rather than failing, because the exercise
+ * hierarchy falls back to it for a type it does not recognise. Without this a rejected creation
+ * surfaces later as a cast failure in whichever screen the test opens.
+ */
+private fun checkCreated(exercise: Exercise) {
+    check(exercise !is UnknownExercise && exercise.id != null) {
+        "Creating the exercise did not answer with one: $exercise"
+    }
 }
 
 suspend fun KoinComponent.createExerciseFormBodyWithPng(
@@ -161,7 +169,7 @@ suspend fun KoinComponent.createExerciseFormBodyWithPng(
 
         contentType(ContentType.MultiPart.FormData)
         accept(ContentType.Application.Json)
-    }.body()
+    }.body<Exercise>().also(::checkCreated)
 }
 
 suspend fun KoinComponent.createLecture(
@@ -211,53 +219,108 @@ suspend fun KoinComponent.createLectureUnit(
     }.body()
 }
 
-suspend fun KoinComponent.createAttachment(
+/**
+ * Creates a visible quiz of the given course with one question of each type, see [createQuizExercise],
+ * and uploads the background of its drag and drop question with it.
+ */
+suspend fun KoinComponent.createQuiz(
     accessToken: String,
-    lectureId: Long,
-    attachmentName: String = "Attachment${generateId()}"
-): Attachment {
-    return ktorProvider.ktorClient.submitFormWithBinaryData(
-        formData {
-            append(
-                "file",
-                "file content".encodeToByteArray(),
-                Headers.build {
-                    append(HttpHeaders.ContentDisposition, "filename=file.txt")
-                }
-            )
+    courseId: Long,
+    mode: QuizExercise.QuizMode = QuizExercise.QuizMode.INDIVIDUAL,
+    randomizeQuestionOrder: Boolean = true,
+    durationInSeconds: Int = 600
+): QuizExercise {
+    val backgroundFilePath = "/api/files/drag-and-drop/backgrounds/$courseId/${generateId()}/dndbackground.png"
 
-            append(
-                "attachment",
-                """
-                    {
-                      "name": "$attachmentName",
-                      "link": "$attachmentName.txt",
-                      "version": 1,
-                      "attachmentType": "FILE",
-                      "lecture": {
-                        "id": $lectureId
-                      }
-                    }
-                """.trimIndent(),
-                Headers.build {
-                    set("Content-Type", "application/json")
-                    set("filename", "blob")
-                }
-            )
-        }
-    ) {
-        url(serverConfigurationService.serverUrl.first())
+    val quiz = createExerciseFormBodyWithPng(
+        accessToken = accessToken,
+        courseId = courseId,
+        pathSegments = arrayOf(*Api.Quiz.path, "courses", courseId.toString(), "quiz-exercises"),
+        pngByteArray = quizBackgroundImageBytes(),
+        pngFilePath = backgroundFilePath,
+        creator = { name, _ -> createQuizExercise(name, backgroundFilePath, mode, randomizeQuestionOrder, durationInSeconds) }
+    )
 
+    return quiz as? QuizExercise ?: error("Creating the quiz did not answer with a quiz: $quiz")
+}
+
+private object QuizBackgroundImage
+
+// Read from the classpath rather than as an Android raw resource: the resource route needed
+// src/test/res grafted onto the main source set, which AGP 9 no longer allows and which shipped a
+// test fixture in the release APK.
+private fun quizBackgroundImageBytes(): ByteArray =
+    checkNotNull(QuizBackgroundImage::class.java.getResourceAsStream("/dndbackground.png")) {
+        "dndbackground.png is missing from the resources of core-test"
+    }.use { inputStream -> inputStream.readBytes() }
+
+/**
+ * Lets the user of the given access token join the batch of a quiz, after they have started their participation.
+ * A quiz in individual mode creates the batch for them.
+ */
+suspend fun KoinComponent.joinQuiz(accessToken: String, exerciseId: Long, password: String = "") {
+    val response = ktorProvider.ktorClient.post(serverConfigurationService.serverUrl.first()) {
         url {
-            appendPathSegments(*Api.Lecture.path, "attachments")
+            appendPathSegments(*Api.Quiz.QuizExercises.path, exerciseId.toString(), "join")
         }
 
         cookieAuth(accessToken)
-
-        contentType(ContentType.MultiPart.FormData)
-        accept(ContentType.Application.Json)
+        contentType(ContentType.Application.Json)
+        setBody("{\"password\":\"$password\"}")
     }
-        .body()
+
+    check(response.status.isSuccess()) { "Could not join quiz $exerciseId: ${response.status}" }
+}
+
+/**
+ * Submits the answers of the user of the given access token to a live quiz they have started.
+ */
+suspend fun KoinComponent.submitLiveQuiz(
+    accessToken: String,
+    exerciseId: Long,
+    submission: QuizSubmission = QuizSubmission(submitted = true)
+) {
+    val response = ktorProvider.ktorClient.post(serverConfigurationService.serverUrl.first()) {
+        url {
+            appendPathSegments(*Api.Quiz.path, "exercises", exerciseId.toString(), "submissions", "live")
+        }
+        parameter("submit", true)
+
+        cookieAuth(accessToken)
+        contentType(ContentType.Application.Json)
+        setBody<Submission>(submission)
+    }
+
+    check(response.status.isSuccess()) { "Could not submit quiz $exerciseId: ${response.status}" }
+}
+
+/**
+ * Ends a quiz that is not synchronized. The server scores the submissions right away.
+ */
+suspend fun KoinComponent.endQuizExerciseNow(
+    accessToken: String,
+    exerciseId: Long
+) = performQuizAction(accessToken, exerciseId, "end-now")
+
+/**
+ * Starts a synchronized quiz for everyone who waits for it.
+ */
+suspend fun KoinComponent.startQuizExerciseNow(
+    accessToken: String,
+    exerciseId: Long
+) = performQuizAction(accessToken, exerciseId, "start-now")
+
+private suspend fun KoinComponent.performQuizAction(accessToken: String, exerciseId: Long, action: String) {
+    val response = ktorProvider.ktorClient.put(serverConfigurationService.serverUrl.first()) {
+        url {
+            appendPathSegments(*Api.Quiz.QuizExercises.path, exerciseId.toString(), action)
+        }
+
+        cookieAuth(accessToken)
+        contentType(ContentType.Application.Json)
+    }
+
+    check(response.status.isSuccess()) { "Could not $action quiz $exerciseId: ${response.status}" }
 }
 
 suspend fun KoinComponent.addQuizExerciseBatch(
@@ -277,12 +340,13 @@ suspend fun KoinComponent.addQuizExerciseBatch(
 
 suspend fun KoinComponent.startQuizExerciseBatch(
     accessToken: String,
-    exerciseId: Long,
     batch: QuizExercise.QuizBatch
 ) {
+    val batchId = requireNotNull(batch.id) { "Cannot start a quiz batch without an id" }
+
     return ktorProvider.ktorClient.put(serverConfigurationService.serverUrl.first()) {
         url {
-            appendPathSegments(*Api.Quiz.QuizExercises.path, exerciseId.toString(), "start-batch")
+            appendPathSegments(*Api.Quiz.QuizBatches.path, batchId.toString(), "start-batch")
         }
 
         setBody(batch)
@@ -291,4 +355,133 @@ suspend fun KoinComponent.startQuizExerciseBatch(
 
         contentType(ContentType.Application.Json)
     }.body()
+}
+/**
+ * Adds the given user to the course as a student.
+ *
+ * Artemis 10 decides course membership from per-course roles rather than from the group names a
+ * course used to carry, so creating a course and a user no longer relates the two: without this the
+ * user is not a member and every endpoint that requires membership in this course answers 403.
+ */
+suspend fun KoinComponent.addStudentToCourse(
+    accessToken: String,
+    courseId: Long,
+    studentLogin: String
+) = addUserToCourse(accessToken, courseId, studentLogin, "students")
+
+/**
+ * Sets the code of conduct of an existing course.
+ *
+ * The creation endpoint does not accept one: the field is absent from its payload and silently
+ * dropped, and a course without a code of conduct reports it as already accepted, so the tests that
+ * exercise accepting it have nothing to accept.
+ */
+suspend fun KoinComponent.setCodeOfConduct(
+    accessToken: String,
+    course: Course,
+    codeOfConduct: String
+) {
+    val response = ktorProvider.ktorClient.submitFormWithBinaryData(
+        formData {
+            append(
+                "course",
+                updateCourseCodeOfConductTemplate(course, codeOfConduct),
+                Headers.build {
+                    set("Content-Type", "application/json")
+                    set("name", "course")
+                    set("filename", "blob")
+                })
+        }
+    ) {
+        url(serverConfigurationService.serverUrl.first())
+        url {
+            appendPathSegments(*Api.Course.Courses.path, course.id.toString())
+        }
+        method = HttpMethod.Put
+
+        cookieAuth(accessToken)
+
+        contentType(ContentType.MultiPart.FormData)
+        accept(ContentType.Application.Json)
+    }
+
+    check(response.status.isSuccess()) {
+        "Could not set the code of conduct of course ${course.id}: ${response.status}"
+    }
+}
+
+/**
+ * Adds the given user to the course as an instructor, which is what the server means by a user
+ * responsible for the code of conduct.
+ */
+suspend fun KoinComponent.addInstructorToCourse(
+    accessToken: String,
+    courseId: Long,
+    instructorLogin: String
+) = addUserToCourse(accessToken, courseId, instructorLogin, "instructors")
+
+/**
+ * Number of attempts for [addUserToCourse]. Two is enough, because the collision can only happen
+ * while the authority row is still missing: once any attempt has written it, no further attempt
+ * inserts anything.
+ */
+private const val ADD_USER_ATTEMPTS = 2
+
+private const val ADD_USER_RETRY_DELAY = 500L
+
+/**
+ * Grants [userLogin] a role in a course, retrying once if the server answers 5xx.
+ *
+ * The suite runs its modules in parallel and each of them grants the same few test users a staff
+ * role in its own freshly created course. The server stores the course role first and then rebuilds
+ * that user's *global* authorities, and Hibernate inserts only the authority rows the user does not
+ * have yet -- so two grants collide only while `ROLE_INSTRUCTOR` is still missing for that user,
+ * which on a wiped database is the first grant of a run. Both insert `(user, ROLE_INSTRUCTOR)`, one
+ * wins, and the loser answers 500 although the course role it was asked for is already stored.
+ *
+ * Retrying therefore settles it rather than papering over anything: the second attempt finds the
+ * role in place and returns early, and the authority was written by whichever attempt won. Verified
+ * against a local server -- eight simultaneous first grants for one user answer 1x200 and 7x500
+ * without this, and 8x200 with it, with the role stored in all eight courses either way.
+ *
+ * Only a test suite provokes this. Granting the same person their first staff role in several
+ * courses within the same instant is not something the web client does.
+ */
+private suspend fun KoinComponent.addUserToCourse(
+    accessToken: String,
+    courseId: Long,
+    userLogin: String,
+    roleSegment: String
+) {
+    repeat(ADD_USER_ATTEMPTS) { attempt ->
+        val failure = try {
+            val response = ktorProvider.ktorClient.post(serverConfigurationService.serverUrl.first()) {
+                url {
+                    appendPathSegments(
+                        *Api.Course.Courses.path,
+                        courseId.toString(),
+                        roleSegment,
+                        userLogin
+                    )
+                }
+
+                cookieAuth(accessToken)
+
+                contentType(ContentType.Application.Json)
+            }
+
+            check(response.status.isSuccess()) {
+                "Could not add $userLogin to course $courseId as $roleSegment: ${response.status}"
+            }
+            return
+        } catch (e: ServerResponseException) {
+            e
+        }
+
+        if (attempt == ADD_USER_ATTEMPTS - 1) {
+            throw failure
+        }
+        Log.w("CourseManagementRequests", "Retrying to add $userLogin to course $courseId as $roleSegment", failure)
+        delay(ADD_USER_RETRY_DELAY)
+    }
 }

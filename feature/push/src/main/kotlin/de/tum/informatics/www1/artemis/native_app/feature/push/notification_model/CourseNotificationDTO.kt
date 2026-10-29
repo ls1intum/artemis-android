@@ -1,6 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push.notification_model
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.serialization.Serializable
 
 @Serializable

@@ -24,9 +24,14 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.R as CoreUiR
 @RunWith(RobolectricTestRunner::class)
 class ExerciseOverviewE2eTest : BaseExerciseTest() {
 
+    @OptIn(ExperimentalTestApi::class)
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `displays correct exercise data`() {
         setupUiAndViewModel()
+
+        // The screen renders once the exercise has been loaded from the server, so nothing it shows
+        // is on screen at the moment setContent returns.
+        composeTestRule.waitUntilAtLeastOneExists(hasText(exercise.title!!), DefaultTimeoutMillis)
 
         composeTestRule.onAllNodesWithText(exercise.title!!).onFirst().assertExists()
     }
@@ -37,6 +42,14 @@ class ExerciseOverviewE2eTest : BaseExerciseTest() {
         var participationId: Long? = null
 
         setupUiAndViewModel { participationId = it }
+
+        // Same here: the button only exists once the exercise has loaded, and performClick does not
+        // wait for it -- it failed on develop with "Failed to inject touch input ... could not find
+        // any node that satisfies: Text contains 'Start exercise'".
+        composeTestRule.waitUntilExactlyOneExists(
+            hasText(context.getString(CoreUiR.string.exercise_actions_start_exercise_button)),
+            DefaultTimeoutMillis
+        )
 
         composeTestRule.onNodeWithText(
             context.getString(CoreUiR.string.exercise_actions_start_exercise_button)

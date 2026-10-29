@@ -1,0 +1,215 @@
+{
+  "quizQuestionsType": "live-quiz",
+  "id": 35,
+  "type": "student",
+  "initializationState": "INITIALIZED",
+  "initializationDate": "2026-09-28T20:29:10.373Z",
+  "student": {
+    "id": 2
+  },
+  "exercise": {
+    "id": 41,
+    "title": "Exercise c0b54a6c1546b14b681a17d186d2818cb226",
+    "visibleToStudents": true,
+    "course": {
+      "id": 45,
+      "title": "Course c82c816d1731e14b0f1910a12770199e11ff",
+      "shortName": "ae2e140647d51376314a4e1b",
+      "startDate": "2026-09-28T20:29:09.938Z",
+      "endDate": "2026-10-01T20:29:09.938Z",
+      "semester": "WS26/27",
+      "testCourse": true,
+      "onlineCourse": false,
+      "courseInformationSharingConfiguration": "COMMUNICATION_AND_MESSAGING",
+      "maxComplaints": 0,
+      "maxTeamComplaints": 0,
+      "maxComplaintTimeDays": 0,
+      "maxRequestMoreFeedbackTimeDays": 0,
+      "maxComplaintTextLimit": 0,
+      "maxComplaintResponseTextLimit": 0,
+      "complaintsEnabled": false,
+      "requestMoreFeedbackEnabled": false,
+      "accuracyOfScores": 1,
+      "athenaGradingFeedbackEnabled": false,
+      "athenaFormativeFeedbackEnabled": false
+    },
+    "type": "quiz",
+    "randomizeQuestionOrder": true,
+    "allowedNumberOfAttempts": 1,
+    "quizMode": "INDIVIDUAL",
+    "duration": 600,
+    "quizBatches": [
+      {
+        "id": 35,
+        "startTime": "2026-09-28T20:29:10.417Z",
+        "started": true,
+        "ended": false
+      }
+    ],
+    "quizStarted": true,
+    "quizEnded": false,
+    "includedInOverallScore": "NOT_INCLUDED",
+    "mode": "INDIVIDUAL",
+    "maxPoints": 3.0,
+    "bonusPoints": 0.0,
+    "quizQuestions": [
+      {
+        "id": 121,
+        "title": "MC1",
+        "text": "Enter your long question if needed",
+        "hint": "Add a hint here (visible during the quiz via ?-Button)",
+        "points": 1.0,
+        "scoringType": "ALL_OR_NOTHING",
+        "randomizeOrder": true,
+        "invalid": false,
+        "type": "multiple-choice",
+        "answerOptions": [
+          {
+            "id": 1,
+            "text": "Enter a correct answer option here",
+            "hint": "Add a hint here (visible during the quiz via ?-Button)",
+            "invalid": false
+          },
+          {
+            "id": 2,
+            "text": "Enter a wrong answer option here",
+            "invalid": false
+          }
+        ],
+        "singleChoice": false
+      },
+      {
+        "id": 122,
+        "title": "ShortAnswer",
+        "text": "Enter your long question if needed\n\nSelect a part of the text and click on Add Spot to automatically create an input field and the corresponding mapping\n\nYou can define a input field like this: This [-spot 1] an [-spot 2] field.\n\nTo define the solution for the input fields you need to create a mapping (multiple mapping also possible):",
+        "points": 1.0,
+        "scoringType": "PROPORTIONAL_WITHOUT_PENALTY",
+        "randomizeOrder": true,
+        "invalid": false,
+        "type": "short-answer",
+        "spots": [
+          {
+            "id": 1,
+            "spotNr": 1,
+            "width": 15,
+            "invalid": false
+          },
+          {
+            "id": 2,
+            "spotNr": 2,
+            "width": 15,
+            "invalid": false
+          }
+        ],
+        "solutions": [
+          {
+            "id": 3,
+            "text": "is",
+            "invalid": false
+          },
+          {
+            "id": 4,
+            "text": "input",
+            "invalid": false
+          },
+          {
+            "id": 5,
+            "text": "correctInBothFields",
+            "invalid": false
+          }
+        ],
+        "similarityValue": 85,
+        "matchLetterCase": false
+      },
+      {
+        "id": 123,
+        "title": "Dnd Question",
+        "text": "Enter your long question if needed",
+        "hint": "Add a hint here (visible during the quiz via ?-Button)",
+        "points": 1.0,
+        "scoringType": "PROPORTIONAL_WITH_PENALTY",
+        "randomizeOrder": true,
+        "invalid": false,
+        "type": "drag-and-drop",
+        "backgroundFilePath": "drag-and-drop/questions/123/backgrounds/dnd_image_2026-09-28T20-29-10-237__api_files_drag-and-drop_backgrounds_45_4fbb01cf1b7d114507194111d0d66c179a44_dndbackground.png",
+        "dropLocations": [
+          {
+            "id": 1,
+            "posX": 22.0,
+            "posY": 57.0,
+            "width": 23.0,
+            "height": 23.0,
+            "invalid": false
+          },
+          {
+            "id": 2,
+            "posX": 94.0,
+            "posY": 55.0,
+            "width": 26.0,
+            "height": 20.0,
+            "invalid": false
+          }
+        ],
+        "dragItems": [
+          {
+            "id": 3,
+            "text": "item1",
+            "invalid": false
+          },
+          {
+            "id": 4,
+            "text": "item2",
+            "invalid": false
+          }
+        ]
+      }
+    ]
+  },
+  "submissions": [
+    {
+      "id": 35,
+      "submissionExerciseType": "quiz",
+      "submitted": false,
+      "submissionDate": "2026-09-28T20:29:10.487Z",
+      "submittedAnswers": [
+        {
+          "id": 108,
+          "quizQuestion": {
+            "id": 121,
+            "title": "MC1",
+            "text": "Enter your long question if needed",
+            "hint": "Add a hint here (visible during the quiz via ?-Button)",
+            "points": 1.0,
+            "scoringType": "ALL_OR_NOTHING",
+            "randomizeOrder": true,
+            "invalid": false,
+            "type": "multiple-choice",
+            "answerOptions": [
+              {
+                "id": 1,
+                "text": "Enter a correct answer option here",
+                "hint": "Add a hint here (visible during the quiz via ?-Button)",
+                "invalid": false
+              },
+              {
+                "id": 2,
+                "text": "Enter a wrong answer option here",
+                "invalid": false
+              }
+            ],
+            "singleChoice": false
+          },
+          "selectedOptions": [
+            {
+              "id": 1,
+              "text": "Enter a correct answer option here",
+              "hint": "Add a hint here (visible during the quiz via ?-Button)",
+              "invalid": false
+            }
+          ],
+          "type": "multiple-choice"
+        }
+      ]
+    }
+  ]
+}

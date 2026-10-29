@@ -20,7 +20,7 @@ internal class DashboardServiceImpl(
     override suspend fun loadDashboard(): NetworkResponse<Dashboard> {
         return getRequest {
             url {
-                appendPathSegments(*Api.Core.Courses.path, "for-dashboard")
+                appendPathSegments(*Api.Course.Courses.path, "for-dashboard")
             }
         }
     }

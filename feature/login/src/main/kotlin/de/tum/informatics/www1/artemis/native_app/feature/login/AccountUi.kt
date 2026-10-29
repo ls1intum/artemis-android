@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.toRoute
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -112,7 +113,6 @@ internal fun LoginUiScreen(
     nestedNavController.currentBackStackEntryAsState().value
     val supportsBackNavigation = nestedNavController.previousBackStackEntry != null
 
-    val selectedDestination: NestedDestination? = currentBackStack?.toRoute()
 
     val onClickSaml2Login: (rememberMe: Boolean) -> Unit = { rememberMe ->
         nestedNavController.navigate(NestedDestination.Saml2Login(rememberMe))
@@ -130,10 +130,18 @@ internal fun LoginUiScreen(
                     }
                 },
                 title = {
-                    val titleText: Int? = when (selectedDestination) {
-                        NestedDestination.CustomInstanceSelection -> R.string.account_select_custom_instance_selection_title
-                        NestedDestination.Login -> R.string.login_title
-                        NestedDestination.Register -> R.string.register_title
+                    // hasRoute rather than toRoute: toRoute deserializes the route into the type
+                    // asked for, and asking for the sealed supertype makes it resolve a polymorphic
+                    // serializer for a route that carries no discriminator. Navigation 2.9 turned
+                    // that into "Polymorphic value has not been read for class null", which crashed
+                    // the login screen on a fresh install and after logout.
+                    val destination = currentBackStack?.destination
+                    val titleText: Int? = when {
+                        destination == null -> null
+                        destination.hasRoute<NestedDestination.CustomInstanceSelection>() ->
+                            R.string.account_select_custom_instance_selection_title
+                        destination.hasRoute<NestedDestination.Login>() -> R.string.login_title
+                        destination.hasRoute<NestedDestination.Register>() -> R.string.register_title
                         else -> null
                     }
 
@@ -187,7 +195,8 @@ internal fun LoginUiScreen(
                         .fillMaxSize()
                         .imePadding()
                 ) {
-                    nestedNavController.navigate(NestedDestination.Home)
+                    // pop back the stack so that there is always only one ViewModel
+                    nestedNavController.popBackStack(NestedDestination.Home, inclusive = false)
                 }
             }
 
@@ -384,16 +393,11 @@ private fun RegisterLoginAccount(
 
                     if (LocalInspectionMode.current) {
                         //Just for the preview.
-                        LoginUi(
+                        Text(
                             modifier = loginUiModifier,
-                            accountName = "TUM",
-                            needsToAcceptTerms = true,
-                            hasUserAcceptedTerms = true,
-                            saml2Config = null,
-                            isPasswordLoginDisabled = false,
-                            updateUserAcceptedTerms = {},
-                            passwordBasedLoginContent = {},
-                            saml2BasedLoginContent = { _, _ -> }
+                            text = stringResource(id = R.string.login_title),
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Center
                         )
                     } else {
                         LoginUi(

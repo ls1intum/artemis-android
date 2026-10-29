@@ -14,9 +14,15 @@ internal class ParticipationServiceImpl(
     artemisContextProvider: ArtemisContextProvider,
 ) : LoggedInBasedServiceImpl(ktorProvider, artemisContextProvider),  ParticipationService {
     override suspend fun findParticipation(exerciseId: Long): NetworkResponse<Participation> {
-        return getRequest {
+        // Artemis 8.6.1 removed "exercise/exercises/{exerciseId}/participation"; the quiz module now
+        // owns the only variant the app used, and it starts the participation when there is none yet.
+        return postRequest {
             url {
-                appendPathSegments(*Api.Exercise.Exercises.path, exerciseId.toString(), "participation")
+                appendPathSegments(
+                    *Api.Quiz.QuizExercises.path,
+                    exerciseId.toString(),
+                    "start-participation"
+                )
             }
         }
     }

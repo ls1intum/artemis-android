@@ -23,7 +23,7 @@ class PasskeySettingsServiceImpl(
     override suspend fun getPasskeys(): NetworkResponse<List<PasskeyDTO>> {
         return getRequest {
             url {
-                appendPathSegments(*Api.Core.Passkey.path, "user")
+                appendPathSegments(*Api.Account.Passkeys.path, "user")
             }
         }
     }

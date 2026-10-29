@@ -5,8 +5,8 @@ import androidx.compose.ui.res.stringResource
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date

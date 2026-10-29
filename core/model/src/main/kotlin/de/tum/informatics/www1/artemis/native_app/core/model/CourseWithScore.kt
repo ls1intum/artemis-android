@@ -1,7 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.core.model
 
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.serialization.Serializable
 
 @Serializable

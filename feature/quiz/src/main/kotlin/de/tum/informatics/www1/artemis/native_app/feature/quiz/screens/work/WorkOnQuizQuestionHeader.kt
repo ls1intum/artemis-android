@@ -43,6 +43,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragA
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.MultipleChoiceQuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.QuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.ShortAnswerQuizQuestion
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExercisePointsDecimalFormat
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ExerciseColors
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 
@@ -51,7 +52,7 @@ internal fun WorkOnQuizHeader(
     modifier: Modifier,
     questions: List<QuizQuestion>,
     selectedQuestionIndex: Int,
-    overallPoints: Int,
+    overallPoints: Double,
     onChangeSelectionQuestionIndex: (questionIndex: Int) -> Unit
 ) {
 
@@ -69,7 +70,7 @@ internal fun WorkOnQuizHeader(
             modifier = Modifier.padding(8.dp),
             text = stringResource(
                 id = R.string.quiz_participation_overall_score_points,
-                overallPoints
+                ExercisePointsDecimalFormat.format(overallPoints)
             ),
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Bold
@@ -202,7 +203,7 @@ private fun QuizHeaderPreview(
             modifier = Modifier.fillMaxWidth(),
             questions = questions,
             selectedQuestionIndex = selectedIndex,
-            overallPoints = 5
+            overallPoints = 5.0
         ) { selectedIndex = it }
     }
 }

@@ -17,53 +17,123 @@ permissions:
   contents: read
   checks: write
 
+concurrency:
+  # One E2E run at a time, repository wide. The stack uses fixed container names and a fixed volume,
+  # and the job starts by stopping and removing exactly those, so two runs sharing a machine tear
+  # each other down; a full Artemis and PostgreSQL per run is more than the runners carry in parallel in
+  # any case. A run that overlapped another has already failed here with "container artemis-app is
+  # unhealthy" after waiting out the ten minute health check.
+  #
+  # Queued rather than cancelled: every one of these runs is a result somebody is waiting on.
+  group: e2e-tests
+  cancel-in-progress: false
+  queue: max
+
 jobs:
   end-to-end-tests:
     name: E2E Tests
     runs-on: [self-hosted, ase-large-android-sdk-35]
     timeout-minutes: 60
 
-    steps:
-      - uses: actions/checkout@v4
+    env:
+      # The runner's preinstalled SDK is read-only and can lag behind compileSdk. Use a writable
+      # SDK so Gradle can install the platform and build tools requested by the version catalog.
+      ANDROID_HOME: ${{ github.workspace }}/.android-sdk
+      ANDROID_SDK_ROOT: ${{ github.workspace }}/.android-sdk
+      # setup-gradle restores the cache only into a Gradle home that does not exist yet ("Gradle User Home already
+      # exists: will not restore from cache"), and ~/.gradle of the runner does, so the cache was saved and never
+      # restored. The workspace is empty at the start of every run.
+      GRADLE_USER_HOME: ${{ github.workspace }}/.gradle-home
 
-      - name: Set Android Sdk Env
-        run: export ANDROID_HOME=/usr/lib/android-sdk
+    steps:
+      - uses: actions/checkout@v7
 
       - name: Set local.properties
-        run: echo "sdk.dir=/usr/lib/android-sdk" > local.properties
+        run: echo "sdk.dir=$ANDROID_HOME" > local.properties
 
       - name: Gradle Wrapper Verification
-        uses: gradle/actions/wrapper-validation@v3
+        uses: gradle/actions/wrapper-validation@v6
 
-        # Sanity cleanup
-      - name: Stop all running docker containers
-        run: docker stop artemis-app artemis-mysql docker-artemis-app-setup
-        continue-on-error: true
+      - name: Fetch the database version and validate the E2E stack
+        # Every docker compose call below reads it from docker/.env, including the cleanup of the previous run.
+        # The stack includes the PostgreSQL service from the Artemis repository, which needs a Compose version
+        # with remote includes, so the step also records the version the runner has.
+        run: |
+          docker compose version
+          bash docker/fetch-artemis-versions.sh
+          docker compose -f docker/e2e-tests.yml config --quiet
 
-      - name: Remove all docker containers
-        run: docker rm artemis-app artemis-mysql docker-artemis-app-setup
-        if: success() || failure()
-        continue-on-error: true
+      - name: Remove the stack left behind by the previous run
+        # Runs are serialised repository wide, so the previous job on this runner can finish seconds
+        # before this one starts. Its containers are then still terminating, the database volume is
+        # still attached, and "docker volume rm" fails -- which used to be swallowed by "|| exit 0",
+        # leaving the next Artemis to start against the previous run's database. That shows up later
+        # as "container artemis-app is unhealthy", or as tests failing on data they did not create.
+        run: |
+          docker compose -f docker/e2e-tests.yml down --volumes --remove-orphans --timeout 30 || true
+          docker rm --force artemis-app artemis-postgres-android docker-artemis-app-setup 2>/dev/null || true
 
-      - name: Remove mysql volume
-        run: docker volume rm artemis-mysql-data-android || exit 0
+          for _ in $(seq 1 60); do
+            docker volume ls --quiet | grep -qx artemis-postgres-data-android || break
+            docker volume rm artemis-postgres-data-android >/dev/null 2>&1 || sleep 1
+          done
+
+          if docker volume ls --quiet | grep -qx artemis-postgres-data-android; then
+            echo "::error::The database volume from a previous run is still present, so the database would not be empty."
+            exit 1
+          fi
 
       - name: Launch docker containers
         run: docker compose -f docker/e2e-tests.yml up -d artemis-app-setup
-        if: success() || failure()
 
       - name: JDK setup
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v6
         with:
-          distribution: 'zulu'
-          java-version: 17
+          distribution: 'temurin'
+          # build-logic and the Android modules target JVM 25; Gradle refuses to configure the
+          # build on an older JDK. Pinned to an exact build, like the other workflows, so every job
+          # in this repository compiles and runs on the same JDK; Renovate bumps it.
+          java-version: 25.0.5+8.0.LTS
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools'
+
+      - name: Restore the Gradle dependencies
+        # Without it every run downloads all dependencies from Maven Central, which answers the shared address of the
+        # runners with 429 Too Many Requests once their Gradle home is empty. develop writes the cache, pull
+        # requests read it.
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Run tests
+        id: run-tests
         run: ./gradlew test --max-workers=4 -Dskip.unit-tests=true -Dskip.e2e=false -Dskip.debugVariants=true -Dskip.flavor.unrestricted=true -Dskip.flavor.beta=true
         continue-on-error: true
+        env:
+          # The tests wait this long for the server. The default of 10s is measured against a
+          # developer machine talking to a warm server; here the runner is shared and the server
+          # has just started, and the first test to reach it has timed out on that alone. Still
+          # short enough that something genuinely stuck fails rather than hangs.
+          DEFAULT_TIMEOUT: 30000
+
+      - name: Artemis server log
+        # Only useful when something went wrong, and then it is the difference between "a test
+        # failed" and knowing which request the server rejected and why. Artemis logs at DEBUG, so
+        # a plain tail covers the last few seconds and misses the failure entirely; select the
+        # errors out of the whole log instead, and keep a tail as well for the shape of the end.
+        if: steps.run-tests.outcome == 'failure'
+        continue-on-error: true
+        run: |
+          echo "::group::Errors and exceptions"
+          docker logs artemis-app 2>&1 | grep -aE "ERROR|Exception|Caused by:" | tail -200 || echo "none found"
+          echo "::endgroup::"
+          echo "::group::Last 200 lines"
+          docker logs artemis-app --tail 200 2>&1 || true
+          echo "::endgroup::"
 
       - name: Test Report
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v3
         if: success() || failure()    # run this step even if previous step failed
         with:
           name: E2E Test Results
@@ -71,12 +141,16 @@ jobs:
           reporter: java-junit
           fail-on-empty: 'false'
 
-      - name: Cleanup -> Stop all running docker containers
+      - name: Cleanup
         if: always()
-        run: docker stop artemis-app artemis-mysql docker-artemis-app-setup
+        # With --volumes, so the next run starts from an empty database even if it begins before
+        # this teardown has fully settled.
+        run: docker compose -f docker/e2e-tests.yml down --volumes --remove-orphans --timeout 30
         continue-on-error: true
 
-      - name: Cleanup -> Remove all docker containers
-        if: always()
-        run: docker rm artemis-app artemis-mysql docker-artemis-app-setup
-        continue-on-error: true
+      - name: Fail when the tests did not pass
+        # The tests continue on error so that the server log, the report and the cleanup above still
+        # run. The report fails the job for failed tests only: a build that fails before any test has
+        # run, e.g. because a dependency could not be downloaded, reports nothing and left the job green.
+        if: steps.run-tests.outcome == 'failure'
+        run: exit 1

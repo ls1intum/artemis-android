@@ -11,7 +11,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -181,10 +181,9 @@ val Exercise.notEndedSubmittedOrFinished: Flow<Boolean>
                 )
     }
 
-// TODO: Include QuizExercises here once this issue has been resolved: See https://github.com/ls1intum/artemis-android/issues/107
 val Exercise.isParticipationAvailable: Flow<Boolean>
     get() {
-        return if (this is TextExercise) flowOf(true)
+        return if (this is TextExercise || this is QuizExercise) flowOf(true)
         else flowOf(false)
     }
 

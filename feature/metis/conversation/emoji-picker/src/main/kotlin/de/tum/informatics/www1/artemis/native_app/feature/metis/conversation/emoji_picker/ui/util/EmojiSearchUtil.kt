@@ -5,9 +5,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emo
 object EmojiSearchUtil {
 
     fun filterAndSortEmojis(emojis: List<Emoji>, query: String): List<Emoji> {
+        val search = query.trim()
         return emojis
             .asSequence()
-            .map { EmojiSearchResult.fromQuery(it, query) }
+            .map { EmojiSearchResult.fromQuery(it, search) }
             .filterIsInstance<EmojiSearchResult.Match>()
             .sortedBy { it.score }
             .map { it.emoji }
@@ -22,6 +23,7 @@ object EmojiSearchUtil {
                     it.startsWith(query, ignoreCase = true)
                 }
 
+                if (emoji.unicode == query) return Match(emoji, -1f)
                 if (firstMatchingKeywordIndex == -1) {
                     return NoMatch
                 }

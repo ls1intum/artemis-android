@@ -98,8 +98,7 @@ internal abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest()
 
     protected fun setupUiAndViewModel(
         conversation: Conversation,
-        onConversationLeft: () -> Unit = {},
-        onChannelDeleted: () -> Unit = {}
+        onConversationLeft: () -> Unit = {}
     ): ConversationSettingsViewModel {
         val viewModel = ConversationSettingsViewModel(
             initialCourseId = course.id!!,
@@ -123,7 +122,7 @@ internal abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest()
                 onRequestAddMembers = { },
                 onRequestViewAllMembers = { },
                 onConversationLeft = onConversationLeft,
-                onChannelDeleted = onChannelDeleted,
+                onChannelDeleted = { },
                 onSidebarToggle = { },
             )
         }
@@ -157,35 +156,6 @@ internal abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest()
         )
     }
 
-    protected fun deleteChannelTestImpl() {
-        val deleteButtonText =
-            context.getString(R.string.conversation_settings_section_delete_channel)
-
-        composeTestRule.waitUntilAtLeastOneExists(
-            hasText(deleteButtonText),
-            DefaultTimeoutMillis
-        )
-
-        composeTestRule
-            .onNodeWithText(deleteButtonText)
-            .performScrollTo()
-            .assertIsDisplayed()
-            .performClick()
-
-        composeTestRule
-            .onNode(
-                hasAnyAncestor(isDialog()) and hasText(context.getString(R.string.conversation_settings_section_delete_channel_title))
-            )
-            .assertExists()
-
-        composeTestRule
-            .onNode(
-                hasAnyAncestor(isDialog()) and hasText(context.getString(R.string.conversation_settings_section_delete_channel))
-            )
-            .assertExists()
-            .performClick()
-    }
-
     protected fun toggleChannelPrivacyTestImpl(conversation: Conversation) {
         val isPublic = (conversation as ChannelChat).isPublic
         val toggleButtonText = context.getString(
@@ -207,6 +177,14 @@ internal abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest()
                 R.string.conversation_settings_section_channel_toggle_privacy_private_button
             else
                 R.string.conversation_settings_section_channel_toggle_privacy_public_button
+        )
+
+        // Once the channel has changed, the action on offer is the opposite one.
+        val toggledButtonText = context.getString(
+            if (isPublic)
+                R.string.conversation_settings_section_channel_toggle_privacy_public
+            else
+                R.string.conversation_settings_section_channel_toggle_privacy_private
         )
 
         composeTestRule.waitUntilAtLeastOneExists(
@@ -235,7 +213,7 @@ internal abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest()
 
         composeTestRule
             .waitUntilExactlyOneExists(
-                hasText(toggleButtonText),
+                hasText(toggledButtonText),
                 DefaultTimeoutMillis
             )
     }

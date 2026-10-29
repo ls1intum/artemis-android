@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.courseregistration
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasParent
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithTag
@@ -33,6 +34,7 @@ import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertEquals
 
+@OptIn(ExperimentalTestApi::class)
 @Category(EndToEndTest::class)
 @RunWith(RobolectricTestRunner::class)
 class CourseRegistrationE2eTest : BaseComposeTest() {
@@ -71,6 +73,12 @@ class CourseRegistrationE2eTest : BaseComposeTest() {
                 viewModel = viewModel
             )
         }
+
+        // The list only appears once the registrable courses have loaded
+        composeTestRule.waitUntilExactlyOneExists(
+            hasTestTag(TEST_TAG_REGISTRABLE_COURSE_LIST),
+            DefaultTimeoutMillis
+        )
 
         composeTestRule
             .onNodeWithTag(TEST_TAG_REGISTRABLE_COURSE_LIST)

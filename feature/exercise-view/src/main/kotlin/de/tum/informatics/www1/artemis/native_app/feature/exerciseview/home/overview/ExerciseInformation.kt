@@ -24,7 +24,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.date.format
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseCategoryChipRow
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseInfoChip
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.R
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 private val exerciseInformationColumnModifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
 val informationTableThickness = 1.dp

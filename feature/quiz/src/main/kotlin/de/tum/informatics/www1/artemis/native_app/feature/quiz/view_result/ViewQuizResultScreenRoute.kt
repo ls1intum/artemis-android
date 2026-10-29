@@ -137,5 +137,5 @@ private data class ResultData(
     val submission: QuizSubmission,
     val result: Result,
     val quizQuestions: List<QuizQuestionData<*>>,
-    val maxPoints: Int
+    val maxPoints: Double
 )

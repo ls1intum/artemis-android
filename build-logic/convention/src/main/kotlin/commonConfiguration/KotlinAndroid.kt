@@ -6,10 +6,12 @@ import com.android.build.api.variant.AndroidComponentsExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
-import org.gradle.api.plugins.ExtensionAware
+import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByType
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompilerOptions
 import util.libs
 import java.lang.Boolean
 import kotlin.String
@@ -55,52 +57,55 @@ object ProductFlavors {
  * Configure base Kotlin with Android options
  */
 internal fun Project.configureKotlinAndroid(
-    commonExtension: CommonExtension<*, *, *, *, *, *>,
+    commonExtension: CommonExtension,
 ) {
     commonExtension.apply {
         compileSdk = libs.findVersion("compileSdk").get().toString().toInt()
         buildToolsVersion = libs.findVersion("buildToolsVersion").get().toString()
 
-        defaultConfig {
-            minSdk = libs.findVersion("minSdk").get().toString().toInt()
-        }
+        defaultConfig.minSdk = libs.findVersion("minSdk").get().toString().toInt()
 
-        compileOptions {
-            sourceCompatibility = JavaVersion.VERSION_17
-            targetCompatibility = JavaVersion.VERSION_17
+        compileOptions.apply {
+            sourceCompatibility = JavaVersion.VERSION_25
+            targetCompatibility = JavaVersion.VERSION_25
             isCoreLibraryDesugaringEnabled = true
         }
 
-        kotlinOptions {
-            freeCompilerArgs = freeCompilerArgs + listOf(
-                "-opt-in=kotlin.RequiresOptIn",
-                // Enable experimental coroutines APIs, including Flow
-                "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-                "-opt-in=kotlinx.coroutines.FlowPreview"
-            )
+        testOptions.unitTests.isIncludeAndroidResources = true
 
-            jvmTarget = JavaVersion.VERSION_17.toString()
-        }
-
-        testOptions {
-            unitTests {
-                isIncludeAndroidResources = true
-            }
-        }
+        // The product flavors below declare BuildConfig fields, so the feature has to be on. It used
+        // to be switched on by "android.defaults.buildfeatures.buildconfig" in gradle.properties,
+        // which is deprecated and gone in AGP 9.
+        buildFeatures.buildConfig = true
 
         // As of now, we can skip the linter on release builds.
-        lint {
+        lint.apply {
             checkReleaseBuilds = false
             checkTestSources = false
         }
 
-        extensions.getByType(AndroidComponentsExtension::class).apply {
-            if (Boolean.getBoolean("skip.debugVariants")) {
-                beforeVariants(selector().withBuildType("debug")) { variantBuilder ->
-                    variantBuilder.enable = false
-                }
+    }
+
+    // Qualified against the project: AGP 9 makes CommonExtension itself ExtensionAware, so an
+    // unqualified "extensions" inside the block above now resolves to the Android extension's own
+    // (empty) container rather than the project's.
+    this.extensions.getByType(AndroidComponentsExtension::class).apply {
+        if (Boolean.getBoolean("skip.debugVariants")) {
+            beforeVariants(selector().withBuildType("debug")) { variantBuilder ->
+                variantBuilder.enable = false
             }
         }
+    }
+
+    kotlinCompilerOptions {
+        freeCompilerArgs.addAll(
+            "-opt-in=kotlin.RequiresOptIn",
+            // Enable experimental coroutines APIs, including Flow
+            "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+            "-opt-in=kotlinx.coroutines.FlowPreview"
+        )
+
+        jvmTarget.set(JvmTarget.JVM_25)
     }
 
     dependencies {
@@ -111,12 +116,12 @@ internal fun Project.configureKotlinAndroid(
 }
 
 internal fun Project.configureReleaseTypeFlavors(
-    commonExtension: CommonExtension<*, *, *, *, *, *>,
+    commonExtension: CommonExtension,
 ) {
     commonExtension.apply {
         flavorDimensions += ProductFlavors.Dimensions.ReleaseType.Key
 
-        productFlavors {
+        productFlavors.apply {
             createFlavor(
                 ProductFlavors.Dimensions.ReleaseType.Key,
                 ProductFlavors.Dimensions.ReleaseType.Flavors.Beta
@@ -137,12 +142,12 @@ internal fun Project.configureReleaseTypeFlavors(
 private const val TUM_ARTEMIS_SERVER_URL = "https://artemis.tum.de/"        // The "/" at the end is important, as it is used in the URL building process
 
 internal fun Project.configureInstanceSelectionFlavors(
-    commonExtension: CommonExtension<*, *, *, *, *, *>,
+    commonExtension: CommonExtension,
 ) {
     commonExtension.apply {
         flavorDimensions += ProductFlavors.Dimensions.InstanceSelection.Key
 
-        productFlavors {
+        productFlavors.apply {
             createFlavor(
                 ProductFlavors.Dimensions.InstanceSelection.Key,
                 ProductFlavors.Dimensions.InstanceSelection.Flavors.FreeInstanceSelection
@@ -192,6 +197,14 @@ private fun NamedDomainObjectContainer<out ProductFlavor>.createFlavor(
     }
 }
 
-fun CommonExtension<*, *, *, *, *, *>.kotlinOptions(block: KotlinJvmOptions.() -> Unit) {
-    (this as ExtensionAware).extensions.configure("kotlinOptions", block)
+/**
+ * Configures the Kotlin compiler of this project.
+ *
+ * Kotlin 2.2 turned the "kotlinOptions" block on the Android extension into an error, so the options
+ * are set on the Kotlin extension itself instead.
+ */
+fun Project.kotlinCompilerOptions(block: KotlinJvmCompilerOptions.() -> Unit) {
+    extensions.configure<KotlinAndroidProjectExtension> {
+        compilerOptions(block)
+    }
 }

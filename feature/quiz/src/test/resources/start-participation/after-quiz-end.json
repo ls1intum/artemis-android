@@ -1,0 +1,347 @@
+{
+  "quizQuestionsType": "after-quiz-end",
+  "id": 36,
+  "type": "student",
+  "initializationState": "FINISHED",
+  "initializationDate": "2026-09-28T20:29:41.043Z",
+  "student": {
+    "id": 2
+  },
+  "exercise": {
+    "id": 42,
+    "title": "Exercise 66c0b71d19f7714f53192d117a6f088143dd",
+    "dueDate": "2026-09-28T20:29:41Z",
+    "visibleToStudents": true,
+    "course": {
+      "id": 46,
+      "title": "Course fbd626eb17f0d14ba91bf1019a49670ebe93",
+      "shortName": "ae2edd50105013d051430b1b",
+      "startDate": "2026-09-28T20:29:40.91Z",
+      "endDate": "2026-10-01T20:29:40.91Z",
+      "semester": "WS26/27",
+      "testCourse": true,
+      "onlineCourse": false,
+      "courseInformationSharingConfiguration": "COMMUNICATION_AND_MESSAGING",
+      "maxComplaints": 0,
+      "maxTeamComplaints": 0,
+      "maxComplaintTimeDays": 0,
+      "maxRequestMoreFeedbackTimeDays": 0,
+      "maxComplaintTextLimit": 0,
+      "maxComplaintResponseTextLimit": 0,
+      "complaintsEnabled": false,
+      "requestMoreFeedbackEnabled": false,
+      "accuracyOfScores": 1,
+      "athenaGradingFeedbackEnabled": false,
+      "athenaFormativeFeedbackEnabled": false
+    },
+    "type": "quiz",
+    "randomizeQuestionOrder": true,
+    "allowedNumberOfAttempts": 1,
+    "quizMode": "INDIVIDUAL",
+    "duration": 600,
+    "quizBatches": [
+      {
+        "id": 36,
+        "startTime": "2026-09-28T20:19:36Z",
+        "started": true,
+        "ended": true
+      }
+    ],
+    "quizStarted": true,
+    "quizEnded": true,
+    "includedInOverallScore": "NOT_INCLUDED",
+    "mode": "INDIVIDUAL",
+    "maxPoints": 3.0,
+    "bonusPoints": 0.0,
+    "quizQuestions": [
+      {
+        "id": 124,
+        "title": "MC1",
+        "text": "Enter your long question if needed",
+        "hint": "Add a hint here (visible during the quiz via ?-Button)",
+        "points": 1.0,
+        "scoringType": "ALL_OR_NOTHING",
+        "randomizeOrder": true,
+        "invalid": false,
+        "type": "multiple-choice",
+        "answerOptions": [
+          {
+            "id": 1,
+            "text": "Enter a correct answer option here",
+            "hint": "Add a hint here (visible during the quiz via ?-Button)",
+            "invalid": false,
+            "explanation": "Add an explanation here (only visible in feedback after quiz has ended)",
+            "isCorrect": true
+          },
+          {
+            "id": 2,
+            "text": "Enter a wrong answer option here",
+            "invalid": false,
+            "isCorrect": false
+          }
+        ],
+        "singleChoice": false
+      },
+      {
+        "id": 125,
+        "title": "ShortAnswer",
+        "text": "Enter your long question if needed\n\nSelect a part of the text and click on Add Spot to automatically create an input field and the corresponding mapping\n\nYou can define a input field like this: This [-spot 1] an [-spot 2] field.\n\nTo define the solution for the input fields you need to create a mapping (multiple mapping also possible):",
+        "points": 1.0,
+        "scoringType": "PROPORTIONAL_WITHOUT_PENALTY",
+        "randomizeOrder": true,
+        "invalid": false,
+        "type": "short-answer",
+        "spots": [
+          {
+            "id": 1,
+            "spotNr": 1,
+            "width": 15,
+            "invalid": false
+          },
+          {
+            "id": 2,
+            "spotNr": 2,
+            "width": 15,
+            "invalid": false
+          }
+        ],
+        "solutions": [
+          {
+            "id": 3,
+            "text": "is",
+            "invalid": false
+          },
+          {
+            "id": 4,
+            "text": "input",
+            "invalid": false
+          },
+          {
+            "id": 5,
+            "text": "correctInBothFields",
+            "invalid": false
+          }
+        ],
+        "similarityValue": 85,
+        "matchLetterCase": false,
+        "correctMappings": [
+          {
+            "id": 6,
+            "shortAnswerSpotIndex": 0,
+            "shortAnswerSolutionIndex": 0,
+            "invalid": false,
+            "solution": {
+              "id": 3,
+              "text": "is",
+              "invalid": false
+            },
+            "spot": {
+              "id": 1,
+              "spotNr": 1,
+              "width": 15,
+              "invalid": false
+            }
+          },
+          {
+            "id": 7,
+            "shortAnswerSpotIndex": 1,
+            "shortAnswerSolutionIndex": 1,
+            "invalid": false,
+            "solution": {
+              "id": 4,
+              "text": "input",
+              "invalid": false
+            },
+            "spot": {
+              "id": 2,
+              "spotNr": 2,
+              "width": 15,
+              "invalid": false
+            }
+          },
+          {
+            "id": 8,
+            "shortAnswerSpotIndex": 0,
+            "shortAnswerSolutionIndex": 2,
+            "invalid": false,
+            "solution": {
+              "id": 5,
+              "text": "correctInBothFields",
+              "invalid": false
+            },
+            "spot": {
+              "id": 1,
+              "spotNr": 1,
+              "width": 15,
+              "invalid": false
+            }
+          },
+          {
+            "id": 9,
+            "shortAnswerSpotIndex": 1,
+            "shortAnswerSolutionIndex": 2,
+            "invalid": false,
+            "solution": {
+              "id": 5,
+              "text": "correctInBothFields",
+              "invalid": false
+            },
+            "spot": {
+              "id": 2,
+              "spotNr": 2,
+              "width": 15,
+              "invalid": false
+            }
+          }
+        ]
+      },
+      {
+        "id": 126,
+        "title": "Dnd Question",
+        "text": "Enter your long question if needed",
+        "hint": "Add a hint here (visible during the quiz via ?-Button)",
+        "points": 1.0,
+        "scoringType": "PROPORTIONAL_WITH_PENALTY",
+        "randomizeOrder": true,
+        "invalid": false,
+        "type": "drag-and-drop",
+        "backgroundFilePath": "drag-and-drop/questions/126/backgrounds/dnd_image_2026-09-28T20-29-40-973__api_files_drag-and-drop_backgrounds_46_1a4221d11ba67149241b5a412fe4c0135545_dndbackground.png",
+        "dropLocations": [
+          {
+            "id": 1,
+            "posX": 22.0,
+            "posY": 57.0,
+            "width": 23.0,
+            "height": 23.0,
+            "invalid": false
+          },
+          {
+            "id": 2,
+            "posX": 94.0,
+            "posY": 55.0,
+            "width": 26.0,
+            "height": 20.0,
+            "invalid": false
+          }
+        ],
+        "dragItems": [
+          {
+            "id": 3,
+            "text": "item1",
+            "invalid": false
+          },
+          {
+            "id": 4,
+            "text": "item2",
+            "invalid": false
+          }
+        ],
+        "correctMappings": [
+          {
+            "id": 5,
+            "dragItemIndex": 0,
+            "dropLocationIndex": 0,
+            "invalid": false,
+            "dragItem": {
+              "id": 3,
+              "text": "item1",
+              "invalid": false
+            },
+            "dropLocation": {
+              "id": 1,
+              "posX": 22.0,
+              "posY": 57.0,
+              "width": 23.0,
+              "height": 23.0,
+              "invalid": false
+            }
+          },
+          {
+            "id": 6,
+            "dragItemIndex": 1,
+            "dropLocationIndex": 1,
+            "invalid": false,
+            "dragItem": {
+              "id": 4,
+              "text": "item2",
+              "invalid": false
+            },
+            "dropLocation": {
+              "id": 2,
+              "posX": 94.0,
+              "posY": 55.0,
+              "width": 26.0,
+              "height": 20.0,
+              "invalid": false
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "submissions": [
+    {
+      "id": 36,
+      "submissionExerciseType": "quiz",
+      "submitted": true,
+      "type": "MANUAL",
+      "submissionDate": "2026-09-28T20:29:41.141Z",
+      "scoreInPoints": 1.0,
+      "submittedAnswers": [
+        {
+          "id": 109,
+          "scoreInPoints": 1.0,
+          "quizQuestion": {
+            "id": 124,
+            "title": "MC1",
+            "text": "Enter your long question if needed",
+            "hint": "Add a hint here (visible during the quiz via ?-Button)",
+            "points": 1.0,
+            "scoringType": "ALL_OR_NOTHING",
+            "randomizeOrder": true,
+            "invalid": false,
+            "type": "multiple-choice",
+            "answerOptions": [
+              {
+                "id": 1,
+                "text": "Enter a correct answer option here",
+                "hint": "Add a hint here (visible during the quiz via ?-Button)",
+                "invalid": false,
+                "explanation": "Add an explanation here (only visible in feedback after quiz has ended)",
+                "isCorrect": true
+              },
+              {
+                "id": 2,
+                "text": "Enter a wrong answer option here",
+                "invalid": false,
+                "isCorrect": false
+              }
+            ],
+            "singleChoice": false
+          },
+          "selectedOptions": [
+            {
+              "id": 1,
+              "text": "Enter a correct answer option here",
+              "hint": "Add a hint here (visible during the quiz via ?-Button)",
+              "invalid": false,
+              "explanation": "Add an explanation here (only visible in feedback after quiz has ended)",
+              "isCorrect": true
+            }
+          ],
+          "type": "multiple-choice"
+        }
+      ],
+      "results": [
+        {
+          "id": 2,
+          "completionDate": "2026-09-28T20:29:41.141Z",
+          "successful": false,
+          "score": 33.3,
+          "rated": true,
+          "assessmentType": "AUTOMATIC"
+        }
+      ]
+    }
+  ]
+}

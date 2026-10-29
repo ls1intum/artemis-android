@@ -1,52 +1,54 @@
 [versions]
-compileSdk = "36"
-targetSdk = "36"
+compileSdk = "37"
+targetSdk = "37"
 minSdk = "30"
-buildToolsVersion = "35.0.0"
+buildToolsVersion = "37.0.0"
 
-accompanist = "0.30.1"
+accompanist = "0.36.0"                # the last release of the deprecated artifacts below
+accompanistPermissions = "0.37.3"     # the only one still released
 androidDesugarJdkLibs = "2.1.5"
-androidGradlePlugin = "8.9.1"
-androidxActivity = "1.10.1"
-androidxAppCompat = "1.7.1"
-androidxComposeBom = "2025.06.01"
-androidxCredentials = "1.5.0"
-androidxDataStore = "1.1.4"
-androidxLifecycle = "2.9.1"
-androidxNavigation = "2.8.9"
-androidxPaging = "3.3.6"
-androidxPagingCompose = "3.3.6"
-coil = "3.2.0"
+androidGradlePlugin = "9.4.1"
+androidxActivity = "1.13.0"
+androidxAppCompat = "1.8.0"
+androidxComposeBom = "2026.09.00"
+androidxCredentials = "1.6.0"
+androidxDataStore = "1.3.0"
+androidxLifecycle = "2.11.0"
+androidxNavigation = "2.10.2"
+androidxPaging = "3.5.3"
+androidxPagingCompose = "3.5.3"
+coil = "3.6.3"
 coil2 = "2.7.0"     # The markwon library still depends on coil2: https://github.com/ls1intum/artemis-android/issues/171
-kotlin = "2.1.21"
-kotlinxCoroutines = "1.10.2"
-kotlinxDatetime = "0.6.2"
-kotlinxSerializationJson = "1.8.1"
-koin = "4.0.4"
-koinAndroidxCompose = "4.0.0"
-kover = "0.9.1"
+kotlin = "2.4.21"
+kotlinxCoroutines = "1.11.0"
+kotlinxDatetime = "0.8.0-0.6.x-compat"
+kotlinxSerializationJson = "1.12.0"
+koin = "4.2.2"
+kover = "0.9.11"
 krop = "0.2.0"
-krossbow = "9.3.0"
-ktor = "3.1.3"
+krossbow = "10.1.0"
+ktor = "3.6.0"
 markwon = "4.6.2"
-mockk = "1.14.2"
-ossLicensesPlugin = "0.10.6"
+markdown = "0.7.18"
+mockk = "1.14.11"
+ossLicensesPlugin = "0.13.0"
 placeholderMaterial = "2.0.0"
-room = "2.6.1"
-sentry-android = "8.14.0"
-work = "2.10.2"
+room = "2.8.5"
+sentry-android = "8.61.1"
+work = "2.12.0"
+browser = "1.10.0"
 
 [libraries]
 accompanist-placeholder-material = { group = "com.google.accompanist", name = "accompanist-placeholder-material", version.ref = "accompanist" }
 accompanist-flowlayout = { group = "com.google.accompanist", name = "accompanist-flowlayout", version.ref = "accompanist" }
 accompanist-swiperefresh = { group = "com.google.accompanist", name = "accompanist-swiperefresh", version.ref = "accompanist" }
 accompanist-webview = { group = "com.google.accompanist", name = "accompanist-webview", version.ref = "accompanist" }
-accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
+accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanistPermissions" }
 
 android-desugarJdkLibs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "androidDesugarJdkLibs" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidxActivity" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidxAppCompat" }
-androidx-browser = { group = "androidx.browser", name = "browser", version = "1.8.0" }
+androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "androidxComposeBom" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout" }
@@ -73,17 +75,21 @@ androidx-room-runtime = { group = "androidx.room", name = "room-runtime", versio
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 androidx-room-paging = { group = "androidx.room", name = "room-paging", version.ref = "room" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
-androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version = "1.1.0-beta01" }
+androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version = "1.1.0" }
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work" }
-auth0-java-jwt = { group = "com.auth0.android", name = "jwtdecode", version = "2.0.2" }
+auth0-java-jwt = { group = "com.auth0.android", name = "jwtdecode", version = "2.1.0" }
+bouncycastle-bcprov = { group = "org.bouncycastle", name = "bcprov-jdk18on", version = "1.86" }
+androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version = "3.7.0" }
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 coil-compose-core = { group = "io.coil-kt.coil3", name = "coil-compose-core", version.ref = "coil" }
 coil-test = { group = "io.coil-kt.coil3", name = "coil-test", version.ref = "coil" }
 coil-network = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 coil2-base = { group = "io.coil-kt", name = "coil-base", version.ref = "coil2" }
-edge2edge-preview = { group = "de.drick.compose", name = "edge-to-edge-preview", version = "0.6.0" }
-google-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version = "33.15.0" }
+edge2edge-preview = { group = "de.drick.compose", name = "edge-to-edge-preview", version = "0.10.1" }
+google-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version = "35.1.0" }
 google-firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
+google-play-services-basement = { group = "com.google.android.gms", name = "play-services-basement", version = "18.12.0" }
+guava = { group = "com.google.guava", name = "guava", version = "33.7.2-jre" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 kotlinx-coroutines-core-jvm = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core-jvm", version.ref = "kotlinxCoroutines" }
@@ -97,7 +103,7 @@ koin-test = { group = "io.insert-koin", name = "koin-test", version.ref = "koin"
 koin-test-junit4 = { group = "io.insert-koin", name = "koin-test-junit4", version.ref = "koin" }
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }
 koin-android-test = { group = "io.insert-koin", name = "koin-android-test", version.ref = "koin" }
-koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koinAndroidxCompose" }
+koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koin" }
 koin-androidx-workmanager = { group = "io.insert-koin", name = "koin-androidx-workmanager", version.ref = "koin" }
 koin-android-compat = { group = "io.insert-koin", name = "koin-android-compat", version.ref = "koin" }
 ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
@@ -107,6 +113,8 @@ ktor-client-websockets = { group = "io.ktor", name = "ktor-client-websockets", v
 ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
 ktor-client-cio = { group = "io.ktor", name = "ktor-client-cio", version.ref = "ktor" }
+ktor-io = { group = "io.ktor", name = "ktor-io", version.ref = "ktor" }
+ktor-http-cio = { group = "io.ktor", name = "ktor-http-cio", version.ref = "ktor" }
 krop-core = { group = "com.attafitamim.krop", name = "core", version.ref = "krop" }
 krop-ui = { group = "com.attafitamim.krop", name = "ui", version.ref = "krop" }
 krossbow-stomp-core = { group = "org.hildan.krossbow", name = "krossbow-stomp-core", version.ref = "krossbow" }
@@ -116,6 +124,7 @@ krossbow-stomp-kxserialization-json = { group = "org.hildan.krossbow", name = "k
 mockk-android = { group = "io.mockk", name = "mockk-android", version.ref = "mockk" }
 mockk-agent = { group = "io.mockk", name = "mockk-agent", version.ref = "mockk" }
 noties-markwon-core = { group = "io.noties.markwon", name = "core", version.ref = "markwon" }
+jetbrains-markdown = { group = "org.jetbrains", name = "markdown", version.ref = "markdown" }
 noties-markwon-ext-strikethrough = { group = "io.noties.markwon", name = "ext-strikethrough", version.ref = "markwon" }
 noties-markwon-ext-tables = { group = "io.noties.markwon", name = "ext-tables", version.ref = "markwon" }
 noties-markwon-html = { group = "io.noties.markwon", name = "html", version.ref = "markwon" }
@@ -123,9 +132,11 @@ noties-markwon-linkify = { group = "io.noties.markwon", name = "linkify", versio
 noties-markwon-simple-ext = { group = "io.noties.markwon", name = "simple-ext", version.ref = "markwon" }
 noties-markwon-image-coil = { group = "io.noties.markwon", name = "image-coil", version.ref = "markwon" }
 oss-licenses-plugin = { module = "com.google.android.gms:oss-licenses-plugin", version.ref = "ossLicensesPlugin" }
+objenesis = { group = "org.objenesis", name = "objenesis", version = "3.6" }
 placeholder-material = { group = "io.github.fornewid", name = "placeholder-material3", version.ref = "placeholderMaterial" }
-play-services-oss-licences = { group = "com.google.android.gms", name = "play-services-oss-licenses", version = "17.1.0" }
-robolectric = { group = "org.robolectric", name = "robolectric", version = "4.16.1" }
+play-services-oss-licences = { group = "com.google.android.gms", name = "play-services-oss-licenses", version = "17.5.2" }
+protobuf-java = { group = "com.google.protobuf", name = "protobuf-java", version = "4.36.2" }
+robolectric = { group = "org.robolectric", name = "robolectric", version = "4.17" }
 sentry-android = { group = "io.sentry", name = "sentry-android", version.ref = "sentry-android" }
 sentry-compose-android = { group = "io.sentry", name = "sentry-compose-android", version.ref = "sentry-android" }
 toolbar-compose = { group = "me.onebone", name = "toolbar-compose", version = "2.3.5" }
@@ -133,14 +144,15 @@ toolbar-compose = { group = "me.onebone", name = "toolbar-compose", version = "2
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-kover = { group = "org.jetbrains.kotlinx", name = "kover-gradle-plugin", version.ref = "kover" }
+browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
 android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "5.1.1" }
-google-ksp = { id = "com.google.devtools.ksp", version = "2.1.20-1.0.32" }
-google-services = { id = "com.google.gms.google-services", version = "4.4.2" }
+google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "5.3.1" }
+google-ksp = { id = "com.google.devtools.ksp", version = "2.3.12" }
+google-services = { id = "com.google.gms.google-services", version = "4.5.0" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }

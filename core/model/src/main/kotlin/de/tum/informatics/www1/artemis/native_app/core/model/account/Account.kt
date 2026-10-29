@@ -18,24 +18,50 @@ open class Account(
     override val langKey: String = "en",
     override val imageUrl: String? = null,
     override val id: Long = 0L,
-    val groups: List<String> = emptyList()
+    /**
+     * The roles this account holds per course. Artemis 10 replaced the course group names the client
+     * used to match against the account's groups with this list.
+     */
+    val courseRoles: List<CourseAccessRights> = emptyList()
 ) : BaseAccount {
 
     val hasCustomProfilePicture: Boolean
         get() = imageUrl != null
 
-    fun isAtLeastTutorInCourse(course: Course): Boolean {
-        return hasGroup(course.instructorGroupName) ||
-                hasGroup(course.editorGroupName) ||
-                hasGroup(course.teachingAssistantGroupName) ||
-                hasAnyAuthorityDirect(listOf(AccountAuthority.ROLE_INSTRUCTOR))
-    }
+    fun isAtLeastTutorInCourse(course: Course): Boolean = isAtLeastTutorInCourse(course.id)
 
-    private fun hasGroup(groupName: String): Boolean {
-        return groupName in groups
+    /**
+     * The id is enough to answer this, so a caller that already knows which course it is looking at
+     * does not have to load the course first.
+     */
+    fun isAtLeastTutorInCourse(courseId: Long?): Boolean =
+        hasCourseRoleAtLeast(courseId, CourseRole.TEACHING_ASSISTANT)
+
+    private fun hasCourseRoleAtLeast(courseId: Long?, minimum: CourseRole): Boolean {
+        if (hasAnyAuthorityDirect(ADMIN_AUTHORITIES)) return true
+        if (courseId == null) return false
+
+        return courseRoles
+            .firstOrNull { it.courseId == courseId }
+            ?.roles
+            .orEmpty()
+            .any { it.isAtLeast(minimum) }
     }
 
     private fun hasAnyAuthorityDirect(authorities: List<AccountAuthority>): Boolean {
         return this.authorities.any { it in authorities }
     }
 }
+
+/**
+ * Both count as an administrator on the server, and the internal admin holds ROLE_SUPER_ADMIN
+ * rather than ROLE_ADMIN.
+ *
+ * Kept out of a companion object: kotlinx serialization looks the generated serializer up through
+ * the companion reflectively, and a private one makes that lookup fail with an IllegalAccessException
+ * wherever the serializer is not resolved at compile time.
+ */
+private val ADMIN_AUTHORITIES = listOf(
+    AccountAuthority.ROLE_ADMIN,
+    AccountAuthority.ROLE_SUPER_ADMIN
+)

@@ -16,7 +16,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.notification_mode
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.StandalonePostCommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.CommunicationPostTarget
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.PushNotificationHandlerImpl
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith

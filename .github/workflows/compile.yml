@@ -17,25 +17,34 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set local.properties
         run: echo \"sdk.dir=/usr/lib/android-sdk\" \> local.properties
 
       - name: Gradle Wrapper Verification
-        uses: gradle/actions/wrapper-validation@v3
+        uses: gradle/actions/wrapper-validation@v6
 
       - name: JDK setup
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v6
         with:
           distribution: 'temurin'
-          java-version: 21
+          java-version: 25.0.5+8.0.LTS
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
+        with:
+          # The action installs "tools platform-tools" by default, and Google has withdrawn the
+          # obsolete "tools" package, so the default makes sdkmanager exit 1 before anything builds.
+          packages: 'platform-tools'
 
       - name: Compile sources
         run: ./gradlew compileProductionUnrestrictedReleaseSources
 
       - name: Compile test sources
         run: ./gradlew compileProductionUnrestrictedReleaseUnitTestSources
+
+      - name: Compile debug sources
+        # The screenshots of the Play Store are previews of the debug variant, which nothing else builds. The
+        # quiz screenshot was commented out for almost two years because it no longer compiled.
+        run: ./gradlew compileProductionUnrestrictedDebugUnitTestSources

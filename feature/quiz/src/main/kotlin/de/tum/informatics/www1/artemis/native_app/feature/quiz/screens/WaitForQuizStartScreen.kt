@@ -35,8 +35,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.ButtonWithLoadi
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.ConnectionStatusUi
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.getFormattedRelativeToFutureTimeQuizStyle
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlin.time.Duration.Companion.minutes
 
 internal const val TEST_TAG_WAIT_FOR_QUIZ_START_SCREEN = "TEST_TAG_WAIT_FOR_QUIZ_START_SCREEN"

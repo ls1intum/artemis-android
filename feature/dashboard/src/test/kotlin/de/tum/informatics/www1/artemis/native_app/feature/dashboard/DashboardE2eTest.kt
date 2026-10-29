@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.dashboard
 
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -15,6 +16,7 @@ import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.addStudentToCourse
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createCourse
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui.CourseOverviewViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui.CoursesOverview
@@ -57,7 +59,9 @@ class DashboardE2eTest : BaseComposeTest() {
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `shows created course in course list`() {
         val createdCourse = runBlockingWithTestTimeout {
-            createCourse(getAdminAccessToken())
+            createCourse(getAdminAccessToken()).also { course ->
+                addStudentToCourse(getAdminAccessToken(), course.id!!, user1Username)
+            }
         }
 
         val viewModel = CourseOverviewViewModel(

@@ -14,6 +14,8 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.shared.ui.post.util.ForwardedSourcePostContent
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.util.MarkdownEditEngine
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.util.MarkdownStyleUtil
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
@@ -23,7 +25,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.n
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member_selection.MemberSelectionBaseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.member_selection.util.MemberSelectionItem
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
@@ -36,7 +41,7 @@ class ForwardMessageUseCase(
     networkStatusProvider: NetworkStatusProvider,
     savedStateHandle: SavedStateHandle,
     private val coroutineContext: CoroutineContext,
-    val onFileSelected: (Uri, Context) -> Unit,
+    private val onUploadFile: (Uri, Context, (String) -> Unit) -> Unit,
 ) : MemberSelectionBaseViewModel(
     courseId,
     conversationService,
@@ -52,8 +57,50 @@ class ForwardMessageUseCase(
     override val newMessageText: MutableStateFlow<TextFieldValue> =
         MutableStateFlow(TextFieldValue(""))
 
+    private data class ForwardDraftKey(val host: String, val type: PostingType, val postKey: Any)
+
+    val forwardingServerHost: Flow<String> = serverConfigurationService.host
+    private var activeDraftKey: ForwardDraftKey? = null
+    private val drafts = mutableMapOf<ForwardDraftKey?, TextFieldValue>()
+    private val _editorSessionKey = MutableStateFlow<Any?>(null)
+    override val editorSessionKey: StateFlow<Any?> = _editorSessionKey
+
+    fun beginForwarding(post: IBasePost) {
+        viewModelScope.launch(coroutineContext, start = CoroutineStart.UNDISPATCHED) {
+            val key = ForwardDraftKey(
+                host = forwardingServerHost.first(),
+                type = if (post is IAnswerPost) PostingType.ANSWER else PostingType.POST,
+                postKey = post.serverPostId ?: post.clientPostId ?: post.key
+            )
+            activeDraftKey = key
+            val text = drafts[key]?.copy(composition = null) ?: TextFieldValue()
+            drafts[key] = text
+            newMessageText.value = text
+            _editorSessionKey.value = key
+        }
+    }
+
     override fun updateInitialReplyText(text: TextFieldValue) {
+        drafts[activeDraftKey] = text
         newMessageText.value = text
+    }
+
+    override fun captureAttachmentTarget(): (String) -> Unit {
+        val target = activeDraftKey
+        return { markdown ->
+            val latest = drafts[target] ?: TextFieldValue()
+            val updated = MarkdownEditEngine.insertMarkup(latest, markdown)
+            drafts[target] = updated
+            if (activeDraftKey == target) newMessageText.value = updated
+        }
+    }
+
+    fun onFileSelected(
+        uri: Uri,
+        context: Context,
+        onAppendMarkdown: (String) -> Unit = captureAttachmentTarget()
+    ) {
+        onUploadFile(uri, context, onAppendMarkdown)
     }
 
     fun resetErrorMessage() {
@@ -67,12 +114,13 @@ class ForwardMessageUseCase(
      */
     fun createPost(
         targetConversationId: Long,
-        forwardedSourcePostList: List<ForwardedSourcePostContent>
+        forwardedSourcePostList: List<ForwardedSourcePostContent>,
+        comment: String = MarkdownStyleUtil.prepareForSend(newMessageText.value.text)
     ) {
         createPostService.createPost(
             courseId,
             targetConversationId,
-            newMessageText.value.text,
+            comment,
             forwardedSourcePostList = forwardedSourcePostList,
         )
     }
@@ -87,6 +135,7 @@ class ForwardMessageUseCase(
      * https://github.com/ls1intum/Artemis/blob/develop/src/main/webapp/app/shared/metis/posting-reactions-bar/posting-reactions-bar.component.ts
      */
     fun forwardPost(post: IBasePost, onComplete: (Boolean) -> Unit) {
+        val comment = MarkdownStyleUtil.prepareForSend(newMessageText.value.text)
         viewModelScope.launch(coroutineContext) {
             val recipients = recipients.first()
             val conversations = conversations.first()
@@ -108,27 +157,30 @@ class ForwardMessageUseCase(
             // can be scheduled in the background.
             if (conversations.isNotEmpty()) forwardPostToConversations(
                 conversations,
-                forwardedSourcePostList
+                forwardedSourcePostList,
+                comment
             )
             // The creation of conversations is more sensitive, so we need to handle errors here.
-            val success = forwardPostToRecipients(recipients, forwardedSourcePostList, serverData)
+            val success = forwardPostToRecipients(recipients, forwardedSourcePostList, serverData, comment)
             onComplete(success)
         }
     }
 
     private fun forwardPostToConversations(
         conversations: List<MemberSelectionItem.Conversation>,
-        forwardedSourcePostList: List<ForwardedSourcePostContent>
+        forwardedSourcePostList: List<ForwardedSourcePostContent>,
+        comment: String
     ) {
         conversations.forEach {
-            createPost(it.id, forwardedSourcePostList)
+            createPost(it.id, forwardedSourcePostList, comment)
         }
     }
 
     private suspend fun forwardPostToRecipients(
         recipients: List<MemberSelectionItem.Recipient>,
         forwardedSourcePostList: List<ForwardedSourcePostContent>,
-        serverData: Pair<String, String>
+        serverData: Pair<String, String>,
+        comment: String
     ): Boolean {
         val (serverUrl, authToken) = serverData
         if (recipients.isEmpty()) return true
@@ -140,7 +192,7 @@ class ForwardMessageUseCase(
                 authToken,
                 serverUrl
             ).onSuccess { conversation ->
-                createPost(conversation.id, forwardedSourcePostList = forwardedSourcePostList)
+                createPost(conversation.id, forwardedSourcePostList = forwardedSourcePostList, comment = comment)
                 return true
             }.onFailure {
                 forwardingMessageError.value = ForwardingMessageError.DM_CREATION_ERROR
@@ -153,7 +205,7 @@ class ForwardMessageUseCase(
                 authToken,
                 serverUrl
             ).onSuccess { conversation ->
-                createPost(conversation.id, forwardedSourcePostList = forwardedSourcePostList)
+                createPost(conversation.id, forwardedSourcePostList = forwardedSourcePostList, comment = comment)
                 return true
             }.onFailure {
                 forwardingMessageError.value = ForwardingMessageError.GROUP_CHAT_CREATION_ERROR

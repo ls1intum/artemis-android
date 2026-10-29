@@ -18,8 +18,8 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizQuestionData
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.QuizQuestionBody
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 internal const val TEST_TAG_WORK_ON_QUIZ_QUESTIONS_SCREEN = "TEST_TAG_WORK_ON_QUIZ_QUESTIONS_SCREEN"
 
@@ -31,8 +31,8 @@ internal fun WorkOnQuizQuestionsScreen(
     lastSubmissionTime: Instant?,
     endDate: Instant?,
     isConnected: Boolean,
-    overallPoints: Int,
-    latestWebsocketSubmission: Result<QuizSubmission>?,
+    overallPoints: Double,
+    latestSavedSubmission: Result<QuizSubmission>?,
     clock: Clock,
     onRequestRetrySave: () -> Unit
 ) {
@@ -69,7 +69,7 @@ internal fun WorkOnQuizQuestionsScreen(
                 .padding(bottom = 8.dp),
             quizType = quizType,
             lastSubmissionTime = lastSubmissionTime,
-            latestWebsocketSubmission = latestWebsocketSubmission,
+            latestSavedSubmission = latestSavedSubmission,
             isConnected = isConnected,
             endDate = endDate,
             clock = clock,

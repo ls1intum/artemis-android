@@ -4,7 +4,7 @@ import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 /**
  * The data state of the request.

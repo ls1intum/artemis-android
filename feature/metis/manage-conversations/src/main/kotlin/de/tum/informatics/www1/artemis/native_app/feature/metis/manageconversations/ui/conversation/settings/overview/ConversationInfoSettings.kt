@@ -28,7 +28,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.common.getChannelIconImageVector
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
-import kotlinx.datetime.toJavaInstant
+import kotlin.time.toJavaInstant
 import java.text.SimpleDateFormat
 import java.util.Date
 

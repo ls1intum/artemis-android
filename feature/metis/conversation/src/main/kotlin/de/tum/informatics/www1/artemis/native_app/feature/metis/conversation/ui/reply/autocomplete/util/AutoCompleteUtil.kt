@@ -9,14 +9,37 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.input.getTextBeforeSelection
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MarkdownStyle
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteHintCollection
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.LocalReplyAutoCompleteHintProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.util.MarkdownPresentation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.util.MarkdownEditEngine
 import kotlinx.coroutines.flow.Flow
 
 internal object AutoCompleteUtil {
+
+    data class Query(val sourceStart: Int, val sourceEnd: Int, val tag: Char, val text: String)
+
+    fun query(value: TextFieldValue, tagChars: List<Char>): Query? {
+        if (!value.selection.collapsed) return null
+        val presentation = MarkdownPresentation.parse(value.text, value.selection)
+        if (presentation.spans.any { it.style in setOf(MarkdownStyle.InlineCode, MarkdownStyle.CodeBlock) && value.selection.start in it.contentStart..it.contentEnd }) return null
+        val end = presentation.offsetMapping.originalToTransformed(value.selection.start)
+        val prefix = presentation.text.substring(0, end)
+        val start = prefix.indexOfLastWhileTag(tagChars) ?: return null
+        if (prefix.getOrNull(start) !in tagChars) return null
+        val sourceStart = presentation.offsetMapping.transformedToOriginal(start)
+        var sourceEnd = value.selection.start
+        while (sourceEnd > sourceStart && presentation.offsetMapping.originalToTransformed(sourceEnd - 1) == end) sourceEnd--
+        for (span in presentation.spans.filter { it.start >= sourceStart && it.start < sourceEnd }) {
+            // Include complete inner styles, while retaining styles that surround the mention.
+            if (span.contentEnd > sourceEnd) return null
+            sourceEnd = maxOf(sourceEnd, span.end)
+        }
+        return Query(sourceStart, sourceEnd, prefix[start], prefix.substring(start + 1))
+    }
 
     fun perform(
         textFieldValue: TextFieldValue,
@@ -24,22 +47,11 @@ internal object AutoCompleteUtil {
         replacement: String
     ): TextFieldValue {
         // Perform replace in text
-        val replacementStart = textFieldValue
-            .getTextBeforeSelection(Int.MAX_VALUE)
-            .indexOfLastWhileTag(tagChars)
-            ?: return textFieldValue
+        val query = query(textFieldValue, tagChars) ?: return textFieldValue
+        val replacementStart = query.sourceStart
+        val replacementEnd = query.sourceEnd
 
-        val replacementEnd = textFieldValue.selection.min
-
-        val newText = textFieldValue
-            .text
-            .replaceRange(replacementStart, replacementEnd, replacement)
-
-        return textFieldValue.copy(
-            text = newText,
-            // Put cursor after replacement.
-            selection = TextRange(replacementStart + replacement.length)
-        )
+        return MarkdownEditEngine.insertMarkup(textFieldValue.copy(selection = TextRange(replacementStart, replacementEnd)), replacement)
     }
 
     /**
@@ -61,13 +73,8 @@ internal object AutoCompleteUtil {
         LaunchedEffect(textFieldValue, replyAutoCompleteHintProvider) {
             // Check that no text is selected, and instead we have a simple cursor
             replyAutoCompleteHintProducer =
-                textFieldValue.getAutoCompleteReplacementTextFirstIndex(tagChars)?.let { tagIndex ->
-                    val tagChar = textFieldValue.text[tagIndex]
-                    val replacementWord = if (textFieldValue.text.length > tagIndex + 1) {
-                        textFieldValue.text.substring(tagIndex + 1).takeWhileTag()
-                    } else ""
-
-                    replyAutoCompleteHintProvider.produceAutoCompleteHints(tagChar, replacementWord)
+                query(textFieldValue, tagChars)?.let { query ->
+                    replyAutoCompleteHintProvider.produceAutoCompleteHints(query.tag, query.text)
                 }
         }
 
@@ -117,40 +124,4 @@ internal object AutoCompleteUtil {
     }
 
 
-    /**
-     * @return the index of the tagging char of the current replacement text, or null if the user is currently
-     * not entering a replaceable text.
-     */
-    private fun TextFieldValue.getAutoCompleteReplacementTextFirstIndex(tagChars: List<Char>): Int? {
-        return if (selection.collapsed) {
-            // Gather the last word, meaning the characters from the last whitespace until the cursor.
-            val tagCharIndex = getTextBeforeSelection(Int.MAX_VALUE)
-                .indexOfLastWhileTag(tagChars)
-                ?: return null
-
-            val tagChar = text[tagCharIndex]
-
-            if (tagChar in tagChars) tagCharIndex else null
-        } else null
-    }
-
-
-    /**
-     * Takes characters until the end of the string or a second whitespace has been found
-     */
-    private fun String.takeWhileTag(): String {
-        var foundWhitespace = false
-
-        for (index in indices) {
-            val currentChar = this[index]
-
-            if (currentChar.isWhitespace() && foundWhitespace) {
-                return substring(0, index)
-            } else if (currentChar.isWhitespace()) {
-                foundWhitespace = true
-            }
-        }
-
-        return this
-    }
 }

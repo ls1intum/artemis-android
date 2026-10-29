@@ -35,8 +35,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.ConnectionStatusUi
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.getFormattedRelativeToFutureTimeQuizStyle
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.Footer
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 @Composable
 internal fun WorkOnQuizQuestionFooter(
@@ -45,7 +45,7 @@ internal fun WorkOnQuizQuestionFooter(
     lastSubmissionTime: Instant?,
     endDate: Instant?,
     isConnected: Boolean,
-    latestWebsocketSubmission: Result<QuizSubmission>?,
+    latestSavedSubmission: Result<QuizSubmission>?,
     clock: Clock,
     canNavigateToPreviousQuestion: Boolean,
     canNavigateToNextQuestion: Boolean,
@@ -73,7 +73,7 @@ internal fun WorkOnQuizQuestionFooter(
         }
     }
 
-    if (latestWebsocketSubmission != null && latestWebsocketSubmission.isFailure) {
+    if (latestSavedSubmission != null && latestSavedSubmission.isFailure) {
         // Display ui that the latest submission could not be uploaded
         Box(
             modifier = Modifier

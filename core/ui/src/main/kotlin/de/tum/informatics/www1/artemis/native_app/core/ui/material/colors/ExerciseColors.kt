@@ -4,7 +4,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.hasPassed
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 object ExerciseColors {
 

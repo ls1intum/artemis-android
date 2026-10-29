@@ -1,5 +1,6 @@
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
+import commonConfiguration.configureDependencyConstraints
 import commonConfiguration.configureJacoco
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -13,7 +14,6 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
         with(target) {
             with(pluginManager) {
                 apply("com.android.application")
-                apply("org.jetbrains.kotlin.android")
                 apply("org.gradle.jacoco")
                 apply("org.jetbrains.kotlinx.kover")
             }
@@ -24,6 +24,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                 defaultConfig.targetSdk = libs.findVersion("targetSdk").get().toString().toInt()
             }
 
+            configureDependencyConstraints()
             configureJacoco(extensions.getByType<ApplicationAndroidComponentsExtension>())
         }
     }

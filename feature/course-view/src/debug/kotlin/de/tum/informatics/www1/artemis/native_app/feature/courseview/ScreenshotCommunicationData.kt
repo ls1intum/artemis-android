@@ -7,8 +7,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.ReactionPojo
+import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Duration.Companion.minutes
@@ -87,8 +88,8 @@ object ScreenshotCommunicationData {
             time = firstMessageTime + 3.minutes,
             id = "2",
             reactions = listOf(
-                PostPojo.Reaction("❤️", 1, "", 0, null),
-                PostPojo.Reaction("❤️", 0, "", 0, null),
+                ReactionPojo("❤️", 1, "", 0, null),
+                ReactionPojo("❤️", 0, "", 0, null),
             )
         ),
         generateMessage(
@@ -97,8 +98,8 @@ object ScreenshotCommunicationData {
             time = firstMessageTime + 12.minutes,
             id = "3",
             reactions = listOf(
-                PostPojo.Reaction("👍", 1, "", 0, null),
-                PostPojo.Reaction("🚀", 1, "", 0, null),
+                ReactionPojo("👍", 1, "", 0, null),
+                ReactionPojo("🚀", 1, "", 0, null),
             )
         ),
         generateMessage(
@@ -114,7 +115,7 @@ object ScreenshotCommunicationData {
         text: String,
         time: Instant,
         id: String,
-        reactions: List<PostPojo.Reaction> = emptyList()
+        reactions: List<ReactionPojo> = emptyList()
     ): ChatListItem.PostItem {
         return ChatListItem.PostItem.IndexedItem.Post(
             PostPojo(

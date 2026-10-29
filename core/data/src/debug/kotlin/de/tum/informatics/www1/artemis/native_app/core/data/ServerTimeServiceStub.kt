@@ -7,7 +7,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.network.Serv
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlin.time.Duration
 
 class ServerTimeServiceStub(

@@ -26,10 +26,10 @@ internal class SinglePageConversationBodyViewModel(
         networkStatusProvider = networkStatusProvider
     ) {
         courseService.getCourse(courseId)
-            .then { courseWithScore ->
+            .then { course ->
                 accountDataService
                     .getAccountData()
-                    .bind { it.isAtLeastTutorInCourse(courseWithScore.course) }
+                    .bind { it.isAtLeastTutorInCourse(course) }
             }
     }
         .map { it.orElse(false) }

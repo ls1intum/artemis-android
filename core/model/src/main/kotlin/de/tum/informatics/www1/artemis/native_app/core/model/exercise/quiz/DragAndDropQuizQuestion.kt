@@ -12,7 +12,7 @@ data class DragAndDropQuizQuestion(
     override val text: String? = null,
     override val hint: String? = null,
     override val explanation: String? = null,
-    override val points: Int? = null,
+    override val points: Double? = null,
     override val scoringType: ScoringType? = null,
     override val randomizeOrder: Boolean = true,
     override val invalid: Boolean = false,

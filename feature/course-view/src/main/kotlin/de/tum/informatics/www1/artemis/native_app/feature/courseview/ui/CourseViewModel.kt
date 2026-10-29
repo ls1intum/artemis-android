@@ -46,8 +46,7 @@ class CourseViewModel(
             networkStatusProvider = networkStatusProvider,
             manualReloadFlow = requestReload
         ) {
-            getCourse(courseId)
-                .bind { it.course }
+            getCourseWithContent(courseId)
         }
         .flowOn(coroutineContext)
         .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
@@ -108,7 +107,7 @@ class CourseViewModel(
                         getEndDate = { it.dueDate },
                         isDueSoon = { ex ->
                             // Example: "due soon" if due - now < 3 days
-                            val now = kotlinx.datetime.Clock.System.now()
+                            val now = kotlin.time.Clock.System.now()
                             val due = ex.dueDate ?: return@groupByTimeFrame false
                             due > now && (due - now).inWholeDays <= 3
                         }

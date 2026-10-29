@@ -112,10 +112,8 @@ private class ThemeClient(
     private val adjustHeightForContent: Boolean,
     private val onHeightChanged: (Int) -> Unit
 ) : AccompanistWebViewClient() {
-    override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-        if (view != null) {
-            setLocalStorage(view)
-        }
+    override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
+        setLocalStorage(view)
 
         super.onPageStarted(view, url, favicon)
     }
@@ -128,8 +126,8 @@ private class ThemeClient(
         )
     }
 
-    override fun onPageFinished(view: WebView?, url: String?) {
-        if (view != null) {
+    override fun onPageFinished(view: WebView, url: String?) {
+        run {
             setLocalStorage(view)
 
             // The following code is inspired by: https://github.com/ls1intum/artemis-ios/blob/71596a9949bacd29c142cbdfe3a9825d6921628f/ArtemisKit/Sources/CourseView/ExerciseTab/ExerciseDetailViewModel.swift

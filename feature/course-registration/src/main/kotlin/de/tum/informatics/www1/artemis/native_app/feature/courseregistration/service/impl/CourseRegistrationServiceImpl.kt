@@ -18,7 +18,7 @@ internal class CourseRegistrationServiceImpl(
     override suspend fun fetchRegistrableCourses(): NetworkResponse<List<Course>> {
         return getRequest {
             url {
-                appendPathSegments(*Api.Core.Courses.path, "for-enrollment")
+                appendPathSegments(*Api.Course.Courses.path, "for-enrollment")
             }
         }
     }
@@ -26,7 +26,7 @@ internal class CourseRegistrationServiceImpl(
     override suspend fun registerInCourse(courseId: Long): NetworkResponse<HttpStatusCode> {
         return postRequest {
             url {
-                appendPathSegments(*Api.Core.Courses.path, courseId.toString(), "enroll")
+                appendPathSegments(*Api.Course.Courses.path, courseId.toString(), "enroll")
             }
         }
     }

@@ -1,7 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation
 
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

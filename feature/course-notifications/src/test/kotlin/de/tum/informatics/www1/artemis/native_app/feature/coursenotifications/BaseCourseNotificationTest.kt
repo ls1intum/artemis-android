@@ -1,10 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.feature.coursenotifications
 
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
 import androidx.test.platform.app.InstrumentationRegistry
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.addStudentToCourse
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createCourse
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
@@ -42,6 +44,7 @@ abstract class BaseCourseNotificationTest : BaseComposeTest() {
         runBlocking {
             accessToken = performTestLogin()
             course = createCourse(getAdminAccessToken())
+            addStudentToCourse(getAdminAccessToken(), course.id!!, user1Username)
         }
     }
 } 

@@ -1,11 +1,13 @@
 plugins {
     `kotlin-dsl`
-    kotlin("jvm") version "2.1.21"
-    kotlin("plugin.serialization") version "2.1.21"
+    kotlin("jvm") version "2.4.21"
+    kotlin("plugin.serialization") version "2.4.21"
 //    id("java-gradle-plugin")
 }
 
 repositories {
+    // Maven Central as mirrored by TUM AET, see settings.gradle.kts
+    maven("https://reposilite.aet.cit.tum.de/releases")
     mavenCentral()
     gradlePluginPortal()
 }

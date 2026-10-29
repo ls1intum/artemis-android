@@ -1,7 +1,7 @@
 @file:Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
 
+import org.gradle.api.artifacts.VersionCatalogsExtension
 import java.lang.Boolean as B
-
 
 plugins {
     id("artemis.android.application")
@@ -30,15 +30,18 @@ android {
 
 repositories {
     google()
+    // Maven Central as mirrored by TUM AET, see settings.gradle.kts
+    maven("https://reposilite.aet.cit.tum.de/releases")
     mavenCentral()
     maven("https://jitpack.io")
 }
 
 dependencies {
     if (!B.getBoolean("skip.deps")) {
-        val libs = project.libs
-        libs.libraryAliases.map { libs.findLibrary(it) }.forEach {
-            implementation(it.get())
+        val catalog = project.extensions.getByType<VersionCatalogsExtension>().named("libs")
+        catalog.libraryAliases.forEach { alias ->
+            val library = catalog.findLibrary(alias).get()
+            implementation(if (alias.endsWith(".bom")) platform(library) else library)
         }
     }
 }

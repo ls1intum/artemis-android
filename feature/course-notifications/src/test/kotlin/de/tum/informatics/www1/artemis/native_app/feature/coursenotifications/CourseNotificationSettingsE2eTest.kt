@@ -9,7 +9,6 @@ import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTi
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.ui.settings.CourseNotificationSettingsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.coursenotifications.ui.settings.CourseNotificationSettingsViewModel
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.koin.test.get
@@ -32,22 +31,6 @@ class CourseNotificationSettingsScreenE2eTest : BaseCourseNotificationTest() {
         composeTestRule
             .onNodeWithTag(tag)
             .performScrollTo()
-            .assertExists()
-            .performClick()
-    }
-
-    @Ignore("This test is quite flaky")
-    @Test(timeout = DefaultTestTimeoutMillis)
-    fun `can open and select preset from dropdown`() {
-        setupUi()
-
-        composeTestRule
-            .onNodeWithTag("PresetDropdownTextField")
-            .assertExists()
-            .performClick()
-
-        composeTestRule
-            .onNodeWithTag("CUSTOM")
             .assertExists()
             .performClick()
     }

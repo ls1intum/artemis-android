@@ -16,6 +16,28 @@ import org.robolectric.RobolectricTestRunner
 class MarkdownListContinuationUtilTest {
 
     @Test
+    fun `enter on an empty item exits the list`() {
+        val result = continueListIfApplicable("- one\n- ", TextFieldValue("- one\n- \n", TextRange(9)))
+        assertEquals("- one\n\n", result.text)
+        assertEquals(TextRange(7), result.selection)
+    }
+
+    @Test
+    fun `quote continues on enter and an empty quote exits`() {
+        val continued = continueListIfApplicable("> hello", TextFieldValue("> hello\n", TextRange(8)))
+        assertEquals("> hello\n> ", continued.text)
+        val exited = continueListIfApplicable("> hello\n> ", TextFieldValue("> hello\n> \n", TextRange(11)))
+        assertEquals("> hello\n\n", exited.text)
+    }
+
+    @Test
+    fun `code containing list syntax does not continue a list`() {
+        val old = "```\n- literal\n```"
+        val result = continueListIfApplicable(old, TextFieldValue("```\n- literal\n\n```", TextRange(14)))
+        assertEquals("```\n- literal\n\n```", result.text)
+    }
+
+    @Test
     fun `test WHEN typing newline after an unordered list line THEN next line continues with dash prefix`() {
         val oldText = "- Hello"
 

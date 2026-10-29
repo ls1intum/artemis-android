@@ -110,10 +110,10 @@ internal abstract class BaseQuizViewModel<
     /**
      * The maximum of points achievable
      */
-    val maxPoints: StateFlow<DataState<Int>> = quizExerciseDataState
+    val maxPoints: StateFlow<DataState<Double>> = quizExerciseDataState
         .map { quizExerciseDataState ->
             quizExerciseDataState.bind { quizExercise ->
-                quizExercise.quizQuestions.sumOf { it.points ?: 0 }
+                quizExercise.quizQuestions.sumOf { it.points ?: 0.0 }
             }
         }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)

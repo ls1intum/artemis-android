@@ -1,7 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.core.common
 
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlin.time.Duration
 
 data class ClockWithOffset internal constructor(private val source: Clock, val delta: Duration) : Clock {

@@ -18,16 +18,21 @@ data class Course(
     val exercises: List<Exercise> = emptyList(),
     val lectures: List<Lecture> = emptyList(),
     val semester: String = "",
-    val registrationConfirmationMessage: String = "",
+    val enrollmentConfirmationMessage: String = "",
     val accuracyOfScores: Float = 1f,
     val courseInformationSharingConfiguration: CourseInformationSharingConfiguration = CourseInformationSharingConfiguration.DISABLED,
     val color: String? = null,
-    val instructorGroupName: String = "",
-    val studentGroupName: String = "",
-    val teachingAssistantGroupName: String = "",
-    val editorGroupName: String = "",
     val testCourse: Boolean = false,
     val courseInformationSharingMessagingCodeOfConduct: String = "",
+    /**
+     * Not sent by the server. Artemis 10 answers tab availability from
+     * "courses/{courseId}/available-tabs" instead of carrying flags on the course, so this is filled
+     * in by [de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseService.getCourseWithContent].
+     *
+     * Note that it no longer means "the FAQ feature is switched on" but "there is at least one
+     * accepted FAQ", which is what the server computes for that tab. The app only ever asks for
+     * accepted FAQs, so the two agree on what is worth showing.
+     */
     val faqEnabled: Boolean = false,
 ) {
     enum class CourseInformationSharingConfiguration(val supportsMessaging: Boolean) {

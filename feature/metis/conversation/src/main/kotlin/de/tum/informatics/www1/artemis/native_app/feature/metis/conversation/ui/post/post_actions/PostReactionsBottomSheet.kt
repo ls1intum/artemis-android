@@ -41,7 +41,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.getUnicodeForEmojiId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IReaction
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.ReactionPojo
 
 internal const val TEST_TAG_POST_REACTIONS_BOTTOM_SHEET = "TEST_TAG_POST_REACTIONS_BOTTOM_SHEET"
 fun getTestTagForEmojiId(emojiId: String, source: String) = "emoji$emojiId$source"
@@ -211,6 +211,6 @@ private fun getReactingAuthorsForEmojiSelection(
     } else {
         reactions
     }
-    return filteredReactions.map { it as PostPojo.Reaction }
+    return filteredReactions.map { it as ReactionPojo }
         .map { ReactionAuthor(it.id, it.username, it.emojiId) }
 }

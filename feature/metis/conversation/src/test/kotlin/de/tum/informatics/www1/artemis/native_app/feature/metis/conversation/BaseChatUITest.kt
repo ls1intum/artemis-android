@@ -49,6 +49,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.ReactionPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.LocalVisibleMetisContextManager
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisiblePostList
 import de.tum.informatics.www1.artemis.native_app.feature.metistest.VisibleMetisContextManagerMock
@@ -59,7 +60,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 
 private fun User.asConversationUser(isRequestingUser: Boolean = false): ConversationUser {
@@ -97,14 +98,14 @@ abstract class BaseChatUITest : BaseComposeTest() {
     )
 
     val reactions = listOf(
-        PostPojo.Reaction(
+        ReactionPojo(
             emojiId = "rocket",
             authorId = currentUser.id,
             username = currentUser.username ?: "author name",
             id = 1,
             creationDate = Clock.System.now()
         ),
-        PostPojo.Reaction(
+        ReactionPojo(
             emojiId = "tada",
             authorId = otherUser.id,
             username = otherUser.username ?: "other author name",
@@ -258,7 +259,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                     onUndoDeletePost = {},
                     onRequestReload = {},
                     onRequestRetrySend = { _, _ -> },
-                    onFileSelect = { _, _ -> },
+                    onFileSelect = { _, _, _ -> },
                 )
             }
         }
@@ -329,7 +330,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                         onClickViewPost = {},
                         onRequestRetrySend = { _ -> },
                         conversationName = "Title",
-                        onFileSelected = { _ -> }
+                        onFileSelected = { _, _ -> }
                     )
                 }
             }
@@ -357,10 +358,10 @@ abstract class BaseChatUITest : BaseComposeTest() {
         }
     }
 
-    fun setupReplyTextField() {
+    fun setupReplyTextField(composerModifier: Modifier = Modifier.fillMaxWidth(), initialText: String = "", onSourceChanged: (TextFieldValue) -> Unit = {}) {
         composeTestRule.setContent {
             CompositionLocalProvider(LocalReplyAutoCompleteHintProvider provides hintProviderStub) {
-                val text = remember { mutableStateOf(TextFieldValue()) }
+                val text = remember { mutableStateOf(TextFieldValue(initialText)) }
 
                 Column {
                     // This Spacer is required to allocate some space where the autocompletion dialog can be
@@ -368,16 +369,16 @@ abstract class BaseChatUITest : BaseComposeTest() {
                     Spacer(modifier = Modifier.weight(1f))
 
                     ReplyTextField(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = composerModifier,
                         replyMode = ReplyMode.NewMessage(
                             text,
-                            onUpdateTextUpstream = { text.value = it }
+                            onUpdateTextUpstream = { text.value = it; onSourceChanged(it) }
                         ) {
                             CompletableDeferred()
                         },
                         updateFailureState = {},
                         conversationName = "TestChat",
-                        onFileSelected = { _ -> },
+                        onFileSelected = { _, _ -> },
                         surfaceShape = MaterialTheme.shapes.large,
                         emojiService = EmojiServiceStub
                     )
