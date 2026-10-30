@@ -14,7 +14,7 @@ plugins {
     id("com.google.gms.google-services")
     id("com.google.firebase.appdistribution")
     id("com.google.android.gms.oss-licenses-plugin")
-    id("io.sentry.android.gradle") version "6.24.0"
+    id("io.sentry.android.gradle") version "6.25.0"
     id("artemis.android.room")
 }
 
