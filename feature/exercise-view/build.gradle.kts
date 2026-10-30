@@ -22,6 +22,7 @@ dependencies {
 
     implementation(libs.toolbar.compose)
 
+    testImplementation("io.ktor:ktor-client-mock:${libs.versions.ktor.get()}")
     testImplementation(project(":feature:login"))
     testImplementation(project(":feature:login-test"))
 }

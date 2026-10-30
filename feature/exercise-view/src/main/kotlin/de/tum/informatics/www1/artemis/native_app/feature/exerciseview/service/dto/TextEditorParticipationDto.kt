@@ -1,5 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.exerciseview.service.dto
 
+import de.tum.informatics.www1.artemis.native_app.core.model.Team
+import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
@@ -23,6 +25,9 @@ internal data class TextEditorParticipationDto(
     val initializationDate: Instant? = null,
     val individualDueDate: Instant? = null,
     val exercise: Exercise? = null,
+    val student: User? = null,
+    val team: Team? = null,
+    val testRun: Boolean? = null,
     val submissions: List<TextEditorSubmissionDto> = emptyList()
 ) {
 
@@ -32,6 +37,9 @@ internal data class TextEditorParticipationDto(
         initializationDate = initializationDate,
         individualDueDate = individualDueDate,
         exercise = exercise,
+        student = student,
+        team = team,
+        testRun = testRun,
         submissions = submissions.map { it.toSubmission() }
     )
 }
