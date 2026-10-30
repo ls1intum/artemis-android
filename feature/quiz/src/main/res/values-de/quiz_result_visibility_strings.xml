@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="quiz_result_correctness_withheld">Richtigkeit noch nicht veröffentlicht</string>
+    <string name="quiz_review_invalid">Ungültig</string>
+    <string name="quiz_review_blank_outcome">Lücke %1$d: %2$s</string>
+    <string name="quiz_review_sample">Beispiellösung</string>
+    <string name="quiz_review_sample_unavailable">Eine gültige Beispiellösung ist nicht verfügbar.</string>
+    <string name="quiz_review_access_unavailable">Dieses Quiz-Ergebnis ist nicht mehr zugänglich. Öffne es erneut über die Aufgabe.</string>
+    <string name="quiz_review_practice">Übung</string>
+    <string name="quiz_review_graded">Gewertet</string>
+    <string name="quiz_review_unrated">Nicht gewertet</string>
+    <string name="quiz_review_attempts">Versuch auswählen</string>
+</resources>

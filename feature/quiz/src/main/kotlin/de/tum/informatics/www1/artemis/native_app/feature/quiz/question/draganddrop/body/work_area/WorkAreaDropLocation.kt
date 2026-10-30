@@ -9,6 +9,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.QuizReviewOutcome
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.label
+import androidx.compose.ui.res.stringResource
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -29,7 +35,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.dragandd
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.dragPosition
 
 internal sealed interface WorkAreaDropLocationType {
-    data class ViewOnly(val isCorrect: Boolean, val isDisplayingSampleSolution: Boolean) :
+    data class ViewOnly(val outcome: QuizReviewOutcome, val isDisplayingSampleSolution: Boolean) :
         WorkAreaDropLocationType
 
     data class Editable(
@@ -75,8 +81,11 @@ internal fun WorkAreaDropLocation(
             if (type.isDisplayingSampleSolution) {
                 dragItemOutlineColor
             } else {
-                if (type.isCorrect) ExerciseColors.Result.success
-                else ExerciseColors.Result.medium
+                when (type.outcome) {
+                    QuizReviewOutcome.CORRECT -> ExerciseColors.Result.success
+                    QuizReviewOutcome.INCORRECT -> ExerciseColors.Result.medium
+                    QuizReviewOutcome.WITHHELD, QuizReviewOutcome.INVALID -> dragItemOutlineColor
+                }
             }
         }
     }
@@ -91,8 +100,11 @@ internal fun WorkAreaDropLocation(
             if (type.isDisplayingSampleSolution) {
                 ExerciseColors.Quiz.dropTargetColorNotDragging
             } else {
-                if (type.isCorrect) ExerciseColors.Result.success.copy(alpha = 0.2f)
-                else ExerciseColors.Result.medium.copy(alpha = 0.2f)
+                when (type.outcome) {
+                    QuizReviewOutcome.CORRECT -> ExerciseColors.Result.success.copy(alpha = 0.2f)
+                    QuizReviewOutcome.INCORRECT -> ExerciseColors.Result.medium.copy(alpha = 0.2f)
+                    QuizReviewOutcome.WITHHELD, QuizReviewOutcome.INVALID -> ExerciseColors.Quiz.dropTargetColorNotDragging
+                }
             }
         }
     }
@@ -100,8 +112,10 @@ internal fun WorkAreaDropLocation(
     val isDraggingDragChild =
         targetInfo is DragTargetInfo.Dragging && targetInfo.dragItem == dragItem
 
+    val status = (type as? WorkAreaDropLocationType.ViewOnly)?.let { if (it.isDisplayingSampleSolution) stringResource(R.string.quiz_review_sample) else it.outcome.label() }
     Box(
         modifier = modifier
+            .semantics { status?.let { stateDescription = it } }
             .let {
                 // Only needed in edit mode
                 if (type is WorkAreaDropLocationType.Editable) {

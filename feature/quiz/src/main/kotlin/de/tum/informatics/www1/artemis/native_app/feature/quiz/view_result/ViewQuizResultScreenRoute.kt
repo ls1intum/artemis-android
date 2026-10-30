@@ -1,6 +1,14 @@
 package de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result
 
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
+import org.koin.compose.koinInject
+import de.tum.informatics.www1.artemis.native_app.core.ui.collectArtemisContextAsState
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ProvideReviewImages
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
@@ -60,6 +68,14 @@ internal fun ViewQuizResultScreen(
     exerciseId: Long,
     quizType: QuizType.ViewableQuizType
 ) {
+    val contextProvider: ArtemisContextProvider = koinInject()
+    val context by contextProvider.collectArtemisContextAsState()
+    val session = remember { context as? ArtemisContext.LoggedIn }
+    var denied by remember(session) { mutableStateOf(false) }
+    if (session == null || context !is ArtemisContext.LoggedIn || session.serverUrl != context.serverUrl || session.authToken != (context as? ArtemisContext.LoggedIn)?.authToken || session.loginName != (context as? ArtemisContext.LoggedIn)?.loginName || denied) {
+        Text(stringResource(R.string.quiz_review_access_unavailable), Modifier.padding(24.dp))
+        return
+    }
     val viewModel: QuizResultViewModel = koinViewModel { parametersOf(exerciseId, quizType) }
 
     val quizExercise by viewModel.quizExerciseDataState.collectAsState()
@@ -67,6 +83,7 @@ internal fun ViewQuizResultScreen(
     val result by viewModel.result.collectAsState()
     val quizQuestions by viewModel.quizQuestionsWithData.collectAsState()
     val maxPoints by viewModel.maxPoints.collectAsState()
+    val attempts by viewModel.reviewAttempts.collectAsState()
 
     Scaffold(
         modifier = modifier,
@@ -104,14 +121,22 @@ internal fun ViewQuizResultScreen(
             retryButtonText = stringResource(id = R.string.quiz_result_try_again),
             onClickRetry = viewModel::onRequestReload
         ) { data ->
-            QuizResultUi(
-                modifier = Modifier.fillMaxSize(),
-                quizQuestions = data.quizExercise.quizQuestions,
-                quizQuestionsWithData = data.quizQuestions,
-                achievedPoints = data.submission.scoreInPoints ?: 0.0,
-                maxPoints = data.maxPoints,
-                quizTitle = data.quizExercise.title.orEmpty()
-            )
+            ProvideReviewImages(session, onDenied = { denied = true }) {
+                Column(Modifier.fillMaxSize()) {
+                    QuizReviewAttemptControls(data, quizType, attempts, viewModel::onSelectReviewAttempt)
+                    key(data.submission.id) {
+                        QuizResultUi(
+                            modifier = Modifier.weight(1f),
+                            quizQuestions = data.quizExercise.quizQuestions,
+                            quizQuestionsWithData = data.quizQuestions,
+                            achievedPoints = data.submission.scoreInPoints,
+                            maxPoints = quizReviewMaximum(data.quizExercise),
+                            quizTitle = data.quizExercise.title.orEmpty(),
+                            precision = data.quizExercise.course?.accuracyOfScores?.toInt() ?: 1,
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -139,3 +164,28 @@ private data class ResultData(
     val quizQuestions: List<QuizQuestionData<*>>,
     val maxPoints: Double
 )
+@Composable
+private fun QuizReviewAttemptControls(data: ResultData, quizType: QuizType.ViewableQuizType, attempts: List<QuizReviewAttempt>, onSelect: (QuizReviewAttempt) -> Unit) {
+    val selected = attempts.firstOrNull { it.submissionId == data.submission.id }
+    val practice = quizType is QuizType.PracticeResults || selected?.practice == true
+    val state = stringResource(if (practice) R.string.quiz_review_practice else if (data.result.rated == true) R.string.quiz_review_graded else R.string.quiz_review_unrated)
+    val submitted = data.submission.submissionDate?.let { java.text.DateFormat.getDateTimeInstance(java.text.DateFormat.SHORT, java.text.DateFormat.SHORT).format(java.util.Date(it.toEpochMilliseconds())) }
+    Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+        Text(listOfNotNull(state, submitted).joinToString(" · "), Modifier.weight(1f), style = MaterialTheme.typography.bodySmall)
+        if (attempts.size > 1) {
+            var expanded by remember { mutableStateOf(false) }
+            Box {
+                TextButton(onClick = { expanded = true }) { Text(stringResource(R.string.quiz_review_attempts)) }
+                DropdownMenu(expanded, onDismissRequest = { expanded = false }) {
+                    attempts.forEach { attempt ->
+                        DropdownMenuItem(text = {
+                            val label = stringResource(if (attempt.practice) R.string.quiz_review_practice else if (attempt.rated == true) R.string.quiz_review_graded else R.string.quiz_review_unrated)
+                            val date = attempt.submissionDate?.let { java.text.DateFormat.getDateTimeInstance(java.text.DateFormat.SHORT, java.text.DateFormat.SHORT).format(java.util.Date(it.toEpochMilliseconds())) }
+                            Text(listOfNotNull(label, date ?: "#${attempt.submissionId}").joinToString(" · "))
+                        }, onClick = { expanded = false; onSelect(attempt) })
+                    }
+                }
+            }
+        }
+    }
+}

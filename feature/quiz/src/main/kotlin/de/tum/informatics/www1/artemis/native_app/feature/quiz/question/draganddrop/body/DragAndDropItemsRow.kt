@@ -7,6 +7,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.Text
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -62,7 +68,11 @@ internal fun DragAndDropAvailableDragItemsContainer(
                         }
                     }
                     DragAndDropDragItemsRowType.ViewOnly -> {
-                        dragItemUiElement()
+                        val invalid = stringResource(R.string.quiz_review_invalid)
+                        Column(Modifier.semantics { if (dragItem.invalid) stateDescription = invalid }) {
+                            dragItemUiElement()
+                            if (dragItem.invalid) Text(invalid)
+                        }
                     }
                 }
             }

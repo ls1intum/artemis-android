@@ -52,7 +52,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
@@ -313,6 +313,17 @@ internal class QuizParticipationViewModel(
      */
     private val hasStoredInitialSubmission = MutableStateFlow(false)
 
+    private data class Answers(
+        val dragAndDrop: Map<Long, DirectDragAndDropStorageData>,
+        val multipleChoice: Map<Long, DirectMultipleChoiceStorageData>,
+        val shortAnswer: Map<Long, DirectShortAnswerStorageData>,
+    )
+
+    private var restoredAnswers: Answers? = null
+
+    override val questionDataReady: Flow<Boolean>
+        get() = if (quizType is QuizType.Live) hasStoredInitialSubmission else flowOf(true)
+
     /**
      * Set when the user has uploaded a submission using the submit button
      */
@@ -340,16 +351,17 @@ internal class QuizParticipationViewModel(
 
         // Wait for the initial storage to avoid uploading an empty submission
         hasStoredInitialSubmission.filter { it }.first()
+        val baseline = checkNotNull(restoredAnswers)
 
         val changedAnswers = combine(
             dragAndDropData,
             multipleChoiceData,
             shortAnswerData
         ) { dragAndDropData, multipleChoiceData, shortAnswerData ->
-            Triple(dragAndDropData, multipleChoiceData, shortAnswerData)
+            Answers(dragAndDropData, multipleChoiceData, shortAnswerData)
         }
-            // The first value holds the answers that were just loaded from the server
-            .drop(1)
+            // The first collected value may already contain an edit. Ignore only the untouched restored baseline.
+            .dropWhile { it == baseline }
             .conflate()
             .transform { answers ->
                 emit(answers)
@@ -360,7 +372,7 @@ internal class QuizParticipationViewModel(
 
         // A save the user asks for does not wait for the interval
         val requestedAnswers = onRequestSaveSubmission.map {
-            Triple(dragAndDropData.first(), multipleChoiceData.first(), shortAnswerData.first())
+            Answers(dragAndDropData.first(), multipleChoiceData.first(), shortAnswerData.first())
         }
 
         emitAll(
@@ -471,6 +483,7 @@ internal class QuizParticipationViewModel(
             // First wait for the initial submission to load. Then fill the savedStateHandle with it
             val initialSubmission = initialSubmission.first()
             fillSavedStateHandleFromSubmission(initialSubmission)
+            restoredAnswers = Answers(dragAndDropData.first(), multipleChoiceData.first(), shortAnswerData.first())
 
             hasStoredInitialSubmission.value = true
         }
@@ -503,6 +516,11 @@ internal class QuizParticipationViewModel(
     }
 
     private suspend fun submitImpl(): Boolean {
+        // The practice completion watcher and the user can both request the same final submission.
+        if (uploadedSubmission.value != null) return true
+        // Submit can be available before the independently scheduled answer restoration completes.
+        if (quizType is QuizType.Live) hasStoredInitialSubmission.first { it }
+
         val submission = buildSubmission(
             questions = quizQuestionsRandomOrder.first(),
             isFinalSubmission = true,

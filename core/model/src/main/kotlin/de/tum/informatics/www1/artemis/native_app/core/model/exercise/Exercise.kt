@@ -82,6 +82,7 @@ sealed class Exercise {
     enum class AssessmentType {
         AUTOMATIC,
         SEMI_AUTOMATIC,
+        AUTOMATIC_ATHENA,
         MANUAL
     }
 
@@ -193,17 +194,14 @@ val Exercise.isStartExerciseAvailable: Flow<Boolean>
         else dueDate?.isInFutureFlow() ?: flowOf(true)
     }
 
-private val Exercise.currentUserScore: Float?
+val Exercise.currentUserScore: Float?
     get() = studentParticipations
         .orEmpty()
         .flatMap { participation ->
-            participation.submissions.orEmpty()
-                .flatMap { submission ->
-                    submission.results.orEmpty()
-                }
+            participation.results.orEmpty() + participation.submissions.orEmpty().flatMap { it.results.orEmpty() }
         }
         .filter { it.rated == true }
-        .maxByOrNull { it.completionDate ?: Instant.fromEpochSeconds(0L) }
+        .maxWithOrNull(compareBy<de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result> { it.completionDate ?: Instant.fromEpochSeconds(0L) }.thenBy { it.id })
         ?.score
 
 val Exercise.currentUserPoints: Float

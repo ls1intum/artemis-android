@@ -186,6 +186,7 @@ internal class QuizParticipationE2eTest : QuizParticipationBaseE2eTest(QuizType.
         }
 
         val resultViewModel = QuizResultViewModel(
+            reviewContextProvider = get<de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider>(),
             exerciseId = quiz.id,
             quizType = QuizType.ViewResults,
             quizExerciseService = get(),

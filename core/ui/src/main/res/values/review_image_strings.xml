@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="review_image_unavailable">An image could not be displayed. It may be unavailable, inaccessible or an unsupported format. Retry the review to reload it.</string>
+    <string name="review_link_browser_signin">This link opens in your browser. You may need to sign in to Artemis there to access the file.</string>
+    <string name="review_link_open_browser">Open in browser</string>
+    <string name="review_link_cancel">Cancel</string>
+    <string name="review_link_unsupported">This link cannot be opened from the review.</string>
+</resources>

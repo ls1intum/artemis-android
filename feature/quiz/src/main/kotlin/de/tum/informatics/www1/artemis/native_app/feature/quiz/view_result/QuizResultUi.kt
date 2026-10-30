@@ -37,10 +37,11 @@ import java.text.DecimalFormat
 internal fun QuizResultUi(
     modifier: Modifier,
     quizTitle: String,
-    achievedPoints: Double,
+    achievedPoints: Double?,
     maxPoints: Double,
     quizQuestions: List<QuizQuestion>,
     quizQuestionsWithData: List<QuizQuestionData<*>>,
+    precision: Int = 2,
 ) {
     val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
@@ -51,6 +52,7 @@ internal fun QuizResultUi(
         }
     }
 
+    androidx.compose.runtime.CompositionLocalProvider(LocalQuizReviewPrecision provides precision) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -95,7 +97,7 @@ internal fun QuizResultUi(
                             .fillMaxWidth()
                             .border(
                                 width = 1.dp,
-                                color = if (isCorrect) ExerciseColors.Result.success else ExerciseColors.Result.medium
+                                color = if (questionWithData.question.invalid || questionWithData.achievedPoints == null) MaterialTheme.colorScheme.outline else if (isCorrect) ExerciseColors.Result.success else ExerciseColors.Result.medium
                             )
                             .padding(8.dp)
                     ) {
@@ -111,6 +113,7 @@ internal fun QuizResultUi(
             }
         }
     }
+}
 }
 
 @Composable
@@ -132,7 +135,7 @@ private fun QuizResultHeader(
 private fun QuizQuestionListHeader(
     modifier: Modifier,
     quizTitle: String,
-    achievedPoints: Double,
+    achievedPoints: Double?,
     maxPoints: Double
 ) {
     Column(modifier) {
@@ -150,19 +153,12 @@ private fun QuizQuestionListHeader(
 }
 
 @Composable
-private fun QuizScoreResultOverview(modifier: Modifier, achievedPoints: Double, maxPoints: Double) {
-    val achievedPointsFormatted = remember(achievedPoints) {
-        ExercisePointsDecimalFormat.format(achievedPoints)
-    }
-
-    val maxPointsFormatted = remember(maxPoints) {
-        ExercisePointsDecimalFormat.format(maxPoints)
-    }
-
-    val percentFormatted = remember(achievedPoints, maxPoints) {
-        val percent = achievedPoints.toFloat() / maxPoints.toFloat()
-        DecimalFormat.getPercentInstance().format(percent)
-    }
+private fun QuizScoreResultOverview(modifier: Modifier, achievedPoints: Double?, maxPoints: Double) {
+    val precision = LocalQuizReviewPrecision.current
+    val score = remember(achievedPoints, maxPoints, precision) { quizReviewScore(achievedPoints, maxPoints, precision) }
+    val achievedPointsFormatted = score.points ?: "–"
+    val maxPointsFormatted = score.maximum ?: "–"
+    val percentFormatted = score.percentage ?: "–"
 
     Text(
         modifier = modifier,
@@ -176,3 +172,6 @@ private fun QuizScoreResultOverview(modifier: Modifier, achievedPoints: Double, 
         fontWeight = FontWeight.Bold
     )
 }
+/** Scores are absolute quiz points; an absent score or zero maximum has no percentage. */
+internal fun quizResultFraction(achievedPoints: Double?, maxPoints: Double): Double? =
+    achievedPoints?.takeIf { it.isFinite() && maxPoints.isFinite() && maxPoints > 0 }?.div(maxPoints)

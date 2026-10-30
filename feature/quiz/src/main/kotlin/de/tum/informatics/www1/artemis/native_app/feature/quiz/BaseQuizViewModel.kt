@@ -1,6 +1,13 @@
 package de.tum.informatics.www1.artemis.native_app.feature.quiz
 
 import androidx.lifecycle.viewModelScope
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
+import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.QuizReviewAttempt
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.initialQuizReviewAttempt
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
@@ -29,6 +36,7 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
@@ -48,20 +56,73 @@ internal abstract class BaseQuizViewModel<
     serverConfigurationService: ServerConfigurationService,
     accountService: AccountService,
     participationService: ParticipationService,
-    private val coroutineContext: CoroutineContext
+    private val coroutineContext: CoroutineContext,
+    private val reviewContextProvider: ArtemisContextProvider? = null,
 ) : ReloadableViewModel() {
+    private var selectedResultAttempt: Pair<Long, Int>? = null
+    private var selectedResultSession: Pair<String, String>? = null
+    private val _reviewAttempts = MutableStateFlow<List<QuizReviewAttempt>>(emptyList())
+    val reviewAttempts: StateFlow<List<QuizReviewAttempt>> = _reviewAttempts
+
+    fun onSelectReviewAttempt(attempt: QuizReviewAttempt) {
+        if (attempt !in _reviewAttempts.value) return
+        selectedResultAttempt = attempt.participationId to attempt.submissionId
+        onRequestReload()
+    }
+
     /**
      * In live quizzes, a participation is loaded to get the exercise.
      */
     protected val initialParticipationDataState: StateFlow<DataState<Participation>> =
         when (quizType) {
-            QuizType.Live, QuizType.ViewResults ->
+            QuizType.Live ->
                 participationService.performAutoReloadingNetworkCall(
                     networkStatusProvider = networkStatusProvider,
                     manualReloadFlow = requestReload
                 ) {
                     findParticipation(exerciseId)
                 }
+
+            QuizType.ViewResults -> combine(
+                requireNotNull(reviewContextProvider).stateFlow,
+                requestReload.onStart { emit(Unit) },
+            ) { context, _ -> context }.transformLatest { context ->
+                if (context !is ArtemisContext.LoggedIn) {
+                    selectedResultAttempt = null
+                    selectedResultSession = null
+                    _reviewAttempts.value = emptyList()
+                    emit(DataState.Failure(IllegalStateException("No captured quiz review session")))
+                    return@transformLatest
+                }
+                val serverUrl = context.serverUrl
+                val token = context.authToken
+                val session = serverUrl to token
+                if (selectedResultSession != session) {
+                    selectedResultAttempt = null
+                    selectedResultSession = session
+                    _reviewAttempts.value = emptyList()
+                }
+                emitAll(retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+                    val history = quizExerciseService.findReviewAttempts(exerciseId, serverUrl, token)
+                    if (history is NetworkResponse.Failure) NetworkResponse.Failure<Participation>(history.exception)
+                    else {
+                        val attempts = (history as NetworkResponse.Response).data
+                        _reviewAttempts.value = attempts
+                        if (selectedResultAttempt == null) selectedResultAttempt = initialQuizReviewAttempt(attempts)?.let { it.participationId to it.submissionId }
+                        quizExerciseService.findResultParticipation(
+                            exerciseId, serverUrl, token,
+                            selectedResultAttempt?.first, selectedResultAttempt?.second
+                        ).also { response ->
+                            if (response is NetworkResponse.Response && selectedResultSession == session) {
+                                val participation = response.data
+                                val pid = participation.id
+                                val sid = participation.quizSubmission?.id
+                                if (pid != null && sid != null) selectedResultAttempt = pid to sid
+                            }
+                        }
+                    }
+                })
+            }
 
             QuizType.Practice, is QuizType.PracticeResults -> emptyFlow()
         }
@@ -138,10 +199,14 @@ internal abstract class BaseQuizViewModel<
 
     protected abstract val multipleChoiceData: Flow<Map<Long, MultipleChoiceStorageDataT>>
 
+    /** Workable quizzes can wait for restored answers before exposing editable question data. */
+    protected open val questionDataReady: Flow<Boolean> = flowOf(true)
+
     /*
      * Construct the question data from the questions and the flows (which are itself coming from the saved state handle)
      */
     val quizQuestionsWithData: StateFlow<DataState<List<QuizQuestionData<*>>>> = flow {
+        questionDataReady.first { it }
         // Wrap in flow to avoid compiler warning as properties are abstract
         emitAll(
             combine(
