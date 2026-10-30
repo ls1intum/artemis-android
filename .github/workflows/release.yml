@@ -15,12 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Set Android Sdk Env
-        run: export ANDROID_HOME=/usr/lib/android-sdk
-
-      - name: Set local.properties
-        run: echo "sdk.dir=/usr/lib/android-sdk" > local.properties
-
       - name: Gradle Wrapper Verification
         uses: gradle/actions/wrapper-validation@v6
 
@@ -29,6 +23,19 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: 25.0.5+8.0.LTS
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
+        env:
+          # The runner's system SDK is read-only and may lack the versions required by Gradle.
+          ANDROID_HOME: ${{ runner.temp }}/android-sdk
+          ANDROID_SDK_ROOT: ${{ runner.temp }}/android-sdk
+        with:
+          # Gradle downloads the required platform and build-tools into this writable SDK.
+          packages: 'platform-tools'
+
+      - name: Set local.properties
+        run: echo "sdk.dir=$ANDROID_HOME" > local.properties
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
