@@ -10,4 +10,9 @@
     <string name="markdown_textfield_autocomplete_category_faqs">FAQs</string>
 
     <string name="markdown_textfield_unsupported_warning">Unsupported file type selected.</string>
+    <string name="reply_resize">Resize message input</string>
+    <string name="reply_resize_expand">Expand message input</string>
+    <string name="reply_resize_collapse">Collapse message input</string>
+    <string name="reply_resize_expanded">Expanded</string>
+    <string name="reply_resize_collapsed">Collapsed</string>
 </resources>

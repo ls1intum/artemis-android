@@ -58,12 +58,13 @@ internal fun ReplyAutoCompletePopup(
         properties = PopupProperties(dismissOnClickOutside = true),
         onDismissRequest = onDismissRequest
     ) {
-        val maxHeight = min(maxHeightFromScreen, Spacings.Popup.maxHeight)
         val verticalPadding = Spacings.Popup.ContentVerticalPadding
+        val availableHeight = min(maxHeightFromScreen, Spacings.Popup.maxHeight) - verticalPadding * 2
+        if (availableHeight <= 0.dp) return@Popup
         ReplyAutoCompletePopupBody(
             modifier = Modifier
                 .padding(vertical = verticalPadding, horizontal = 8.dp)
-                .heightIn(max = maxHeight - verticalPadding * 2)
+                .heightIn(max = availableHeight)
                 .width(targetWidth),
             autoCompleteCategories = autoCompleteCategories,
             performAutoComplete = performAutoComplete

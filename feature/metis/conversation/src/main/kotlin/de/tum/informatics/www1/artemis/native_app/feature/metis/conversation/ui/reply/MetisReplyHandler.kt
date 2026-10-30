@@ -6,6 +6,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.TextFieldValue
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
@@ -69,17 +70,25 @@ internal fun <T : IBasePost> MetisReplyHandler(
     )
 
     var editingPost: T? by remember { mutableStateOf(null) }
+    var editingSessionKey by remember { mutableStateOf(0L) }
     val replyMode = rememberReplyMode(
         initialReplyTextProvider = initialReplyTextProvider,
         editingPost = editingPost,
-        onClearEditingPost = { editingPost = null },
+        editingSessionKey = editingSessionKey,
+        onClearEditingPost = {
+            editingSessionKey++
+            editingPost = null
+        },
         onCreatePost = actions.create,
         onEditPost = actions.edit
     )
 
     val outputActions = remember(actions) {
         MetisReplyHandlerOutputActions<T>(
-            edit = { post -> editingPost = post },
+            edit = { post ->
+                editingSessionKey++
+                editingPost = post
+            },
             delete = { post -> metisModificationTask = actions.delete(post) },
             react = { post, emojiId, create ->
                 metisModificationTask = actions.react(post, emojiId, create)
@@ -112,43 +121,72 @@ internal fun <T : IBasePost> MetisReplyHandler(
 private fun <T : IBasePost> rememberReplyMode(
     initialReplyTextProvider: InitialReplyTextProvider,
     editingPost: T?,
+    editingSessionKey: Long,
     onClearEditingPost: () -> Unit,
     onCreatePost: () -> MetisModificationTask,
     onEditPost: (T, String) -> MetisModificationTask
 ): ReplyMode {
     val newMessageText = initialReplyTextProvider.newMessageText.collectAsState(initial = TextFieldValue())
 
+    val sessionKeys = remember(initialReplyTextProvider) { initialReplyTextProvider.editorSessionKey }
+    val editorSessionKey by sessionKeys.collectAsState(initial = null)
+
     val replyModeNewMessage =
-        remember(initialReplyTextProvider::updateInitialReplyText, onCreatePost) {
+        remember(initialReplyTextProvider::updateInitialReplyText, onCreatePost, editorSessionKey) {
             ReplyMode.NewMessage(
                 currentText = newMessageText,
                 onUpdateTextUpstream = initialReplyTextProvider::updateInitialReplyText,
-                onCreateNewMessageUpstream = onCreatePost
+                onCreateNewMessageUpstream = onCreatePost,
+                onCaptureAttachmentTarget = initialReplyTextProvider::captureAttachmentTarget,
+                editorSessionKey = editorSessionKey,
+                handlesAcceptedSend = initialReplyTextProvider.handlesAcceptedSend
             )
         }
-    var editingPostJob: MetisModificationTask? by remember() { mutableStateOf(null) }
+    var editingPostJob: MetisModificationTask? by remember { mutableStateOf(null) }
+    var submittedEditingPost: T? by remember { mutableStateOf(null) }
+    var submittedEditingSessionKey: Long? by remember { mutableStateOf(null) }
+    var submittedEditingMode: ReplyMode.EditMessage? by remember { mutableStateOf(null) }
+    var submittedEditingRevision: Long? by remember { mutableStateOf(null) }
+    val currentEditingSessionKey by rememberUpdatedState(editingSessionKey)
+    val currentEditingPost by rememberUpdatedState(editingPost)
+    val clearEditingPost by rememberUpdatedState(onClearEditingPost)
 
-    AwaitDeferredCompletion(job = editingPostJob) {
-        onClearEditingPost()
-        editingPostJob = null
-    }
-
-    val replyMode: ReplyMode by remember(editingPost, replyModeNewMessage) {
+    val replyMode: ReplyMode by remember(editingPost, editingSessionKey, replyModeNewMessage) {
         derivedStateOf {
             if (editingPost != null) {
-                ReplyMode.EditMessage(
+                lateinit var editingMode: ReplyMode.EditMessage
+                editingMode = ReplyMode.EditMessage(
                     editingPost,
                     onEditMessage = {
                         val job = onEditPost(editingPost, it)
+                        submittedEditingPost = editingPost
+                        submittedEditingSessionKey = editingSessionKey
+                        submittedEditingMode = editingMode
+                        submittedEditingRevision = editingMode.revision
                         editingPostJob = job
                         job
                     },
                     onCancelEditMessage = onClearEditingPost
                 )
+                editingMode
             } else {
                 replyModeNewMessage
             }
         }
+    }
+
+    val currentMode by rememberUpdatedState(replyMode)
+    AwaitDeferredCompletion(job = editingPostJob) { failure ->
+        val submitted = submittedEditingMode
+        if (failure == null && currentEditingPost == submittedEditingPost &&
+            currentEditingSessionKey == submittedEditingSessionKey && currentMode === submitted &&
+            submitted?.revision == submittedEditingRevision
+        ) clearEditingPost()
+        editingPostJob = null
+        submittedEditingPost = null
+        submittedEditingSessionKey = null
+        submittedEditingMode = null
+        submittedEditingRevision = null
     }
 
     return replyMode

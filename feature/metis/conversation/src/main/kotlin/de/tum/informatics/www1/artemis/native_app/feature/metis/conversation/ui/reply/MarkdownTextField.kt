@@ -1,78 +1,67 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply
 
-import android.annotation.SuppressLint
 import android.net.Uri
 import androidx.activity.compose.ManagedActivityResultLauncher
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ListAlt
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Numbers
-import androidx.compose.material.icons.filled.QuestionMark
-import androidx.compose.material.icons.filled.School
-import androidx.compose.material.icons.outlined.AddReaction
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.InputChip
-import androidx.compose.material3.InputChipDefaults
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isShiftPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.PopupProperties
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicArtemisTextField
-import de.tum.informatics.www1.artemis.native_app.core.ui.compose.toPainter
-import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.appendAtCursor
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.emoji_picker.ui.EmojiPickerModalBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteType
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.LocalReplyAutoCompleteHintProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.util.ComposerHistory
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.util.MarkdownAttachments
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.util.MarkdownDocument
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.util.MarkdownEditEngine
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.util.MarkdownStyleUtil
 
+private val ComposerResizeSaver = Saver<ComposerResizeState, Float>(
+    save = { it.extraHeight }, restore = { ComposerResizeState(it) },
+)
 
 const val TEST_TAG_MARKDOWN_TEXTFIELD = "TEST_TAG_MARKDOWN_TEXTFIELD"
-val textFormattingOptionsHiddenOffsetY = 200.dp
 
-
-@SuppressLint("UnusedBoxWithConstraintsScope")
+/** Shared native composer for messages, replies, edits and forwarding. */
 @Composable
 internal fun MarkdownTextField(
     modifier: Modifier,
@@ -80,494 +69,212 @@ internal fun MarkdownTextField(
     hintText: AnnotatedString,
     alignOptionsAtBottom: Boolean = false,
     isEmojiPickerEnabled: Boolean = true,
-    isTextOptionsInitiallyVisible: Boolean = true,
-    backgroundColor: Color,
-    textOptionsColor: Color = MaterialTheme.colorScheme.surfaceContainer,
+    editorSession: Any? = null,
+    backgroundColor: Color = MaterialTheme.colorScheme.surfaceContainer,
     filePickerLauncher: ManagedActivityResultLauncher<String, Uri?>,
+    onPrepareAttachment: () -> Unit = {},
     focusRequester: FocusRequester = remember { FocusRequester() },
     textFieldTrailingContent: @Composable RowScope.() -> Unit = {},
     textOptionsTopContent: @Composable ColumnScope.() -> Unit = {},
-    onFocusAcquired: () -> Unit = {},
-    onFocusLost: () -> Unit = {},
     onTextChanged: (TextFieldValue) -> Unit,
     showAutoCompletePopup: ((AutoCompleteType) -> Unit)? = null,
-    formattingOptionButtons: @Composable (Color) -> Unit = {},
 ) {
-    val text = textFieldValue.text
-    var selectedType by remember { mutableStateOf(ViewType.TEXT) }
+    var typingMarkNames by rememberSaveable(editorSession) { mutableStateOf<List<String>?>(null) }
+    val typingMarks = typingMarkNames?.map { MarkdownStyle.valueOf(it) }?.toSet()
+    val history = remember(editorSession) { ComposerHistory() }
+    SideEffect { history.observe(textFieldValue) }
+    val commit: (TextFieldValue) -> Unit = { next -> history.commit(textFieldValue, next); onTextChanged(next) }
+    val undo = { typingMarkNames = null; history.undo()?.let(onTextChanged); Unit }
+    val redo = { typingMarkNames = null; history.redo()?.let(onTextChanged); Unit }
+    var formattingExpanded by rememberSaveable { mutableStateOf(false) }
+    var resize by rememberSaveable(editorSession, stateSaver = ComposerResizeSaver) { mutableStateOf(ComposerResizeState()) }
+    var isDragging by remember(editorSession) { mutableStateOf(false) }
+    val maximumExpansion = if (LocalConfiguration.current.screenHeightDp < 480) 120f else 240f
+    var availableExpansion by remember(editorSession) { mutableFloatStateOf(maximumExpansion) }
+    val expansionLimit = minOf(maximumExpansion, availableExpansion)
+    val targetExpansion = resize.extraHeight.coerceIn(0f, expansionLimit)
+    val renderedExpansion by key(editorSession) {
+        animateFloatAsState(
+            targetValue = targetExpansion,
+            animationSpec = if (isDragging) snap() else tween(220),
+            label = "Composer expansion",
+        )
+    }
     var showEmojiPicker by remember { mutableStateOf(false) }
-    var isTextOptionsVisible by remember { mutableStateOf(isTextOptionsInitiallyVisible) }
-    // weight(1f) is needed for the row to ensure that the TextFieldOptions stay visible when the BasicMarkdownTextField grows.
-    // fill has to be disabled for the UI tests to work properly.
-    val content: @Composable ColumnScope.(applyWeight: Boolean) -> Unit = { applyWeight ->
-        Row(
-            modifier = Modifier
-                .then(if (applyWeight) Modifier.weight(1f, false) else Modifier)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            when (selectedType) {
-                ViewType.TEXT -> {
-                    BasicMarkdownTextField(
-                        modifier = Modifier.weight(1f),
-                        textFieldValue = textFieldValue,
-                        onTextChanged = onTextChanged,
-                        hintText = hintText,
-                        backgroundColor = backgroundColor,
-                        focusRequester = focusRequester,
-                        onFocusAcquired = {
-                            onFocusAcquired()
-                            isTextOptionsVisible = true
-                        },
-                        onFocusLost = {
-                            onFocusLost()
-                            isTextOptionsVisible = false
-                        }
-                    )
-                }
+    var linkSelection by remember { mutableStateOf<TextFieldValue?>(null) }
+    val keyboard = LocalSoftwareKeyboardController.current
+    val nativeClipboard = LocalClipboard.current
+    val currentDocument = rememberUpdatedState(textFieldValue)
+    val clipboard = remember(nativeClipboard, editorSession) { ComposerClipboard(nativeClipboard) { currentDocument.value } }
+    val focusEditor = {
+        focusRequester.requestFocus()
+        keyboard?.show()
+        Unit
+    }
 
-                ViewType.PREVIEW -> {
-                    MarkdownText(
-                        markdown = text,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-            }
-
-            textFieldTrailingContent()
+    val capabilities = remember(textFieldValue.text, textFieldValue.selection) { composerEditingCapabilities(textFieldValue) }
+    val applyStyle: (MarkdownStyle) -> Unit = { style ->
+        if (style != MarkdownStyle.CodeBlock && !capabilities.inlineActions) Unit
+        else if (textFieldValue.selection.collapsed && style in MarkdownDocument.inlineStyles) {
+            val active = typingMarks ?: MarkdownEditEngine.activeMarks(textFieldValue).intersect(MarkdownDocument.inlineStyles)
+            typingMarkNames = (if (style in active) active - style else active + style).map { it.name }
+        } else {
+            if (style == MarkdownStyle.CodeBlock) typingMarkNames = null
+            commit(MarkdownStyleUtil.toggle(style, textFieldValue))
         }
     }
 
-val options: @Composable (applyPadding: Boolean) -> Unit = { applyPadding ->
-        TextFieldOptions(
-            modifier = Modifier.then(if (applyPadding) Modifier.padding(top = 4.dp) else Modifier),
-            selectedType = selectedType,
-            isPreviewEnabled = text.isNotBlank(),
-            isEmojiPickerEnabled = isEmojiPickerEnabled,
-            backgroundColor = backgroundColor,
-            containerColor = textOptionsColor,
-            showFormattingOptions = selectedType == ViewType.TEXT,
-            onChangeViewType = { selectedType = it },
-            formattingOptionButtons = formattingOptionButtons,
-            showAutoCompletePopup = showAutoCompletePopup,
-            onOpenImagePicker = { filePickerLauncher.launch("image/*") },
-            onOpenFilePicker = { filePickerLauncher.launch("*/*") },
-            onOpenEmojiPicker = { showEmojiPicker = true }
-            )
+    val attachments = remember(textFieldValue.text) { MarkdownAttachments.list(textFieldValue.text) }
+    BoxWithConstraints(modifier = modifier.then(if (alignOptionsAtBottom) Modifier.imePadding() else Modifier)) {
+        // Keep conversation/completion context above an expanded inline composer.
+        // Preview tiles may occupy up to 96 dp at large text sizes. In very
+        // short windows the inline attachment stays editable; its preview yields
+        // space to the editor and Send.
+        val showAttachmentPreviews = !constraints.hasBoundedHeight || maxHeight >= 120.dp + ComposerAttachmentPreviewMaxHeight
+        val attachmentBudget = if (showAttachmentPreviews && attachments.isNotEmpty()) ComposerAttachmentPreviewMaxHeight else 0.dp
+        // Three 48 dp targets (editor, grabber, toolbar) plus 24 dp padding.
+        val minimumResizableHeight = 168.dp + attachmentBudget
+        val surfaceBudget = if (constraints.hasBoundedHeight) {
+            maxHeight - (maxHeight - minimumResizableHeight).coerceIn(0.dp, 96.dp)
+        } else maxHeight
+        val showResizeHandle = (!constraints.hasBoundedHeight || surfaceBudget >= minimumResizableHeight) &&
+            (attachments.isEmpty() || showAttachmentPreviews)
+        Column {
+            if (alignOptionsAtBottom) {
+                Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), content = textOptionsTopContent)
+            }
+            Surface(
+                modifier = Modifier.heightIn(max = surfaceBudget),
+                shape = RoundedCornerShape(24.dp),
+                color = backgroundColor.copy(alpha = 0.96f),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)),
+            ) {
+                Column(Modifier.padding(8.dp)) {
+                    if (showResizeHandle) {
+                        key(editorSession) {
+                            ComposerResizeHandle(
+                                modifier = Modifier.align(androidx.compose.ui.Alignment.CenterHorizontally),
+                                expanded = targetExpansion > 0f,
+                                maximumExpansion = expansionLimit,
+                                onToggle = { resize = resize.setExpanded(targetExpansion == 0f, expansionLimit) },
+                                onExpand = { resize = resize.setExpanded(true, expansionLimit) },
+                                onCollapse = { resize = resize.setExpanded(false, expansionLimit) },
+                                onDragStart = {
+                                    resize = resize.beginGesture(renderedExpansion, expansionLimit)
+                                    isDragging = true
+                                },
+                                onDrag = { resize = resize.update(it, expansionLimit) },
+                                onDragEnd = { vertical, horizontal ->
+                                    resize = resize.finish(vertical, horizontal, expansionLimit)
+                                    isDragging = false
+                                },
+                                onDragCancel = { resize = resize.cancelGesture(); isDragging = false },
+                            )
+                        }
+                    }
+                    key(editorSession) {
+                        ComposerKeyboardInput(onBackspace = {
+                            MarkdownEditEngine.removeBlockAtStart(textFieldValue)?.let { commit(it); true } ?: false
+                        }) {
+                            CompositionLocalProvider(LocalClipboard provides clipboard) {
+                                BasicMarkdownTextField(
+                                    // Measure the action row first so long drafts cannot consume Send's space.
+                                    modifier = Modifier.weight(1f, fill = false)
+                                        .padding(start = 8.dp, end = 8.dp, top = if (showResizeHandle) 12.dp else 4.dp, bottom = 4.dp)
+                                        .onPreviewKeyEvent { event ->
+                                            if (event.type == KeyEventType.KeyDown && event.key == Key.Backspace && !event.isCtrlPressed &&
+                                                MarkdownEditEngine.removeBlockAtStart(textFieldValue)?.let { commit(it); true } == true) true
+                                            else if (event.type != KeyEventType.KeyDown || !event.isCtrlPressed) false
+                                            else when (event.key) {
+                                                Key.Z -> { if (event.isShiftPressed) redo() else undo(); true }
+                                                Key.Y -> { redo(); true }
+                                                Key.B -> { applyStyle(MarkdownStyle.Bold); true }
+                                                Key.I -> { applyStyle(MarkdownStyle.Italic); true }
+                                                Key.U -> { applyStyle(MarkdownStyle.Underline); true }
+                                                Key.K -> { if (capabilities.link) linkSelection = textFieldValue; true }
+                                                else -> false
+                                            }
+                                        },
+                                    textFieldValue = textFieldValue,
+                                    hintText = hintText,
+                                    focusRequester = focusRequester,
+                                        extraHeight = if (showResizeHandle) renderedExpansion.dp else 0.dp,
+                                    maximumExpansion = maximumExpansion.dp,
+                                    onExpansionLimitChanged = { availableExpansion = it },
+                                    isCodeInput = !capabilities.inlineActions || MarkdownStyle.InlineCode in
+                                        (typingMarks ?: MarkdownEditEngine.activeMarks(textFieldValue)),
+                                    onTextChanged = { native ->
+                                        val previous = MarkdownEditEngine.visibleValue(textFieldValue)
+                                        if (native.text == previous.text && native.selection != previous.selection) typingMarkNames = null
+                                        commit(clipboard.consumePaste(textFieldValue, native, typingMarks)
+                                            ?: MarkdownEditEngine.applyVisibleEdit(textFieldValue, native, typingMarks))
+                                    },
+                                )
+                            }
+                        }
+                    }
+                    if (showAttachmentPreviews) {
+                        ComposerAttachments(value = textFieldValue, onTextChanged = commit, attachments = attachments)
+                    }
+                    if (!alignOptionsAtBottom) textOptionsTopContent()
+                    ComposerToolbar(
+                        textFieldValue = textFieldValue,
+                        typingMarks = typingMarks,
+                        capabilities = capabilities,
+                        formattingExpanded = formattingExpanded,
+                        isEmojiPickerEnabled = isEmojiPickerEnabled,
+                        onToggleFormatting = {
+                            formattingExpanded = !formattingExpanded
+                            focusEditor()
+                        },
+                        onApplyStyle = {
+                            applyStyle(it)
+                            focusEditor()
+                        },
+                        onLink = { if (capabilities.link) linkSelection = textFieldValue },
+                        onOpenImagePicker = { onPrepareAttachment(); filePickerLauncher.launch("image/*") },
+                        onOpenFilePicker = { onPrepareAttachment(); filePickerLauncher.launch("*/*") },
+                        onOpenEmojiPicker = { showEmojiPicker = true },
+                        onMention = showAutoCompletePopup?.let { request ->
+                            { type ->
+                                commit(MarkdownEditEngine.insertText(textFieldValue, if (type == AutoCompleteType.USERS) "@" else "#", typingMarks))
+                                focusEditor()
+                                request(type)
+                            }
+                        },
+                        canUndo = history.canUndo,
+                        canRedo = history.canRedo,
+                        onUndo = { undo(); focusEditor() },
+                        onRedo = { redo(); focusEditor() },
+                        trailingContent = textFieldTrailingContent,
+                    )
+                }
+            }
+        }
     }
 
-    if (alignOptionsAtBottom) {
-        BoxedMarkdownTextField(
-            modifier = modifier,
-            backgroundColor = backgroundColor,
-            isTextOptionsVisible = isTextOptionsVisible,
-            content = content,
-            textOptionsTopContent = textOptionsTopContent,
-            options = options
-        )
-        return
-    }
-
-    ChatMarkdownTextField(
-        modifier = modifier,
-        content = content,
-        textOptionsTopContent = textOptionsTopContent,
-        isTextOptionsVisible = isTextOptionsVisible,
-        options = options
-    )
-
+    // Picker and dialog presentation belongs to the composer, so taking focus never destroys it.
     if (showEmojiPicker) {
         EmojiPickerModalBottomSheet(
             onEmojiClicked = {
-                onTextChanged(
-                    textFieldValue.appendAtCursor(it.unicode)
-                )
+                commit(MarkdownEditEngine.insertText(textFieldValue, it.unicode, typingMarks))
                 showEmojiPicker = false
+                focusEditor()
             },
-            onDismiss = { showEmojiPicker = false }
+            onDismiss = { showEmojiPicker = false; focusEditor() },
         )
     }
-}
-
-@Composable
-private fun BoxedMarkdownTextField(
-    modifier: Modifier,
-    backgroundColor: Color,
-    isTextOptionsVisible: Boolean,
-    content: @Composable ColumnScope.(applyWeight: Boolean) -> Unit,
-    textOptionsTopContent: @Composable ColumnScope.() -> Unit,
-    options: @Composable (Boolean) -> Unit,
-) {
-    Box(
-        modifier = modifier.imePadding()
-    ) {
-        val scrollState = rememberScrollState()
-        val optionsHeight = if (isTextOptionsVisible) 56.dp else 0.dp
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(scrollState)
-                .padding(bottom = optionsHeight)
-        ) {
-            content(false)
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                content = textOptionsTopContent
-            )
-        }
-
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .background(backgroundColor)
-                .fillMaxWidth()
-        ) {
-            AnimatedVisibility(isTextOptionsVisible) {
-                options(true)
-            }
-        }
-    }
-}
-
-@Composable
-private fun ChatMarkdownTextField(
-    modifier: Modifier,
-    content: @Composable ColumnScope.(applyWeight: Boolean) -> Unit,
-    textOptionsTopContent: @Composable ColumnScope.() -> Unit,
-    isTextOptionsVisible: Boolean = true,
-    options: @Composable (Boolean) -> Unit,
-) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        content(true)
-        textOptionsTopContent()
-        AnimatedVisibility(isTextOptionsVisible) {
-            options(false)
-        }
-    }
-}
-
-@Composable
-fun BasicMarkdownTextField(
-    modifier: Modifier = Modifier,
-    textFieldValue: TextFieldValue,
-    hintText: AnnotatedString,
-    focusRequester: FocusRequester,
-    backgroundColor: Color,
-    maxVisibleLines: Int = 8,
-    onTextChanged: (TextFieldValue) -> Unit,
-    onFocusAcquired: () -> Unit = {},
-    onFocusLost: () -> Unit = {}
-) {
-    var hadFocus by remember { mutableStateOf(false) }
-    val localTextStyle = LocalTextStyle.current
-
-    BasicArtemisTextField(
-        modifier = modifier
-            .fillMaxWidth()
-            .heightIn(max = (localTextStyle.fontSize.value * maxVisibleLines).dp)
-            .testTag(TEST_TAG_MARKDOWN_TEXTFIELD),
-        backgroundColor = backgroundColor,
-        value = textFieldValue,
-        onValueChange = onTextChanged,
-        focusRequester = focusRequester,
-        onFocusChanged = { hasFocus ->
-            if (hasFocus) {
-                hadFocus = true
-                onFocusAcquired()
-            }
-            if (!hasFocus && hadFocus) {
-                onFocusLost()
-                hadFocus = false
-            }
-        },
-        hint = hintText.text
-    )
-}
-
-@Composable
-private fun TextFieldOptions(
-    modifier: Modifier = Modifier,
-    selectedType: ViewType,
-    isPreviewEnabled: Boolean,
-    isEmojiPickerEnabled: Boolean,
-    backgroundColor: Color,
-    containerColor: Color,
-    showFormattingOptions: Boolean,
-    onChangeViewType: (ViewType) -> Unit,
-    showAutoCompletePopup: ((AutoCompleteType) -> Unit)? = null,
-    formattingOptionButtons: @Composable (Color) -> Unit = {},
-    onOpenFilePicker: () -> Unit = {},
-    onOpenImagePicker: () -> Unit = {},
-    onOpenEmojiPicker: () -> Unit = {}
-) {
-    var isTextFormattingExpanded by remember { mutableStateOf(false) }
-    val textFormattingOptionsOffsetY by animateDpAsState(targetValue = if (isTextFormattingExpanded) 0.dp else textFormattingOptionsHiddenOffsetY)
-    var isTaggingDropdownExpanded by remember { mutableStateOf(false) }
-
-    val textOptionsFieldOptionsModifier = Modifier
-        .clip(CircleShape)
-        .background(containerColor)
-
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        if (showFormattingOptions) {
-            Box(
-                modifier = Modifier.weight(1f),
-                contentAlignment = Alignment.CenterStart
-            ) {
-                Row(
-                    modifier = modifier,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    TextFieldOptionsIconButton(
-                        modifier = textOptionsFieldOptionsModifier,
-                        painter = painterResource(id = R.drawable.image),
-                        containerColor = containerColor
-                    ) {
-                        onOpenImagePicker()
-                    }
-
-                    TextFieldOptionsIconButton(
-                        modifier = textOptionsFieldOptionsModifier,
-                        painter = painterResource(id = R.drawable.attachment),
-                        containerColor = containerColor
-                    ) {
-                        onOpenFilePicker()
-                    }
-
-                    TextFieldOptionsIconButton(
-                        modifier = textOptionsFieldOptionsModifier,
-                        painter = painterResource(id = R.drawable.format_text),
-                        containerColor = containerColor
-                    ) {
-                        isTextFormattingExpanded = !isTextFormattingExpanded
-                    }
-
-                    if (isEmojiPickerEnabled) {
-                        TextFieldOptionsIconButton(
-                            painter = Icons.Outlined.AddReaction.toPainter(),
-                            containerColor = containerColor
-                        ) {
-                            onOpenEmojiPicker()
-                        }
-                    }
-
-                    TextFieldOptionsIconButton(
-                        modifier = Modifier,
-                        painter = painterResource(id = R.drawable.tag),
-                        containerColor = containerColor
-                    ) {
-                        isTaggingDropdownExpanded = !isTaggingDropdownExpanded
-                    }
-                }
-
-                TaggingDropdownMenu(
-                    isTaggingDropdownExpanded = isTaggingDropdownExpanded,
-                    showAutoCompletePopup = showAutoCompletePopup,
-                    onDismissRequest = { isTaggingDropdownExpanded = false }
-                )
-
-                Box(
-                    modifier = modifier
-                        .offset(y = textFormattingOptionsOffsetY)
-                        .background(backgroundColor)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        TextFieldOptionsIconButton(
-                            imageVector = Icons.Default.Clear,
-                            containerColor = containerColor
-                        ) {
-                            isTextFormattingExpanded = false
-                        }
-
-                        formattingOptionButtons(containerColor)
-                    }
-                }
-            }
-        } else {
-            Spacer(modifier = Modifier.weight(1f))
-        }
-
-        PreviewEditRow(
-            modifier = modifier,
-            selectedType = selectedType,
-            isPreviewEnabled = isPreviewEnabled,
-            onChangeViewType = onChangeViewType
-        )
-    }
-}
-
-@Composable
-private fun TextFieldOptionsIconButton(
-    modifier: Modifier = Modifier,
-    painter: Painter? = null,
-    imageVector: ImageVector? = null,
-    containerColor: Color,
-    onClick: () -> Unit
-) {
-    require(painter != null || imageVector != null)
-
-    IconButton(
-        modifier = modifier
-            .clip(CircleShape)
-            .size(32.dp)
-            .background(containerColor),
-        onClick = onClick
-    ) {
-        painter?.let {
-            Icon(
-                modifier = Modifier.padding(6.dp),
-                painter = painter,
-                tint = MaterialTheme.colorScheme.primary,
-                contentDescription = null
-            )
-            return@IconButton
-        }
-
-        imageVector?.let {
-            Icon(
-                modifier = Modifier.padding(6.dp),
-                imageVector = it,
-                tint = MaterialTheme.colorScheme.primary,
-                contentDescription = null
-            )
-        }
-    }
-}
-
-@Composable
-private fun TaggingDropdownMenu(
-    isTaggingDropdownExpanded: Boolean,
-    showAutoCompletePopup: ((AutoCompleteType) -> Unit)?,
-    onDismissRequest: () -> Unit,
-) {
-    val isFaqEnabled = LocalReplyAutoCompleteHintProvider.current.isFaqEnabled
-
-    val onClick: (AutoCompleteType) -> Unit = { autoCompleteType ->
-        showAutoCompletePopup?.invoke(autoCompleteType)
-        onDismissRequest()
-    }
-
-    DropdownMenu(
-        expanded = isTaggingDropdownExpanded,
-        onDismissRequest = onDismissRequest,
-        properties = PopupProperties(
-            focusable = false
-        )
-    ) {
-        TaggingDropDownMenuItem(
-            iconPainter = painterResource(id = R.drawable.tag),
-            text = stringResource(R.string.reply_format_mention_members),
-            onClick = { onClick(AutoCompleteType.USERS) }
-        )
-
-        TaggingDropDownMenuItem(
-            iconPainter = Icons.Default.Numbers.toPainter(),
-            text = stringResource(R.string.reply_format_mention_channels),
-            onClick = { onClick(AutoCompleteType.CHANNELS) }
-        )
-
-        TaggingDropDownMenuItem(
-            iconPainter = Icons.AutoMirrored.Filled.ListAlt.toPainter(),
-            text = stringResource(R.string.reply_format_mention_exercises),
-            onClick = { onClick(AutoCompleteType.EXERCISES) }
-        )
-
-        TaggingDropDownMenuItem(
-            iconPainter = Icons.Default.School.toPainter(),
-            text = stringResource(R.string.reply_format_mention_lectures),
-            onClick = { onClick(AutoCompleteType.LECTURES) }
-        )
-
-        if (isFaqEnabled) {
-            TaggingDropDownMenuItem(
-                iconPainter = Icons.Default.QuestionMark.toPainter(),
-                text = stringResource(R.string.reply_format_mention_faqs),
-                onClick = { onClick(AutoCompleteType.FAQS) }
-            )
-        }
-    }
-}
-
-@Composable
-private fun TaggingDropDownMenuItem(
-    modifier: Modifier = Modifier,
-    iconPainter: Painter,
-    text: String,
-    onClick: () -> Unit
-) {
-    DropdownMenuItem(
-        modifier = modifier,
-        leadingIcon = {
-            Icon(
-                painter = iconPainter,
-                contentDescription = text
-            )
-        },
-        text = { Text(text) },
-        onClick = onClick
-    )
-}
-
-
-@Composable
-private fun PreviewEditRow(
-    modifier: Modifier = Modifier,
-    selectedType: ViewType,
-    isPreviewEnabled: Boolean = false,
-    onChangeViewType: (ViewType) -> Unit = {}
-) {
-    Row(
-        modifier = modifier.height(32.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        InputChip(
-            selected = selectedType == ViewType.TEXT,
-            onClick = { onChangeViewType(ViewType.TEXT) },
-            label = {
-                Text(text = stringResource(id = R.string.markdown_textfield_tab_text))
+    linkSelection?.let { selection ->
+        ComposerLinkDialog(
+            value = selection,
+            currentValue = textFieldValue,
+            onDismiss = { linkSelection = null; focusEditor() },
+            onConfirm = {
+                commit(it)
+                linkSelection = null
+                focusEditor()
             },
-            border = InputChipDefaults.inputChipBorder(
-                borderColor = MaterialTheme.colorScheme.outlineVariant,
-                enabled = true,
-                selected = selectedType == ViewType.TEXT,
-            )
-        )
-
-        InputChip(
-            selected = selectedType == ViewType.PREVIEW,
-            onClick = { onChangeViewType(ViewType.PREVIEW) },
-            enabled = isPreviewEnabled,
-            label = {
-                Text(text = stringResource(id = R.string.markdown_textfield_tab_preview))
-            },
-            border = InputChipDefaults.inputChipBorder(
-                borderColor = MaterialTheme.colorScheme.outlineVariant,
-                enabled = isPreviewEnabled,
-                selected = selectedType == ViewType.PREVIEW,
-            )
         )
     }
 }
 
-private enum class ViewType {
-    TEXT,
-    PREVIEW
-}
