@@ -10,7 +10,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -177,7 +176,18 @@ internal fun LoginUi(
                 }
 
                 if (FeatureAvailability.isEnabled(ActiveModuleFeature.Passkey)) {
-                    Divider(modifier = Modifier.padding(vertical = 8.dp))
+                    DividerWithText(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        text = { modifier ->
+                            Text(
+                                text = "or",
+                                modifier = modifier,
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
+                    )
                     PasskeyBasedLogin(
                         modifier = Modifier.fillMaxWidth(),
                         onPasskeyLogin = { loginWithPasskeyJob = viewModel.loginWithPasskey() },
@@ -263,7 +273,18 @@ internal fun LoginUi(
                     }
                 }
                 if (FeatureAvailability.isEnabled(ActiveModuleFeature.Passkey)) {
-                    Divider(modifier = Modifier.padding(vertical = 8.dp))
+                    DividerWithText(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        text = { modifier ->
+                            Text(
+                                text = "or",
+                                modifier = modifier,
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
+                    )
                     PasskeyBasedLogin(
                         modifier = Modifier.fillMaxWidth(),
                         onPasskeyLogin = { loginWithPasskeyJob = viewModel.loginWithPasskey() },
