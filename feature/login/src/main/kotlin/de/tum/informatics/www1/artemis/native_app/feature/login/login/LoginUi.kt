@@ -262,6 +262,15 @@ internal fun LoginUi(
                         Text(text = "← Back")
                     }
                 }
+                if (FeatureAvailability.isEnabled(ActiveModuleFeature.Passkey)) {
+                    Divider(modifier = Modifier.padding(vertical = 8.dp))
+                    PasskeyBasedLogin(
+                        modifier = Modifier.fillMaxWidth(),
+                        onPasskeyLogin = { loginWithPasskeyJob = viewModel.loginWithPasskey() },
+                        isLoggingIn = loginWithPasskeyJob != null,
+                        isEnabled = fetchOptionsJob == null
+                    )
+                }
             }
         }
     }
