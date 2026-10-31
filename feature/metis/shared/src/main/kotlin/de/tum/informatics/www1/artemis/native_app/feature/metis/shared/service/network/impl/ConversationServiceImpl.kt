@@ -87,7 +87,7 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
                     appendPathSegments(*Api.Communication.Courses.path, courseId.toString(), "group-chats")
                 }
 
-                setBody(groupMembers)
+                setBody(GroupChatMembers(memberLogins = groupMembers))
                 contentType(ContentType.Application.Json)
 
                 accept(ContentType.Application.Json)
@@ -145,6 +145,15 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
             }.body()
         }
     }
+
+    /**
+     * The starting members of a group chat, identified by their logins. The requesting user is not
+     * part of the list. Artemis does not accept a bare list of logins as the request body.
+     */
+    @Serializable
+    private data class GroupChatMembers(
+        val memberLogins: List<String>
+    )
 
     /**
      * The single other participant of a one-to-one chat, identified by exactly one of [userId] or
