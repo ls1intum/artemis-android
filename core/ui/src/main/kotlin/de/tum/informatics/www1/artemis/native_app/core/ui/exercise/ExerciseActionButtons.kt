@@ -27,8 +27,6 @@ fun ExerciseActionButtons(
     showResult: Boolean = true,
     actions: ExerciseActions
 ) {
-    // TODO: Team mode is currently not supported. Therefore, the buttons are disabled in team mode exercises
-
     val latestParticipation = exercise.getSpecificStudentParticipation(false)
     val isStartExerciseAvailable = exercise.isStartExerciseAvailable.collectAsState(initial = false).value
 
@@ -38,7 +36,6 @@ fun ExerciseActionButtons(
             exercise = exercise,
             latestParticipation = latestParticipation,
             isStartExerciseAvailable = isStartExerciseAvailable,
-            showResult = showResult,
             templateStatus = templateStatus,
             actions = actions
         )
@@ -71,7 +68,6 @@ private fun TextExerciseButtons(
     latestParticipation: Participation?,
     isStartExerciseAvailable: Boolean,
     templateStatus: ResultTemplateStatus?,
-    showResult: Boolean,
     actions: ExerciseActions
 ) {
     // Has due date passed
@@ -81,7 +77,7 @@ private fun TextExerciseButtons(
         ArtemisButton(
             modifier = modifier,
             onClick = actions.onClickStartTextExercise,
-            enabled = !exercise.teamMode,
+            enabled = !exercise.teamMode || (exercise.studentAssignedTeamIdComputed && exercise.studentAssignedTeamId != null),
             text = stringResource(id = R.string.exercise_actions_start_exercise_button)
         )
     }
@@ -101,17 +97,14 @@ private fun TextExerciseButtons(
             }
 
             Participation.InitializationState.FINISHED -> {
-                if (latestParticipation.submissions?.first()?.results.isNullOrEmpty() || !showResult) {
-                    ArtemisButton(
-                        modifier = modifier,
-                        onClick = {
-                            actions.onClickOpenTextExercise(
-                                latestParticipation.id ?: return@ArtemisButton
-                            )
-                        },
-                        text = stringResource(id = R.string.exercise_actions_view_submission_button)
-                    )
-                }
+                // Assessed answers remain readable and may allow another submission with a new id.
+                ArtemisButton(
+                    modifier = modifier,
+                    onClick = {
+                        actions.onClickOpenTextExercise(latestParticipation.id ?: return@ArtemisButton)
+                    },
+                    text = stringResource(id = R.string.exercise_actions_view_submission_button)
+                )
             }
 
             else -> {}

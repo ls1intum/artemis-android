@@ -4,8 +4,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -19,16 +21,11 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.TextSubmission
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.R
-import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.participate.textexercise.SyncState
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.participate.textexercise.TEST_TAG_TEXT_FIELD_PARTICIPATION
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.participate.textexercise.TextExerciseParticipationScreen
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.participate.textexercise.TextExerciseParticipationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.service.TextSubmissionService
-import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeoutOrNull
-import kotlin.time.Clock
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -38,8 +35,9 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
+import kotlin.time.Clock
 
-@OptIn(ExperimentalTestApi::class)
+@OptIn(ExperimentalTestApi::class, ExperimentalCoroutinesApi::class)
 @Category(EndToEndTest::class)
 @RunWith(RobolectricTestRunner::class)
 class TextExerciseParticipationE2eTest : BaseExerciseTest() {
@@ -103,17 +101,22 @@ class TextExerciseParticipationE2eTest : BaseExerciseTest() {
             .onNodeWithTag(TEST_TAG_TEXT_FIELD_PARTICIPATION)
             .performTextInput(textToEnter)
 
-        composeTestRule
-            .onNodeWithText(context.getString(R.string.participate_text_exercise_submit_button))
-            .performClick()
+        val submitText = context.getString(R.string.participate_text_exercise_submit_button)
+        composeTestRule.waitUntil(DefaultTimeoutMillis) {
+            testDispatcher.scheduler.runCurrent()
+            composeTestRule.waitForIdle()
+            viewModel.state.value.canSubmit && composeTestRule
+                .onAllNodes(hasText(submitText) and isEnabled())
+                .fetchSemanticsNodes().size == 1
+        }
+        composeTestRule.onNodeWithText(submitText).assertIsEnabled().performClick()
 
-        // Advance time to continue with the syncing
-        testDispatcher.scheduler.advanceTimeBy(TextExerciseParticipationViewModel.SyncDelay * 2)
-
-        runBlocking {
-            withTimeoutOrNull(DefaultTimeoutMillis) {
-                viewModel.syncState.filterIsInstance<SyncState.Synced>().first()
-            } ?: throw RuntimeException("State could not be synced in time.")
+        // Keep the main looper and test dispatcher moving while the network acknowledgement arrives.
+        composeTestRule.waitUntil(DefaultTimeoutMillis) {
+            testDispatcher.scheduler.runCurrent()
+            composeTestRule.waitForIdle()
+            val state = viewModel.state.value
+            state.isSubmitted && !state.submitting && !state.saving && !state.localSaveFailed && state.text == textToEnter
         }
 
         composeTestRule
@@ -127,7 +130,8 @@ class TextExerciseParticipationE2eTest : BaseExerciseTest() {
             participationId = participation.id!!,
             textSubmissionService = get(),
             textEditorService = get(),
-            networkStatusProvider = get(),
+            contextProvider = get(),
+            draftStore = get(),
             coroutineContext = testDispatcher
         )
 
@@ -140,8 +144,14 @@ class TextExerciseParticipationE2eTest : BaseExerciseTest() {
             )
         }
 
-        composeTestRule.waitUntilAtLeastOneExists(
-            hasTestTag(TEST_TAG_TEXT_FIELD_PARTICIPATION),
+        composeTestRule.waitUntil(DefaultTimeoutMillis) {
+            testDispatcher.scheduler.runCurrent()
+            composeTestRule.waitForIdle()
+            val state = viewModel.state.value
+            state.draftReady && !state.loading && !state.loadFailed
+        }
+        composeTestRule.waitUntilExactlyOneExists(
+            hasTestTag(TEST_TAG_TEXT_FIELD_PARTICIPATION) and isEnabled(),
             DefaultTimeoutMillis
         )
 

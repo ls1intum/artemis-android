@@ -1,17 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="participate_text_exercise_title">Text editor</string>
-    <string name="participate_text_exercise_uploading_changes">Uploading changes to server…</string>
-    <string name="participate_text_exercise_synced_changes">Your changes are saved.</string>
-    <string name="participate_text_exercise_failed_sync">Could not sync changes with server.</string>
-
+    <string name="participate_text_exercise_uploading_changes">Submitting…</string>
+    <string name="participate_text_exercise_synced_changes">Submitted to Artemis</string>
+    <string name="participate_text_exercise_failed_sync">Could not confirm submission. Your draft is kept on this device. Reload before trying again.</string>
     <string name="participate_text_exercise_submit_button">Submit</string>
-
-    <string name="participate_text_exercise_tab_submission">Submission</string>
-    <string name="participate_text_exercise_tab_problem_statement">Problem statement</string>
-
-    <string name="participate_text_exercise_discard_dialog_title">Discard changes?</string>
-    <string name="participate_text_exercise_discard_dialog_message">You have unsaved changes. If you close this screen your changes will be lost. Do you want to discard your changes and leave this screen?</string>
-    <string name="participate_text_exercise_discard_dialog_positive">Discard</string>
-    <string name="participate_text_exercise_discard_dialog_negative">@android:string/cancel</string>
+    <string name="participate_text_exercise_tab_submission">Your answer</string>
+    <string name="participate_text_exercise_tab_problem_statement">Assignment</string>
+    <string name="participate_text_exercise_local_hint">Drafts stay on this device. Submit to send your answer.</string>
+    <string name="participate_text_exercise_other_submission">An earlier submission is finishing…</string>
+    <string name="participate_text_exercise_loading">Checking server answer…</string>
+    <string name="participate_text_exercise_saving">Saving draft…</string>
+    <string name="participate_text_exercise_saved_locally">Draft saved on this device</string>
+    <string name="participate_text_exercise_recovered">Recovered draft on this device</string>
+    <string name="participate_text_exercise_unsaved">Draft is not saved</string>
+    <string name="participate_text_exercise_local_failed">Could not save your draft on this device. Keep this editor open or copy your answer.</string>
+    <string name="participate_text_exercise_load_failed">Could not check the server answer. You can keep writing your local draft.</string>
+    <string name="participate_text_exercise_retry">Retry saving</string>
+    <string name="participate_text_exercise_reload">Reload server answer</string>
+    <string name="participate_text_exercise_closed">Submission is closed. Your local draft is available to edit and copy.</string>
+    <string name="participate_text_exercise_answer">Your answer</string>
+    <string name="participate_text_exercise_placeholder">Write your answer here…</string>
+    <string name="participate_text_exercise_copy">Copy answer</string>
+    <string name="participate_text_exercise_count">%1$d / %2$d characters</string>
+    <string name="participate_text_exercise_too_long">Your answer exceeds the 30,000-character limit. Shorten it before submitting.</string>
+    <string name="participate_text_exercise_session_changed">Your editing session changed. Reopen this exercise to continue. Your saved draft belongs to the original account.</string>
+    <string name="participate_text_exercise_conflict">The server answer changed on another device or by a team member. Review it before submitting.</string>
+    <string name="participate_text_exercise_review">Review server answer</string>
+    <string name="participate_text_exercise_conflict_title">Server answer changed</string>
+    <string name="participate_text_exercise_conflict_detail">The latest server answer is below. Keep your local draft to submit it yourself, or replace your draft with this server answer. Copy your local answer first if you want to keep both.</string>
+    <string name="participate_text_exercise_keep_draft">Keep local draft</string>
+    <string name="participate_text_exercise_use_server">Use server answer</string>
 </resources>

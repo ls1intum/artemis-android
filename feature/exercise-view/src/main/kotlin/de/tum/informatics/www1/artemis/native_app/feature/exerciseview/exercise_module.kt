@@ -7,6 +7,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.service.i
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.service.impl.TextSubmissionServiceImpl
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
+import org.koin.android.ext.koin.androidContext
+import java.io.File
+import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.participate.textexercise.FileTextExerciseDraftStore
+import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.participate.textexercise.TextExerciseDraftStore
 
 val exerciseModule = module {
     viewModel { parametersHolder ->
@@ -21,9 +25,10 @@ val exerciseModule = module {
     }
 
     viewModel { params ->
-        TextExerciseParticipationViewModel(params[0], params[1], get(), get(), get())
+        TextExerciseParticipationViewModel(params[0], params[1], get(), get(), get(), get())
     }
 
+    single<TextExerciseDraftStore> { FileTextExerciseDraftStore(File(androidContext().filesDir, "text-exercise-drafts")) }
     single<TextSubmissionService> { TextSubmissionServiceImpl(get(), get()) }
     single<TextEditorService> { TextEditorServiceImpl(get(), get()) }
 }
