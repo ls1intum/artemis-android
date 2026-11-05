@@ -9,6 +9,7 @@ data class Attachment(
     val name: String? = null,
     val visibleToStudents: Boolean = true,
     val link: String? = null,
+    val studentVersion: String? = null,
     val releaseDate: Instant? = null,
     val version: Int? = null,
     val uploadDate: Instant? = null,

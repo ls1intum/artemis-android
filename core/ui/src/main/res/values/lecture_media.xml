@@ -1,0 +1,16 @@
+<resources>
+    <string name="pdf_view_actions">PDF actions</string>
+    <string name="lecture_media_retry">Retry</string>
+    <string name="lecture_media_close">Close</string>
+    <string name="lecture_media_access_recovery">Check your connection and sign in again if your session has expired.</string>
+    <string name="lecture_media_browser">Open in browser</string>
+    <string name="lecture_media_failed">This media could not be loaded.</string>
+    <string name="lecture_media_invalid">This media link is invalid.</string>
+    <string name="lecture_media_loading">Loading media…</string>
+    <string name="lecture_media_provider">Some providers require their website or do not allow embedded playback.</string>
+    <string name="lecture_media_fullscreen">Fullscreen</string>
+    <string name="lecture_media_exit_fullscreen">Exit fullscreen</string>
+    <string name="lecture_media_missing">This lecture resource is unavailable or has not been released.</string>
+    <string name="lecture_media_reopen_source">Open this resource again from the lecture or message.</string>
+    <string name="lecture_media_open_attachment">Open attachment</string>
+</resources>

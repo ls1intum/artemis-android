@@ -22,6 +22,12 @@ class ArtemisApplication : Application(), SingletonImageLoader.Factory, CurrentA
     override val currentActivity = MutableStateFlow<Activity?>(null)
 
     override fun onCreate() {
+        if (getProcessName().endsWith(":lecture_media")) {
+            // This process must never share SAML/JWT cookies or WebView storage with login.
+            android.webkit.WebView.setDataDirectorySuffix("lecture_media")
+            super.onCreate()
+            return
+        }
         super.onCreate()
 
         SentryAndroid.init(this) {

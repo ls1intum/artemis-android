@@ -125,8 +125,19 @@ jobs:
         if: steps.run-tests.outcome == 'failure'
         continue-on-error: true
         run: |
+          echo "::group::Runner and container resources"
+          uptime || true
+          free -h || true
+          ps -eo comm,pcpu,pmem --sort=-pcpu | head -15 || true
+          docker stats --no-stream --format '{{.Name}} CPU={{.CPUPerc}} memory={{.MemUsage}} memory_percent={{.MemPerc}} pids={{.PIDs}}' artemis-app artemis-postgres-android || true
+          for container in artemis-app artemis-postgres-android; do
+            docker inspect --format '{{.Name}} status={{.State.Status}} oom_killed={{.State.OOMKilled}} exit_code={{.State.ExitCode}} health={{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}} memory_limit={{.HostConfig.Memory}} nano_cpus={{.HostConfig.NanoCpus}} cpu_quota={{.HostConfig.CpuQuota}} cpu_period={{.HostConfig.CpuPeriod}}' "$container" || true
+          done
+          echo "::endgroup::"
           echo "::group::Errors and exceptions"
-          docker logs artemis-app 2>&1 | grep -aE "ERROR|Exception|Caused by:" | tail -200 || echo "none found"
+          # Strip ANSI before matching the ERROR level. The old substring match filled the
+          # entire excerpt with the benign OpenTelemetry message ending in "not ERROR."
+          docker logs artemis-app 2>&1 | sed -E 's/\x1B\[[0-9;]*[mK]//g' | grep -aE '(^|[[:space:]])ERROR[[:space:]]|Exception|Caused by:' | tail -200 || echo "none found"
           echo "::endgroup::"
           echo "::group::Last 200 lines"
           docker logs artemis-app --tail 200 2>&1 || true

@@ -105,6 +105,9 @@ android {
 }
 
 dependencies {
+    testImplementation(libs.robolectric)
+    testImplementation(project(":core:common-test"))
+
     implementation(project(":core:common"))
     implementation(project(":core:data"))
     implementation(project(":core:datastore"))
@@ -164,4 +167,27 @@ dependencies {
 
 sentry {
     autoInstallation.enabled.set(false)
+}
+
+// Match library Robolectric access when running the app's real navigation boundary tests on JDK 25.
+tasks.withType<Test>().configureEach {
+    // Match the library test lanes: local page/navigation tests belong to JUnit, not E2E.
+    useJUnit {
+        if (System.getProperty("skip.e2e").toBoolean()) {
+            excludeCategories("de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest")
+        }
+        if (System.getProperty("skip.unit-tests").toBoolean()) {
+            excludeCategories("de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest")
+        }
+    }
+    jvmArgs(
+        "--add-opens=java.base/java.io=ALL-UNNAMED",
+        "--add-opens=java.base/java.lang=ALL-UNNAMED",
+        "--add-opens=java.base/java.util=ALL-UNNAMED",
+        "--add-opens=java.base/java.net=ALL-UNNAMED",
+        "--add-opens=java.base/java.security=ALL-UNNAMED",
+        "--add-opens=java.base/java.nio=ALL-UNNAMED",
+        "--add-opens=java.base/sun.nio.fs=ALL-UNNAMED",
+        "--add-opens=java.base/jdk.internal.access=ALL-UNNAMED"
+    )
 }

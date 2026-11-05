@@ -234,7 +234,7 @@ class MainActivity : AppCompatActivity(),
         }
 
         val linkOpener = remember {
-            CustomTabsLinkOpener(this@MainActivity)
+            AppLinkOpener(this@MainActivity, navController)
         }
 
         CompositionLocalProvider(
@@ -287,12 +287,6 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
-    private class CustomTabsLinkOpener(private val context: Context) : LinkOpener {
-        override fun openLink(url: String) {
-            CustomTabsIntent.Builder().build()
-                .launchUrl(context, Uri.parse(url))
-        }
-    }
 
     override fun onResume() {
         super.onResume()

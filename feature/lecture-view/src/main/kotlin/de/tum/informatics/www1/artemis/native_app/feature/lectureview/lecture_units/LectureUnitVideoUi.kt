@@ -4,12 +4,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitAttachmentVideo
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
+import de.tum.informatics.www1.artemis.native_app.core.ui.collectArtemisContextAsState
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
+import de.tum.informatics.www1.artemis.native_app.core.ui.media.*
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.R
 
 @Composable
@@ -18,7 +24,13 @@ internal fun LectureUnitVideoUi(
     lectureUnit: LectureUnitAttachmentVideo,
     onClickOpenLink: () -> Unit,
     onClickOpenAttachment: (Attachment) -> Unit,
+    onPageOpened: () -> Unit = {},
 ) {
+    val linkOpener = LocalLinkOpener.current
+    val session by
+        de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextProvider.current
+            .collectArtemisContextAsState()
+    var invalid by androidx.compose.runtime.remember { mutableStateOf(false) }
     LectureUnitBody(
         modifier = modifier,
         name = lectureUnit.name.orEmpty(),
@@ -34,17 +46,32 @@ internal fun LectureUnitVideoUi(
         if (lectureUnit.hasVideo) {
             OpenLinkButton(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
-                onClickOpenLink = onClickOpenLink,
+                onClickOpenLink = {
+                    if (
+                        de.tum.informatics.www1.artemis.native_app.feature.lectureview
+                            .openLectureUnitMedia(lectureUnit, null, session, linkOpener)
+                    )
+                        onPageOpened()
+                    else invalid = true
+                },
                 text = stringResource(R.string.lecture_view_open_video_link_button),
             )
         }
+
+        if (invalid)
+            androidx.compose.material3.Text(
+                stringResource(
+                    de.tum.informatics.www1.artemis.native_app.core.ui.R.string
+                        .lecture_media_invalid
+                )
+            )
 
         if (lectureUnit.hasAttachment) {
             OpenLinkButton(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 onClickOpenLink = { onClickOpenAttachment(lectureUnit.attachment!!) },
                 icon = Icons.Default.Description,
-                text = stringResource(R.string.lecture_view_open_attachment_button)
+                text = stringResource(R.string.lecture_view_open_attachment_button),
             )
         }
     }

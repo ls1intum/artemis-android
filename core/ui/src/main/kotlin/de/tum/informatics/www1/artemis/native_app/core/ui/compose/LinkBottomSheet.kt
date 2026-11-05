@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -23,11 +24,10 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.web.WebContent
 import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.ImageFile
-import de.tum.informatics.www1.artemis.native_app.core.ui.remote_resources.pdf.PdfFile
 
 sealed class LinkBottomSheetState {
-    class PDFVIEWSTATE(val pdfFile: PdfFile) : LinkBottomSheetState()
     class IMAGEVIEWSTATE(val imageFile: ImageFile) : LinkBottomSheetState()
+
     data class WEBVIEWSTATE(val url: String) : LinkBottomSheetState()
 }
 
@@ -36,32 +36,22 @@ sealed class LinkBottomSheetState {
 fun LinkBottomSheet(
     modifier: Modifier,
     state: LinkBottomSheetState,
-    onDismissRequest: () -> Unit
+    onDismissRequest: () -> Unit,
 ) {
+    val sheetState = rememberModalBottomSheetState()
     ModalBottomSheet(
         modifier = modifier.statusBarsPadding(),
+        sheetState = sheetState,
         contentWindowInsets = { WindowInsets.statusBars },
-        onDismissRequest = onDismissRequest
+        onDismissRequest = onDismissRequest,
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .padding(8.dp)
-        ) {
+        Box(modifier = Modifier.fillMaxHeight().padding(8.dp)) {
             when (state) {
-                is LinkBottomSheetState.PDFVIEWSTATE -> {
-                    ArtemisPdfView(
-                        modifier = Modifier.fillMaxSize(),
-                        pdfFile = state.pdfFile,
-                        dismiss = onDismissRequest
-                    )
-                }
-
                 is LinkBottomSheetState.IMAGEVIEWSTATE -> {
                     ArtemisImageView(
                         modifier = Modifier.fillMaxSize(),
                         state.imageFile,
-                        dismiss = onDismissRequest
+                        dismiss = onDismissRequest,
                     )
                 }
 
@@ -71,15 +61,12 @@ fun LinkBottomSheet(
 
                     // The lazy column is needed to support scrolling
                     LazyColumn(
-                        modifier = Modifier
-                            .fillMaxHeight(),
-                        state = rememberLazyListState()
+                        modifier = Modifier.fillMaxHeight(),
+                        state = rememberLazyListState(),
                     ) {
                         item {
                             ArtemisWebView(
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .padding(8.dp),
+                                modifier = Modifier.fillMaxHeight().padding(8.dp),
                                 webViewState = webViewState,
                                 webView = webView,
                                 setWebView = { webView = it },
@@ -93,12 +80,11 @@ fun LinkBottomSheet(
 }
 
 @Composable
-private fun getWebViewState(
-    link: String
-): WebViewState {
+private fun getWebViewState(link: String): WebViewState {
     return remember(link) {
-        derivedStateOf {
-            WebViewState(WebContent.Url(url = link))
+            derivedStateOf {
+                WebViewState(WebContent.Url(url = link))
+            }
         }
-    }.value
+        .value
 }
