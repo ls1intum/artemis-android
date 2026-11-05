@@ -1,86 +1,78 @@
 package de.tum.informatics.www1.artemis.native_app.feature.exerciseview.viewresult
 
-import android.webkit.WebView
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
 import de.tum.informatics.www1.artemis.native_app.core.data.join
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.collectArtemisContextAsState
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
-import de.tum.informatics.www1.artemis.native_app.core.ui.compose.ArtemisWebView
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.LocalTemplateStatusProvider
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ProvideDefaultExerciseTemplateStatus
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.R
-import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.getFeedbackViewWebViewState
 
 @Composable
-internal fun ViewResultScreen(
-    modifier: Modifier,
-    viewModel: ExerciseViewModel,
-    onCloseResult: () -> Unit
-) {
+internal fun ViewResultScreen(modifier: Modifier, viewModel: ExerciseViewModel, onCloseResult: () -> Unit) {
+    val context by LocalArtemisContextProvider.current.collectArtemisContextAsState()
+    // Captured once on entry. A different account/server/token must reopen from its own exercise.
+    val session = remember { context as? ArtemisContext.LoggedIn }
     Scaffold(
         modifier = modifier,
         topBar = {
             ArtemisTopAppBar(
-                title = { Text(text = stringResource(id = R.string.result_view_title)) },
-                navigationIcon = {
-                    NavigationBackButton(onCloseResult)
-                }
+                title = { Text(stringResource(R.string.result_view_title)) },
+                navigationIcon = { NavigationBackButton(onCloseResult) }
             )
         }
     ) { padding ->
-        val artemisContext by LocalArtemisContextProvider.current.collectArtemisContextAsState()
-        val exerciseDataState by viewModel.exerciseDataState.collectAsState()
-        val latestResultDataState by viewModel.latestResultDataState.collectAsState()
-
-        EmptyDataStateUi(exerciseDataState join latestResultDataState) { (exercise, result) ->
-            ProvideDefaultExerciseTemplateStatus(exercise = exercise) {
-                val resultTemplateStatus = LocalTemplateStatusProvider.current()
-
-                val webViewState = getFeedbackViewWebViewState(
-                    serverUrl = artemisContext.serverUrl,
-                    courseId = exercise.course?.id ?: return@ProvideDefaultExerciseTemplateStatus,
-                    exerciseId = exercise.id ?: 0L,
-                    participationId = exercise.getSpecificStudentParticipation(false)?.id ?: return@ProvideDefaultExerciseTemplateStatus,
-                    resultId = result?.id ?: return@ProvideDefaultExerciseTemplateStatus,
-                    templateStatus = resultTemplateStatus ?: return@ProvideDefaultExerciseTemplateStatus
-                )
-
-                var webView: WebView? by remember { mutableStateOf(null) }
-
-                Box(
-                    modifier = Modifier
-                        .padding(top = padding.calculateTopPadding())
-                        .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top))
-                ){
-                    ArtemisWebView(
-                        modifier = Modifier.align(Alignment.Center),
-                        webViewState = webViewState,
-                        webView = webView,
-                        setWebView = { webView = it }
-                    )
+        if (session == null || !sameReviewSession(session, context)) {
+            ReviewMessage(Modifier.padding(padding), R.string.review_access_unavailable)
+        } else {
+            val exercise by viewModel.exerciseDataState.collectAsState()
+            val result by viewModel.latestResultDataState.collectAsState()
+            EmptyDataStateUi(exercise join result) { (loadedExercise, loadedResult) ->
+                val snapshot = remember(loadedExercise.id) { loadedExercise }
+                var selectedId by rememberSaveable(loadedExercise.id) { mutableStateOf(loadedResult?.id ?: selectReviewTarget(snapshot)?.result?.id) }
+                val target = remember(snapshot, selectedId) { selectReviewTarget(snapshot, selectedId) }
+                val targets = remember(snapshot) { reviewTargets(snapshot) }
+                if (target == null) ReviewMessage(Modifier.padding(padding), R.string.review_no_result)
+                else Column(Modifier.padding(padding).fillMaxSize()) {
+                    if (targets.size > 1) {
+                        var expanded by remember { mutableStateOf(false) }
+                        Box {
+                            TextButton(onClick = { expanded = true }) { Text(stringResource(R.string.review_select_assessment)) }
+                            DropdownMenu(expanded, onDismissRequest = { expanded = false }) {
+                                targets.forEach { choice ->
+                                    DropdownMenuItem(text = {
+                                        Text(listOfNotNull(
+                                            reviewDate(choice.result.completionDate?.toString()),
+                                            reviewScore(choice.result.score, snapshot.maxPoints, snapshot.course?.accuracyOfScores?.toInt() ?: 1),
+                                            if (choice.result.rated == false) stringResource(R.string.review_practice) else null
+                                        ).joinToString(" · "))
+                                    }, onClick = { selectedId = choice.result.id; expanded = false })
+                                }
+                            }
+                        }
+                    }
+                    NativeResultReview(Modifier.weight(1f), snapshot, target, session)
                 }
             }
         }
     }
 }
+
+internal fun sameReviewSession(session: ArtemisContext.LoggedIn, current: ArtemisContext): Boolean =
+    current is ArtemisContext.LoggedIn && session.serverUrl == current.serverUrl &&
+        session.authToken == current.authToken && session.loginName == current.loginName

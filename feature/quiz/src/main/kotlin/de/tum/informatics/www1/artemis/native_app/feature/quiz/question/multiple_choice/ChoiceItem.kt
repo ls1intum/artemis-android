@@ -33,7 +33,8 @@ sealed interface ChoiceItemType {
     data class ViewResult(
         val explanation: String?,
         val help: String?,
-        val isCorrectChoice: Boolean
+        val isCorrectChoice: Boolean?,
+        val invalid: Boolean = false,
     ) : ChoiceItemType
 
     data class Editable(
@@ -88,7 +89,9 @@ internal fun ChoiceItem(
                         }
                     }
                 }
-                is ChoiceItemType.ViewResult -> {
+                is ChoiceItemType.ViewResult -> if (type.invalid || type.isCorrectChoice == null) {
+                    Text(stringResource(if (type.invalid) R.string.quiz_review_invalid else R.string.quiz_result_correctness_withheld), style = MaterialTheme.typography.bodySmall)
+                } else {
                     val userIncorrectChoice = type.isCorrectChoice != isSelected
 
                     val correctStatusText =
@@ -148,7 +151,7 @@ internal fun ChoiceItem(
             }
         }
 
-        if (type is ChoiceItemType.ViewResult && (type.explanation != null || type.help != null)) {
+        if (type is ChoiceItemType.ViewResult && !type.invalid && type.isCorrectChoice != null && (type.explanation != null || type.help != null)) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()

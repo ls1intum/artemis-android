@@ -54,7 +54,7 @@
     <string name="assessment_type_semi_automatic">Manual feedback with computer assistance.</string>
     <string name="assessment_type_manual">Manual feedback.</string>
 
-    <string name="result_view_title">Your latest result</string>
+    <string name="result_view_title">Results and feedback</string>
     <string name="result_view_automatic_feedback_missing">Even after the due date not for all test cases a detailed feedback is shown. This could be the case if other students are still working on the exercise (e.g. to allow for the compensation of sick days). Those feedbacks will automatically become visible after %1$s.</string>
     <string name="result_view_preliminary_result_semi_automatic">Your result is not final yet, because more tests will be executed after the due date or a manual assessment will be done.</string>
     <string name="result_view_preliminary_result_automatic">Your result is not final yet, because more tests will be executed after the due date.</string>

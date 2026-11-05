@@ -38,7 +38,8 @@ val quizParticipationModule = module {
             get(),
             get(),
             get(),
-            get()
+            get(),
+            reviewContextProvider = get()
         )
     }
 }

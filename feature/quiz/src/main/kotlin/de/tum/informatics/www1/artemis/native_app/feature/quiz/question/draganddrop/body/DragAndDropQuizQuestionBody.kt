@@ -13,6 +13,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.dragAndDropReviewSample
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.dragAndDropReviewOutcomes
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -56,7 +58,7 @@ internal fun DragAndDropQuizQuestionBody(
                         && targetInfo.dragItem !in data.availableDragItems
             }
 
-            QuizQuestionInstructionText(
+            if (data is QuizQuestionData.DragAndDropData.Editable) QuizQuestionInstructionText(
                 modifier = Modifier.fillMaxWidth(),
                 instructionText = stringResource(id = R.string.quiz_participation_drag_and_drop_instruction)
             )
@@ -96,18 +98,8 @@ internal fun DragAndDropQuizQuestionBody(
             )
 
             // Correct mappings as sent from the server. Not relevant for participation mode.
-            val sampleSolutionMappings = remember(question.correctMappings) {
-                question.correctMappings
-                    .orEmpty()
-                    .mapNotNull { correctMapping ->
-                        val dropLocation =
-                            correctMapping.dropLocation ?: return@mapNotNull null
-                        val dragItem = correctMapping.dragItem ?: return@mapNotNull null
-
-                        dropLocation to dragItem
-                    }
-                    .toMap()
-            }
+            val sample = remember(question) { dragAndDropReviewSample(question) }
+            val sampleSolutionMappings = sample.orEmpty()
 
             val dropLocationMapping = if (isSampleSolutionDisplayed) {
                 sampleSolutionMappings
@@ -128,7 +120,8 @@ internal fun DragAndDropQuizQuestionBody(
                 )
             )
 
-            if (data is QuizQuestionData.DragAndDropData.Result) {
+            if (data is QuizQuestionData.DragAndDropData.Result && !question.invalid && question.correctMappings != null && sample == null) Text(stringResource(R.string.quiz_review_sample_unavailable))
+            if (data is QuizQuestionData.DragAndDropData.Result && !question.invalid && question.correctMappings != null && sample != null) {
                 val buttonText = if (isSampleSolutionDisplayed) {
                     R.string.quiz_result_dnd_hide_sample_solution
                 } else R.string.quiz_result_dnd_show_sample_solution
@@ -188,6 +181,7 @@ private fun QuizQuestionData.DragAndDropData.getDragAndDropAreaType(
         }
         is QuizQuestionData.DragAndDropData.Result -> DragAndDropAreaType.ViewOnly(
             isSampleSolution = isSampleSolutionDisplayed,
+            outcomes = dragAndDropReviewOutcomes(this.question, this.dropLocationMapping),
             sampleSolutionMappings = sampleSolutionMappings
         )
     }

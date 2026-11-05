@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="review_image_unavailable">Ein Bild konnte nicht angezeigt werden. Es ist möglicherweise nicht verfügbar, nicht zugänglich oder hat ein nicht unterstütztes Format. Lade die Ansicht erneut.</string>
+    <string name="review_link_browser_signin">Dieser Link wird im Browser geöffnet. Möglicherweise musst du dich dort bei Artemis anmelden, um die Datei zu öffnen.</string>
+    <string name="review_link_open_browser">Im Browser öffnen</string>
+    <string name="review_link_cancel">Abbrechen</string>
+    <string name="review_link_unsupported">Dieser Link kann aus der Ergebnisansicht nicht geöffnet werden.</string>
+</resources>

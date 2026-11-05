@@ -49,4 +49,5 @@ dependencies {
     debugImplementation(libs.edge2edge.preview)
 
     testImplementation(project(":core:common-test"))
+    testImplementation(libs.kotlinx.coroutines.test)
 }

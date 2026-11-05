@@ -29,7 +29,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.util.ExerciseResultUtil
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ExerciseColors
-import java.text.DecimalFormat
 
 private const val MIN_SCORE_GREEN = 80
 private const val MIN_SCORE_ORANGE = 40
@@ -143,18 +142,19 @@ private fun StatusHasResult(
     showLargeIcon: Boolean = false,
     showPoints: Boolean = false
 ) {
-    val resultScore = result.score ?: 0f
-    val points = DecimalFormat.getInstance().format(resultScore / 100f * (exercise.maxPoints ?: 0f))
+    val resultScore = result.score
+    val formattedScore = formatExerciseResultScore(resultScore, maxPoints, exercise.course?.accuracyOfScores?.toInt() ?: 1)
+    val points = formattedScore?.points.orEmpty()
 
-    val icon = if (resultScore < MIN_SCORE_GREEN) {
+    val icon = if ((resultScore ?: 0f) < MIN_SCORE_GREEN) {
         Icons.Default.Cancel
     } else {
         Icons.Default.CheckCircle
     }
 
     val textAndIconColor = when {
-        resultScore >= MIN_SCORE_GREEN -> ExerciseColors.Result.success
-        resultScore >= MIN_SCORE_ORANGE -> ExerciseColors.Result.medium
+        (resultScore ?: 0f) >= MIN_SCORE_GREEN -> ExerciseColors.Result.success
+        (resultScore ?: 0f) >= MIN_SCORE_ORANGE -> ExerciseColors.Result.medium
         else -> ExerciseColors.Result.bad
     }
 
@@ -165,11 +165,11 @@ private fun StatusHasResult(
     //The relative time to this result being finished.
     val relativeTime = if (completionDate == null) null else getRelativeTime(to = completionDate)
 
-    val text = remember(resultScore, maxPoints, relativeTime) {
-        if (maxPoints == null || relativeTime == null)
+    val text = remember(formattedScore, relativeTime, showPoints, exercise, result, isLate) {
+        if (formattedScore == null)
             return@remember context.getString(R.string.exercise_result_has_result_score_unknown)
 
-        val formattedPercentage = DecimalFormat("0.#%").format(resultScore / 100f)
+        val formattedPercentage = formattedScore.percentage
 
         val scoreString = ExerciseResultUtil.resolveScoreString(
             exercise,
@@ -177,9 +177,9 @@ private fun StatusHasResult(
             result,
             points,
             context,
-            showPoints
+            showPoints && formattedScore.points != null
         )
-
+        if (relativeTime == null) return@remember scoreString
         context.getString(
             if (isLate) R.string.exercise_result_has_result_score_late_with_date
             else R.string.exercise_result_has_result_score_with_date,

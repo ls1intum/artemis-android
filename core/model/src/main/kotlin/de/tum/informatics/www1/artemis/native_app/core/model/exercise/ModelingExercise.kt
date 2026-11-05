@@ -50,7 +50,10 @@ data class ModelingExercise(
         DeploymentDiagram,
         PetriNet,
         SyntaxTree,
-        Flowchart
+        Flowchart,
+        ReachabilityGraph,
+        BPMN,
+        Sfc
     }
 
     override fun copyWithUpdatedParticipations(newParticipations: List<Participation>): Exercise = copy(studentParticipations = newParticipations)

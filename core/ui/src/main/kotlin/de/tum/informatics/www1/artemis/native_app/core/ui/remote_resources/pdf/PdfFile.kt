@@ -36,7 +36,8 @@ import java.io.File
 class PdfFile(
     override val url: String,
     override val authToken: String,
-    override val filename: String
+    override val filename: String,
+    private val localFile: File? = null
 ): BaseFile(authToken, filename, url) {
 
     fun load(
@@ -47,6 +48,16 @@ class PdfFile(
         height: Int,
         portrait: Boolean
     ) {
+        localFile?.let { file ->
+            coroutineScope.launch(Dispatchers.IO) {
+                runCatching {
+                    val descriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+                    state.pdfRender = PdfRendering(descriptor, width, height, portrait)
+                    state.mFile = file
+                }.onFailure { state.mError = it }
+            }
+            return
+        }
         val client = OkHttpClient()
         val request = Request.Builder()
             .url(url)

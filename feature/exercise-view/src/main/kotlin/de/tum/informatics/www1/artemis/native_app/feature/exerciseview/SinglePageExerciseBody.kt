@@ -7,9 +7,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -42,7 +42,10 @@ fun SinglePageExerciseBody(
     val isTabletPortrait = layout.isTabletPortrait
 
     var config: ExerciseConfiguration by rememberSaveable { mutableStateOf(NothingOpened) }
-    var isSidebarOpen by remember { mutableStateOf(true) }
+    var isSidebarOpen by rememberSaveable { mutableStateOf(true) }
+    LaunchedEffect(isTabletPortrait) {
+        if (isTabletPortrait && config is OpenedExercise) isSidebarOpen = false
+    }
     val onSidebarToggle: () -> Unit = { isSidebarOpen = !isSidebarOpen }
 
     val openExercise: (Long) -> Unit = { id ->
@@ -53,6 +56,37 @@ fun SinglePageExerciseBody(
     val resetToSidebar = {
         isSidebarOpen = true
         config = NothingOpened
+    }
+
+    val detailPane = rememberExerciseDetailPane((config as? OpenedExercise)?.exerciseId) { contentMod ->
+        when (val conf = config) {
+            NothingOpened -> {
+                IconButton(onClick = onSidebarToggle) {
+                    Icon(
+                        painter = painterResource(id = sidebar_icon),
+                        contentDescription = null
+                    )
+                }
+                Box(
+                    modifier = contentMod.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(stringResource(id = R.string.exercise_list_exercise_item_not_selected))
+                }
+            }
+
+            is OpenedExercise -> {
+                ExerciseDetailContent(
+                    exerciseId = conf.exerciseId,
+                    viewMode = ExerciseViewMode.Overview,
+                    onNavigateBack = {
+                        resetToSidebar()
+                    },
+                    actions = actions,
+                    onSidebarToggle = onSidebarToggle,
+                )
+            }
+        }
     }
 
     // Handle system back button
@@ -90,36 +124,7 @@ fun SinglePageExerciseBody(
                         selectedExerciseId = (config as? OpenedExercise)?.exerciseId
                     )
                 },
-                priorityColumn = { contentMod ->
-                    when (val conf = config) {
-                        NothingOpened -> {
-                            IconButton(onClick = onSidebarToggle) {
-                                Icon(
-                                    painter = painterResource(id = sidebar_icon),
-                                    contentDescription = null
-                                )
-                            }
-                            Box(
-                                modifier = contentMod.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(stringResource(id = R.string.exercise_list_exercise_item_not_selected))
-                            }
-                        }
-
-                        is OpenedExercise -> {
-                            ExerciseDetailContent(
-                                exerciseId = conf.exerciseId,
-                                viewMode = ExerciseViewMode.Overview,
-                                onNavigateBack = {
-                                    resetToSidebar()
-                                },
-                                actions = actions,
-                                onSidebarToggle = onSidebarToggle
-                            )
-                        }
-                    }
-                },
+                priorityColumn = detailPane,
                 title = title,
                 searchConfiguration = searchConfiguration
             )

@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.multipleChoiceReviewOutcome
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.QuizReviewOutcome
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.MultipleChoiceQuizQuestion
@@ -39,7 +41,7 @@ internal fun MultipleChoiceQuizQuestionUi(
             question = data.question
         )
 
-        QuizQuestionInstructionText(
+        if (data is QuizQuestionData.MultipleChoiceData.Editable) QuizQuestionInstructionText(
             modifier = Modifier.fillMaxWidth(),
             instructionText = stringResource(
                 id = if (data.question.singleChoice) {
@@ -51,7 +53,7 @@ internal fun MultipleChoiceQuizQuestionUi(
         )
 
         val questionExplanation = data.question.explanation
-        if (data is QuizQuestionData.MultipleChoiceData.Result && questionExplanation != null) {
+        if (data is QuizQuestionData.MultipleChoiceData.Result && data.question.answerOptions.all { it.isCorrect != null } && questionExplanation != null) {
             ExplanationText(
                 modifier = Modifier.fillMaxWidth(),
                 explanation = questionExplanation
@@ -83,7 +85,8 @@ internal fun MultipleChoiceQuizQuestionUi(
                         is QuizQuestionData.MultipleChoiceData.Result -> ChoiceItemType.ViewResult(
                             explanation = option.explanation,
                             help = option.hint,
-                            isCorrectChoice = option.isCorrect
+                            isCorrectChoice = option.isCorrect,
+                            invalid = multipleChoiceReviewOutcome(data.question, option) == QuizReviewOutcome.INVALID
                         )
                     },
                     onRequestDisplayHint = { onRequestDisplayAnswerOptionHint(option) }

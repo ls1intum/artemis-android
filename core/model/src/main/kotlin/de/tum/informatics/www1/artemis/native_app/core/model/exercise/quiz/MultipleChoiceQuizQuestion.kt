@@ -26,7 +26,7 @@ data class MultipleChoiceQuizQuestion(
         val text: String? = null,
         val hint: String? = null,
         val explanation: String? = null,
-        val isCorrect: Boolean = false,
+        val isCorrect: Boolean? = null,
         val invalid: Boolean = false
     )
 }

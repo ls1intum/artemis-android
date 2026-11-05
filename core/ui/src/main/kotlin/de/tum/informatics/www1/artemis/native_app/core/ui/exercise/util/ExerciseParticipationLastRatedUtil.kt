@@ -6,17 +6,8 @@ import kotlin.time.Instant
 
 object ExerciseParticipationLastRatedUtil {
     fun findLatestRatedResult(participation: Participation?): Result? {
-        return participation?.submissions
-            ?.flatMap { submission ->
-                submission.results
-                    ?.filter { it.rated == true }
-                    ?.map { it to (it.completionDate ?: Instant.fromEpochSeconds(0L)) }
-                    ?: emptyList()
-            }
-            ?.maxByOrNull { it.second }
-            ?.first
-            ?: participation?.results.orEmpty()
-                .filter { it.rated == true }
-                .maxByOrNull { it.completionDate ?: Instant.fromEpochSeconds(0L) }
+        return (participation?.submissions.orEmpty().flatMap { it.results.orEmpty() } + participation?.results.orEmpty())
+            .filter { it.rated == true }
+            .maxWithOrNull(compareBy<Result> { it.completionDate ?: Instant.fromEpochSeconds(0L) }.thenBy { it.id })
     }
 }

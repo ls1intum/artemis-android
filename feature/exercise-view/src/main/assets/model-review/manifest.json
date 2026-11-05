@@ -1,0 +1,30 @@
+{
+  "version": "1.0.0",
+  "apollonVersion": "5.3.1",
+  "files": {
+    "LICENSE": {
+      "bytes": 1089,
+      "sha256": "b6a81f9556563f4fa0b272c03b8e59eab34bfa0366696ff7f94d26522af382bd"
+    },
+    "THIRD-PARTY-NOTICES.txt": {
+      "bytes": 1214,
+      "sha256": "2b15811510bab20525d8e8be3062f4bdc9b5064bd1b75975efa911026b8a7102"
+    },
+    "artemis-model-review-1.0.0.css": {
+      "bytes": 564395,
+      "sha256": "2cc0cd9d92a1889a87a74865dac837dcc4c15d5e6ce21d6d42cf48722616239b"
+    },
+    "artemis-model-review-1.0.0.js": {
+      "bytes": 1658232,
+      "sha256": "3372e8626604db06b12aea1794f9a422441d769f49d64978e935f2baa2d4c644"
+    },
+    "artemis-model-review-1.0.0.js.LEGAL.txt": {
+      "bytes": 4390,
+      "sha256": "a068db62c76f86d311558e79186e874da4dae64b9e96f7b13368b00bb4084ca7"
+    },
+    "index.html": {
+      "bytes": 755,
+      "sha256": "cb3ec537ea6d97ce551fd1cb1a69258652bad7c7b9763b548f8a83e40d7f09b7"
+    }
+  }
+}

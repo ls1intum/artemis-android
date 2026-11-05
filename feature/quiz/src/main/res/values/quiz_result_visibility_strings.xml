@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="quiz_result_correctness_withheld">Correctness not released</string>
+    <string name="quiz_review_invalid">Invalid</string>
+    <string name="quiz_review_blank_outcome">Blank %1$d: %2$s</string>
+    <string name="quiz_review_sample">Sample solution</string>
+    <string name="quiz_review_sample_unavailable">A valid sample solution is unavailable.</string>
+    <string name="quiz_review_access_unavailable">This quiz result is no longer accessible. Reopen it from the exercise.</string>
+    <string name="quiz_review_practice">Practice</string>
+    <string name="quiz_review_graded">Graded</string>
+    <string name="quiz_review_unrated">Not graded</string>
+    <string name="quiz_review_attempts">Choose attempt</string>
+</resources>

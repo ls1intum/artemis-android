@@ -1,0 +1,227 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "cb9595de25ac446c3d0f4c5fbbdb675c9d0af4c6",
+  "scoreCases": [
+    {
+      "name": "zero-is-published",
+      "score": 0,
+      "maxPoints": 10,
+      "accuracyOfScores": 1,
+      "expectedPoints": 0
+    },
+    {
+      "name": "missing-is-unknown",
+      "score": null,
+      "maxPoints": 10,
+      "accuracyOfScores": 1,
+      "expectedPoints": null
+    },
+    {
+      "name": "bonus-not-clamped",
+      "score": 112.5,
+      "maxPoints": 10,
+      "accuracyOfScores": 1,
+      "expectedPoints": 11.3
+    },
+    {
+      "name": "course-rounding",
+      "score": 81.234,
+      "maxPoints": 15,
+      "accuracyOfScores": 2,
+      "expectedPoints": 12.19
+    }
+  ],
+  "feedbackCases": [
+    {
+      "name": "released-standardized-message",
+      "input": {
+        "id": 301,
+        "text": "Clear reasoning",
+        "detailText": "Explain why the search interval shrinks.",
+        "credits": 2.5,
+        "positive": true,
+        "type": "MANUAL",
+        "gradingInstruction": {
+          "id": 3,
+          "feedback": "Good use of the loop invariant.",
+          "instructionDescription": "PRIVATE_DO_NOT_DISPLAY",
+          "gradingScale": "PRIVATE_SCALE",
+          "usageCount": 5
+        }
+      },
+      "expectedPublicText": [
+        "Good use of the loop invariant.",
+        "Explain why the search interval shrinks."
+      ],
+      "expectedTitle": "Clear reasoning",
+      "forbiddenText": [
+        "PRIVATE_DO_NOT_DISPLAY",
+        "PRIVATE_SCALE"
+      ]
+    },
+    {
+      "name": "synthetic-long-test-feedback",
+      "input": {
+        "id": -9223372036854775000,
+        "text": "binarySearchFindsMissingValue",
+        "detailText": "Expected -1, but was 0.",
+        "hasLongFeedbackText": true,
+        "positive": false,
+        "type": "AUTOMATIC",
+        "testCase": {
+          "testName": "binarySearchFindsMissingValue"
+        }
+      },
+      "expectedGroup": "tests",
+      "expectedId": -9223372036854775000
+    },
+    {
+      "name": "unknown-feedback-remains-readable",
+      "input": {
+        "id": 304,
+        "text": "Review note",
+        "detailText": "Use the documented assumptions.",
+        "type": "FUTURE_FEEDBACK_TYPE"
+      },
+      "expectedPublicText": [
+        "Use the documented assumptions."
+      ]
+    },
+    {
+      "name": "neutral-not-failed",
+      "input": {
+        "id": 305,
+        "text": "Additional observation",
+        "detailText": "No points awarded for this note.",
+        "credits": 0,
+        "type": "MANUAL"
+      },
+      "expectedPositive": null
+    },
+    {
+      "name": "programming-reference-is-zero-based",
+      "input": {
+        "id": 306,
+        "text": "Check bounds",
+        "detailText": "Consider the empty input.",
+        "type": "MANUAL",
+        "reference": "file:src/Search.java_line:0-2",
+        "credits": -1
+      },
+      "expectedFile": "src/Search.java",
+      "expectedFirstLineIndex": 0,
+      "expectedLastLineIndex": 2
+    }
+  ],
+  "textCases": [
+    {
+      "name": "unicode-and-block-reference",
+      "text": "A👩‍💻 é\nمرحبا",
+      "blocks": [
+        {
+          "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "text": "👩‍💻",
+          "startIndex": 1,
+          "endIndex": 6,
+          "type": "MANUAL"
+        }
+      ],
+      "feedback": {
+        "id": 307,
+        "reference": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "detailText": "Explain this example."
+      },
+      "expectedUTF16Range": [
+        1,
+        6
+      ]
+    },
+    {
+      "name": "out-of-range-is-unlocated",
+      "text": "Short answer",
+      "blocks": [
+        {
+          "id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "text": "answer",
+          "startIndex": 99,
+          "endIndex": 104,
+          "type": "MANUAL"
+        }
+      ],
+      "feedback": {
+        "id": 308,
+        "reference": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "detailText": "Keep the feedback readable."
+      },
+      "expectedUTF16Range": null
+    }
+  ],
+  "identityCases": [
+    {
+      "name": "older-assessed-submission-not-newer-pending",
+      "participationId": 101,
+      "selectedResultId": 201,
+      "submissions": [
+        {
+          "id": 501,
+          "submissionDate": "2026-10-20T10:00:00Z",
+          "text": "Assessed answer",
+          "results": [
+            {
+              "id": 201,
+              "score": 75,
+              "rated": true,
+              "completionDate": "2026-10-21T10:00:00Z"
+            }
+          ]
+        },
+        {
+          "id": 502,
+          "submissionDate": "2026-10-22T10:00:00Z",
+          "text": "Newer unassessed answer",
+          "results": []
+        }
+      ],
+      "expectedSubmissionId": 501
+    },
+    {
+      "name": "missing-exact-result-never-falls-back",
+      "participationId": 101,
+      "selectedResultId": 999,
+      "submissions": [
+        {
+          "id": 501,
+          "results": [
+            {
+              "id": 201,
+              "score": 75
+            }
+          ]
+        }
+      ],
+      "expectedSubmissionId": null
+    }
+  ],
+  "quizCases": [
+    {
+      "name": "submitted-withheld-correctness",
+      "submitted": true,
+      "isCorrect": null,
+      "expectedCorrectness": "unknown"
+    },
+    {
+      "name": "published-wrong-answer",
+      "submitted": true,
+      "isCorrect": false,
+      "solutionsReleased": true,
+      "expectedCorrectness": "incorrect"
+    },
+    {
+      "name": "absolute-points-not-percent",
+      "scoreInPoints": 7.5,
+      "maxPoints": 10,
+      "resultScore": 75,
+      "expectedPoints": 7.5
+    }
+  ]
+}

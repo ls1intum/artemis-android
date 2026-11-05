@@ -35,6 +35,7 @@ internal class quiz_participation_moduleTest {
                 definition<QuizResultViewModel>(Long::class, QuizType.ViewableQuizType::class)
             ),
             extraTypes = listOf(
+                de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider::class,
                 SavedStateHandle::class,
                 ServerConfigurationService::class,
                 NetworkStatusProvider::class,

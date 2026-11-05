@@ -1,0 +1,39 @@
+Artemis model review 1.0.0 — built with official npm @tumaet/apollon 5.3.1.
+Source: https://github.com/ls1intum/Apollon (MIT).
+All dependencies are bundled locally. Embedded Inter font: SIL Open Font License 1.1.
+No native tokens or network access are required.
+
+@base-ui/react 1.8.0 — MIT
+@base-ui/utils 0.4.0 — MIT
+@chenglou/pretext 0.0.9 — MIT
+@dnd-kit/accessibility 3.1.1 — MIT
+@dnd-kit/core 6.3.1 — MIT
+@dnd-kit/sortable 10.0.0 — MIT
+@dnd-kit/utilities 3.2.2 — MIT
+@floating-ui/core 1.8.0 — MIT
+@floating-ui/dom 1.8.0 — MIT
+@floating-ui/react-dom 2.1.9 — MIT
+@floating-ui/utils 0.2.12 — MIT
+@tumaet/apollon 5.3.1 — MIT
+@xyflow/react 12.11.1 — MIT
+@xyflow/system 0.0.78 — MIT
+classcat 5.0.5 — MIT
+d3-color 3.1.0 — ISC
+d3-dispatch 3.0.1 — ISC
+d3-drag 3.0.0 — ISC
+d3-ease 3.0.1 — BSD-3-Clause
+d3-interpolate 3.0.1 — ISC
+d3-selection 3.0.0 — ISC
+d3-timer 3.0.1 — ISC
+d3-transition 3.0.1 — ISC
+d3-zoom 3.0.0 — ISC
+lib0 0.2.119 — MIT
+lucide-react 1.49.0 — ISC
+react 19.3.1 — MIT
+react-dom 19.3.1 — MIT
+reselect 5.3.0 — MIT
+scheduler 0.28.0 — MIT
+use-sync-external-store 1.7.0 — MIT
+y-protocols 1.0.7 — MIT
+yjs 13.6.30 — MIT
+zustand 5.0.15 — MIT

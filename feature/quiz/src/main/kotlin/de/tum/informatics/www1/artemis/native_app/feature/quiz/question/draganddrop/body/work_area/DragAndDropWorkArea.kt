@@ -12,6 +12,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.QuizReviewOutcome
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -31,6 +32,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 internal sealed interface DragAndDropAreaType {
     data class ViewOnly(
         val isSampleSolution: Boolean,
+        val outcomes: Map<Long, QuizReviewOutcome> = emptyMap(),
         val sampleSolutionMappings: Map<DragAndDropQuizQuestion.DropLocation, DragAndDropQuizQuestion.DragItem>
     ) : DragAndDropAreaType
 
@@ -162,10 +164,8 @@ internal fun DragAndDropWorkArea(
                             }
 
                             is DragAndDropAreaType.ViewOnly -> {
-                                val isCorrect =
-                                    type.sampleSolutionMappings[dropLocation] == dropLocationMapping[dropLocation]
                                 WorkAreaDropLocationType.ViewOnly(
-                                    isCorrect = isCorrect,
+                                    outcome = type.outcomes[dropLocation.id] ?: QuizReviewOutcome.WITHHELD,
                                     isDisplayingSampleSolution = type.isSampleSolution
                                 )
                             }

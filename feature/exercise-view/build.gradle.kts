@@ -10,6 +10,7 @@ android {
 }
 
 dependencies {
+    testImplementation("io.ktor:ktor-client-mock:${libs.versions.ktor.get()}")
     implementation(project(":core:ui"))
     implementation(project(":core:data"))
     implementation(project(":core:device"))
